@@ -1,0 +1,245 @@
+RONDEL — STATUS EN BESLISSINGEN
+Laatste update: 12 juni 2026 (sessie 13)
+
+KERNCONCEPT
+- Tabletop-first fantasy bordspel, einddoel = digitale app
+- Werknaam: Rondel
+- Mechanics 1-op-1 overgenomen uit Pokémon Duel / Comaster
+- Setting: high fantasy, folklore- en mythologie-creatures (public domain, geen beschermd IP)
+
+META-PRINCIPE
+Bij contradictie tussen project-instructies en Pokémon Duel-structuur: Duel wint.
+
+WERKAFSPRAAK BESTANDEN (sessie 5)
+- Claude's werkmap wordt na elke sessie gewist; bestanden uit oude chats zijn niet automatisch beschikbaar.
+- Afspraak: Koen zet na elke sessie de nieuwste prototype-versie in de projectbestanden, naast dit statusdocument.
+
+VAST BESLOTEN MECHANICS
+
+Disk-spec (Duel 1-op-1)
+- 16 slots van 22.5°, 5 kleuren
+- White = damage (cijfer)
+- Purple = status/special (sterren tellen bij Purple-vs-Purple)
+- Blue = defense (blokt White/Purple/Red, verliest van Gold)
+- Gold = priority (slaat door Purple/Blue/Red heen, vs White/Gold = damage compare)
+- Red = Miss
+
+Combat-uitkomsten (Duel-correct, SYMMETRISCH — sessie 5 opnieuw geverifieerd via headless tests)
+- KO en status zijn ONAFHANKELIJKE uitkomsten
+- Red vs White/Gold → Red-spinner valt
+- Red vs Purple → Purple's status landt op de Red-spinner
+- Red vs Blue → niemand wint
+- Blue blokt White en Purple → niemand KO; Blue verliest van Gold
+- Gold doorbreekt Purple/Blue/Red → Gold-spinner wint
+- Purple vs White → status op de White-spinner
+- Purple vs Purple → meeste sterren wint, gelijk = niets
+- White/Gold vs White/Gold → hoogste damage wint, gelijk = niets
+
+Statussen (ALLEMAAL functioneel in code sinds sessie 5)
+- Poison: White/Gold damage -20 (vloer 10)
+- Badly Poisoned: damage -40 (vloer 10)
+- Burn: kleinste White → Miss + alle damage -10
+- Paralysis: kleinste White → Miss
+- Confusion: gespind slot schuift 1 positie (zit in mini-combat)
+- Sleep: kan niet bewegen; geneest via adjacent ally bij beurtwissel
+- Frozen: kan niet aanvallen (eigen spin = Miss); kan WEL bewegen (sessie-5 fix conform spec); geneest via adjacent ally
+- Curse: gereserveerd (relevant zodra revive-mechanics bestaan)
+
+Bord (DEFINITIEF — sessie 6: terug naar 32-node layout, vlak, exact conform Koens foto)
+- 32 nodes: outer ring 20 (7 top / 7 bottom incl. goals + entries, 3 per zijkant)
+  + inner rechthoek 12 (5 boven IT1-5, 5 onder IB1-5, 1 mid per zijde IL/IR)
+- Spokes: 4 hoek-diagonalen (entry → inner hoek), G2→IT2 (diagonaal linksaf),
+  G1→IB4 (180°-spiegel, rechtsaf)
+- GESCHRAPT (sessie-3 markeringen, blijft gelden): G2↔IT3, G1↔IB2-kant, L2↔IL, R2↔IR
+- Vlakke 2D-weergave (cirkels), donkere stijl conform foto — de v12-trapezoïde met
+  8-node octagon is hiermee VERVALLEN op expliciete aanwijzing van Koen
+- Topologie headless gevalideerd: 32 nodes, 38 edges, volledig verbonden, 180° rotatiesymmetrisch
+
+Win conditions
+- Goal-rush: figure eindigt op tegenstander's goal
+- Lockout: speler kan niets meer doen
+- GEEN "elimineer alle units"-victory
+
+Beurt-economie (sessie 7: Duel-correct gemaakt na web-verificatie)
+- 1 actie per beurt; move-into-enemy = battle als volledige actie
+- DEPLOY = via een vrij eigen entry-punt, kost 1 MP; resterende MP mag direct
+  doorbewegen (alleen naar lege punten). Bezet entry (eigen óf vijand) blokkeert deploy.
+- ALLEREERSTE zet van het potje: MP-1 (Duel-regel, dempt first-player rush)
+- SURROUND-KO: figure zonder vrij buurpunt en met ≥1 aangrenzende vijand gaat
+  direct KO naar de bench, zonder gevecht
+- Eigen figure mag op het EIGEN goal staan als keeper (Duel-regel)
+- MP globaal gecapt op 3 (ook met Rally/War Cry)
+- KO'd unit → bench met 'wait', weer inzetbaar vanaf eigen volgende beurt
+- Maximaal 1 Plate per beurt, kost géén actie, eenmalig gebruik
+
+Level-up (Duel-spec, sinds sessie 5 in code)
+- KO scoren = +1 level (max level 4)
+- Per level: sterkste White/Gold-slot wordt 1 wedge groter, 1 Miss-wedge verdwijnt
+- Levels blijven behouden na eigen KO; level-badge zichtbaar op het bord
+
+ROSTER (18 units — ALLEMAAL in code, elk 16-slot)
+Knights & Humans: Squire, Battle Cleric, Knight Commander
+Elves & Sylvan: Forest Scout, Elven Archer, Arcane Weaver
+Dwarves & Forge: Stone Apprentice, Runesmith, Mountain Warden
+Undead & Necropolis: Restless Skeleton, Ghoul, Necromancer
+Beasts & Wilds: Boar Brute, Lupine Hunter, Wyrmling
+Inferno & Demonic: Imp, Hellhound, Pit Lord
+LET OP: disk-data is in sessie 5 herontworpen (v4-data was verloren). Archetypes:
+commons veel Miss / laag damage, rares Gold-slots / weinig Miss. Valideren in speeltest.
+
+PLATES (10, in code met targeting-UI)
+Rally (+1 MP 1 unit), War Cry (+1 MP alle units), Cleanse (status wissen),
+Hex (confusion), Ensnare (paralysis), Scorch (burn), Venom (poison),
+Bulwark (volgende combat Red→Blue, eenmalig), Blink (teleport naar leeg buurpunt,
+bewust NIET naar goal — anti-instawin), Recall (terug naar bench).
+- AI: status-plates defensief (op vijand ≤2 stappen van eigen goal), Cleanse op eigen
+  unit met status. Blink/Recall laat AI links liggen.
+
+DECK-SELECTIE (sinds sessie 5)
+- Pre-game scherm: kies exact 6 units + 3 plates, of knop Random
+- Geldt voor P1; P2 (AI én hotseat) krijgt random team — vereenvoudiging, zie open punten
+
+AI (sessie 7: defensief herbouwd na rush-exploit)
+- Rush-dreiging: per speler-unit beurten-tot-G2 berekend (afstand / MP)
+- Bij dreiging ≤2 beurten: keeper op G2 zetten (+400), routes T2/T3/IT2
+  dichtzetten (+150), rusher aanvallen (+120); keeper verlaat de zone niet (-300)
+- Deploy gebruikt nu ook deploy-met-doorbewegen, defensief gewogen bij dreiging
+- Move scoort op BFS-afstandswinst richting G1; goal-bereik = score 1000
+- Attack scoort op combat-EV: volledige 16×16 slot-matrix incl. statussen (depth-1)
+- Kleine random jitter tegen voorspelbaarheid
+
+ONTWIKKELFASEN
+- Fase 1.5 (huidig): digitaal prototype voor mechanics-validatie
+- Fase 2: volledig digitaal single-player prototype
+- Fase 3: multiplayer beoordelen na fase 2
+
+STORE & COLLECTIE (sessie 6, nieuw)
+- Persistent spelersprofiel (localStorage, fallback in-memory): credits + collectie
+- Start: 6 commons gratis (Squire/Scout/Apprentice/Skeleton/Boar/Imp), 300 credits
+- Prijzen: Common 100, Uncommon 200, Rare 400 credits
+- Upgraden (permanent level, max 4): L1→2 = 150, L2→3 = 250, L3→4 = 400
+- Credits verdienen (alleen solo): winst +100, verlies +25
+- Deck-selectie = tegelijk store-scherm: niet-gekochte kaarten grijs met KOOP-prijs,
+  eigen kaarten tonen level + upgrade-chip; alleen eigen kaarten selecteerbaar
+- P1-units starten in een potje op hun collectie-level; in-game level-ups (KO) blijven tijdelijk
+- Silhouetten = placeholder-art; echte kaart-artwork is fase 2 (géén Duel-IP)
+
+HUIDIGE DELIVERABLE
+- rondel_mobile_v21.html: volledige character-art + status-fx + particles (rondel_pwa_v21.zip)
+  - Definitief 32-node bord (vlak, conform foto), Solo (vs AI) + Hotseat
+  - Deck-selectie + store/collectie/credits, 6v6, volledige roster, 10 plates,
+    level-up, alle statussen functioneel
+  - Symmetrische Duel-resolutie (headless getest: 14/14 spec-checks OK)
+  - Bord-topologie headless getest: 12/12 checks OK
+
+EFFECTEN (sessie 13, 12 juni)
+- Status-animaties op bord-figuren (max 2 tegelijk zichtbaar): burn = vlammetjes,
+  poison/badly poisoned/curse = stijgende bubbels in eigen kleur, paralysis =
+  flikkerende bliksems, confusion = roze sterretjes-orbit boven het hoofd,
+  sleep = zwevende z'jes, frozen = ijsscherven met langzame bob, bulwark = gouden boog
+- Status-badge nu kleurgecodeerd per status (was generiek oranje)
+- Particles: stofwolkje bij elke hop-landing, geel-rode burst bij elke KO
+  (combat én surround), via pendingFX-queue zodat renders ze niet wegvagen
+- Performance-keuzes: alleen transform/opacity-animaties, geen filters;
+  alles uit bij prefers-reduced-motion
+- Hop-bugs gefixt (eerder in sessie 12/13): tijdstap-klem tegen frame-skips,
+  CSS-transitie op unit-fig verwijderd (veroorzaakte wegschieten buiten het bord),
+  blur-filters van schaduwen af (jank-bron op telefoon)
+- Deliverable: rondel_mobile_v21.html + rondel_pwa_v21.zip
+
+ART — COMPLEET (sessie 12, 12 juni)
+- Koen leverde alle 17 resterende figuren als één sprite-sheet (witte achtergrond,
+  consistente chibi-stijl); automatisch gesplitst (flood fill + component-clustering,
+  interieur-wit zoals de Cleric-tabbard behouden), gecomprimeerd (~18KB/figuur)
+- ALLE 18 units hebben nu echte character-art op bord, bench en in de store
+- Silhouet-fallback blijft bestaan voor toekomstige units
+- Open: kwaliteitscheck op telefoon (formaat op bord, leesbaarheid)
+
+ART-PIPELINE (sessie 11 — werkend!)
+- Eerste echte character-art (Squire, chibi-stijl door Koen gegenereerd) ingebouwd
+  als test: zichtbaar op bord (op de speler-sokkel), bench en in de store
+- UNIT_ART-systeem: elke nieuwe PNG = één regel code; rest valt terug op silhouet
+- Schoonmaak-pipeline gebouwd voor ingebakken checkerboards (flood fill + despeckle
+  + gaten dichten); échte transparante exports blijven de voorkeur
+- Hop-animatie gefixt: schaduw blijft op de grond en krimpt tijdens de sprong
+- Godot vs Unity uitgelegd; advies: Godot voor fase 2, vereist wel een PC
+
+GRAPHICS — EERLIJKE STAND VAN ZAKEN (sessie 10)
+- Het visuele gat met Pokémon Duel is een ASSET-gat, geen code-gat: Duel heeft
+  professionele 3D-character-art + game-engine. In HTML zonder assets is er een plafond.
+- Afgesproken route naar echte graphics:
+  1) Koen genereert per unit AI-art (transparante PNG, 18 stuks, eigen fantasy-stijl);
+     Claude bouwt ze in als bord-figuren en kaart-art. → grootste visuele sprong
+  2) Duel-niveau (3D, camera, partikels) = fase 2 in Godot/Unity met echte assets
+- Gedaan in code (sessie 10): Duel-stijl hop-animatie (boogje per route-segment met
+  afzet- en landings-squash, respecteert prefers-reduced-motion); figuren in
+  factie-kleurpaletten (speler herken je aan de sokkel, zoals bij echte figures)
+
+VANDAAG GEDAAN (11 juni 2026, sessie 9 — vijfde sessie vandaag)
+- WERKAFSPRAAK verduidelijkt: Claude kan projectbestanden NIET schrijven (read-only);
+  Koen vervangt alleen de laatste prototype-versie, ± 1x per werkdag. Status/beslissingen
+  zitten ook in Claude's geheugen; het document is de backup/het naslagwerk.
+- Visuele overhaul richting Duel-look (signatuur: Duel-sokkels onder elke figure):
+  dikke ronde sokkel met zijwand, gradient-bovenvlak en glansboog; holografisch
+  indigo bord met subtiele ringen; gloeiende cyaan-witte routes; glossy nodes met
+  highlight; pulserende goal-halo's (respecteert prefers-reduced-motion);
+  bench-kaarten met mini-sokkel en glans
+- PWA-bundel ververst (rondel_pwa_v17.zip)
+
+GEDAAN IN SESSIE 8 (eerder vandaag)
+- AI-keeperbug gefixt (Koens speeltest: keeper verliet G2 zodra acute dreiging wegviel):
+  laatste verdediger in de goal-zone (G2/T2/T3/IT2) blijft nu ALTIJD (-500 op vertrek),
+  zone wordt ook zonder dreiging hermand, dreigingshorizon 2→3 beurten
+- App-route besloten (tussenstap vóór fase 2): PWA-bundel gemaakt (manifest, service
+  worker, iconen). Route naar echte APK zonder PC: hosten op GitHub Pages → PWABuilder
+  genereert installeerbare APK. Native build (Godot/Unity) blijft de fase 2-beslissing.
+- Deliverables: rondel_mobile_v16.html + rondel_pwa_v16.zip
+
+GEDAAN IN SESSIE 7 (eerder vandaag)
+- Koens rush-exploit (scout 2×3 stappen = winst) geanalyseerd; Duel-regels
+  geverifieerd via web search (pokemon.com + community-guides)
+- Drie ontbrekende Duel-regels ingebouwd: deploy kost 1 MP + doorbewegen,
+  eerste zet van het potje MP-1, surround-KO
+- Keeper-op-eigen-goal bevestigd als legale Duel-verdediging (zat al impliciet in code)
+- AI defensief herbouwd: dreigingsdetectie, keeper, route-blokkade, intercept
+- Headless getest: 9/9 nieuwe mechanics-checks OK
+- Deliverable: rondel_mobile_v15.html
+
+GEDAAN IN SESSIE 6 (eerder vandaag)
+- Bord teruggezet naar de definitieve 32-node layout exact volgens Koens foto
+  (vlak, cirkels, donkere stijl) — v12-trapezoïde vervallen
+- Store/collectie/credits-systeem gebouwd (zie sectie hierboven)
+- endMatch-flow: winnaar-detectie + credits-beloning op alle 4 game-end paden
+
+GEDAAN IN SESSIE 5 (eerder vandaag)
+- Basis: door Koen aangeleverde v12 (nieuw bord/visuals, maar 3 placeholder-units,
+  geen plates, random AI, incomplete statussen)
+- Volledige 18-unit roster terug in code met herontworpen 16-slot disks + silhouetten
+- 10-plate systeem herbouwd: chip-strip UI, targeting-flow (incl. 2-staps Blink), effecten
+- Deck-selectie UI (6 units + 3 plates kiezen of random)
+- Level-up systeem (Duel-spec: slot groter, Miss kleiner) met level-badges
+- Statussen compleet: poison/badly poisoned/burn damage-modifiers toegevoegd;
+  paralysis/burn raken nu alleen kleinste White (was incl. Gold — spec-afwijking gefixt)
+- Frozen-fix: blokkeerde onterecht ook beweging; mag nu bewegen, niet aanvallen
+- Bulwark in combat-resolutie (Red→Blue, consumeert bij eerstvolgende combat)
+- AI van random terug naar heuristisch, nu mét 16×16 EV-matrix (open punt 4 meteen gedaan)
+- Headless test-suite gedraaid: resolve-tabel en statuseffecten 14/14 conform doc
+
+OPEN PUNTEN — IN VOLGORDE VAN URGENTIE
+1. Speeltest: is de rush-exploit nu echt dood? Voelt AI-verdediging eerlijk of frustrerend?
+2. Speeltest: nieuwe disk-data van alle 18 units (sessie-5 herontwerp) — balance valideren
+3. Store-economie balancen: prijzen, upgrade-kosten, win/verlies-credits (nu eerste gok)
+4. Speeltest: 3 plates te swingy? Level-up tempo OK (KO = +1 level)?
+5. AI-sterkte beoordelen na speeltest (EV-lookahead nu actief)
+6. AFGEROND (sessie 12+13): character-art compleet, status-fx en particles in code.
+   Volgende art-stappen: plate-iconen en bord-thema-art (zelfde stijl)
+7. Deck-selectie voor P2 in hotseat (nu random — beide spelers laten kiezen?)
+8. Definitieve naam (Rondel is werknaam)
+9. Beslissing fase 2 framework: Godot vs Unity vs Web
+10. Fusion-systeem ontwerpen voor app-versie (sluit aan op store/upgrade-systeem)
+11. Factie-puriteit als design-knop overwegen
+
+INSPIRATIE-REFERENTIE
+- Mechanics: Pokémon Duel / Comaster — Duel is bron van waarheid
+- Roster-feel: high fantasy, mythologie en folklore (public domain)
+- Géén beschermd IP gebruiken
