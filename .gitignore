@@ -1,0 +1,11 @@
+# Tijdelijke werk-/build-mappen
+_tmp*/
+*.tmp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/

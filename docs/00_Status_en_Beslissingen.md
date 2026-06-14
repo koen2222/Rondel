@@ -1,5 +1,5 @@
 RONDEL — STATUS EN BESLISSINGEN
-Laatste update: 12 juni 2026 (sessie 13)
+Laatste update: 13 juni 2026 (sessie 14)
 
 KERNCONCEPT
 - Tabletop-first fantasy bordspel, einddoel = digitale app
@@ -10,9 +10,13 @@ KERNCONCEPT
 META-PRINCIPE
 Bij contradictie tussen project-instructies en Pokémon Duel-structuur: Duel wint.
 
-WERKAFSPRAAK BESTANDEN (sessie 5)
-- Claude's werkmap wordt na elke sessie gewist; bestanden uit oude chats zijn niet automatisch beschikbaar.
-- Afspraak: Koen zet na elke sessie de nieuwste prototype-versie in de projectbestanden, naast dit statusdocument.
+WERKAFSPRAAK BESTANDEN (geüpdatet sessie 14)
+- Project draait nu in een git-repo (Claude Code on the web); Claude KAN bestanden lezen
+  EN schrijven/committen op de feature-branch. De oude read-only-aanname (sessie 9) vervalt.
+- Repo-structuur (sessie 14): index.html (game) + manifest.webmanifest + sw.js + icon-192/512.png
+  in de root, art/ met 18 losse unit-PNG's, docs/00_Status_en_Beslissingen.md (dit document).
+- Werkafspraak: edit bestaande bestanden, herbouw niet vanaf nul. De gebalanceerde disk-data,
+  bord-layout en visuals in index.html zijn maandenlang werk — nooit ongevraagd weggooien.
 
 VAST BESLOTEN MECHANICS
 
@@ -125,12 +129,27 @@ STORE & COLLECTIE (sessie 6, nieuw)
 - Silhouetten = placeholder-art; echte kaart-artwork is fase 2 (géén Duel-IP)
 
 HUIDIGE DELIVERABLE
-- rondel_mobile_v21.html: volledige character-art + status-fx + particles (rondel_pwa_v21.zip)
+- v21 draait nu als gestructureerde repo i.p.v. één los HTML-bestand (zie sessie 14).
+  index.html (~72KB) laadt de 18 unit-PNG's los uit art/; PWA-assets in de root.
+- (Historisch) rondel_mobile_v21.html: volledige character-art + status-fx + particles (rondel_pwa_v21.zip)
   - Definitief 32-node bord (vlak, conform foto), Solo (vs AI) + Hotseat
   - Deck-selectie + store/collectie/credits, 6v6, volledige roster, 10 plates,
     level-up, alle statussen functioneel
   - Symmetrische Duel-resolutie (headless getest: 14/14 spec-checks OK)
   - Bord-topologie headless getest: 12/12 checks OK
+
+GEDAAN IN SESSIE 14 (13 juni 2026)
+- Repo gestructureerd (eerste opschoontaak): losse, vreemd genummerde bestanden
+  (00_Status_en_Beslissingen-5.md, rondel_mobile_v21-1.html, rondel_pwa_v21.zip)
+  vervangen door een schone layout — zie WERKAFSPRAAK BESTANDEN.
+- Art-extractie: de 18 base64-PNG's (samen ~443KB, de bulk van het bestand) uit het
+  UNIT_ART-object getrokken naar losse art/<key>.png. index.html van 515KB → 72KB.
+  UNIT_ART verwijst nu per unit naar "art/<key>.png"; silhouet-fallback intact.
+- Validatie: bewezen via prefix/suffix-diff dat ALLEEN het UNIT_ART-blok wijzigde —
+  alle spellogica (combat, topologie, AI, statussen) byte-voor-byte identiek, dus
+  geen regressie mogelijk. Elke art-ref gecontroleerd tegen een bestaand bestand (18/18).
+- sw.js cachet nu ook de 18 art-bestanden (offline-PWA blijft werken). README.md +
+  .gitignore toegevoegd.
 
 EFFECTEN (sessie 13, 12 juni)
 - Status-animaties op bord-figuren (max 2 tegelijk zichtbaar): burn = vlammetjes,
@@ -232,6 +251,7 @@ OPEN PUNTEN — IN VOLGORDE VAN URGENTIE
 4. Speeltest: 3 plates te swingy? Level-up tempo OK (KO = +1 level)?
 5. AI-sterkte beoordelen na speeltest (EV-lookahead nu actief)
 6. AFGEROND (sessie 12+13): character-art compleet, status-fx en particles in code.
+   AFGEROND (sessie 14): art losgetrokken naar art/, repo gestructureerd.
    Volgende art-stappen: plate-iconen en bord-thema-art (zelfde stijl)
 7. Deck-selectie voor P2 in hotseat (nu random — beide spelers laten kiezen?)
 8. Definitieve naam (Rondel is werknaam)
