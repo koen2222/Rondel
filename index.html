@@ -110,6 +110,7 @@
   @keyframes fxBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2.5px); } }
   @keyframes fxPoof { 0% { transform: scale(.4); opacity: .75; } 100% { transform: scale(1.7); opacity: 0; } }
   @keyframes fxBurst { 0% { transform: scale(.3); opacity: 1; } 100% { transform: scale(2); opacity: 0; } }
+  @keyframes fxGlint { 0%, 35%, 100% { opacity: 0; } 52% { opacity: 1; } }
   @media (prefers-reduced-motion: reduce) { .fx-anim { animation: none !important; } }
 
   .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: rgba(20, 15, 10, 0.95); color: var(--gold); padding: 12px 24px; border-radius: 8px; font-size: 1rem; font-family: 'Cinzel', serif; border: 1px solid var(--gold); box-shadow: 0 0 20px rgba(245,158,11,0.3); z-index: 50; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
@@ -416,30 +417,59 @@ function statusFX(g, u) {
     return e;
   };
   for (const st of u.status.slice(0, 2)) {
-    if (st === 'burn') {
-      [[-8,'0s'],[1,'.4s'],[8,'.8s']].forEach(([x,d]) => mk('path', { d:`M ${x} 6 q 3 -4 0 -8 q -3 4 0 8`, fill:'#fb923c', stroke:'#fde047', 'stroke-width':0.6 }, 'fxRise 1.2s ease-out infinite', d));
-    } else if (st === 'poison' || st === 'badlypoison' || st === 'curse') {
-      const c = STATUS_COLORS[st];
-      [[-7,'0s'],[2,'.45s'],[8,'.9s']].forEach(([x,d]) => mk('circle', { cx:x, cy:4, r: st==='badlypoison' ? 2.6 : 2, fill:c, opacity:0.85 }, 'fxRise 1.4s ease-out infinite', d));
+    if (st === 'frozen') {
+      // Groot ijsblok om het hele poppetje heen
+      el('rect', { x:-20, y:-53, width:40, height:62, rx:4, fill:'rgba(147,210,255,0.50)', stroke:'#7dd3fc', 'stroke-width':2 }, g);
+      // Lichte facetten (diepte-illusie)
+      el('polygon', { points:'-20,-53 -4,-53 -17,-20', fill:'rgba(255,255,255,0.14)', stroke:'none' }, g);
+      el('polygon', { points:'20,-53 5,-53 17,-20', fill:'rgba(255,255,255,0.09)', stroke:'none' }, g);
+      el('line', { x1:-5, y1:-53, x2:-11, y2:-18, stroke:'rgba(255,255,255,0.30)', 'stroke-width':1 }, g);
+      el('line', { x1:7, y1:-53, x2:13, y2:-12, stroke:'rgba(255,255,255,0.20)', 'stroke-width':0.8 }, g);
+      // Kristalspitsen bovenop
+      el('polygon', { points:'-11,-53 -7,-64 -3,-53', fill:'#bae6fd', stroke:'#7dd3fc', 'stroke-width':1 }, g);
+      el('polygon', { points:'-1,-53 2,-62 5,-53', fill:'#e0f2fe', stroke:'#7dd3fc', 'stroke-width':0.9 }, g);
+      el('polygon', { points:'9,-53 12,-60 15,-53', fill:'#bae6fd', stroke:'#7dd3fc', 'stroke-width':0.9 }, g);
+      // Glinsterende lichtpuntjes
+      mk('circle', { cx:-7, cy:-33, r:2.5, fill:'white', opacity:0.9 }, 'fxGlint 2.4s ease-in-out infinite', '0s');
+      mk('circle', { cx:11, cy:-17, r:1.8, fill:'white', opacity:0.8 }, 'fxGlint 2.4s ease-in-out infinite', '0.85s');
+      mk('circle', { cx:2, cy:-46, r:1.4, fill:'white', opacity:0.75 }, 'fxGlint 2.4s ease-in-out infinite', '1.6s');
+
+    } else if (st === 'burn') {
+      // Vlammen die het hele poppetje omhullen
+      [[-14,36,'#f97316',4.5,'0s'],[-7,50,'#fbbf24',5.5,'.2s'],[1,46,'#fb923c',5,'.35s'],[8,52,'#fde047',4.5,'.15s'],[14,38,'#f97316',4,'.5s']].forEach(([x,h,c,w,d]) => {
+        mk('path', { d:`M ${x} 7 q ${w} ${-(h*.32|0)} 0 ${-(h*.52|0)} q ${-w} ${-(h*.28|0)} 0 ${-(h*.48|0)}`, fill:'none', stroke:c, 'stroke-width':w, 'stroke-linecap':'round', opacity:0.88 }, 'fxFlicker .85s ease-in-out infinite', d);
+      });
+
     } else if (st === 'paralysis') {
-      [[-14,'0s'],[12,'.25s']].forEach(([x,d]) => mk('polyline', { points:`${x},-30 ${x+4},-25 ${x+1},-25 ${x+5},-19`, fill:'none', stroke:'#fde047', 'stroke-width':1.6, 'stroke-linecap':'round' }, 'fxFlicker .6s linear infinite', d));
+      // Elektrische bogen dwars over het lichaam
+      [['-19,-38 -10,-30 -16,-24 -8,-16','0s'],['18,-42 9,-34 15,-27 7,-19','.28s'],['-15,-16 -5,-10 -12,-4 -3,3','.14s'],['16,-22 8,-15 14,-8 6,-1','.42s']].forEach(([pts,d]) => {
+        mk('polyline', { points:pts, fill:'none', stroke:'#fde047', 'stroke-width':2.2, 'stroke-linecap':'round', 'stroke-linejoin':'round' }, 'fxFlicker .45s linear infinite', d);
+      });
+
     } else if (st === 'confusion') {
+      // Draaiende roze sterren rondom het hoofd
       const orb = el('g', {}, g);
       orb.style.transformBox = 'fill-box'; orb.style.transformOrigin = 'center';
-      orb.style.animation = 'fxOrbit 1.6s linear infinite'; orb.classList.add('fx-anim');
-      el('circle', { cx:-9, cy:-54, r:2.2, fill:'#f472b6' }, orb);
-      el('circle', { cx:9, cy:-54, r:1.6, fill:'#fbcfe8' }, orb);
+      orb.style.animation = 'fxOrbit 1.3s linear infinite'; orb.classList.add('fx-anim');
+      [[-14,-44,3.2,'#f472b6'],[14,-44,2.6,'#fbcfe8'],[-8,-54,2.6,'#e879f9'],[8,-54,2.2,'#f472b6'],[0,-57,3,'#fbcfe8']].forEach(([cx,cy,r,fill]) => el('circle', { cx, cy, r, fill }, orb));
+
     } else if (st === 'sleep') {
-      [[8,-48,9,'0s'],[14,-54,7,'.7s']].forEach(([x,y,fs,d]) => { const t = mk('text', { x, y, 'font-size':fs, fill:'#93c5fd', 'font-weight':'700', 'font-family':'Georgia,serif' }, 'fxRise 1.8s ease-out infinite', d); t.textContent = 'z'; });
-    } else if (st === 'frozen') {
-      const ice = el('g', {}, g);
-      ice.style.transformBox = 'fill-box'; ice.style.transformOrigin = 'center';
-      ice.style.animation = 'fxBob 2.2s ease-in-out infinite'; ice.classList.add('fx-anim');
-      el('polygon', { points:'-11,8 -8,-3 -5,8', fill:'#bae6fd', stroke:'#7dd3fc', 'stroke-width':0.7, opacity:0.92 }, ice);
-      el('polygon', { points:'4,8 7,-5 10,8', fill:'#e0f2fe', stroke:'#7dd3fc', 'stroke-width':0.7, opacity:0.92 }, ice);
-      el('polygon', { points:'-3,9 -1,1 1,9', fill:'#bae6fd', stroke:'#7dd3fc', 'stroke-width':0.6, opacity:0.85 }, ice);
+      // Donkerblauw waas + drijvende z'jes
+      el('rect', { x:-20, y:-53, width:40, height:62, rx:4, fill:'rgba(10,25,65,0.40)' }, g);
+      [[10,-38,12,'0s'],[17,-48,9,'.8s'],[5,-55,7,'1.5s']].forEach(([x,y,fs,d]) => {
+        const t = mk('text', { x, y, 'font-size':fs, fill:'#93c5fd', 'font-weight':'700', 'font-family':'Georgia,serif' }, 'fxRise 2s ease-out infinite', d);
+        t.textContent = 'z';
+      });
+
+    } else if (st === 'poison' || st === 'badlypoison' || st === 'curse') {
+      const c = STATUS_COLORS[st];
+      (st === 'badlypoison'
+        ? [[-12,2,3.2,'0s'],[-4,-12,2.8,'.32s'],[6,-20,3.5,'.64s'],[-8,-30,2.6,'.96s'],[10,-4,3,'.48s'],[2,-38,2.8,'1.2s']]
+        : [[-9,4,2.2,'0s'],[0,-10,2,'.4s'],[9,2,2.4,'.8s'],[-5,-24,1.8,'.55s'],[7,-32,1.6,'.95s']]
+      ).forEach(([cx,cy,r,d]) => mk('circle', { cx, cy, r, fill:c, opacity:0.84 }, 'fxRise 1.5s ease-out infinite', d));
+
     } else if (st === 'bulwark') {
-      mk('path', { d:'M -14 -30 A 16 10 0 0 1 14 -30', fill:'none', stroke:'#fbbf24', 'stroke-width':2, 'stroke-linecap':'round' }, 'fxFlicker 1.6s ease-in-out infinite');
+      mk('path', { d:'M -14 -30 A 16 10 0 0 1 14 -30', fill:'none', stroke:'#fbbf24', 'stroke-width':2.5, 'stroke-linecap':'round' }, 'fxFlicker 1.6s ease-in-out infinite');
     }
   }
 }
