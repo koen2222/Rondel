@@ -26,17 +26,22 @@ const boardSection = html.slice(
   html.indexOf('\nconst W=')          // W/G/B/R helpers starten de disk-data
 );
 
-// resolve + applyStatus — puur-functioneel, geen state
+// resolve + applyStatus — puur-functioneel, geen state; koUnit werkt op state (injecteerbaar)
 const resolveMatch = html.match(/\nfunction resolve\([\s\S]*?\n\}/);
 const applyMatch   = html.match(/\nfunction applyStatus\([\s\S]*?\n\}/);
+const koMatch      = html.match(/\nfunction koUnit\([\s\S]*?\n\}/);
 if (!resolveMatch) throw new Error('resolve() niet gevonden');
 if (!applyMatch)   throw new Error('applyStatus() niet gevonden');
+if (!koMatch)      throw new Error('koUnit() niet gevonden');
 
 const evalCode = [
+  'let state = null;',
+  'function __setState(s) { state = s; }',
   boardSection,
   resolveMatch[0],
   applyMatch[0],
-  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES };',
+  koMatch[0],
+  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState };',
 ].join('\n');
 
 // Schrijf tijdelijk evalueerbaar bestand (vermijdt new Function-beperkingen)
@@ -49,7 +54,7 @@ try {
   fs.unlinkSync(tmpPath);
 }
 
-const { resolve, applyStatus, NODES, ADJ, ROUTES } = extracted;
+const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState } = extracted;
 
 // ─── Test harness ──────────────────────────────────────────────────────────────
 let pass = 0, fail = 0;
@@ -172,6 +177,44 @@ check('G2 aanwezig en type=goal',  NODES['G2']?.type, 'goal');
   const g2adj = [...ADJ['G2']];
   check('G2 verbonden met T2',  g2adj.includes('T2'),  true);
   check('G2 verbonden met IT2', g2adj.includes('IT2'), true);
+}
+
+// ─── 4. HEALING CENTER (Duel-regel: KO → HC max 2, derde KO duwt oudste terug) ──
+section('=== HEALING CENTER (8 checks) ===');
+
+{
+  const S = { hc:{p1:[],p2:[]}, bench:{p1:[],p2:[]}, units:{} };
+  const mkU = (uid) => S.units[uid] = { uid, owner:'p1', node:'B1', status:['poison'], level:3 };
+  const u1 = mkU('u1'), u2 = mkU('u2'), u3 = mkU('u3');
+  __setState(S);
+
+  koUnit(u1);
+  check('KO 1: unit in HC',                S.hc.p1, ['u1']);
+  check('KO 1: van het bord (node null)',  u1.node, null);
+  check('KO 1: statussen genezen in HC',   u1.status, []);
+  check('KO 1: level blijft behouden',     u1.level, 3);
+
+  koUnit(u2);
+  check('KO 2: beide in HC (max 2)',       S.hc.p1, ['u1','u2']);
+  check('KO 2: bench nog leeg',            S.bench.p1, []);
+
+  koUnit(u3);
+  check('KO 3: oudste (u1) terug naar bench met wait', S.bench.p1.includes('u1') && u1.status.includes('wait'), true);
+  check('KO 3: HC bevat nu u2+u3',         S.hc.p1, ['u2','u3']);
+}
+
+// ─── 5. SYNTAX-CHECK volledige game-JS ─────────────────────────────────────────
+section('=== SYNTAX (1 check) ===');
+{
+  const scriptStart2 = html.indexOf('<script>') + 8;
+  const scriptEnd2 = html.lastIndexOf('<\/script>');
+  const js = html.slice(scriptStart2, scriptEnd2);
+  const chk = path.join(__dirname, '_syntax.cjs');
+  fs.writeFileSync(chk, js);
+  const { spawnSync } = require('child_process');
+  const r = spawnSync(process.execPath, ['--check', chk], { encoding: 'utf8' });
+  fs.unlinkSync(chk);
+  check('Game-JS parseert zonder syntaxfouten', r.status === 0 ? 'OK' : r.stderr.slice(0, 300), 'OK');
 }
 
 // ─── Samenvatting ──────────────────────────────────────────────────────────────
