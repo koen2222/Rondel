@@ -1,5 +1,5 @@
 RONDEL — STATUS EN BESLISSINGEN
-Laatste update: 13 juni 2026 (sessie 14)
+Laatste update: 14 juni 2026 (sessie 15)
 
 KERNCONCEPT
 - Tabletop-first fantasy bordspel, einddoel = digitale app
@@ -70,10 +70,14 @@ Beurt-economie (sessie 7: Duel-correct gemaakt na web-verificatie)
   doorbewegen (alleen naar lege punten). Bezet entry (eigen óf vijand) blokkeert deploy.
 - ALLEREERSTE zet van het potje: MP-1 (Duel-regel, dempt first-player rush)
 - SURROUND-KO: figure zonder vrij buurpunt en met ≥1 aangrenzende vijand gaat
-  direct KO naar de bench, zonder gevecht
+  direct KO, zonder gevecht
 - Eigen figure mag op het EIGEN goal staan als keeper (Duel-regel)
 - MP globaal gecapt op 3 (ook met Rally/War Cry)
-- KO'd unit → bench met 'wait', weer inzetbaar vanaf eigen volgende beurt
+- HEALING CENTER (sessie 15, Duel-correct gemaakt na web-verificatie): KO'd unit
+  → HC met max 2 plekken per speler; pas als een DERDE unit KO gaat, schuift de
+  oudste terug naar de bench met 'wait' (weer inzetbaar vanaf eigen volgende beurt).
+  Statussen genezen in het HC; level blijft behouden. De oude regel (KO → direct
+  bench + wait) was te mild en is VERVALLEN.
 - Maximaal 1 Plate per beurt, kost géén actie, eenmalig gebruik
 
 Level-up (Duel-spec, sinds sessie 5 in code)
@@ -137,6 +141,25 @@ HUIDIGE DELIVERABLE
     level-up, alle statussen functioneel
   - Symmetrische Duel-resolutie (headless getest: 14/14 spec-checks OK)
   - Bord-topologie headless getest: 12/12 checks OK
+
+GEDAAN IN SESSIE 15 (14 juni 2026)
+- LIVE: spel staat op GitHub Pages — https://koen2222.github.io/Rondel/ — met
+  auto-deploy workflow (elke push naar main deployt automatisch). Repo is public.
+- Status-fx overhaal op Koens aanwijzing: frozen = groot ijsblok om het hele
+  poppetje (facetten, kristalspitsen, glinsters), burn = 5 omhullende vlammen,
+  paralysis = 4 bliksembogen over het lichaam, confusion = 5 draaiende sterren,
+  sleep = donker waas + 3 z'jes, poison = bubbels over het hele figuur
+- HEALING CENTER ingebouwd (Duel-regel geverifieerd via web search, zie
+  beurt-economie): koUnit() centraliseert alle KO-paden (combat + surround);
+  HC-kaarten zichtbaar in de bench-strip (roze ✚-badge, gestreepte rand);
+  lockout-detectie telt nu alleen inzetbare (niet-wait) bench-units
+- Deck-selectie voor P2 in hotseat (open punt 7 afgerond): tweestaps-flow,
+  P1 kiest eerst (knop "Volgende"), dan P2, gedeelde collectie/levels op één
+  toestel; solo onveranderd (AI random)
+- Plate-iconen (open punt 6 art-stap): 10 eigen SVG-iconen in chip-strip en
+  deck-scherm, kleurgecodeerd per plate
+- Test-suite uitgebreid: 34 → 43 checks (8 HC-checks + syntax-check op de
+  volledige game-JS), alles groen
 
 GEDAAN IN SESSIE 14 (13 juni 2026)
 - Repo gestructureerd (eerste opschoontaak): losse, vreemd genummerde bestanden
@@ -252,8 +275,8 @@ OPEN PUNTEN — IN VOLGORDE VAN URGENTIE
 5. AI-sterkte beoordelen na speeltest (EV-lookahead nu actief)
 6. AFGEROND (sessie 12+13): character-art compleet, status-fx en particles in code.
    AFGEROND (sessie 14): art losgetrokken naar art/, repo gestructureerd.
-   Volgende art-stappen: plate-iconen en bord-thema-art (zelfde stijl)
-7. Deck-selectie voor P2 in hotseat (nu random — beide spelers laten kiezen?)
+   AFGEROND (sessie 15): plate-iconen (SVG). Resteert: bord-thema-art (zelfde stijl)
+7. AFGEROND (sessie 15): deck-selectie voor P2 in hotseat (tweestaps-flow)
 8. Definitieve naam (Rondel is werknaam)
 9. Beslissing fase 2 framework: Godot vs Unity vs Web
 10. Fusion-systeem ontwerpen voor app-versie (sluit aan op store/upgrade-systeem)
