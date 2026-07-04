@@ -143,6 +143,23 @@ HUIDIGE DELIVERABLE
   - Bord-topologie headless getest: 12/12 checks OK
 
 GEDAAN IN SESSIE 16 (4 juli 2026)
+- APP-SHELL gebouwd (Koens opdracht: "volledige app-ervaring, alles in menu's"):
+  startscherm met titel, profiel-chips (credits / collectie / W-V) en tegels
+  DUEL (solo) / HOTSEAT / COLLECTIE / WINKEL. Simpele router (showScreen).
+- COLLECTIE-scherm: alle 18 units als kaarten (level-badge, rarity); tik = detail-
+  overlay met grote DISK-PREVIEW (renderDisk hergebruikt!), slot-samenvatting per
+  kleur, en upgrade-knop — na upgrade zie je de disk direct groeien. Upgraden
+  verhuisd uit de deck-selectie hierheen.
+- WINKEL-scherm: kopen verhuisd uit de deck-selectie; niet-bezeten eerst gesorteerd.
+- Deck-selectie opgeschoond: alleen team kiezen (bezeten units + plates), locked
+  kaarten verwijzen naar Winkel; terug-knop naar menu.
+- Flow: home → modus → deck → game; endMatch → stats bijwerken → terug naar home.
+  In-game "Menu"-knop (met confirm) vervangt Solo/Reset-knoppen.
+- Profiel uitgebreid met stats (wins/losses, alleen solo geteld); migratie voor
+  bestaande profielen. SW-cache gebumpt (v23) zodat telefoons de update krijgen.
+- NIEUW: browser-rooktest (test/smoke.js, Playwright/Chromium headless): boot,
+  alle schermen, detail-disk, deck-flow, bord-render, menu-terug — 16/16 groen.
+  Headless suite blijft 43/43.
 - Koens speeltest: doel wéér bijna vrij bereikbaar (wyrmling op IT2, G2 leeg,
   AI deployde in plaats van keepen). Wortel gevonden in posScore: de keeper-bonus
   (+400) gold alleen bij LEGE zone — één AI-unit ergens in de 4-node zone (bv. T3)
