@@ -118,9 +118,105 @@
 
   .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: rgba(20, 15, 10, 0.95); color: var(--gold); padding: 12px 24px; border-radius: 8px; font-size: 1rem; font-family: 'Cinzel', serif; border: 1px solid var(--gold); box-shadow: 0 0 20px rgba(245,158,11,0.3); z-index: 50; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
   .toast.show { opacity: 1; }
+
+  /* ===== App-schermen (home / collectie / winkel / game) ===== */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .home { min-height: 100vh; max-width: 500px; margin: 0 auto; padding: 40px 18px 30px; display: flex; flex-direction: column; gap: 18px; background: radial-gradient(ellipse at 50% 20%, #1b1530 0%, #0d0a18 55%, #050409 100%); }
+  .home-title { text-align: center; font-family: 'Cinzel', serif; font-weight: 900; font-size: 3rem; letter-spacing: 0.18em; color: var(--gold); text-shadow: 0 0 25px var(--gold-glow), 0 4px 8px rgba(0,0,0,0.8); margin-top: 12px; }
+  .home-sub { text-align: center; font-style: italic; color: #a89f91; font-size: 0.95rem; margin-top: -12px; }
+  .profile-bar { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+  .profile-chip { background: linear-gradient(145deg, #2a201a, #14100d); border: 1px solid rgba(245,158,11,0.3); border-radius: 20px; padding: 6px 16px; font-family: 'Cinzel', serif; font-size: 0.8rem; color: var(--ink); }
+  .profile-chip b { color: var(--gold); }
+  .home-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; }
+  .home-tile { position: relative; background: linear-gradient(160deg, #241c33, #110d1d); border: 1px solid rgba(125,211,252,0.15); border-radius: 14px; padding: 20px 12px 16px; text-align: center; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; overflow: hidden; }
+  .home-tile::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 45%; background: linear-gradient(180deg, rgba(255,255,255,0.06), transparent); pointer-events: none; }
+  .home-tile:active { transform: scale(0.97); }
+  .home-tile.big { grid-column: 1 / -1; padding: 26px 12px; border-color: rgba(245,158,11,0.45); box-shadow: 0 0 18px rgba(245,158,11,0.12); }
+  .home-tile .ico { font-size: 2rem; display: block; margin-bottom: 8px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.7)); }
+  .home-tile .tname { font-family: 'Cinzel', serif; font-weight: 700; font-size: 1rem; color: var(--ink); letter-spacing: 0.08em; }
+  .home-tile.big .tname { font-size: 1.3rem; color: var(--gold); }
+  .home-tile .tdesc { font-size: 0.72rem; color: #a89f91; margin-top: 4px; }
+  .home-foot { text-align: center; color: #665f52; font-size: 0.7rem; margin-top: auto; padding-top: 20px; }
+
+  .subscreen { min-height: 100vh; max-width: 500px; margin: 0 auto; padding: 16px 12px 30px; display: flex; flex-direction: column; gap: 12px; background: radial-gradient(ellipse at 50% 15%, #17122a 0%, #0b0916 55%, #050409 100%); }
+  .subscreen-head { display: flex; align-items: center; gap: 12px; }
+  .btn-back { background: linear-gradient(145deg, #2a201a, #14100d); border: 1px solid rgba(245,158,11,0.35); color: var(--gold); border-radius: 10px; padding: 8px 14px; font-family: 'Cinzel', serif; font-size: 0.85rem; cursor: pointer; }
+  .subscreen-title { font-family: 'Cinzel', serif; font-weight: 700; font-size: 1.15rem; letter-spacing: 0.12em; color: var(--gold); }
+  .subscreen-credits { margin-left: auto; font-family: 'Cinzel', serif; font-size: 0.85rem; color: var(--ink); }
+  .coll-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .coll-card { position: relative; background: linear-gradient(160deg, #241c33, #110d1d); border: 1px solid rgba(125,211,252,0.14); border-radius: 12px; padding: 12px 6px 10px; text-align: center; cursor: pointer; transition: transform 0.15s; overflow: hidden; }
+  .coll-card:active { transform: scale(0.96); }
+  .coll-card .name { font-family: 'Cinzel', serif; font-size: 0.62rem; color: var(--ink); margin-top: 6px; }
+  .coll-card .sub { font-size: 0.58rem; color: #a89f91; margin-top: 2px; }
+  .coll-card.locked { opacity: 0.45; filter: grayscale(0.8); }
+  .coll-card .lvl-badge { position: absolute; top: 5px; left: 5px; background: linear-gradient(135deg, #fbbf24, #d97706); color: #000; font-family: 'Cinzel', serif; font-weight: 900; font-size: 0.6rem; padding: 2px 6px; border-radius: 8px; border: 1px solid #fff; }
+  .coll-card .rar-chip { position: absolute; top: 5px; right: 7px; font-family: 'Cinzel', serif; font-size: 0.6rem; font-weight: 900; }
+  .coll-card .price-chip { display: inline-block; margin-top: 4px; background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.4); color: var(--gold); font-size: 0.6rem; border-radius: 8px; padding: 2px 8px; font-family: 'Cinzel', serif; }
+
+  /* Unit-detail overlay met disk-preview */
+  .detail-panel { background: linear-gradient(170deg, #1c1528, #0b0912); border: 1px solid rgba(245,158,11,0.3); border-radius: 18px; padding: 18px; max-width: 420px; width: 94%; max-height: 92vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.9); }
+  .detail-head { display: flex; align-items: center; gap: 12px; }
+  .detail-name { font-family: 'Cinzel', serif; font-weight: 900; font-size: 1.25rem; color: var(--gold); }
+  .detail-sub { font-size: 0.8rem; color: #a89f91; font-style: italic; }
+  .detail-disk-wrap { display: flex; justify-content: center; margin: 14px 0 6px; }
+  .detail-disk-wrap svg { width: 230px; height: 230px; }
+  .slot-summary { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 10px 0; }
+  .slot-pill { font-size: 0.68rem; font-family: 'Cinzel', serif; border-radius: 10px; padding: 3px 10px; border: 1px solid rgba(255,255,255,0.2); }
+  .detail-actions { display: flex; gap: 10px; margin-top: 14px; }
+  .detail-actions .btn { flex: 1; }
+  .upg-note { text-align: center; font-size: 0.72rem; color: #a89f91; font-style: italic; margin-top: 8px; }
 </style>
 </head>
 <body>
+
+<!-- ===== HOME ===== -->
+<div id="screen-home" class="screen">
+  <div class="home">
+    <div class="home-title">RONDEL</div>
+    <div class="home-sub">Tactisch duel op het bord der legenden</div>
+    <div class="profile-bar">
+      <div class="profile-chip">◈ <b id="home-credits">0</b></div>
+      <div class="profile-chip">Collectie <b id="home-owned">0</b>/18</div>
+      <div class="profile-chip">W <b id="home-wins">0</b> · V <b id="home-losses">0</b></div>
+    </div>
+    <div class="home-tiles">
+      <div class="home-tile big" id="tile-solo"><span class="ico">⚔️</span><div class="tname">DUEL</div><div class="tdesc">Solo tegen het AI-systeem — verdien credits</div></div>
+      <div class="home-tile" id="tile-hotseat"><span class="ico">🤝</span><div class="tname">HOTSEAT</div><div class="tdesc">2 spelers, één toestel</div></div>
+      <div class="home-tile" id="tile-collection"><span class="ico">🛡️</span><div class="tname">COLLECTIE</div><div class="tdesc">Bekijk &amp; verbeter je units</div></div>
+      <div class="home-tile" id="tile-store" style="grid-column: 1 / -1;"><span class="ico">◈</span><div class="tname">WINKEL</div><div class="tdesc">Nieuwe units kopen met credits</div></div>
+    </div>
+    <div class="home-foot">Rondel-prototype · fase 1.5 · mechanics naar Duel-model</div>
+  </div>
+</div>
+
+<!-- ===== COLLECTIE ===== -->
+<div id="screen-collection" class="screen">
+  <div class="subscreen">
+    <div class="subscreen-head">
+      <button class="btn-back" data-back="home">‹ Terug</button>
+      <div class="subscreen-title">COLLECTIE</div>
+      <div class="subscreen-credits" id="coll-credits"></div>
+    </div>
+    <div class="coll-grid" id="coll-grid"></div>
+  </div>
+</div>
+
+<!-- ===== WINKEL ===== -->
+<div id="screen-store" class="screen">
+  <div class="subscreen">
+    <div class="subscreen-head">
+      <button class="btn-back" data-back="home">‹ Terug</button>
+      <div class="subscreen-title">WINKEL</div>
+      <div class="subscreen-credits" id="store-credits"></div>
+    </div>
+    <div class="coll-grid" id="store-grid"></div>
+  </div>
+</div>
+
+<!-- ===== GAME ===== -->
+<div id="screen-game" class="screen">
 <div class="game">
   <div id="turn-banner" class="turn-banner p1">
     <span><span style="opacity:0.6; font-size:0.7rem;">FASE:</span> <span id="turn-name">Speler 1</span></span>
@@ -132,8 +228,28 @@
   <div id="plate-strip" class="plate-strip"></div>
   <div class="action-bar">
     <button class="btn primary" id="btn-end-turn">End Turn</button>
-    <button class="btn" id="btn-mode">Solo</button>
-    <button class="btn" id="btn-reset">Reset</button>
+    <button class="btn" id="btn-menu">Menu</button>
+  </div>
+</div>
+</div>
+
+<!-- ===== UNIT-DETAIL (collectie) ===== -->
+<div id="detail-overlay" class="overlay">
+  <div class="detail-panel">
+    <div class="detail-head">
+      <div id="detail-art"></div>
+      <div>
+        <div class="detail-name" id="detail-name"></div>
+        <div class="detail-sub" id="detail-sub"></div>
+      </div>
+    </div>
+    <div class="detail-disk-wrap"><svg id="disk-preview" viewBox="0 0 240 240"></svg></div>
+    <div class="slot-summary" id="detail-slots"></div>
+    <div class="detail-actions">
+      <button class="btn" id="btn-detail-close">Sluiten</button>
+      <button class="btn primary" id="btn-detail-upgrade">Upgrade</button>
+    </div>
+    <div class="upg-note" id="detail-note"></div>
   </div>
 </div>
 <div id="deck-overlay" class="overlay">
@@ -145,6 +261,7 @@
     <div class="deck-sub" id="deck-count-plates">Plates: 0 / 3</div>
     <div class="deck-grid plates" id="deck-plates"></div>
     <div class="deck-actions">
+      <button class="btn" id="btn-deck-back">‹ Menu</button>
       <button class="btn" id="btn-deck-random">Random</button>
       <button class="btn primary" id="btn-deck-start" disabled>Start</button>
     </div>
@@ -295,11 +412,12 @@ const UPGRADE_COST = { 1:150, 2:250, 3:400 }; // kosten van huidig level naar vo
 const WIN_CREDITS = 100, LOSS_CREDITS = 25;
 
 let profile;
-function freshProfile() { return { credits: 300, owned: { squire:1, scout:1, apprentice:1, skeleton:1, boar:1, imp:1 } }; }
+function freshProfile() { return { credits: 300, owned: { squire:1, scout:1, apprentice:1, skeleton:1, boar:1, imp:1 }, stats: { wins:0, losses:0 } }; }
 function loadProfile() {
   try { const raw = localStorage.getItem('rondel_profile'); profile = raw ? JSON.parse(raw) : freshProfile(); }
   catch(e) { profile = freshProfile(); }
   if (!profile || typeof profile.credits !== 'number' || !profile.owned) profile = freshProfile();
+  if (!profile.stats) profile.stats = { wins:0, losses:0 };
 }
 function saveProfile() { try { localStorage.setItem('rondel_profile', JSON.stringify(profile)); } catch(e) {} }
 
@@ -362,14 +480,38 @@ let deckStage = 'p1';      // hotseat: eerst P1, dan P2
 let deckP1 = null;          // P1-keuze geparkeerd tijdens P2-stage
 function randomPick(arr, n) { const a = [...arr]; const out = []; while (out.length < n && a.length) out.push(a.splice(Math.floor(Math.random()*a.length), 1)[0]); return out; }
 
-function newGame() {
+// ===== App-router: home / collection / store / game =====
+function showScreen(name) {
+  for (const s of document.querySelectorAll('.screen')) s.classList.remove('active');
+  document.getElementById('screen-' + name).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function renderHome() {
+  document.getElementById('home-credits').textContent = profile.credits;
+  document.getElementById('home-owned').textContent = Object.keys(profile.owned).length;
+  document.getElementById('home-wins').textContent = profile.stats.wins;
+  document.getElementById('home-losses').textContent = profile.stats.losses;
+}
+
+function goHome() {
+  document.getElementById('deck-overlay').classList.remove('active');
+  state = initialState(); state.over = true;
+  renderHome(); showScreen('home');
+}
+
+// Vanuit home: modus kiezen -> deck-selectie openen
+function startMatchFlow(mode) {
+  currentMode = mode;
   deckSel = { units: [], plates: [] };
   deckStage = 'p1'; deckP1 = null;
   state = initialState(); state.over = true;
-  renderAll(); renderDeckSelect();
+  renderDeckSelect();
   document.getElementById('deck-overlay').classList.add('active');
-  document.getElementById('btn-mode').textContent = currentMode === 'solo' ? 'Solo' : 'Hotseat';
 }
+
+// Backwards-compat: her en der wordt newGame() aangeroepen als "match voorbij"
+function newGame() { goHome(); }
 
 function onDeckConfirm() {
   if (!(deckSel.units.length === 6 && deckSel.plates.length === 3)) return;
@@ -396,29 +538,16 @@ function renderDeckSelect() {
     const c = document.createElement('div');
     if (lvl) {
       c.className = 'deck-card' + (deckSel.units.includes(key) ? ' selected' : '');
-      const upHtml = lvl < 4 ? ` <span class="up" data-up="${key}">▲ ${UPGRADE_COST[lvl]}</span>` : '';
-      c.innerHTML = `<span class="rar rar-${rar}">${rar}</span>${unitVisual(key, 'p1', 38)}<div class="name">${def.name}</div><div class="fac">${def.fac} · ${def.mp} MP</div><div class="lvl">L${lvl}${upHtml}</div>`;
-      c.addEventListener('click', (e) => {
-        const upKey = e.target.dataset && e.target.dataset.up;
-        if (upKey) {
-          const cur = profile.owned[upKey]; const cost = UPGRADE_COST[cur];
-          if (profile.credits >= cost) { profile.credits -= cost; profile.owned[upKey] = cur + 1; saveProfile(); toast(`${UNIT_DEFS[upKey].name} → L${cur+1}`); }
-          else toast('Te weinig credits');
-          renderDeckSelect(); return;
-        }
+      c.innerHTML = `<span class="rar rar-${rar}">${rar}</span>${unitVisual(key, 'p1', 38)}<div class="name">${def.name}</div><div class="fac">${def.fac} · ${def.mp} MP</div><div class="lvl">L${lvl}</div>`;
+      c.addEventListener('click', () => {
         const i = deckSel.units.indexOf(key);
         if (i >= 0) deckSel.units.splice(i, 1); else if (deckSel.units.length < 6) deckSel.units.push(key); else toast('Max 6 units');
         renderDeckSelect();
       });
     } else {
-      const price = PRICE[rar];
       c.className = 'deck-card locked';
-      c.innerHTML = `<span class="rar rar-${rar}">${rar}</span>${unitVisual(key, 'p1', 38)}<div class="name">${def.name}</div><div class="fac">${def.fac} · ${def.mp} MP</div><div class="price">KOOP ◈ ${price}</div>`;
-      c.addEventListener('click', () => {
-        if (profile.credits >= price) { profile.credits -= price; profile.owned[key] = 1; saveProfile(); toast(`${def.name} gekocht!`); }
-        else toast('Te weinig credits');
-        renderDeckSelect();
-      });
+      c.innerHTML = `<span class="rar rar-${rar}">${rar}</span>${unitVisual(key, 'p1', 38)}<div class="name">${def.name}</div><div class="fac">${def.fac} · ${def.mp} MP</div><div class="price">— via Winkel —</div>`;
+      c.addEventListener('click', () => toast('Koop deze unit in de Winkel'));
     }
     ug.appendChild(c);
   }
@@ -453,6 +582,7 @@ function startGame() {
     state.plates.p2 = randomPick(Object.keys(PLATES), 3);
   }
   state.plates.p1 = [...p1Deck.plates];
+  showScreen('game');
   renderAll();
 }
 
@@ -460,10 +590,100 @@ function endMatch(winner, msg) {
   toast(msg);
   if (state.mode === 'solo') {
     const gain = winner === 'p1' ? WIN_CREDITS : LOSS_CREDITS;
-    profile.credits += gain; saveProfile();
+    profile.credits += gain;
+    if (winner === 'p1') profile.stats.wins++; else profile.stats.losses++;
+    saveProfile();
     setTimeout(() => toast(`+${gain} credits`), 1400);
   }
-  setTimeout(() => newGame(), 3000);
+  setTimeout(() => goHome(), 3000);
+}
+
+// ===== Collectie: bekijken + upgraden (met disk-preview) =====
+function slotsAtLevel(defKey, lvl) {
+  const u = { slots: JSON.parse(JSON.stringify(UNIT_DEFS[defKey].slots)) };
+  for (let i = 1; i < lvl; i++) levelSlotBoost(u);
+  return u.slots;
+}
+
+function renderCollection() {
+  document.getElementById('coll-credits').textContent = `◈ ${profile.credits}`;
+  const g = document.getElementById('coll-grid'); g.innerHTML = '';
+  for (const [key, def] of Object.entries(UNIT_DEFS)) {
+    const lvl = profile.owned[key] || 0; const rar = RARITY[key];
+    const c = document.createElement('div');
+    c.className = 'coll-card' + (lvl ? '' : ' locked');
+    c.innerHTML = `${lvl ? `<span class="lvl-badge">L${lvl}</span>` : ''}<span class="rar-chip rar-${rar}">${rar}</span>
+      <div>${unitVisual(key, 'p1', 52)}</div>
+      <div class="name">${def.name}</div>
+      <div class="sub">${def.fac} · ${def.mp} MP</div>
+      ${lvl ? '' : '<span class="price-chip">via Winkel</span>'}`;
+    c.addEventListener('click', () => { if (lvl) openUnitDetail(key); else { renderStore(); showScreen('store'); } });
+    g.appendChild(c);
+  }
+}
+
+let detailKey = null;
+function openUnitDetail(key) {
+  detailKey = key;
+  const def = UNIT_DEFS[key], lvl = profile.owned[key], rar = RARITY[key];
+  document.getElementById('detail-art').innerHTML = unitVisual(key, 'p1', 64);
+  document.getElementById('detail-name').textContent = def.name;
+  document.getElementById('detail-sub').textContent = `${def.fac} · ${def.mp} MP · ${rar === 'C' ? 'Common' : rar === 'U' ? 'Uncommon' : 'Rare'} · Level ${lvl}`;
+  const slots = slotsAtLevel(key, lvl);
+  renderDisk('disk-preview', slots);
+  // Slot-samenvatting per kleur
+  const sum = {};
+  for (const s of slots) {
+    const k = s.k === 'white' || s.k === 'gold' ? `${s.k}-${s.v}` : (s.k === 'purple' ? `purple-${s.effect}` : s.k);
+    sum[k] = (sum[k] || 0) + 1;
+  }
+  const NL = { red:'Miss', blue:'Verdedig' };
+  const pills = Object.entries(sum).map(([k, n]) => {
+    const [kind, val] = k.split('-');
+    const label = kind === 'white' ? `${val} dmg` : kind === 'gold' ? `★ ${val} dmg` : kind === 'purple' ? val : NL[kind];
+    return `<span class="slot-pill" style="color:${TXT[kind]};background:${COLORS[kind]}">${n}× ${label}</span>`;
+  }).join('');
+  document.getElementById('detail-slots').innerHTML = pills;
+  const upBtn = document.getElementById('btn-detail-upgrade');
+  if (lvl >= 4) { upBtn.textContent = 'Max level'; upBtn.disabled = true; document.getElementById('detail-note').textContent = 'Deze unit is volledig opgewaardeerd.'; }
+  else {
+    upBtn.textContent = `Upgrade ◈ ${UPGRADE_COST[lvl]}`; upBtn.disabled = profile.credits < UPGRADE_COST[lvl];
+    document.getElementById('detail-note').textContent = 'Upgrade: sterkste aanvalsslot wordt groter, één Miss-vak verdwijnt.';
+  }
+  document.getElementById('detail-overlay').classList.add('active');
+}
+
+function doUpgrade() {
+  const lvl = profile.owned[detailKey];
+  if (!detailKey || lvl >= 4) return;
+  const cost = UPGRADE_COST[lvl];
+  if (profile.credits < cost) { toast('Te weinig credits'); return; }
+  profile.credits -= cost; profile.owned[detailKey] = lvl + 1; saveProfile();
+  toast(`${UNIT_DEFS[detailKey].name} → Level ${lvl + 1}!`);
+  renderCollection(); openUnitDetail(detailKey); // detail ververst: disk groeit zichtbaar
+}
+
+// ===== Winkel: units kopen =====
+function renderStore() {
+  document.getElementById('store-credits').textContent = `◈ ${profile.credits}`;
+  const g = document.getElementById('store-grid'); g.innerHTML = '';
+  const entries = Object.entries(UNIT_DEFS).sort(([a], [b]) => (profile.owned[a] ? 1 : 0) - (profile.owned[b] ? 1 : 0));
+  for (const [key, def] of entries) {
+    const owned = !!profile.owned[key]; const rar = RARITY[key]; const price = PRICE[rar];
+    const c = document.createElement('div');
+    c.className = 'coll-card' + (owned ? ' locked' : '');
+    c.innerHTML = `<span class="rar-chip rar-${rar}">${rar}</span>
+      <div>${unitVisual(key, 'p1', 52)}</div>
+      <div class="name">${def.name}</div>
+      <div class="sub">${def.fac} · ${def.mp} MP</div>
+      <span class="price-chip">${owned ? 'In bezit' : `KOOP ◈ ${price}`}</span>`;
+    if (!owned) c.addEventListener('click', () => {
+      if (profile.credits < price) { toast('Te weinig credits — win duels voor meer'); return; }
+      profile.credits -= price; profile.owned[key] = 1; saveProfile();
+      toast(`${def.name} gekocht!`); renderStore();
+    });
+    g.appendChild(c);
+  }
 }
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -1066,9 +1286,19 @@ function levelUp(u) {
 
 let toastT; function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2000); }
 
-document.getElementById('btn-end-turn').addEventListener('click', endTurn); document.getElementById('btn-reset').addEventListener('click', newGame); document.getElementById('btn-mode').addEventListener('click', () => { currentMode = currentMode === 'solo' ? 'hotseat' : 'solo'; newGame(); });
+document.getElementById('btn-end-turn').addEventListener('click', endTurn);
+document.getElementById('btn-menu').addEventListener('click', () => { if (state.over || confirm('Duel verlaten en terug naar het menu?')) goHome(); });
 document.getElementById('btn-deck-random').addEventListener('click', () => { const owned = Object.keys(profile.owned); deckSel.units = randomPick(owned, Math.min(6, owned.length)); deckSel.plates = randomPick(Object.keys(PLATES), 3); renderDeckSelect(); });
 document.getElementById('btn-deck-start').addEventListener('click', onDeckConfirm);
+document.getElementById('btn-deck-back').addEventListener('click', goHome);
+// Home-tegels & subschermen
+document.getElementById('tile-solo').addEventListener('click', () => startMatchFlow('solo'));
+document.getElementById('tile-hotseat').addEventListener('click', () => startMatchFlow('hotseat'));
+document.getElementById('tile-collection').addEventListener('click', () => { renderCollection(); showScreen('collection'); });
+document.getElementById('tile-store').addEventListener('click', () => { renderStore(); showScreen('store'); });
+for (const b of document.querySelectorAll('.btn-back')) b.addEventListener('click', () => { renderHome(); showScreen(b.dataset.back); });
+document.getElementById('btn-detail-close').addEventListener('click', () => document.getElementById('detail-overlay').classList.remove('active'));
+document.getElementById('btn-detail-upgrade').addEventListener('click', doUpgrade);
 
 const AI = 'p2';
 
