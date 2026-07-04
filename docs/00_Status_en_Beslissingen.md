@@ -142,6 +142,21 @@ HUIDIGE DELIVERABLE
   - Symmetrische Duel-resolutie (headless getest: 14/14 spec-checks OK)
   - Bord-topologie headless getest: 12/12 checks OK
 
+GEDAAN IN SESSIE 16 (4 juli 2026)
+- Koens speeltest: doel wéér bijna vrij bereikbaar (wyrmling op IT2, G2 leeg,
+  AI deployde in plaats van keepen). Wortel gevonden in posScore: de keeper-bonus
+  (+400) gold alleen bij LEGE zone — één AI-unit ergens in de 4-node zone (bv. T3)
+  telde als "bemand", terwijl alleen een unit ÓP G2 het doel echt blokkeert.
+  Scores nagerekend: G2 bezetten ~35 vs deploy ~85 → AI koos deploy. FIX: bij
+  dreiging ≤2 beurten en leeg G2 krijgt G2-bezetten +600 (dreiging 3: +250);
+  headless gevalideerd op de exacte screenshot-positie (keeper 635 vs deploy 85).
+- Bord-analyse n.a.v. dezelfde speeltest: kortste route entry→vijandelijk doel is
+  ASYMMETRISCH 5 stappen (E1_BL→IB1→IL→IT1→IT2→G2) vs 7 rechts; MP3-unit haalt
+  het doel daarmee in beurt 2. Echt Duel-bord: 26 punten + 2 goals (bron:
+  pokemon.com), rush is daar óók kern-meta maar ons linker-laantje is vermoedelijk
+  1 stap korter dan Duels kortste route. Bord is DEFINITIEF — eventuele ingreep
+  (spoke schrappen/verleggen) is aan Koen. OPEN PUNT toegevoegd.
+
 GEDAAN IN SESSIE 15 (14 juni 2026)
 - LIVE: spel staat op GitHub Pages — https://koen2222.github.io/Rondel/ — met
   auto-deploy workflow (elke push naar main deployt automatisch). Repo is public.
@@ -268,7 +283,13 @@ GEDAAN IN SESSIE 5 (eerder vandaag)
 - Headless test-suite gedraaid: resolve-tabel en statuseffecten 14/14 conform doc
 
 OPEN PUNTEN — IN VOLGORDE VAN URGENTIE
+0. BESLISSING KOEN: linker-snelweg (5 stappen entry→doel via IB1/IL/IT1/IT2)
+   te snel? Opties: (a) laten en op keeper-AI leunen (Duel-stijl), (b) spoke
+   E1_BL→IB1 en spiegel E2_TR→IT5 schrappen (→7 stappen, symmetrisch), of
+   (c) goal-diagonalen G2→IT2/G1→IB4 schrappen. Bord is definitief verklaard,
+   dus dit is expliciet Koens keuze.
 1. Speeltest: is de rush-exploit nu echt dood? Voelt AI-verdediging eerlijk of frustrerend?
+   (sessie 16: keeper-gat gefixt — AI bezet nu G2 zelf bij acute dreiging)
 2. Speeltest: nieuwe disk-data van alle 18 units (sessie-5 herontwerp) — balance valideren
 3. Store-economie balancen: prijzen, upgrade-kosten, win/verlies-credits (nu eerste gok)
 4. Speeltest: 3 plates te swingy? Level-up tempo OK (KO = +1 level)?

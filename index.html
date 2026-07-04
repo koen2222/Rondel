@@ -1132,12 +1132,18 @@ function aiTurn() {
     const onBoard = Object.values(state.units).filter(u => u.owner === AI && u.node).length;
     const actions = [];
 
+    const g2Empty = !unitAt('G2');
     const posScore = (t, dNow) => {
       let s = (dNow - distTo(t, 'G1')) * 25;
       if (NODES[t].type === 'goal' && NODES[t].owner === 'p1') s = 1000;
       if (GOAL_ZONE.includes(t)) {
         if (zoneEmpty && onBoard >= 1) s += danger ? 400 : 150; // zone altijd hermannen, niet alleen bij paniek
-        if (t === 'G2') s += 60;
+        if (t === 'G2') {
+          s += 60;
+          // In de zone staan blokkeert niets — alleen een keeper OP het doel blokkeert.
+          // Bij dreiging moet G2 zelf bezetten daarom (bijna) alles overtroeven.
+          if (danger && g2Empty) s += threat.turns <= 2 ? 600 : 250;
+        }
       }
       return s;
     };
