@@ -36,17 +36,18 @@
   .bench-card.hc .name { color: #f9a8d4; }
   .hc-badge { position: absolute; top: -4px; left: -4px; background: linear-gradient(135deg, #f472b6, #be185d); color: #fff; font-weight: 900; font-size: 0.7rem; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border: 1px solid #fff; }
 
-  .board-wrap { position: relative; background: linear-gradient(180deg, #4d3d70 0%, #372b55 30%, #272044 58%, #1b1631 100%); border-radius: 16px; padding: 0; border: 1px solid rgba(125,211,252,0.18); box-shadow: inset 0 0 70px rgba(10,6,20,0.55), 0 10px 30px rgba(0,0,0,0.9); overflow: hidden; }
+  .board-wrap { position: relative; background: linear-gradient(180deg, #5b4a82 0%, #423463 32%, #302750 62%, #201a38 100%); border-radius: 16px; padding: 0; border: 1px solid rgba(147,197,253,0.25); box-shadow: inset 0 0 70px rgba(10,6,20,0.45), 0 10px 30px rgba(0,0,0,0.9); overflow: hidden; }
   /* Holografische ringen, heel subtiel — Duel-sfeer */
   .board-wrap::before { content: ''; position: absolute; inset: 0; background: repeating-radial-gradient(circle at 50% 50%, rgba(125,211,252,0.035) 0 1px, transparent 1px 64px); pointer-events: none; }
   .board-wrap::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 45%, rgba(125,211,252,0.04) 100%); pointer-events: none; mix-blend-mode: overlay; }
   
   #board { display: block; width: 100%; height: auto; filter: drop-shadow(0 15px 15px rgba(0,0,0,0.6)); }
   
-  .route-halo { stroke: rgba(125,211,252,0.14); stroke-width: 9; stroke-linecap: round; fill: none; }
-  .route-core { stroke: rgba(214,233,255,0.5); stroke-width: 2; stroke-linecap: round; fill: none; }
-  
-  .node-rim { stroke: rgba(255,255,255,0.28); stroke-width: 1.5; }
+  /* Licht Duel-veld: donkere lijnen/punten op glanzend bord */
+  .route-halo { stroke: rgba(30,58,138,0.16); stroke-width: 8; stroke-linecap: round; fill: none; }
+  .route-core { stroke: rgba(30,41,89,0.75); stroke-width: 2.5; stroke-linecap: round; fill: none; }
+
+  .node-rim { stroke: rgba(255,255,255,0.6); stroke-width: 1.5; }
   .entry-ring.p1 { stroke: var(--p1); stroke-width: 3.5; filter: drop-shadow(0 0 10px var(--p1-glow)); }
   .entry-ring.p2 { stroke: var(--p2); stroke-width: 3.5; filter: drop-shadow(0 0 10px var(--p2-glow)); }
   .goal-halo { fill: none; stroke-width: 2; animation: goalPulse 2.4s ease-in-out infinite; }
@@ -222,9 +223,7 @@
     <span><span style="opacity:0.6; font-size:0.7rem;">FASE:</span> <span id="turn-name">Speler 1</span></span>
     <span style="font-size:0.8rem; color:var(--gold);" id="turn-actions">1 ACTIE</span>
   </div>
-  <div id="bench-p2" class="bench"></div>
   <div class="board-wrap"><svg id="board" viewBox="0 0 540 850" xmlns="http://www.w3.org/2000/svg"></svg></div>
-  <div id="bench-p1" class="bench"></div>
   <div id="plate-strip" class="plate-strip"></div>
   <div class="action-bar">
     <button class="btn primary" id="btn-end-turn">End Turn</button>
@@ -287,7 +286,7 @@
 // Outer ring 20 + inner rechthoek 12; spokes: 4 hoek-diagonalen.
 // Goal-diagonalen G2-IT2/G1-IB4 GESCHRAPT in sessie 17 (rush-fix, zie doc).
 // ==========================================
-const BOARD_CX = 270, BOARD_ROW_Y = [150, 285, 440, 605, 775], BOARD_ROW_W = [0.60, 0.70, 0.80, 0.90, 1.00];
+const BOARD_CX = 270, BOARD_ROW_Y = [205, 315, 450, 590, 705], BOARD_ROW_W = [0.60, 0.70, 0.80, 0.90, 1.00];
 function depthScale(y) { return 0.78 + 0.22 * Math.min(1, Math.max(0, (y - BOARD_ROW_Y[0]) / (BOARD_ROW_Y[4] - BOARD_ROW_Y[0]))); }
 const NODES = (function() {
   const colX = c => 60 + c * 70;
@@ -356,25 +355,28 @@ const UNIT_DEFS = {
 // blijven exact gelijk, alleen de volgorde op de schijf verschilt (bv. twee
 // kleine Miss-vakjes i.p.v. één groot blok). Tokens: kleurletter + aantal.
 // ==========================================
+// Duel-regel voor de indeling: elke MOVE is één aaneengesloten vak — nooit
+// dezelfde mogelijkheid twee keer op de schijf. Alleen de (anonieme)
+// Miss-zone is in twee clusters gedeeld, zoals op echte Duel-wielen.
 const DISK_LAYOUT = {
-  squire:      'W3 R2 B1 W2 P1 R2 W1 B1 P1 R2',
-  cleric:      'W3 R2 P1 B2 W2 R2 P2 B1 R1',
-  commander:   'G2 R1 W3 P1 B1 R1 G1 W2 P2 B1 R1',
-  scout:       'W2 R2 P1 W2 R2 B1 P2 W1 R2 B1',
-  archer:      'W3 B2 R2 W2 P1 B1 R1 W1 P1 B1 R1',
-  weaver:      'G2 P1 B1 R1 W1 P2 G2 B1 R1 W1 P1 B1 R1',
-  apprentice:  'W2 R2 B2 W2 R2 B1 P1 W1 R2 B1',
-  runesmith:   'W2 P1 R1 B1 W2 P2 R2 B1 W1 P1 R1 B1',
-  warden:      'W3 B2 R1 W2 P1 B1 R1 W1 P2 B1 R1',
-  skeleton:    'W2 R2 W2 R2 P1 B1 W2 R2 P1 B1',
-  ghoul:       'W2 P2 R1 B1 W2 R2 P1 B1 W1 P1 R1 B1',
-  necromancer: 'G2 P2 B1 R1 W1 G2 P1 B1 R1 W1 P1 B1 R1',
-  boar:        'W4 R2 B1 W2 R2 P1 W1 R2 B1',
-  lupine:      'W3 R2 B1 W2 R1 P1 B1 W1 R2 P1 B1',
-  wyrmling:    'G2 P1 W2 R1 B1 W2 P2 G1 W1 R1 B1 P1',
-  imp:         'W2 R2 P1 B1 W2 R2 P1 W1 R2 P1 B1',
-  hellhound:   'W3 R1 P1 B1 W2 R2 P1 B1 W1 R1 P1 B1',
-  pitlord:     'G2 W3 R1 P1 B1 W2 G2 R1 P1 W1 R1'
+  squire:      'W6 R3 P2 R3 B2',
+  cleric:      'W5 R3 P3 R2 B3',
+  commander:   'G3 W5 R2 P3 R1 B2',
+  scout:       'W5 R3 P3 R3 B2',
+  archer:      'W6 R2 P2 R2 B4',
+  weaver:      'G4 R2 W2 P4 R1 B3',
+  apprentice:  'W5 R3 B4 R3 P1',
+  runesmith:   'W5 R2 P4 R2 B3',
+  warden:      'W6 R2 P3 R1 B4',
+  skeleton:    'W6 R3 P2 R3 B2',
+  ghoul:       'W5 R2 P4 R2 B3',
+  necromancer: 'G4 R2 W2 P4 R1 B3',
+  boar:        'W7 R3 P1 R3 B2',
+  lupine:      'W6 R3 P2 R2 B3',
+  wyrmling:    'G3 W5 R1 P4 R1 B2',
+  imp:         'W5 R3 P3 R3 B2',
+  hellhound:   'W6 R2 P3 R2 B3',
+  pitlord:     'G4 W6 R2 P2 R1 B1'
 };
 
 // Herschikt base-slots volgens het layout-patroon. Retourneert null (en de
@@ -838,13 +840,16 @@ function unitGroup(u, withShadow = true) {
 const BOARD_DEFS = `
 <defs>
   <linearGradient id="gPlate" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0%" stop-color="#3d4f78"/><stop offset="45%" stop-color="#2c3a5e"/><stop offset="100%" stop-color="#1f2946"/>
+    <stop offset="0%" stop-color="#dfe9f6"/><stop offset="40%" stop-color="#c9d8ec"/><stop offset="100%" stop-color="#aabfdd"/>
   </linearGradient>
   <linearGradient id="gPlateWall" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0%" stop-color="#131a30"/><stop offset="100%" stop-color="#0a0e1c"/>
+    <stop offset="0%" stop-color="#7288ad"/><stop offset="100%" stop-color="#46587a"/>
   </linearGradient>
+  <radialGradient id="gPlateSheen" cx="50%" cy="18%" r="80%">
+    <stop offset="0%" stop-color="rgba(255,255,255,0.55)"/><stop offset="45%" stop-color="rgba(255,255,255,0.10)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+  </radialGradient>
   <radialGradient id="gArenaGlow" cx="50%" cy="42%" r="65%">
-    <stop offset="0%" stop-color="rgba(125,211,252,0.14)"/><stop offset="60%" stop-color="rgba(125,211,252,0.04)"/><stop offset="100%" stop-color="rgba(125,211,252,0)"/>
+    <stop offset="0%" stop-color="rgba(147,197,253,0.20)"/><stop offset="60%" stop-color="rgba(147,197,253,0.06)"/><stop offset="100%" stop-color="rgba(147,197,253,0)"/>
   </radialGradient>
   <radialGradient id="gNode" cx="35%" cy="30%" r="85%">
     <stop offset="0%" stop-color="#46405c"/><stop offset="55%" stop-color="#1c1729"/><stop offset="100%" stop-color="#100c1a"/>
@@ -865,11 +870,12 @@ const BOARD_DEFS = `
 
 function renderBoard() {
   const svg = document.getElementById('board'); svg.innerHTML = BOARD_DEFS;
-  // Schuine duel-tafel: trapezoïde plaat met 3D-randwand, gloed eronder
-  el('ellipse', { cx:270, cy:480, rx:295, ry:390, fill:'url(#gArenaGlow)' }, svg);
-  el('polygon', { points:'114,108 426,108 514,812 26,812', fill:'url(#gPlate)', stroke:'rgba(125,211,252,0.35)', 'stroke-width':2 }, svg);
-  el('polygon', { points:'26,812 514,812 506,834 34,834', fill:'url(#gPlateWall)' }, svg);
-  el('polygon', { points:'114,108 426,108 425,113 115,113', fill:'rgba(255,255,255,0.18)' }, svg);
+  // Schuine duel-tafel: licht glanzend veld (Duel-stijl) met 3D-randwand
+  el('ellipse', { cx:270, cy:455, rx:300, ry:330, fill:'url(#gArenaGlow)' }, svg);
+  el('polygon', { points:'108,168 432,168 516,742 24,742', fill:'url(#gPlate)', stroke:'rgba(255,255,255,0.75)', 'stroke-width':3 }, svg);
+  el('polygon', { points:'108,168 432,168 516,742 24,742', fill:'url(#gPlateSheen)' }, svg);
+  el('polygon', { points:'24,742 516,742 508,764 32,764', fill:'url(#gPlateWall)' }, svg);
+  el('polygon', { points:'32,764 508,764 506,770 34,770', fill:'rgba(0,0,0,0.35)' }, svg);
   const gHalo = el('g', {}, svg), gRoute = el('g', {}, svg);
   for (const [a,b] of ROUTES) { const A = NODES[a], B = NODES[b]; el('line', { x1:A.x, y1:A.y, x2:B.x, y2:B.y, class:'route-halo' }, gHalo); el('line', { x1:A.x, y1:A.y, x2:B.x, y2:B.y, class:'route-core' }, gRoute); }
   const gNodes = el('g', {}, svg);
@@ -911,24 +917,42 @@ function renderBoard() {
   for (const t of state.legalTargets) { const glow = document.getElementById(`glow-${t}`); if (glow) glow.classList.add('active'); }
 }
 
+// Duel-stijl: de poppetjes staan als echte figuren klaar aan hun eigen kant
+// van de tafel (P2 achteraan, P1 vooraan) en worden vanuit daar ingezet.
+// Getekend ín de bord-SVG zodat ze meeschalen met het perspectief.
 function renderBench() {
+  const svg = document.getElementById('board');
   for (const player of ['p1','p2']) {
-    const div = document.getElementById(`bench-${player}`); div.innerHTML = ''; div.classList.toggle('dim', state.turn !== player);
-    const uids = state.bench[player];
-    if (uids.length === 0 && state.hc[player].length === 0) { const e = document.createElement('div'); e.style = 'flex:1;display:flex;align-items:center;justify-content:center;color:#555;font-style:italic;font-size:0.85rem;'; e.textContent = 'Leeg'; div.appendChild(e); continue; }
-    for (const uid of uids) {
-      const u = state.units[uid]; const card = document.createElement('div'); card.className = `bench-card ${player}` + (state.pendingDeploy===uid?' selected':'');
-      card.innerHTML = `<div class="mp-badge">${UNIT_DEFS[u.defKey].mp}</div><div>${unitVisual(u.defKey, player, 40)}</div><div class="sokkel"></div><div class="name">${UNIT_DEFS[u.defKey].name.split(' ').pop()}</div>`;
-      if(u.status.includes('wait')) { card.style.opacity = '0.3'; card.style.filter = 'grayscale(1)'; }
-      card.addEventListener('click', () => onBenchTap(uid)); div.appendChild(card);
-    }
-    // Healing Center: KO'de units wachten hier (max 2, Duel-regel) tot een derde KO ze eruit duwt
-    for (const uid of state.hc[player]) {
-      const u = state.units[uid]; const card = document.createElement('div'); card.className = `bench-card hc ${player}`;
-      card.innerHTML = `<div class="hc-badge">✚</div><div>${unitVisual(u.defKey, player, 40)}</div><div class="sokkel"></div><div class="name">${UNIT_DEFS[u.defKey].name.split(' ').pop()}</div>`;
-      card.addEventListener('click', () => toast(`${UNIT_DEFS[u.defKey].name} herstelt in het Healing Center`));
-      div.appendChild(card);
-    }
+    const gRow = el('g', { class:`bench-row bench-${player}` }, svg);
+    const isP2 = player === 'p2';
+    const y = isP2 ? 92 : 800;
+    const scale = isP2 ? 0.72 : 0.95;
+    const dim = state.turn !== player && !state.over;
+    const uids = [...state.bench[player], ...state.hc[player]];
+    const spacing = Math.min(isP2 ? 52 : 66, uids.length > 1 ? (isP2 ? 400 : 500) / uids.length : 66);
+    uids.forEach((uid, i) => {
+      const u = state.units[uid];
+      const x = 270 + (i - (uids.length - 1) / 2) * spacing;
+      const inHC = state.hc[player].includes(uid);
+      const waiting = u.status.includes('wait');
+      const g = unitGroup(u);
+      g.setAttribute('class', 'unit-fig bench-fig' + (state.pendingDeploy === uid ? ' selected' : ''));
+      g.setAttribute('transform', `translate(${x},${y}) scale(${scale})`);
+      if (inHC) {
+        g.setAttribute('opacity', '0.5'); g.setAttribute('filter', 'saturate(0.35)');
+        el('circle', { cx:12, cy:-40, r:8, fill:'#f472b6', stroke:'#fff', 'stroke-width':1.5 }, g);
+        const t = el('text', { x:12, y:-36.5, 'font-size':11, 'text-anchor':'middle', fill:'#fff', 'font-weight':'900', 'font-family':'sans-serif' }, g); t.textContent = '✚';
+        g.addEventListener('click', e => { e.stopPropagation(); toast(`${UNIT_DEFS[u.defKey].name} herstelt in het Healing Center`); });
+      } else {
+        if (waiting) { g.setAttribute('opacity', '0.35'); g.setAttribute('filter', 'grayscale(1)'); }
+        else if (dim) g.setAttribute('opacity', '0.6');
+        // MP-badge zoals op de oude bench-kaarten
+        el('circle', { cx:-15, cy:-44, r:8, fill:'#fbbf24', stroke:'#fff', 'stroke-width':1.5 }, g);
+        const t = el('text', { x:-15, y:-40.5, 'font-size':10.5, 'text-anchor':'middle', fill:'#000', 'font-weight':'900', 'font-family':'sans-serif' }, g); t.textContent = UNIT_DEFS[u.defKey].mp;
+        g.addEventListener('click', e => { e.stopPropagation(); onBenchTap(uid); });
+      }
+      gRow.appendChild(g);
+    });
   }
 }
 
