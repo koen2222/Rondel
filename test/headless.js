@@ -20,10 +20,17 @@ function extractBlock(src, startPattern, endMarker) {
   return mi < 0 ? after : after.slice(0, mi);
 }
 
-// NODES, ROUTES, ADJ — alles vóór UNIT_DEFS
+// NODES, ROUTES, ADJ — alles vóór UNIT_DEFS (incl. perspectief-constanten)
 const boardSection = html.slice(
-  html.indexOf('\nconst NODES'),
+  html.indexOf('\nconst BOARD_CX'),
   html.indexOf('\nconst W=')          // W/G/B/R helpers starten de disk-data
+);
+
+// Disk-data: W/G/B/R/P helpers + UNIT_DEFS + DISK_LAYOUT + arrangeSlots,
+// tot vóór de apply-loop (zodat we hier de ONGEARRANGEERDE blokken hebben)
+const diskSection = html.slice(
+  html.indexOf('\nconst W='),
+  html.indexOf('// DISK-ARRANGE-APPLY')
 );
 
 // resolve + applyStatus — puur-functioneel, geen state; koUnit werkt op state (injecteerbaar)
@@ -38,10 +45,11 @@ const evalCode = [
   'let state = null;',
   'function __setState(s) { state = s; }',
   boardSection,
+  diskSection,
   resolveMatch[0],
   applyMatch[0],
   koMatch[0],
-  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState };',
+  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots };',
 ].join('\n');
 
 // Schrijf tijdelijk evalueerbaar bestand (vermijdt new Function-beperkingen)
@@ -54,7 +62,7 @@ try {
   fs.unlinkSync(tmpPath);
 }
 
-const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState } = extracted;
+const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots } = extracted;
 
 // ─── Test harness ──────────────────────────────────────────────────────────────
 let pass = 0, fail = 0;
@@ -128,12 +136,12 @@ section('=== BOARD TOPOLOGIE (12 checks) ===');
 
 const nodeKeys = Object.keys(NODES);
 check('32 nodes',            nodeKeys.length, 32);
-check('38 edges (ROUTES)',   ROUTES.length,   38);
+check('36 edges (ROUTES, sessie 17: goal-diagonalen geschrapt)', ROUTES.length, 36);
 
 // ADJ: Set → count undirected edges
 let edgeSum = 0;
 for (const k of nodeKeys) edgeSum += ADJ[k].size;
-check('ADJ-som = 76 (38×2)', edgeSum, 76);
+check('ADJ-som = 72 (36×2)', edgeSum, 72);
 
 // BFS volledig verbonden
 {
@@ -172,11 +180,38 @@ check('G2 aanwezig en type=goal',  NODES['G2']?.type, 'goal');
   check('12 inner nodes (IT×5 + IB×5 + IL + IR)', inner.length, 12);
 }
 
-// Goal-connecties: G2 verbonden met T2, T3, IT2 (de 3 spokes in de spec)
+// Goal-connecties (sessie 17): G2 alleen nog via T2 en T3 — de rush-fix
 {
-  const g2adj = [...ADJ['G2']];
-  check('G2 verbonden met T2',  g2adj.includes('T2'),  true);
-  check('G2 verbonden met IT2', g2adj.includes('IT2'), true);
+  const g2adj = [...ADJ['G2']].sort();
+  check('G2 heeft precies 2 buren (T2, T3)', g2adj, ['T2','T3']);
+  // Kortste route entry → vijandelijk doel is nu 7 aan BEIDE kanten
+  const bfsD = (s, g) => { const q=[[s,0]], seen=new Set([s]);
+    while(q.length){const [n,d]=q.shift(); if(n===g) return d;
+      for(const nx of ADJ[n]) if(!seen.has(nx)){seen.add(nx);q.push([nx,d+1]);}} return -1; };
+  check('E1_BL → G2 = 7 stappen (snelweg dicht)', bfsD('E1_BL','G2'), 7);
+  check('E1_BR → G2 = 7 stappen (symmetrisch)',   bfsD('E1_BR','G2'), 7);
+  check('E2_TR → G1 = 7 stappen (180°-spiegel)',  bfsD('E2_TR','G1'), 7);
+}
+
+// ─── 3b. DISK-LAYOUTS (permutatie-garantie: kansen exact gelijk) ──────────────
+section('=== DISK-LAYOUTS (20 checks) ===');
+{
+  const keys = Object.keys(UNIT_DEFS);
+  check('Alle 18 units hebben een layout', keys.every(k => DISK_LAYOUT[k]), true);
+  let allPerm = true, all16 = true;
+  for (const k of keys) {
+    const base = UNIT_DEFS[k].slots;                       // ongearrangeerde blokken
+    const arr = arrangeSlots(base, DISK_LAYOUT[k]);
+    if (!arr || arr.length !== 16) { all16 = false; console.log('    ✗ layout kapot:', k); continue; }
+    const norm = a => JSON.stringify([...a].map(s => JSON.stringify(s)).sort());
+    if (norm(arr) !== norm(base)) { allPerm = false; console.log('    ✗ geen permutatie:', k); }
+  }
+  check('Elke layout levert exact 16 slots', all16, true);
+  check('Elke layout is een zuivere permutatie (kansen identiek)', allPerm, true);
+  // Steekproef: skeleton heeft nu gespreide Miss-vakjes (4 losse runs i.p.v. 1 blok)
+  const arr = arrangeSlots(UNIT_DEFS.skeleton.slots, DISK_LAYOUT.skeleton);
+  let runs = 0; for (let i = 0; i < arr.length; i++) if (arr[i].k === 'red' && (i === 0 || arr[i-1].k !== 'red')) runs++;
+  check('Skeleton: Miss verdeeld over meerdere vakjes', runs >= 3, true);
 }
 
 // ─── 4. HEALING CENTER (Duel-regel: KO → HC max 2, derde KO duwt oudste terug) ──

@@ -142,6 +142,30 @@ HUIDIGE DELIVERABLE
   - Symmetrische Duel-resolutie (headless getest: 14/14 spec-checks OK)
   - Bord-topologie headless getest: 12/12 checks OK
 
+GEDAAN IN SESSIE 17 (5 juli 2026)
+- RUSH-FIX DEFINITIEF (open punt 0 BESLIST na Koens tweede rush-melding):
+  goal-diagonalen G2→IT2 en G1→IB4 geschrapt (optie c). Entry→vijandelijk doel
+  is nu 7 stappen aan BEIDE kanten (was 5 links); MP3-rusher heeft 3 beurten
+  nodig i.p.v. 2, en elk doel heeft nog maar 2 toegangen (T2/T3 resp. B2/B3) —
+  veel beter te verdedigen, zoals in Duel. G2_ADJ/GOAL_ZONE aangepast.
+  Bord: 32 nodes, 36 edges, nog steeds 180°-symmetrisch (headless gecheckt).
+- BORD IN PERSPECTIEF (Koens wens: "schuin zoals in Duel, geen zwarte
+  achtergrond"): coördinaten geprojecteerd naar een trapezoïde (boven smaller,
+  rijen dichter op elkaar) — topologie/logica ongewijzigd, figuren blijven
+  rechtop en schalen mee met de diepte (ook in de hop-animatie). Bord is nu
+  een blauw-slate duel-tafel met 3D-randwand op een violet-schemering
+  achtergrond met arena-gloed. LET OP: dit vervangt de "vlak conform foto"-
+  beslissing van sessie 6 op Koens expliciete nieuwe aanwijzing.
+- DISK-LAYOUTS per unit (Koens wens: variatie, kleine losse vakjes, moet bij
+  het karakter passen): DISK_LAYOUT-tabel + arrangeSlots() — puur een
+  PERMUTATIE van de bestaande slots, kansen exact gelijk (headless bewezen
+  voor alle 18). Bv. skeleton: Miss verspreid over 4 kleine vakjes.
+- DISK-RENDER opgepoetst: gouden metalen rand met tick-markeringen per slot,
+  gloss/schaduw-diepte per wedge, glossy naaf, labels met outline (leesbaar
+  op elke kleur), fonkel-accent op Gold-slots, kleinere labels in smalle vakjes.
+- Tests: 43 → 49 checks (nieuwe topologie-getallen, 7-staps rush-afstanden,
+  disk-permutatie-garantie); browser-rooktest 16/16. SW-cache v24.
+
 GEDAAN IN SESSIE 16 (4 juli 2026)
 - APP-SHELL gebouwd (Koens opdracht: "volledige app-ervaring, alles in menu's"):
   startscherm met titel, profiel-chips (credits / collectie / W-V) en tegels
@@ -300,13 +324,10 @@ GEDAAN IN SESSIE 5 (eerder vandaag)
 - Headless test-suite gedraaid: resolve-tabel en statuseffecten 14/14 conform doc
 
 OPEN PUNTEN — IN VOLGORDE VAN URGENTIE
-0. BESLISSING KOEN: linker-snelweg (5 stappen entry→doel via IB1/IL/IT1/IT2)
-   te snel? Opties: (a) laten en op keeper-AI leunen (Duel-stijl), (b) spoke
-   E1_BL→IB1 en spiegel E2_TR→IT5 schrappen (→7 stappen, symmetrisch), of
-   (c) goal-diagonalen G2→IT2/G1→IB4 schrappen. Bord is definitief verklaard,
-   dus dit is expliciet Koens keuze.
+0. AFGEROND (sessie 17): rush-snelweg dichtgezet via optie c — goal-diagonalen
+   geschrapt, entry→doel 7 stappen symmetrisch, doelen nog maar 2 toegangen.
 1. Speeltest: is de rush-exploit nu echt dood? Voelt AI-verdediging eerlijk of frustrerend?
-   (sessie 16: keeper-gat gefixt — AI bezet nu G2 zelf bij acute dreiging)
+   (sessie 16: keeper-gat gefixt; sessie 17: bord-fix — samen zou dit het moeten zijn)
 2. Speeltest: nieuwe disk-data van alle 18 units (sessie-5 herontwerp) — balance valideren
 3. Store-economie balancen: prijzen, upgrade-kosten, win/verlies-credits (nu eerste gok)
 4. Speeltest: 3 plates te swingy? Level-up tempo OK (KO = +1 level)?

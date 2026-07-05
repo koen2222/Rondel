@@ -36,7 +36,7 @@
   .bench-card.hc .name { color: #f9a8d4; }
   .hc-badge { position: absolute; top: -4px; left: -4px; background: linear-gradient(135deg, #f472b6, #be185d); color: #fff; font-weight: 900; font-size: 0.7rem; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border: 1px solid #fff; }
 
-  .board-wrap { position: relative; background: radial-gradient(ellipse at 50% 38%, #1b1530 0%, #0d0a18 55%, #050409 100%); border-radius: 16px; padding: 0; border: 1px solid rgba(125,211,252,0.12); box-shadow: inset 0 0 70px rgba(0,0,0,0.85), 0 10px 30px rgba(0,0,0,0.9); overflow: hidden; }
+  .board-wrap { position: relative; background: linear-gradient(180deg, #4d3d70 0%, #372b55 30%, #272044 58%, #1b1631 100%); border-radius: 16px; padding: 0; border: 1px solid rgba(125,211,252,0.18); box-shadow: inset 0 0 70px rgba(10,6,20,0.55), 0 10px 30px rgba(0,0,0,0.9); overflow: hidden; }
   /* Holografische ringen, heel subtiel — Duel-sfeer */
   .board-wrap::before { content: ''; position: absolute; inset: 0; background: repeating-radial-gradient(circle at 50% 50%, rgba(125,211,252,0.035) 0 1px, transparent 1px 64px); pointer-events: none; }
   .board-wrap::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 45%, rgba(125,211,252,0.04) 100%); pointer-events: none; mix-blend-mode: overlay; }
@@ -280,15 +280,19 @@
 
 <script>
 // ==========================================
-// BORD — definitieve 32-node layout (vlak, conform foto sessie 6)
-// Outer ring 20 + inner rechthoek 12; spokes: 4 hoek-diagonalen
-// + 1 asymmetrische goal-diagonaal per goal (180° rotatie-symmetrisch)
+// BORD — 32-node layout (sessie 6), sinds sessie 17 in PERSPECTIEF gerenderd:
+// de logische kolom/rij-topologie is ongewijzigd, maar de coördinaten vormen
+// een trapezoïde (bovenkant smaller + rijen dichter op elkaar) zodat het bord
+// schuin ligt zoals een echte duel-tafel. Figuren blijven rechtop staan.
+// Outer ring 20 + inner rechthoek 12; spokes: 4 hoek-diagonalen.
+// Goal-diagonalen G2-IT2/G1-IB4 GESCHRAPT in sessie 17 (rush-fix, zie doc).
 // ==========================================
+const BOARD_CX = 270, BOARD_ROW_Y = [150, 285, 440, 605, 775], BOARD_ROW_W = [0.60, 0.70, 0.80, 0.90, 1.00];
+function depthScale(y) { return 0.78 + 0.22 * Math.min(1, Math.max(0, (y - BOARD_ROW_Y[0]) / (BOARD_ROW_Y[4] - BOARD_ROW_Y[0]))); }
 const NODES = (function() {
   const colX = c => 60 + c * 70;
-  const rowY = r => 110 + r * 170;
   const N = {};
-  const add = (k, c, r, type, owner) => { N[k] = { x: colX(c), y: rowY(r), type: type || 'regular', owner }; };
+  const add = (k, c, r, type, owner) => { N[k] = { x: BOARD_CX + (colX(c) - BOARD_CX) * BOARD_ROW_W[r], y: BOARD_ROW_Y[r], type: type || 'regular', owner }; };
 
   // Outer top (P2-kant)
   add('E2_TL',0,0,'entry','p2'); add('T1',1,0); add('T2',2,0); add('G2',3,0,'goal','p2'); add('T3',4,0); add('T4',5,0); add('E2_TR',6,0,'entry','p2');
@@ -314,11 +318,11 @@ const ROUTES = [
   ['IT1','IT2'], ['IT2','IT3'], ['IT3','IT4'], ['IT4','IT5'],
   ['IT1','IL'], ['IL','IB1'], ['IT5','IR'], ['IR','IB5'],
   ['IB1','IB2'], ['IB2','IB3'], ['IB3','IB4'], ['IB4','IB5'],
-  // Spokes: 4 hoek-diagonalen + asymmetrische goal-diagonalen
-  // (G2↔IT3, G1↔IB1, L2↔IL, R2↔IR zijn geschrapt — sessie-3 markeringen)
-  ['E2_TL','IT1'], ['E2_TR','IT5'], ['E1_BL','IB1'], ['E1_BR','IB5'],
-  ['G2','IT2'],
-  ['G1','IB4']
+  // Spokes: 4 hoek-diagonalen
+  // (G2↔IT3, G1↔IB1, L2↔IL, R2↔IR geschrapt — sessie-3 markeringen)
+  // (G2↔IT2, G1↔IB4 geschrapt — sessie 17: rush-fix, entry→doel nu 7 stappen
+  //  aan beide kanten en het doel heeft nog maar 2 toegangen)
+  ['E2_TL','IT1'], ['E2_TR','IT5'], ['E1_BL','IB1'], ['E1_BR','IB5']
 ];
 
 const ADJ = {}; for (const k of Object.keys(NODES)) ADJ[k] = new Set();
@@ -345,6 +349,56 @@ const UNIT_DEFS = {
   hellhound:   { name:'Hellhound',         fac:'Inferno', mp:3, slots:[...W(6,40), ...P(3,'burn',1), ...B(3), ...R(4)] },
   pitlord:     { name:'Pit Lord',          fac:'Inferno', mp:1, slots:[...W(6,90), ...G(4,70), ...P(2,'burn',2), ...B(1), ...R(3)] }
 };
+
+// ==========================================
+// DISK-LAYOUT (sessie 17): per unit een eigen wedge-indeling die bij het
+// karakter past. Puur een PERMUTATIE van de slots hierboven — de kansen
+// blijven exact gelijk, alleen de volgorde op de schijf verschilt (bv. twee
+// kleine Miss-vakjes i.p.v. één groot blok). Tokens: kleurletter + aantal.
+// ==========================================
+const DISK_LAYOUT = {
+  squire:      'W3 R2 B1 W2 P1 R2 W1 B1 P1 R2',
+  cleric:      'W3 R2 P1 B2 W2 R2 P2 B1 R1',
+  commander:   'G2 R1 W3 P1 B1 R1 G1 W2 P2 B1 R1',
+  scout:       'W2 R2 P1 W2 R2 B1 P2 W1 R2 B1',
+  archer:      'W3 B2 R2 W2 P1 B1 R1 W1 P1 B1 R1',
+  weaver:      'G2 P1 B1 R1 W1 P2 G2 B1 R1 W1 P1 B1 R1',
+  apprentice:  'W2 R2 B2 W2 R2 B1 P1 W1 R2 B1',
+  runesmith:   'W2 P1 R1 B1 W2 P2 R2 B1 W1 P1 R1 B1',
+  warden:      'W3 B2 R1 W2 P1 B1 R1 W1 P2 B1 R1',
+  skeleton:    'W2 R2 W2 R2 P1 B1 W2 R2 P1 B1',
+  ghoul:       'W2 P2 R1 B1 W2 R2 P1 B1 W1 P1 R1 B1',
+  necromancer: 'G2 P2 B1 R1 W1 G2 P1 B1 R1 W1 P1 B1 R1',
+  boar:        'W4 R2 B1 W2 R2 P1 W1 R2 B1',
+  lupine:      'W3 R2 B1 W2 R1 P1 B1 W1 R2 P1 B1',
+  wyrmling:    'G2 P1 W2 R1 B1 W2 P2 G1 W1 R1 B1 P1',
+  imp:         'W2 R2 P1 B1 W2 R2 P1 W1 R2 P1 B1',
+  hellhound:   'W3 R1 P1 B1 W2 R2 P1 B1 W1 R1 P1 B1',
+  pitlord:     'G2 W3 R1 P1 B1 W2 G2 R1 P1 W1 R1'
+};
+
+// Herschikt base-slots volgens het layout-patroon. Retourneert null (en de
+// blokvolgorde blijft dan staan) als het patroon niet exact matcht — zo kan
+// een typefout nooit de kansen veranderen.
+function arrangeSlots(base, patternStr) {
+  const queues = { W:[], G:[], B:[], R:[], P:[] };
+  const KEY = { white:'W', gold:'G', blue:'B', red:'R', purple:'P' };
+  for (const s of base) queues[KEY[s.k]].push(s);
+  const out = [];
+  for (const tok of patternStr.split(/\s+/)) {
+    const kind = tok[0], n = parseInt(tok.slice(1), 10);
+    if (!queues[kind] || queues[kind].length < n) return null;
+    for (let i = 0; i < n; i++) out.push(queues[kind].shift());
+  }
+  if (out.length !== base.length || Object.values(queues).some(q => q.length)) return null;
+  return out;
+}
+
+// DISK-ARRANGE-APPLY (marker voor headless tests — niet verwijderen)
+for (const [k, def] of Object.entries(UNIT_DEFS)) {
+  const a = DISK_LAYOUT[k] && arrangeSlots(def.slots, DISK_LAYOUT[k]);
+  if (a) def.slots = a;
+}
 
 // Echte character-art (base64). Elke nieuwe PNG van Koen = één regel erbij.
 const UNIT_ART = {
@@ -783,6 +837,15 @@ function unitGroup(u, withShadow = true) {
 
 const BOARD_DEFS = `
 <defs>
+  <linearGradient id="gPlate" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#3d4f78"/><stop offset="45%" stop-color="#2c3a5e"/><stop offset="100%" stop-color="#1f2946"/>
+  </linearGradient>
+  <linearGradient id="gPlateWall" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#131a30"/><stop offset="100%" stop-color="#0a0e1c"/>
+  </linearGradient>
+  <radialGradient id="gArenaGlow" cx="50%" cy="42%" r="65%">
+    <stop offset="0%" stop-color="rgba(125,211,252,0.14)"/><stop offset="60%" stop-color="rgba(125,211,252,0.04)"/><stop offset="100%" stop-color="rgba(125,211,252,0)"/>
+  </radialGradient>
   <radialGradient id="gNode" cx="35%" cy="30%" r="85%">
     <stop offset="0%" stop-color="#46405c"/><stop offset="55%" stop-color="#1c1729"/><stop offset="100%" stop-color="#100c1a"/>
   </radialGradient>
@@ -802,29 +865,36 @@ const BOARD_DEFS = `
 
 function renderBoard() {
   const svg = document.getElementById('board'); svg.innerHTML = BOARD_DEFS;
+  // Schuine duel-tafel: trapezoïde plaat met 3D-randwand, gloed eronder
+  el('ellipse', { cx:270, cy:480, rx:295, ry:390, fill:'url(#gArenaGlow)' }, svg);
+  el('polygon', { points:'114,108 426,108 514,812 26,812', fill:'url(#gPlate)', stroke:'rgba(125,211,252,0.35)', 'stroke-width':2 }, svg);
+  el('polygon', { points:'26,812 514,812 506,834 34,834', fill:'url(#gPlateWall)' }, svg);
+  el('polygon', { points:'114,108 426,108 425,113 115,113', fill:'rgba(255,255,255,0.18)' }, svg);
   const gHalo = el('g', {}, svg), gRoute = el('g', {}, svg);
   for (const [a,b] of ROUTES) { const A = NODES[a], B = NODES[b]; el('line', { x1:A.x, y1:A.y, x2:B.x, y2:B.y, class:'route-halo' }, gHalo); el('line', { x1:A.x, y1:A.y, x2:B.x, y2:B.y, class:'route-core' }, gRoute); }
   const gNodes = el('g', {}, svg);
   for (const [key, n] of Object.entries(NODES)) {
+    const ds = 0.85 + 0.15 * (depthScale(n.y) - 0.78) / 0.22;   // nodes achterin iets kleiner
     const g = el('g', { 'data-node':key, style:'cursor:pointer;' }, gNodes);
-    if (n.type === 'entry') { 
-      el('circle', { cx:n.x, cy:n.y, r:24, class:'node-glow', id:`glow-${key}` }, g); 
-      el('circle', { cx:n.x, cy:n.y, r:18, fill:'url(#gNode)', class: 'entry-ring ' + n.owner }, g); 
-      el('circle', { cx:n.x, cy:n.y, r:6, fill: n.owner==='p1' ? '#3b82f6' : '#ef4444', opacity:0.9 }, g); 
-      el('ellipse', { cx:n.x-4, cy:n.y-6, rx:6, ry:3.5, fill:'rgba(255,255,255,0.16)' }, g);
+    if (n.type === 'entry') {
+      el('circle', { cx:n.x, cy:n.y, r:24*ds, class:'node-glow', id:`glow-${key}` }, g);
+      el('circle', { cx:n.x, cy:n.y, r:18*ds, fill:'url(#gNode)', class: 'entry-ring ' + n.owner }, g);
+      el('circle', { cx:n.x, cy:n.y, r:6*ds, fill: n.owner==='p1' ? '#3b82f6' : '#ef4444', opacity:0.9 }, g);
+      el('ellipse', { cx:n.x-4*ds, cy:n.y-6*ds, rx:6*ds, ry:3.5*ds, fill:'rgba(255,255,255,0.16)' }, g);
     }
-    else if (n.type === 'goal') { 
-      el('circle', { cx:n.x, cy:n.y, r:26, class:'goal-halo ' + n.owner }, g);
-      el('circle', { cx:n.x, cy:n.y, r:24, class:'node-glow', id:`glow-${key}` }, g); 
-      el('circle', { cx:n.x, cy:n.y, r:18, fill: n.owner==='p1' ? 'url(#gGoalBlue)' : 'url(#gGoalGold)', stroke:'#fff', 'stroke-width':2 }, g); 
-      const tri = n.owner==='p2' ? `${n.x},${n.y+7} ${n.x-8},${n.y-5} ${n.x+8},${n.y-5}` : `${n.x},${n.y-7} ${n.x-8},${n.y+5} ${n.x+8},${n.y+5}`; 
-      el('polygon', { points:tri, fill:'rgba(0,0,0,0.85)' }, g); 
-      el('ellipse', { cx:n.x-5, cy:n.y-8, rx:8, ry:4, fill:'rgba(255,255,255,0.3)' }, g);
+    else if (n.type === 'goal') {
+      el('circle', { cx:n.x, cy:n.y, r:26*ds, class:'goal-halo ' + n.owner }, g);
+      el('circle', { cx:n.x, cy:n.y, r:24*ds, class:'node-glow', id:`glow-${key}` }, g);
+      el('circle', { cx:n.x, cy:n.y, r:18*ds, fill: n.owner==='p1' ? 'url(#gGoalBlue)' : 'url(#gGoalGold)', stroke:'#fff', 'stroke-width':2 }, g);
+      const t8 = 8*ds, t5 = 5*ds, t7 = 7*ds;
+      const tri = n.owner==='p2' ? `${n.x},${n.y+t7} ${n.x-t8},${n.y-t5} ${n.x+t8},${n.y-t5}` : `${n.x},${n.y-t7} ${n.x-t8},${n.y+t5} ${n.x+t8},${n.y+t5}`;
+      el('polygon', { points:tri, fill:'rgba(0,0,0,0.85)' }, g);
+      el('ellipse', { cx:n.x-5*ds, cy:n.y-8*ds, rx:8*ds, ry:4*ds, fill:'rgba(255,255,255,0.3)' }, g);
     }
-    else { 
-      el('circle', { cx:n.x, cy:n.y, r:16, class:'node-glow', id:`glow-${key}` }, g); 
-      el('circle', { cx:n.x, cy:n.y, r:11.5, fill:'url(#gNode)', class:'node-rim' }, g); 
-      el('ellipse', { cx:n.x-3, cy:n.y-4, rx:4.5, ry:2.8, fill:'rgba(255,255,255,0.18)' }, g);
+    else {
+      el('circle', { cx:n.x, cy:n.y, r:16*ds, class:'node-glow', id:`glow-${key}` }, g);
+      el('circle', { cx:n.x, cy:n.y, r:11.5*ds, fill:'url(#gNode)', class:'node-rim' }, g);
+      el('ellipse', { cx:n.x-3*ds, cy:n.y-4*ds, rx:4.5*ds, ry:2.8*ds, fill:'rgba(255,255,255,0.18)' }, g);
     }
     g.addEventListener('click', () => onNodeTap(key));
   }
@@ -833,7 +903,7 @@ function renderBoard() {
     if (!u.node || state.animating === u.uid) continue; const n = NODES[u.node];
     const g = unitGroup(u);
     g.setAttribute('class', 'unit-fig' + (state.selected===u.uid?' selected':''));
-    g.setAttribute('transform', `translate(${n.x},${n.y})`);
+    g.setAttribute('transform', `translate(${n.x},${n.y}) scale(${depthScale(n.y).toFixed(3)})`);
     g.setAttribute('data-uid', u.uid);
     g.addEventListener('click', e => { e.stopPropagation(); onUnitTap(u.uid); });
     gUnits.appendChild(g);
@@ -1005,11 +1075,12 @@ function moveUnit(u, end) {
         last = now;
         const gx = A.x + (B.x - A.x) * t, gy = A.y + (B.y - A.y) * t;   // grondpositie
         const lift = Math.sin(Math.PI * t) * 24;                          // boogje
+        const ds = depthScale(gy);                                        // dieper op het bord = kleiner
         let sy = 1, sx = 1;
         if (t > 0.88) { const k = (t - 0.88) / 0.12; sy = 1 - 0.14 * k; sx = 1 + 0.09 * k; } // landing-squash
-        ghost.setAttribute('transform', `translate(${gx},${gy - lift}) scale(${sx},${sy})`);
-        const sh = 1 - (lift / 24) * 0.45;                                 // schaduw krimpt op het hoogste punt
-        shadow.setAttribute('cx', gx); shadow.setAttribute('cy', gy + 11);
+        ghost.setAttribute('transform', `translate(${gx},${gy - lift}) scale(${(sx*ds).toFixed(3)},${(sy*ds).toFixed(3)})`);
+        const sh = (1 - (lift / 24) * 0.45) * ds;                          // schaduw krimpt op het hoogste punt
+        shadow.setAttribute('cx', gx); shadow.setAttribute('cy', gy + 11 * ds);
         shadow.setAttribute('rx', 21 * sh); shadow.setAttribute('ry', 7.5 * sh);
         shadow.setAttribute('fill', `rgba(0,0,0,${0.45 * (0.55 + 0.45 * sh)})`);
         if (t < 1) requestAnimationFrame(frame);
@@ -1140,21 +1211,54 @@ const TXT = { white:'#000', purple:'#fff', blue:'#fff', gold:'#000', red:'#fff' 
 
 function renderDisk(svgId, slots) {
   const svg = document.getElementById(svgId); svg.innerHTML = ''; svg.style.transition = 'none'; svg.style.transform = 'rotate(0deg)'; svg.getBoundingClientRect();
-  const cx=120, cy=120, R=105, IR=28; el('circle', { cx, cy, r: R+10, fill:'#1f1814', stroke:'#fbbf24', 'stroke-width':4, filter:'drop-shadow(0 0 10px rgba(0,0,0,0.8))' }, svg);
+  const cx=120, cy=120, R=100, IR=26;
+  const uq = svgId.replace(/[^a-zA-Z0-9]/g, '');
+  svg.innerHTML = `<defs>
+    <radialGradient id="dHub${uq}" cx="38%" cy="30%" r="85%"><stop offset="0%" stop-color="#4a4666"/><stop offset="55%" stop-color="#1a1826"/><stop offset="100%" stop-color="#0a0910"/></radialGradient>
+    <linearGradient id="dRim${uq}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#fde68a"/><stop offset="40%" stop-color="#b45309"/><stop offset="65%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#713f12"/></linearGradient>
+  </defs>`;
+  // Metalen buitenrand met tick-markeringen per slot
+  el('circle', { cx, cy, r: R+17, fill:'#0b0912' }, svg);
+  el('circle', { cx, cy, r: R+14, fill:'none', stroke:`url(#dRim${uq})`, 'stroke-width':7 }, svg);
+  el('circle', { cx, cy, r: R+9.5, fill:'none', stroke:'rgba(255,255,255,0.28)', 'stroke-width':1 }, svg);
+  el('circle', { cx, cy, r: R+4, fill:'#12101e' }, svg);
+  for (let k = 0; k < SLOT_COUNT; k++) {
+    const a = (k*SLOT_DEG - 90)*Math.PI/180;
+    el('line', { x1:cx+(R+4)*Math.cos(a), y1:cy+(R+4)*Math.sin(a), x2:cx+(R+9)*Math.cos(a), y2:cy+(R+9)*Math.sin(a), stroke:'rgba(255,255,255,0.35)', 'stroke-width':1.4 }, svg);
+  }
+  // Wedge-helper voor ringsegmenten (buitenradius ro, binnenradius ri)
+  const seg = (ro, ri, sA, eA, large) => {
+    const x1=cx+ro*Math.cos(sA), y1=cy+ro*Math.sin(sA), x2=cx+ro*Math.cos(eA), y2=cy+ro*Math.sin(eA);
+    const ix1=cx+ri*Math.cos(sA), iy1=cy+ri*Math.sin(sA), ix2=cx+ri*Math.cos(eA), iy2=cy+ri*Math.sin(eA);
+    return `M ${ix1} ${iy1} L ${x1} ${y1} A ${ro} ${ro} 0 ${large} 1 ${x2} ${y2} L ${ix2} ${iy2} A ${ri} ${ri} 0 ${large} 0 ${ix1} ${iy1} Z`;
+  };
   const merged = []; let i = 0;
   while (i < slots.length) { let j = i; while (j < slots.length && slots[i].k===slots[j].k && slots[i].v===slots[j].v && slots[i].stars===slots[j].stars) j++; merged.push({ slot: slots[i], start:i, end:j }); i = j; }
   for (const m of merged) {
     const sA = (m.start*SLOT_DEG - 90)*Math.PI/180, eA = (m.end*SLOT_DEG - 90)*Math.PI/180, mA = (sA+eA)/2;
-    const x1 = cx+R*Math.cos(sA), y1=cy+R*Math.sin(sA), x2 = cx+R*Math.cos(eA), y2=cy+R*Math.sin(eA);
-    const ix1 = cx+IR*Math.cos(sA), iy1=cy+IR*Math.sin(sA), ix2 = cx+IR*Math.cos(eA), iy2=cy+IR*Math.sin(eA);
     const large = (m.end-m.start)*SLOT_DEG > 180 ? 1 : 0;
-    const d = `M ${ix1} ${iy1} L ${x1} ${y1} A ${R} ${R} 0 ${large} 1 ${x2} ${y2} L ${ix2} ${iy2} A ${IR} ${IR} 0 ${large} 0 ${ix1} ${iy1} Z`;
-    el('path', { d, fill: COLORS[m.slot.k], stroke:'#000', 'stroke-width':2 }, svg);
-    const lr = (R+IR)/2 + 4, lx = cx+lr*Math.cos(mA), ly = cy+lr*Math.sin(mA);
-    let label = ''; if (m.slot.k==='white'||m.slot.k==='gold') label = String(m.slot.v); else if (m.slot.k==='purple') label = '★'.repeat(m.slot.stars||1); else if (m.slot.k==='blue') label = '◆'; else if (m.slot.k==='red') label = '×';
-    const t = el('text', { x:lx, y:ly, fill:TXT[m.slot.k], 'font-family':"'Cinzel', serif", 'font-weight':'900', 'font-size': (m.slot.k==='white'||m.slot.k==='gold')?24:20, 'text-anchor':'middle', 'dominant-baseline':'middle' }, svg); t.textContent = label;
+    // Basiskleur + subtiele diepte: lichte gloss aan de buitenkant, schaduw bij de naaf
+    el('path', { d: seg(R, IR, sA, eA, large), fill: COLORS[m.slot.k], stroke:'rgba(0,0,0,0.55)', 'stroke-width':1.6 }, svg);
+    el('path', { d: seg(R-1.5, R-13, sA, eA, large), fill:'rgba(255,255,255,0.22)', stroke:'none' }, svg);
+    el('path', { d: seg(IR+11, IR, sA, eA, large), fill:'rgba(0,0,0,0.22)', stroke:'none' }, svg);
+    const wedgeSlots = m.end - m.start;
+    const lr = (R+IR)/2 + (wedgeSlots === 1 ? 10 : 5);   // smalle vakjes: label iets naar buiten
+    const lx = cx+lr*Math.cos(mA), ly = cy+lr*Math.sin(mA);
+    let label = ''; if (m.slot.k==='white'||m.slot.k==='gold') label = String(m.slot.v); else if (m.slot.k==='purple') label = (m.slot.stars||1) <= 3 ? '★'.repeat(m.slot.stars||1) : `★${m.slot.stars}`; else if (m.slot.k==='blue') label = '◆'; else if (m.slot.k==='red') label = '×';
+    const big = m.slot.k==='white'||m.slot.k==='gold';
+    const fs = big ? (wedgeSlots === 1 ? 17 : 24) : (wedgeSlots === 1 ? 13 : 19);
+    const t = el('text', { x:lx, y:ly, fill:TXT[m.slot.k], 'font-family':"'Cinzel', serif", 'font-weight':'900', 'font-size':fs, 'text-anchor':'middle', 'dominant-baseline':'middle', 'paint-order':'stroke', stroke: TXT[m.slot.k]==='#000' ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.75)', 'stroke-width':2.5 }, svg);
+    t.textContent = label;
+    // Gold-slots krijgen een fonkel-accent zodat "doorbraak"-aanvallen opvallen
+    if (m.slot.k === 'gold') {
+      const gr = R - 9, gx = cx+gr*Math.cos(mA), gy = cy+gr*Math.sin(mA);
+      el('circle', { cx:gx, cy:gy, r:2.2, fill:'#fff', opacity:0.9 }, svg);
+    }
   }
-  el('circle', { cx, cy, r: IR, fill:'#0a0806', stroke:'#fbbf24', 'stroke-width':3 }, svg);
+  // Glossy naaf
+  el('circle', { cx, cy, r: IR, fill:`url(#dHub${uq})`, stroke:'#fbbf24', 'stroke-width':2.5 }, svg);
+  el('ellipse', { cx:cx-6, cy:cy-8, rx:10, ry:6, fill:'rgba(255,255,255,0.20)' }, svg);
+  el('circle', { cx, cy, r:4, fill:'#fbbf24', opacity:0.85 }, svg);
 }
 
 function spin(svgId, ms) {
@@ -1346,8 +1450,8 @@ function rushThreat() {
   return best;
 }
 
-const G2_ADJ = ['T2','T3','IT2'];
-const GOAL_ZONE = ['G2','T2','T3','IT2'];
+const G2_ADJ = ['T2','T3'];              // sessie 17: IT2 grenst niet meer aan G2
+const GOAL_ZONE = ['G2','T2','T3'];
 
 function aiTurn() {
   if (state.over || state.turn !== AI || state.mode !== 'solo' || state.locked) return; state.aiThinking = true; renderAll();
