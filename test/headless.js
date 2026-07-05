@@ -208,10 +208,31 @@ section('=== DISK-LAYOUTS (20 checks) ===');
   }
   check('Elke layout levert exact 16 slots', all16, true);
   check('Elke layout is een zuivere permutatie (kansen identiek)', allPerm, true);
-  // Steekproef: skeleton heeft nu gespreide Miss-vakjes (4 losse runs i.p.v. 1 blok)
+  // Duel-regel: elke move één aaneengesloten vak — nooit twee identieke
+  // wedges naast elkaar (ook niet over de wrap-grens van de cirkel heen)
+  let noDup = true;
+  for (const k of keys) {
+    const arr = arrangeSlots(UNIT_DEFS[k].slots, DISK_LAYOUT[k]);
+    if (!arr) continue;
+    // merge runs zoals renderDisk dat doet, mét wrap-check
+    const runs = [];
+    for (let i = 0; i < arr.length; i++) {
+      const prev = runs[runs.length - 1];
+      const same = s => s && s.k === arr[i].k && s.v === arr[i].v && s.effect === arr[i].effect && s.stars === arr[i].stars;
+      if (prev && same(prev.slot)) prev.n++; else runs.push({ slot: arr[i], n: 1 });
+    }
+    for (let i = 0; i < runs.length; i++) {
+      const a = runs[i].slot, b = runs[(i + 1) % runs.length].slot;
+      if (runs.length > 1 && a.k === b.k && a.v === b.v && a.effect === b.effect && a.stars === b.stars) {
+        noDup = false; console.log('    ✗ dubbele wedge naast elkaar:', k);
+      }
+    }
+  }
+  check('Nooit twee identieke wedges naast elkaar (elke move = één vak)', noDup, true);
+  // Steekproef: skeleton heeft precies 2 gescheiden Miss-zones
   const arr = arrangeSlots(UNIT_DEFS.skeleton.slots, DISK_LAYOUT.skeleton);
-  let runs = 0; for (let i = 0; i < arr.length; i++) if (arr[i].k === 'red' && (i === 0 || arr[i-1].k !== 'red')) runs++;
-  check('Skeleton: Miss verdeeld over meerdere vakjes', runs >= 3, true);
+  let missRuns = 0; for (let i = 0; i < arr.length; i++) if (arr[i].k === 'red' && (i === 0 || arr[i-1].k !== 'red')) missRuns++;
+  check('Skeleton: Miss in precies 2 zones', missRuns, 2);
 }
 
 // ─── 4. HEALING CENTER (Duel-regel: KO → HC max 2, derde KO duwt oudste terug) ──

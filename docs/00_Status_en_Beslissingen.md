@@ -142,6 +142,25 @@ HUIDIGE DELIVERABLE
   - Symmetrische Duel-resolutie (headless getest: 14/14 spec-checks OK)
   - Bord-topologie headless getest: 12/12 checks OK
 
+GEDAAN IN SESSIE 18 (5 juli 2026, tweede ronde)
+- DISK-INDELING gecorrigeerd (Koen: "rommeltje, soms twee keer dezelfde
+  mogelijkheid achter elkaar"): nieuwe regel = elke MOVE is één aaneengesloten
+  vak, nooit twee identieke wedges naast elkaar; alleen de anonieme Miss-zone
+  mag in 2 clusters. DISK_LAYOUT herschreven, headless-check toegevoegd die
+  wrap-around dubbele wedges verbiedt (alle 18 units). Kansen nog steeds
+  identiek (permutatie-garantie blijft).
+- BORD naar Duel-look: licht glanzend veld (was donker/lelijk) met donkere
+  routes en punten, witte glans-highlight, subtielere 3D-rand. Rijen compacter
+  zodat er ruimte is voor de figuren-rijen boven/onder.
+- FIGUREN KLAAR AAN DE ZIJKANT (Koen: "net als Duel, poppetjes staan klaar aan
+  elke zijde en je zet ze van daar in"): oude HTML-bench-strips vervangen door
+  figuren die ín de bord-SVG staan — P2-team achteraan (kleiner), P1-team
+  vooraan, elk op hun sokkel met MP-badge, meeschalend met het perspectief.
+  Healing-Center-units staan er half-transparant met ✚ tussen. Inzetten werkt
+  ongewijzigd (onBenchTap). #bench-p1/#bench-p2 divs verwijderd.
+- Tests: 50/50 headless, rooktest bijgewerkt (figuren i.p.v. bench-cards) 17/17.
+  SW-cache v25.
+
 GEDAAN IN SESSIE 17 (5 juli 2026)
 - RUSH-FIX DEFINITIEF (open punt 0 BESLIST na Koens tweede rush-melding):
   goal-diagonalen G2→IT2 en G1→IB4 geschrapt (optie c). Entry→vijandelijk doel
