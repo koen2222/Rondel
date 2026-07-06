@@ -142,6 +142,20 @@ HUIDIGE DELIVERABLE
   - Symmetrische Duel-resolutie (headless getest: 14/14 spec-checks OK)
   - Bord-topologie headless getest: 12/12 checks OK
 
+GEDAAN IN SESSIE 19 (6 juli 2026)
+- BEURT-ECONOMIE geverifieerd (Koen vroeg: kun je in Duel inzetten ÉN nog
+  aanvallen?): NEE — Duel is strikt 1 actie per beurt, en inzetten vanaf de
+  bank ís die ene actie (kost 1 MP via entry, mag met rest-MP doorbewegen).
+  Bevestigd via pokemon.com + Serebii-mechanics. Onze code was al correct;
+  BEWUST NIET aangepast (dat zou van Duel afwijken). Meta-principe toegepast.
+- DISK-ICONEN (Duel-stijl, Koens wens "verder uitbreiden"): status-vakken
+  tonen nu hun effect-glyph (druppel=poison, vlam=burn, bliksem=paralysis,
+  spiraal=confusion, Z=sleep) mét gele stervakjes; blauw = schild-icoon;
+  rood = kruis; wit/goud houden het schade-getal, goud krijgt een fonkel als
+  doorbraak-markering. Puur cosmetisch, geen kans-/waarde-wijziging.
+  Legenda-chips in het detailscherm blijven tekst (leesbaarheid).
+- SW-cache v26. Tests 50/50 headless, rooktest 17/17.
+
 GEDAAN IN SESSIE 18 (5 juli 2026, tweede ronde)
 - DISK-INDELING gecorrigeerd (Koen: "rommeltje, soms twee keer dezelfde
   mogelijkheid achter elkaar"): nieuwe regel = elke MOVE is één aaneengesloten
