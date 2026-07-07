@@ -165,6 +165,8 @@
   .detail-disk-wrap svg { width: 230px; height: 230px; }
   .slot-summary { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 10px 0; }
   .slot-pill { font-size: 0.68rem; font-family: 'Cinzel', serif; border-radius: 10px; padding: 3px 10px; border: 1px solid rgba(255,255,255,0.2); }
+  .ability-line { width: 100%; font-size: 0.72rem; color: #cdbfa6; margin-top: 8px; line-height: 1.35; }
+  .ability-tag { display: inline-block; font-family: 'Cinzel', serif; font-weight: 700; color: #a78bfa; }
   .detail-actions { display: flex; gap: 10px; margin-top: 14px; }
   .detail-actions .btn { flex: 1; }
   .upg-note { text-align: center; font-size: 0.72rem; color: #a89f91; font-style: italic; margin-top: 8px; }
@@ -402,6 +404,39 @@ for (const [k, def] of Object.entries(UNIT_DEFS)) {
   if (a) def.slots = a;
 }
 
+// ==========================================
+// ABILITIES (sessie 20) — 1-op-1 gemodelleerd naar Pokémon Duel-abilities
+// (Serebii-geverifieerd), vertaald naar onze folklore. Niet elke unit heeft er
+// één (commons meestal kaal, zoals in Duel). Hooks: inzet / MP / beweging /
+// gevecht-contact / KO.
+// ==========================================
+const ABILITIES = {
+  blessing: { name:'Zegenende Aura', desc:'Bij inzet: wis status van aangrenzende bondgenoten' },   // Refreshing Aroma
+  command:  { name:'Aanvoerder',     desc:'Aangrenzende bondgenoten krijgen +1 MP' },                // Loyalty-aura
+  stalk:    { name:'Sluipen',        desc:'Beweegt dwars door bezette punten (stopt op leeg)' },      // Infiltrator
+  enchant:  { name:'Betovering',     desc:'Vijand die ermee vecht raakt Confused' },                  // contact-status
+  emberrune:{ name:'Vuurrune',       desc:'Vijand die ermee vecht raakt Burned' },                    // contact-status
+  mountain: { name:'Bergvast',       desc:'Bij KO: naar de bank i.p.v. Healing Center' },
+  rot:      { name:'Rottende Greep',  desc:'Vijand die ermee vecht raakt Poisoned' },                 // Poison Touch
+  raise:    { name:'Zielenoproep',   desc:'Bij inzet: wis Wacht-status van je eigen bank' },          // Sonic Blast
+  pack:     { name:'Roedel',         desc:'+1 MP zolang er een bondgenoot naast staat' },             // Loyalty
+  fly:      { name:'Vleugelslag',    desc:'Vliegt over andere units heen (stopt op leeg)' },          // Soar
+  infernal: { name:'Helse Jacht',    desc:'Na een gevecht raken deze unit én de vijand Burned' },     // Infernal Hunt
+  undying:  { name:'Onverwoestbaar', desc:'Overleeft de eerste KO en trekt terug naar de bank' },     // Ruinous Helix
+};
+const UNIT_ABILITY = {
+  cleric:'blessing', commander:'command', scout:'stalk', weaver:'enchant',
+  runesmith:'emberrune', warden:'mountain', ghoul:'rot', necromancer:'raise',
+  lupine:'pack', wyrmling:'fly', hellhound:'infernal', pitlord:'undying',
+};
+for (const [k, ab] of Object.entries(UNIT_ABILITY)) UNIT_DEFS[k].ability = ab;
+
+function abilityOf(u) { return u && UNIT_DEFS[u.defKey] ? UNIT_DEFS[u.defKey].ability : null; }
+// Contact-status: welke status krijgt de tegenstander die ermee vecht?
+function contactStatusOf(ability) { return { enchant:'confusion', emberrune:'burn', rot:'poison', infernal:'burn' }[ability] || null; }
+function canPhase(u) { const a = abilityOf(u); return a === 'stalk' || a === 'fly'; }
+// ABILITIES-END (marker voor headless tests — niet verwijderen)
+
 // Echte character-art (base64). Elke nieuwe PNG van Koen = één regel erbij.
 const UNIT_ART = {
   squire: "art/squire.png",
@@ -522,6 +557,8 @@ function initialState() { return { turn:'p1', actionsLeft:1, units:{}, bench:{p1
 // Statussen genezen in het HC; level blijft behouden.
 function koUnit(u) {
   u.node = null; u.status = [];
+  // Bergvast (Mountain Warden): sla het Healing Center over, direct terug naar de bank
+  if (abilityOf(u) === 'mountain') { u.status = ['wait']; state.bench[u.owner].push(u.uid); return; }
   state.hc[u.owner].push(u.uid);
   if (state.hc[u.owner].length > 2) {
     const backUid = state.hc[u.owner].shift();
@@ -699,7 +736,9 @@ function openUnitDetail(key) {
     const label = kind === 'white' ? `${val} dmg` : kind === 'gold' ? `★ ${val} dmg` : kind === 'purple' ? val : NL[kind];
     return `<span class="slot-pill" style="color:${TXT[kind]};background:${COLORS[kind]}">${n}× ${label}</span>`;
   }).join('');
-  document.getElementById('detail-slots').innerHTML = pills;
+  const ab = UNIT_DEFS[key].ability;
+  const abHtml = ab ? `<div class="ability-line"><span class="ability-tag">✦ ${ABILITIES[ab].name}</span> ${ABILITIES[ab].desc}</div>` : `<div class="ability-line" style="opacity:0.5">Geen ability</div>`;
+  document.getElementById('detail-slots').innerHTML = pills + abHtml;
   const upBtn = document.getElementById('btn-detail-upgrade');
   if (lvl >= 4) { upBtn.textContent = 'Max level'; upBtn.disabled = true; document.getElementById('detail-note').textContent = 'Deze unit is volledig opgewaardeerd.'; }
   else {
@@ -1079,7 +1118,7 @@ function onNodeTap(nodeKey) {
 
 function moveUnit(u, end) {
   return new Promise(res => {
-    const path = bfs(u.node, end);
+    const path = bfs(u.node, end, canPhase(u));
     if (!path || path.length < 2) { u.node = end; renderAll(); res(); return; }
     const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduced) { let i = 1; const step = () => { u.node = path[i]; renderAll(); i++; if (i < path.length) setTimeout(step, 120); else res(); }; setTimeout(step, 80); return; }
@@ -1121,9 +1160,9 @@ function moveUnit(u, end) {
   });
 }
 
-function bfs(start, end) {
+function bfs(start, end, phase) {
   const q = [[start]], seen = new Set([start]);
-  while (q.length) { const p = q.shift(); const last = p[p.length-1]; if (last === end) return p; for (const n of ADJ[last]) { if (seen.has(n)) continue; if (n !== end && unitAt(n)) continue; seen.add(n); q.push([...p, n]); } } return null;
+  while (q.length) { const p = q.shift(); const last = p[p.length-1]; if (last === end) return p; for (const n of ADJ[last]) { if (seen.has(n)) continue; if (n !== end && unitAt(n) && !phase) continue; seen.add(n); q.push([...p, n]); } } return null;
 }
 
 function onUnitTap(uid) {
@@ -1152,8 +1191,19 @@ function onUnitTap(uid) {
   }
 }
 
+// Ability-MP: +1 als deze unit 'pack' heeft en naast een bondgenoot staat,
+// of naast een bondgenoot met 'command' (Aanvoerder) staat.
+function abilityMPBonus(u) {
+  if (!u.node) return 0;
+  const neighbours = [...ADJ[u.node]].map(unitAt).filter(o => o && o.owner === u.owner);
+  let bonus = 0;
+  if (abilityOf(u) === 'pack' && neighbours.length) bonus += 1;
+  if (neighbours.some(o => abilityOf(o) === 'command')) bonus += 1;
+  return bonus;
+}
+
 function effMP(u) {
-  let mp = Math.min(3, UNIT_DEFS[u.defKey].mp + (state.mpBonus[u.uid] || 0) + (state.warcry[u.owner] ? 1 : 0));
+  let mp = Math.min(3, UNIT_DEFS[u.defKey].mp + (state.mpBonus[u.uid] || 0) + (state.warcry[u.owner] ? 1 : 0) + abilityMPBonus(u));
   if (!state.firstMoveDone) mp = Math.max(1, mp - 1); // Duel: allereerste zet van het potje MP-1
   return mp;
 }
@@ -1180,15 +1230,47 @@ function doDeploy(u, target) {
   }
   u.node = entry;
   state.bench[u.owner] = state.bench[u.owner].filter(x => x !== u.uid);
-  if (target === entry || !entry) { renderAll(); return Promise.resolve(); }
-  return moveUnit(u, target);
+  if (target === entry || !entry) { onDeployComplete(u); renderAll(); return Promise.resolve(); }
+  return moveUnit(u, target).then(() => onDeployComplete(u));
+}
+
+// Inzet-abilities (triggeren zodra de unit op het veld staat)
+function onDeployComplete(u) {
+  const ab = abilityOf(u);
+  if (ab === 'blessing' && u.node) {
+    // Zegenende Aura: wis status van aangrenzende bondgenoten
+    for (const n of ADJ[u.node]) { const o = unitAt(n); if (o && o.owner === u.owner) o.status = o.status.filter(s => s === 'wait' || s === 'bulwark'); }
+    toast(`${UNIT_DEFS[u.defKey].name}: Zegenende Aura`);
+  } else if (ab === 'raise') {
+    // Zielenoproep: wis Wacht-status van je eigen bank (sneller herinzetten)
+    for (const uid of state.bench[u.owner]) { const o = state.units[uid]; o.status = o.status.filter(s => s !== 'wait'); }
+    toast(`${UNIT_DEFS[u.defKey].name}: Zielenoproep`);
+  }
 }
 
 function legalMoves(u) {
   const frozen = u.status.includes('frozen');
+  const phase = canPhase(u);   // Sluipen/Vleugelslag: dwars door bezette punten
   const mp = effMP(u);
   const out = new Set(), seen = new Map([[u.node, 0]]), q = [[u.node, 0]];
-  while (q.length) { const [n, d] = q.shift(); if (d >= mp) continue; for (const nx of ADJ[n]) { const occ = unitAt(nx); if (occ && occ.owner !== u.owner) { if (!frozen) out.add(nx); continue; } if (occ) continue; if (seen.has(nx) && seen.get(nx) <= d+1) continue; seen.set(nx, d+1); out.add(nx); q.push([nx, d+1]); } } return out;
+  while (q.length) {
+    const [n, d] = q.shift(); if (d >= mp) continue;
+    for (const nx of ADJ[n]) {
+      const occ = unitAt(nx);
+      if (occ && occ.owner !== u.owner) {
+        if (!frozen) out.add(nx);                             // aanvallen op de vijand
+        if (phase && (!seen.has(nx) || seen.get(nx) > d+1)) { seen.set(nx, d+1); q.push([nx, d+1]); } // eroverheen
+        continue;
+      }
+      if (occ) {                                              // eigen unit: nooit landen
+        if (phase && (!seen.has(nx) || seen.get(nx) > d+1)) { seen.set(nx, d+1); q.push([nx, d+1]); }
+        continue;
+      }
+      if (seen.has(nx) && seen.get(nx) <= d+1) continue;
+      seen.set(nx, d+1); out.add(nx); q.push([nx, d+1]);
+    }
+  }
+  return out;
 }
 
 function unitAt(k) { return Object.values(state.units).find(u => u.node === k); }
@@ -1410,7 +1492,13 @@ async function runCombat(att, def) {
   if (def.status.includes('bulwark')) { def.status = def.status.filter(s => s !== 'bulwark'); if (dSlot.k === 'red') dSlot = {k:'blue'}; }
 
   const r = resolve(aSlot, dSlot); let html = "";
-  
+
+  // Onverwoestbaar (Ruinous Helix): eerste KO wordt geen KO — de unit trekt
+  // terug naar de bank en de tegenstander levelt NIET. Eenmalig per potje.
+  let attRetreat = false, defRetreat = false;
+  if (r.attKO && abilityOf(att) === 'undying' && !att.undyingUsed) { att.undyingUsed = true; r.attKO = false; attRetreat = true; }
+  if (r.defKO && abilityOf(def) === 'undying' && !def.undyingUsed) { def.undyingUsed = true; r.defKO = false; defRetreat = true; }
+
   let attNextNode = att.node;
   let defNextNode = def.node;
   let attToBench = false;
@@ -1418,13 +1506,25 @@ async function runCombat(att, def) {
 
   if (r.attKO) { html += `<span class="ko">${UNIT_DEFS[att.defKey].name} is verslagen!</span><br>`; attNextNode = null; attToBench = true; }
   if (r.defKO) { html += `<span class="ko">${UNIT_DEFS[def.defKey].name} is verslagen!</span><br>`; defNextNode = null; defToBench = true; }
-  
-  if (r.defKO && !r.attKO) { attNextNode = defInitialNode; } 
-  
+  if (attRetreat) { html += `<span class="status">${UNIT_DEFS[att.defKey].name} — Onverwoestbaar! Trekt terug.</span><br>`; attNextNode = null; }
+  if (defRetreat) { html += `<span class="status">${UNIT_DEFS[def.defKey].name} — Onverwoestbaar! Trekt terug.</span><br>`; defNextNode = null; }
+
+  if (r.defKO && !r.attKO) { attNextNode = defInitialNode; }
+
   if (r.statusOnAtt) { if (!att.status.includes(r.statusOnAtt)) att.status.push(r.statusOnAtt); html += `<span class="status">-> ${r.statusOnAtt.toUpperCase()}</span><br>`; }
   if (r.statusOnDef) { if (!def.status.includes(r.statusOnDef)) def.status.push(r.statusOnDef); html += `<span class="status">-> ${r.statusOnDef.toUpperCase()}</span><br>`; }
-  if (!r.attKO && !r.defKO && !r.statusOnAtt && !r.statusOnDef) html += `<span style="opacity:0.8;font-style:italic">${noEffectReason(aSlot, dSlot)}</span>`;
-  
+
+  // Contact-abilities: status op de overlevende tegenstander (en op zichzelf bij Helse Jacht)
+  const applyContact = (src, tgt, srcSurvives, tgtSurvives) => {
+    const st = contactStatusOf(abilityOf(src)); if (!st) return;
+    if (tgtSurvives && !tgt.status.includes(st)) { tgt.status.push(st); html += `<span class="status">${UNIT_DEFS[src.defKey].name}: ${UNIT_DEFS[tgt.defKey].name} -> ${st.toUpperCase()}</span><br>`; }
+    if (abilityOf(src) === 'infernal' && srcSurvives && !src.status.includes('burn')) src.status.push('burn');
+  };
+  applyContact(att, def, !attToBench, !defToBench);
+  applyContact(def, att, !defToBench, !attToBench);
+
+  if (!r.attKO && !r.defKO && !attRetreat && !defRetreat && !r.statusOnAtt && !r.statusOnDef && !html) html += `<span style="opacity:0.8;font-style:italic">${noEffectReason(aSlot, dSlot)}</span>`;
+
   document.getElementById('combat-result').innerHTML = html;
   const btn = document.getElementById('btn-combat-continue'); btn.style.display = ''; setTimeout(() => btn.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
   await new Promise(res => { btn.onclick = res; }); ov.classList.remove('active');
@@ -1433,6 +1533,9 @@ async function runCombat(att, def) {
   def.node = defNextNode;
   if (attToBench) { koUnit(att); queueFX(NODES[attInitialNode].x, NODES[attInitialNode].y, 'burst'); }
   if (defToBench) { koUnit(def); queueFX(NODES[defInitialNode].x, NODES[defInitialNode].y, 'burst'); }
+  // Onverwoestbaar-terugtocht: statussen behouden (geen HC-genezing), wél 'wait'
+  if (attRetreat) { att.status.push('wait'); state.bench[att.owner].push(att.uid); queueFX(NODES[attInitialNode].x, NODES[attInitialNode].y, 'poof'); }
+  if (defRetreat) { def.status.push('wait'); state.bench[def.owner].push(def.uid); queueFX(NODES[defInitialNode].x, NODES[defInitialNode].y, 'poof'); }
 
   if (r.defKO && !r.attKO) levelUp(att);
   if (r.attKO && !r.defKO) levelUp(def);

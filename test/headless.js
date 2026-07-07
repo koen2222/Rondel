@@ -33,6 +33,12 @@ const diskSection = html.slice(
   html.indexOf('// DISK-ARRANGE-APPLY')
 );
 
+// Ability-definities (ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase)
+const abilitySection = html.slice(
+  html.indexOf('const ABILITIES ='),
+  html.indexOf('// ABILITIES-END')
+);
+
 // resolve + applyStatus — puur-functioneel, geen state; koUnit werkt op state (injecteerbaar)
 const resolveMatch = html.match(/\nfunction resolve\([\s\S]*?\n\}/);
 const applyMatch   = html.match(/\nfunction applyStatus\([\s\S]*?\n\}/);
@@ -46,10 +52,11 @@ const evalCode = [
   'function __setState(s) { state = s; }',
   boardSection,
   diskSection,
+  abilitySection,
   resolveMatch[0],
   applyMatch[0],
   koMatch[0],
-  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots };',
+  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase };',
 ].join('\n');
 
 // Schrijf tijdelijk evalueerbaar bestand (vermijdt new Function-beperkingen)
@@ -62,7 +69,7 @@ try {
   fs.unlinkSync(tmpPath);
 }
 
-const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots } = extracted;
+const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase } = extracted;
 
 // ─── Test harness ──────────────────────────────────────────────────────────────
 let pass = 0, fail = 0;
@@ -257,6 +264,30 @@ section('=== HEALING CENTER (8 checks) ===');
   koUnit(u3);
   check('KO 3: oudste (u1) terug naar bench met wait', S.bench.p1.includes('u1') && u1.status.includes('wait'), true);
   check('KO 3: HC bevat nu u2+u3',         S.hc.p1, ['u2','u3']);
+}
+
+// ─── 4b. ABILITIES ─────────────────────────────────────────────────────────────
+section('=== ABILITIES (10 checks) ===');
+{
+  check('12 abilities gedefinieerd', Object.keys(ABILITIES).length, 12);
+  check('Elke ability heeft naam + desc', Object.values(ABILITIES).every(a => a.name && a.desc), true);
+  check('Alle 12 unit-toewijzingen verwijzen naar bestaande ability',
+    Object.values(UNIT_ABILITY).every(a => ABILITIES[a]), true);
+  check('abilityOf(warden) === mountain', abilityOf({ defKey:'warden' }), 'mountain');
+  check('abilityOf(squire) === undefined (common, geen ability)', abilityOf({ defKey:'squire' }) || null, null);
+  // contact-status-mapping
+  check('Rottende Greep → poison', contactStatusOf('rot'), 'poison');
+  check('Vuurrune → burn',         contactStatusOf('emberrune'), 'burn');
+  check('Betovering → confusion',  contactStatusOf('enchant'), 'confusion');
+  // canPhase
+  check('Scout (stalk) kan phasen', canPhase({ defKey:'scout' }), true);
+  // Bergvast: KO → bank i.p.v. HC
+  {
+    const S = { hc:{p1:[],p2:[]}, bench:{p1:[],p2:[]}, units:{} };
+    const w = S.units.w = { uid:'w', owner:'p1', node:'B1', status:['poison'], level:2, defKey:'warden' };
+    __setState(S); koUnit(w);
+    check('Bergvast: KO → bank, niet HC', S.bench.p1.includes('w') && S.hc.p1.length === 0, true);
+  }
 }
 
 // ─── 5. SYNTAX-CHECK volledige game-JS ─────────────────────────────────────────

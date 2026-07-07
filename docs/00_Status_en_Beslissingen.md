@@ -142,6 +142,27 @@ HUIDIGE DELIVERABLE
   - Symmetrische Duel-resolutie (headless getest: 14/14 spec-checks OK)
   - Bord-topologie headless getest: 12/12 checks OK
 
+GEDAAN IN SESSIE 20 (6 juli 2026)
+- ABILITIES ingebouwd (Koens keuze uit de "meer op Duel lijken"-lijst).
+  12 abilities, gemodelleerd naar echte Duel-abilities (Serebii-geverifieerd),
+  vertaald naar folklore. Commons blijven kaal (Duel-conventie). Toewijzing:
+  cleric=Zegenende Aura (cleanse buren bij inzet / Refreshing Aroma),
+  commander=Aanvoerder (+1 MP aan buren), scout=Sluipen & wyrmling=Vleugelslag
+  (door units heen / Infiltrator+Soar), weaver=Betovering (confusion-contact),
+  runesmith=Vuurrune (burn-contact), ghoul=Rottende Greep (poison-contact),
+  hellhound=Helse Jacht (beide burn na gevecht / Infernal Hunt),
+  warden=Bergvast (KO→bank i.p.v. HC), pitlord=Onverwoestbaar (overleeft 1e KO,
+  retour bank / Ruinous Helix), necromancer=Zielenoproep (wis Wacht van bank /
+  Sonic Blast), lupine=Roedel (+1 MP naast bondgenoot / Loyalty).
+- Hooks: effMP (command/pack), legalMoves+bfs (phasing), doDeploy
+  (onDeployComplete), runCombat (contact-status + infernal + undying-retreat),
+  koUnit (mountain). Getoond in collectie-detail (paarse ✦-tag).
+- BEURT-ECONOMIE (Koen vroeg nogmaals): 3e keer geverifieerd incl. beurt-
+  volgorde — Duel = plate(gratis) + 1 figuur bewegen. Deploy IS je actie; niet
+  deploy+aanval of aanval+deploy. Bewust ongewijzigd (Duel wint).
+- Tests: 50 → 60 headless (10 ability-checks); rooktest 17 → 19 (speelt nu een
+  paar beurten + checkt ability in detail). SW-cache v27.
+
 GEDAAN IN SESSIE 19 (6 juli 2026)
 - BEURT-ECONOMIE geverifieerd (Koen vroeg: kun je in Duel inzetten ÉN nog
   aanvallen?): NEE — Duel is strikt 1 actie per beurt, en inzetten vanaf de
@@ -373,6 +394,11 @@ OPEN PUNTEN — IN VOLGORDE VAN URGENTIE
 9. Beslissing fase 2 framework: Godot vs Unity vs Web
 10. Fusion-systeem ontwerpen voor app-versie (sluit aan op store/upgrade-systeem)
 11. Factie-puriteit als design-knop overwegen
+12. AI bewust maken van abilities (nu functioneren ze wel, maar de AI weegt ze
+    niet in z'n scoring — bv. phasers voor rushes, undying-tanks vooraan)
+13. Nog-openstaande "meer-op-Duel"-opties (sessie 19-lijst): gevechts-
+    presentatie (move-namen/clash/resultaatscherm), sudden death + winstscherm,
+    geluid. Abilities is gedaan (sessie 20).
 
 INSPIRATIE-REFERENTIE
 - Mechanics: Pokémon Duel / Comaster — Duel is bron van waarheid
