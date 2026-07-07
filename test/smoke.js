@@ -54,9 +54,29 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
   ok('Bench P1: 6 figuren naast het bord', await page.locator('#board g.bench-p1 g.bench-fig').count() === 6);
   ok('Bench P2: 6 figuren naast het bord', await page.locator('#board g.bench-p2 g.bench-fig').count() === 6);
 
-  // 6. Menu terug naar home (state.over is false → confirm; auto-accept)
+  // 5a. Een paar beurten spelen zodat ability-hooks (deploy/combat/MP) echt draaien
   page.on('dialog', d => d.accept());
-  await page.click('#btn-menu');
+  for (let t = 0; t < 6; t++) {
+    // deploy: eerste vrije eigen figuur op een entry, anders end-turn
+    const fig = page.locator('#board g.bench-p1 g.bench-fig').first();
+    if (await fig.count()) { await fig.click().catch(()=>{}); const glow = page.locator('#board .node-glow.active').first(); if (await glow.count()) await glow.click().catch(()=>{}); }
+    await page.waitForTimeout(150);
+    if (await page.locator('#btn-end-turn').count()) await page.click('#btn-end-turn').catch(()=>{});
+    await page.waitForTimeout(500); // AI-beurt
+  }
+  ok('Enkele beurten gespeeld zonder crash', errors.length === 0);
+
+  // 5b. Ability zichtbaar in collectie-detail
+  if (await page.locator('#screen-game.active').count()) await page.click('#btn-menu');
+  await page.waitForSelector('#screen-home.active');
+  await page.click('#tile-collection');
+  await page.locator('#coll-grid .coll-card', { hasText: 'Forest Scout' }).click();
+  await page.waitForSelector('#detail-overlay.active');
+  ok('Ability getoond in unit-detail', /Sluipen/.test(await page.locator('#detail-slots').innerText()));
+  await page.click('#btn-detail-close');
+
+  // 6. Terug naar home
+  await page.locator('.btn-back').first().click();
   await page.waitForSelector('#screen-home.active');
   ok('Menu-knop keert terug naar home', true);
 
