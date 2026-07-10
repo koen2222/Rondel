@@ -355,26 +355,31 @@ const ROUTES = [
 const ADJ = {}; for (const k of Object.keys(NODES)) ADJ[k] = new Set();
 for (const [a,b] of ROUTES) { ADJ[a].add(b); ADJ[b].add(a); }
 
-const W=(n,v)=>Array(n).fill({k:'white',v}), G=(n,v)=>Array(n).fill({k:'gold',v}), B=n=>Array(n).fill({k:'blue'}), R=n=>Array(n).fill({k:'red'}), P=(n,effect,stars)=>Array(n).fill({k:'purple',stars,effect});
+// Slot-helpers. Sinds sessie 23 dragen aanvallen hun NAAM in het slot zelf, en
+// heeft elke unit TWEE onderscheiden white-aanvallen (hoofd + snelle bijaanval,
+// verschillende waarde). Duel-reden: burn/paralysis maakt alleen de KLEINSTE
+// aanval Miss — met één aanvalswaarde wiste dat het hele wiel (Koens miss-loop).
+// Totale white-schade per unit is ~gelijk gehouden aan de oude data (±20).
+const W=(n,v,name)=>Array(n).fill({k:'white',v,name}), G=(n,v,name)=>Array(n).fill({k:'gold',v,name}), B=n=>Array(n).fill({k:'blue'}), R=n=>Array(n).fill({k:'red'}), P=(n,effect,stars,name)=>Array(n).fill({k:'purple',stars,effect,name});
 const UNIT_DEFS = {
-  squire:      { name:'Squire',            fac:'Knights', mp:2, slots:[...W(6,30), ...P(2,'paralysis',1), ...B(2), ...R(6)] },
-  cleric:      { name:'Battle Cleric',     fac:'Knights', mp:2, slots:[...W(5,40), ...P(3,'sleep',1), ...B(3), ...R(5)] },
-  commander:   { name:'Knight Commander',  fac:'Knights', mp:2, slots:[...G(3,50), ...W(5,60), ...P(3,'paralysis',2), ...B(2), ...R(3)] },
-  scout:       { name:'Forest Scout',      fac:'Elves',   mp:3, slots:[...W(5,20), ...P(3,'poison',1), ...B(2), ...R(6)] },
-  archer:      { name:'Elven Archer',      fac:'Elves',   mp:2, slots:[...W(6,50), ...P(2,'poison',1), ...B(4), ...R(4)] },
-  weaver:      { name:'Arcane Weaver',     fac:'Elves',   mp:2, slots:[...W(2,70), ...G(4,40), ...P(4,'confusion',2), ...B(3), ...R(3)] },
-  apprentice:  { name:'Stone Apprentice',  fac:'Dwarves', mp:1, slots:[...W(5,50), ...P(1,'paralysis',1), ...B(4), ...R(6)] },
-  runesmith:   { name:'Runesmith',         fac:'Dwarves', mp:2, slots:[...W(5,50), ...P(4,'burn',1), ...B(3), ...R(4)] },
-  warden:      { name:'Mountain Warden',   fac:'Dwarves', mp:1, slots:[...W(6,80), ...P(3,'paralysis',2), ...B(4), ...R(3)] },
-  skeleton:    { name:'Restless Skeleton', fac:'Undead',  mp:2, slots:[...W(6,20), ...P(2,'confusion',1), ...B(2), ...R(6)] },
-  ghoul:       { name:'Ghoul',             fac:'Undead',  mp:2, slots:[...W(5,40), ...P(4,'badlypoison',1), ...B(3), ...R(4)] },
-  necromancer: { name:'Necromancer',       fac:'Undead',  mp:1, slots:[...W(2,60), ...G(4,30), ...P(4,'sleep',2), ...B(3), ...R(3)] },
-  boar:        { name:'Boar Brute',        fac:'Beasts',  mp:2, slots:[...W(7,50), ...P(1,'confusion',1), ...B(2), ...R(6)] },
-  lupine:      { name:'Lupine Hunter',     fac:'Beasts',  mp:3, slots:[...W(6,40), ...P(2,'paralysis',1), ...B(3), ...R(5)] },
-  wyrmling:    { name:'Wyrmling',          fac:'Beasts',  mp:2, slots:[...W(5,50), ...G(3,60), ...P(4,'burn',2), ...B(2), ...R(2)] },
-  imp:         { name:'Imp',               fac:'Inferno', mp:3, slots:[...W(5,20), ...P(3,'burn',1), ...B(2), ...R(6)] },
-  hellhound:   { name:'Hellhound',         fac:'Inferno', mp:3, slots:[...W(6,40), ...P(3,'burn',1), ...B(3), ...R(4)] },
-  pitlord:     { name:'Pit Lord',          fac:'Inferno', mp:1, slots:[...W(6,90), ...G(4,70), ...P(2,'burn',2), ...B(1), ...R(3)] }
+  squire:      { name:'Squire',            fac:'Knights', mp:2, slots:[...W(4,40,'Schildstoot'), ...W(2,10,'Schouderduw'), ...P(2,'paralysis',1,'Voetveeg'), ...B(2), ...R(6)] },
+  cleric:      { name:'Battle Cleric',     fac:'Knights', mp:2, slots:[...W(3,50,'Strijdknots'), ...W(2,20,'Vermaning'), ...P(3,'sleep',1,'Slaaphymne'), ...B(3), ...R(5)] },
+  commander:   { name:'Knight Commander',  fac:'Knights', mp:2, slots:[...G(3,50,'Banierstorm'), ...W(3,70,'Zwaardslag'), ...W(2,40,'Pareersteek'), ...P(3,'paralysis',2,'Bevelschreeuw'), ...B(2), ...R(3)] },
+  scout:       { name:'Forest Scout',      fac:'Elves',   mp:3, slots:[...W(3,30,'Dolksteek'), ...W(2,10,'Schampschot'), ...P(3,'poison',1,'Gifpijl'), ...B(2), ...R(6)] },
+  archer:      { name:'Elven Archer',      fac:'Elves',   mp:2, slots:[...W(4,60,'Boogschot'), ...W(2,20,'Snelschot'), ...P(2,'poison',1,'Doornpijl'), ...B(4), ...R(4)] },
+  weaver:      { name:'Arcane Weaver',     fac:'Elves',   mp:2, slots:[...W(2,70,'Manavlaag'), ...G(4,40,'Spreukbreker'), ...P(4,'confusion',2,'Warreling'), ...B(3), ...R(3)] },
+  apprentice:  { name:'Stone Apprentice',  fac:'Dwarves', mp:1, slots:[...W(3,60,'Steenworp'), ...W(2,30,'Gruisgooi'), ...P(1,'paralysis',1,'Gruisgreep'), ...B(4), ...R(6)] },
+  runesmith:   { name:'Runesmith',         fac:'Dwarves', mp:2, slots:[...W(3,60,'Hamerslag'), ...W(2,30,'Vonkslag'), ...P(4,'burn',1,'Gloeirune'), ...B(3), ...R(4)] },
+  warden:      { name:'Mountain Warden',   fac:'Dwarves', mp:1, slots:[...W(4,90,'Bergbeuk'), ...W(2,50,'Rotsworp'), ...P(3,'paralysis',2,'Rotsgreep'), ...B(4), ...R(3)] },
+  skeleton:    { name:'Restless Skeleton', fac:'Undead',  mp:2, slots:[...W(4,30,'Botzwaai'), ...W(2,10,'Ribbenstoot'), ...P(2,'confusion',1,'Grafkilte'), ...B(2), ...R(6)] },
+  ghoul:       { name:'Ghoul',             fac:'Undead',  mp:2, slots:[...W(3,50,'Klauwhaal'), ...W(2,20,'Knagende Beet'), ...P(4,'badlypoison',1,'Lijkengif'), ...B(3), ...R(4)] },
+  necromancer: { name:'Necromancer',       fac:'Undead',  mp:1, slots:[...W(2,60,'Schaduwgreep'), ...G(4,30,'Zielenvlaag'), ...P(4,'sleep',2,'Doodsslaap'), ...B(3), ...R(3)] },
+  boar:        { name:'Boar Brute',        fac:'Beasts',  mp:2, slots:[...W(5,60,'Stormram'), ...W(2,20,'Hoefslag'), ...P(1,'confusion',1,'Woeste Duw'), ...B(2), ...R(6)] },
+  lupine:      { name:'Lupine Hunter',     fac:'Beasts',  mp:3, slots:[...W(4,50,'Kaakklem'), ...W(2,20,'Scheurbeet'), ...P(2,'paralysis',1,'Huilroep'), ...B(3), ...R(5)] },
+  wyrmling:    { name:'Wyrmling',          fac:'Beasts',  mp:2, slots:[...W(3,60,'Staartzweep'), ...W(2,30,'Klauwzwiep'), ...G(3,60,'Vuurspuw'), ...P(4,'burn',2,'Asadem'), ...B(2), ...R(2)] },
+  imp:         { name:'Imp',               fac:'Inferno', mp:3, slots:[...W(3,30,'Prikvork'), ...W(2,10,'Plaagstoot'), ...P(3,'burn',1,'Vonkenregen'), ...B(2), ...R(6)] },
+  hellhound:   { name:'Hellhound',         fac:'Inferno', mp:3, slots:[...W(4,50,'Vlammenbeet'), ...W(2,20,'Snauw'), ...P(3,'burn',1,'Schroeiblaf'), ...B(3), ...R(4)] },
+  pitlord:     { name:'Pit Lord',          fac:'Inferno', mp:1, slots:[...W(4,100,'Verwoester'), ...W(2,60,'Zwavelklauw'), ...G(4,70,'Hellekling'), ...P(2,'burn',2,'Zwavelvloek'), ...B(1), ...R(3)] }
 };
 
 // ==========================================
@@ -387,24 +392,24 @@ const UNIT_DEFS = {
 // dezelfde mogelijkheid twee keer op de schijf. Alleen de (anonieme)
 // Miss-zone is in twee clusters gedeeld, zoals op echte Duel-wielen.
 const DISK_LAYOUT = {
-  squire:      'W6 R3 P2 R3 B2',
-  cleric:      'W5 R3 P3 R2 B3',
-  commander:   'G3 W5 R2 P3 R1 B2',
-  scout:       'W5 R3 P3 R3 B2',
-  archer:      'W6 R2 P2 R2 B4',
+  squire:      'W4 R3 W2 P2 R3 B2',
+  cleric:      'W3 R3 W2 P3 R2 B3',
+  commander:   'G3 W3 R2 W2 P3 R1 B2',
+  scout:       'W3 R3 W2 P3 R3 B2',
+  archer:      'W4 R2 W2 P2 R2 B4',
   weaver:      'G4 R2 W2 P4 R1 B3',
-  apprentice:  'W5 R3 B4 R3 P1',
-  runesmith:   'W5 R2 P4 R2 B3',
-  warden:      'W6 R2 P3 R1 B4',
-  skeleton:    'W6 R3 P2 R3 B2',
-  ghoul:       'W5 R2 P4 R2 B3',
+  apprentice:  'W3 R3 W2 B4 R3 P1',
+  runesmith:   'W3 R2 W2 P4 R2 B3',
+  warden:      'W4 R2 W2 P3 R1 B4',
+  skeleton:    'W4 R3 W2 P2 R3 B2',
+  ghoul:       'W3 R2 W2 P4 R2 B3',
   necromancer: 'G4 R2 W2 P4 R1 B3',
-  boar:        'W7 R3 P1 R3 B2',
-  lupine:      'W6 R3 P2 R2 B3',
-  wyrmling:    'G3 W5 R1 P4 R1 B2',
-  imp:         'W5 R3 P3 R3 B2',
-  hellhound:   'W6 R2 P3 R2 B3',
-  pitlord:     'G4 W6 R2 P2 R1 B1'
+  boar:        'W5 R3 W2 P1 R3 B2',
+  lupine:      'W4 R3 W2 P2 R2 B3',
+  wyrmling:    'G3 W3 R1 W2 P4 R1 B2',
+  imp:         'W3 R3 W2 P3 R3 B2',
+  hellhound:   'W4 R2 W2 P3 R2 B3',
+  pitlord:     'G4 W4 R2 W2 P2 R1 B1'
 };
 
 // Herschikt base-slots volgens het layout-patroon. Retourneert null (en de
@@ -462,33 +467,12 @@ function abilityOf(u) { return u && UNIT_DEFS[u.defKey] ? UNIT_DEFS[u.defKey].ab
 function contactStatusOf(ability) { return { enchant:'confusion', emberrune:'burn', rot:'poison', infernal:'burn' }[ability] || null; }
 function canPhase(u) { const a = abilityOf(u); return a === 'stalk' || a === 'fly'; }
 
-// Move-namen (eigen fantasy, sessie 21) — Duel-look: elke aanval heeft een naam
-// op het wiel. Per unit: white/gold/purple; blauw en Miss blijven naamloos.
-const MOVE_NAMES = {
-  squire:      { white:'Schildstoot',  purple:'Voetveeg' },
-  cleric:      { white:'Strijdknots',  purple:'Slaaphymne' },
-  commander:   { white:'Zwaardslag',   gold:'Banierstorm',  purple:'Bevelschreeuw' },
-  scout:       { white:'Dolksteek',    purple:'Gifpijl' },
-  archer:      { white:'Boogschot',    purple:'Doornpijl' },
-  weaver:      { white:'Manavlaag',    gold:'Spreukbreker', purple:'Warreling' },
-  apprentice:  { white:'Steenworp',    purple:'Gruisgreep' },
-  runesmith:   { white:'Hamerslag',    purple:'Gloeirune' },
-  warden:      { white:'Bergbeuk',     purple:'Rotsgreep' },
-  skeleton:    { white:'Botzwaai',     purple:'Grafkilte' },
-  ghoul:       { white:'Klauwhaal',    purple:'Lijkengif' },
-  necromancer: { white:'Schaduwgreep', gold:'Zielenvlaag',  purple:'Doodsslaap' },
-  boar:        { white:'Stormram',     purple:'Woeste Duw' },
-  lupine:      { white:'Kaakklem',     purple:'Huilroep' },
-  wyrmling:    { white:'Staartzweep',  gold:'Vuurspuw',     purple:'Asadem' },
-  imp:         { white:'Prikvork',     purple:'Vonkenregen' },
-  hellhound:   { white:'Vlammenbeet',  purple:'Schroeiblaf' },
-  pitlord:     { white:'Verwoester',   gold:'Hellekling',   purple:'Zwavelvloek' }
-};
-function moveLabel(defKey, slot) {
-  const n = MOVE_NAMES[defKey] || {};
-  if (slot.k === 'white') return `${n.white || 'Aanval'} ${slot.v}`;
-  if (slot.k === 'gold')  return `${n.gold || 'Doorbraak'} ${slot.v}`;
-  if (slot.k === 'purple') return `${n.purple || 'Vloek'} ${'★'.repeat(slot.stars || 1)}`;
+// Move-labels (sessie 23): namen zitten sinds de twee-aanvallen-herontwerp
+// ín de slots zelf (zie UNIT_DEFS). Blauw en Miss blijven naamloos.
+function moveLabel(slot) {
+  if (slot.k === 'white') return `${slot.name || 'Aanval'} ${slot.v}`;
+  if (slot.k === 'gold')  return `${slot.name || 'Doorbraak'} ${slot.v}`;
+  if (slot.k === 'purple') return `${slot.name || 'Vloek'} ${'★'.repeat(slot.stars || 1)}`;
   if (slot.k === 'blue')  return 'Verdedigd';
   return 'Miss';
 }
@@ -1496,9 +1480,8 @@ function renderDisk(svgId, slots, defKey) {
     const tp = el('textPath', { href:`#${id}`, startOffset:'50%', 'text-anchor':'middle' }, t);
     tp.textContent = name;
   };
-  const names = MOVE_NAMES[defKey] || {};
   const merged = []; let i = 0;
-  while (i < slots.length) { let j = i; while (j < slots.length && slots[i].k===slots[j].k && slots[i].v===slots[j].v && slots[i].stars===slots[j].stars) j++; merged.push({ slot: slots[i], start:i, end:j }); i = j; }
+  while (i < slots.length) { let j = i; while (j < slots.length && slots[i].k===slots[j].k && slots[i].v===slots[j].v && slots[i].stars===slots[j].stars && slots[i].name===slots[j].name) j++; merged.push({ slot: slots[i], start:i, end:j }); i = j; }
   for (const m of merged) {
     const sA = (m.start*SLOT_DEG - 90)*Math.PI/180, eA = (m.end*SLOT_DEG - 90)*Math.PI/180, mA = (sA+eA)/2;
     const large = (m.end-m.start)*SLOT_DEG > 180 ? 1 : 0;
@@ -1516,7 +1499,7 @@ function renderDisk(svgId, slots, defKey) {
       const fs = narrow ? 17 : 22;
       const t = el('text', { x:lx, y:ly, fill:TXT[k], 'font-family':"'Cinzel', serif", 'font-weight':'900', 'font-size':fs, 'text-anchor':'middle', 'dominant-baseline':'middle', 'paint-order':'stroke', stroke:'rgba(255,255,255,0.55)', 'stroke-width':2.5 }, svg);
       t.textContent = String(m.slot.v);
-      if (!narrow && names[k]) nameArc(names[k], sA, eA, mA, k === 'gold' ? '#78350f' : '#374151');
+      if (!narrow && m.slot.name) nameArc(m.slot.name, sA, eA, mA, k === 'gold' ? '#78350f' : '#374151');
       if (k === 'gold') {
         const gr = narrow ? R - 6 : R - 20, gx = cx+gr*Math.cos(mA), gy = cy+gr*Math.sin(mA);
         el('path', { d:`M ${gx} ${gy-3} L ${gx+0.9} ${gy-0.9} L ${gx+3} ${gy} L ${gx+0.9} ${gy+0.9} L ${gx} ${gy+3} L ${gx-0.9} ${gy+0.9} L ${gx-3} ${gy} L ${gx-0.9} ${gy-0.9} Z`, fill:'#fff', opacity:0.95 }, svg);
@@ -1527,7 +1510,7 @@ function renderDisk(svgId, slots, defKey) {
       diskEffectGlyph(svg, m.slot.effect, lx, ly, gs);
       const sr = lr - (narrow ? 12 : 16), sx = cx+sr*Math.cos(mA), sy = cy+sr*Math.sin(mA);
       diskStars(svg, m.slot.stars || 1, sx, sy, narrow ? 3.4 : 4);
-      if (!narrow && names.purple) nameArc(names.purple, sA, eA, mA, '#ede9fe');
+      if (!narrow && m.slot.name) nameArc(m.slot.name, sA, eA, mA, '#ede9fe');
     } else if (k === 'blue') {
       diskShield(svg, lx, ly, narrow ? 8.5 : 12);
     } else if (k === 'red') {
@@ -1645,7 +1628,7 @@ async function runCombat(att, def) {
 
   if (!r.attKO && !r.defKO && !attRetreat && !defRetreat && !r.statusOnAtt && !r.statusOnDef && !html) html += `<span style="opacity:0.8;font-style:italic">${noEffectReason(aSlot, dSlot)}</span>`;
 
-  const movesLine = `<div class="clash-moves"><span class="mv-att">${moveLabel(att.defKey, aSlot)}</span><span class="vs">⚔</span><span class="mv-def">${moveLabel(def.defKey, dSlot)}</span></div>`;
+  const movesLine = `<div class="clash-moves"><span class="mv-att">${moveLabel(aSlot)}</span><span class="vs">⚔</span><span class="mv-def">${moveLabel(dSlot)}</span></div>`;
   document.getElementById('combat-result').innerHTML = movesLine + html;
   const btn = document.getElementById('btn-combat-continue'); btn.style.display = ''; setTimeout(() => btn.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
   await new Promise(res => { btn.onclick = res; }); ov.classList.remove('active');
