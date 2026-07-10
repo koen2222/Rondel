@@ -142,6 +142,28 @@ HUIDIGE DELIVERABLE
   - Symmetrische Duel-resolutie (headless getest: 14/14 spec-checks OK)
   - Bord-topologie headless getest: 12/12 checks OK
 
+GEDAAN IN SESSIE 22 (7 juli 2026)
+- KOENS PATSTELLING onderzocht (screenshot: iedereen gestatust, niemand kan
+  nog raken). Twee spec-afwijkingen gevonden en gefixt na web-verificatie:
+  * ÉÉN CONDITION TEGELIJK (Bulbapedia): een nieuwe special condition VERVANGT
+    de oude. Wij stapelden (burn+paralysis+... samen = wiel kapot). Nieuwe
+    applyCondition() op alle plekken (combat, contact-abilities, plates);
+    'wait'/'bulwark' zijn geen conditions en blijven staan.
+  * FROZEN wordt na een gevecht gewist, ongeacht uitkomst (Serebii). Was:
+    genezen via aangrenzende bondgenoot. Sleep houdt de bondgenoot-genezing.
+  * Poison/burn/paralysis/confusion slijten in Duel NIET vanzelf — dat bleek
+    correct; genezing via Cleanse-plate, KO→HC en abilities (hebben we al).
+- SCHAAKKLOK (Duel-regel geverifieerd: 5 min per speler, tijd op = verlies —
+  hét anti-patstellings-mechanisme van Duel): tikt alleen tijdens je eigen
+  beurt, pauzeert tijdens animaties/gevechten, zichtbaar in de beurt-banner
+  (rood onder 30 sec). Geldt voor beide spelers (solo én hotseat).
+- RESULTAATSCHERM: einde match toont nu een echt paneel (OVERWINNING/
+  VERSLAGEN of SPELER X WINT, reden, credits) i.p.v. een toast; knop terug
+  naar het menu. endMatch zet nu ook expliciet state.over (latente bug: AI
+  kon in het oude 3-sec-venster doorspelen).
+- Tests: 63 → 67 headless (4 condition-checks); rooktest 19 → 20 (klok).
+  SW-cache v29.
+
 GEDAAN IN SESSIE 21 (6 juli 2026, vervolg)
 - GEVECHTS-PRESENTATIE (open punt 13, deel 1):
   * MOVE-NAMEN: elke aanval heeft nu een eigen (zelfbedachte fantasy-)naam die
