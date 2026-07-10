@@ -142,6 +142,21 @@ HUIDIGE DELIVERABLE
   - Symmetrische Duel-resolutie (headless getest: 14/14 spec-checks OK)
   - Bord-topologie headless getest: 12/12 checks OK
 
+GEDAAN IN SESSIE 21 (6 juli 2026, vervolg)
+- GEVECHTS-PRESENTATIE (open punt 13, deel 1):
+  * MOVE-NAMEN: elke aanval heeft nu een eigen (zelfbedachte fantasy-)naam die
+    gebogen langs de buitenrand van z'n wedge staat, Duel-look. MOVE_NAMES-tabel
+    per unit (white/gold/purple); onderste helft van het wiel gespiegeld zodat
+    tekst rechtop leest. Smalle vakjes (1 slot) krijgen geen naam (geen ruimte).
+  * CLASH: flits + schok van de wielen zodra beide stilstaan (respecteert
+    prefers-reduced-motion).
+  * RESULTAAT: moves-regel bovenaan het combat-resultaat ("Vuurspuw 60 ⚔
+    Schildstoot 30", aanvaller rood / verdediger blauw) boven de uitslag.
+- Tests: 60 → 63 headless (namen dekken exact de vak-soorten van alle 18 units,
+  moveLabel-checks); rooktest 19/19. SW-cache v28.
+- Resteert van open punt 13: volwaardig resultaat-/winstscherm, sudden death,
+  geluid.
+
 GEDAAN IN SESSIE 20 (6 juli 2026)
 - ABILITIES ingebouwd (Koens keuze uit de "meer op Duel lijken"-lijst).
   12 abilities, gemodelleerd naar echte Duel-abilities (Serebii-geverifieerd),

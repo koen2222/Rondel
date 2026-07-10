@@ -79,6 +79,15 @@
   .combat-result { margin-top: 24px; font-family: 'Cinzel', serif; font-size: 1.1rem; text-align: center; min-height: 50px; line-height: 1.5; }
   .combat-result .ko { color: var(--p2-soft); font-weight: 900; font-size: 1.3rem; text-shadow: 0 0 10px rgba(239,68,68,0.5); }
   .combat-result .status { color: var(--gold); font-style: italic; }
+  .clash-moves { display: flex; justify-content: center; align-items: center; gap: 10px; font-family: 'Cinzel', serif; font-weight: 700; font-size: 0.95rem; margin-bottom: 8px; }
+  .clash-moves .mv-att { color: #fca5a5; } .clash-moves .mv-def { color: #93c5fd; }
+  .clash-moves .vs { color: var(--gold); font-size: 1.1rem; }
+  #clash-flash { position: absolute; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(circle at 50% 42%, rgba(255,255,255,0.9) 0%, rgba(255,235,180,0.4) 30%, transparent 65%); }
+  #clash-flash.go { animation: clashFlash 0.45s ease-out; }
+  @keyframes clashFlash { 0% { opacity: 0.9; } 100% { opacity: 0; } }
+  .disks-row.clash { animation: clashShake 0.5s ease-out; }
+  @keyframes clashShake { 0%,100% { transform: translate(0,0); } 15% { transform: translate(-7px,2px); } 30% { transform: translate(6px,-2px); } 45% { transform: translate(-4px,1px); } 60% { transform: translate(3px,-1px); } 80% { transform: translate(-1px,0); } }
+  @media (prefers-reduced-motion: reduce) { .disks-row.clash, #clash-flash.go { animation: none; } }
 
   .plate-strip { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px; }
   .plate-chip { flex: 0 0 auto; min-width: 110px; background: linear-gradient(145deg, #2a201a, #14100d); border: 1px solid rgba(245,158,11,0.3); border-radius: 8px; padding: 6px 10px; display: flex; flex-direction: column; gap: 2px; cursor: pointer; transition: transform 0.15s; }
@@ -269,6 +278,7 @@
   </div>
 </div>
 <div id="combat-overlay" class="overlay">
+  <div id="clash-flash"></div>
   <div class="combat-vs">— DUEL —</div>
   <div class="disks-row">
     <div class="disk-cell"><div class="who" id="combat-top-name" style="color:var(--p2-soft); text-shadow: 0 0 8px var(--p2-glow);">Tegenstander</div><div class="disk-wrap"><div class="disk-pointer"></div><svg id="disk-top" class="disk-svg" viewBox="0 0 240 240"></svg></div></div>
@@ -435,6 +445,37 @@ function abilityOf(u) { return u && UNIT_DEFS[u.defKey] ? UNIT_DEFS[u.defKey].ab
 // Contact-status: welke status krijgt de tegenstander die ermee vecht?
 function contactStatusOf(ability) { return { enchant:'confusion', emberrune:'burn', rot:'poison', infernal:'burn' }[ability] || null; }
 function canPhase(u) { const a = abilityOf(u); return a === 'stalk' || a === 'fly'; }
+
+// Move-namen (eigen fantasy, sessie 21) — Duel-look: elke aanval heeft een naam
+// op het wiel. Per unit: white/gold/purple; blauw en Miss blijven naamloos.
+const MOVE_NAMES = {
+  squire:      { white:'Schildstoot',  purple:'Voetveeg' },
+  cleric:      { white:'Strijdknots',  purple:'Slaaphymne' },
+  commander:   { white:'Zwaardslag',   gold:'Banierstorm',  purple:'Bevelschreeuw' },
+  scout:       { white:'Dolksteek',    purple:'Gifpijl' },
+  archer:      { white:'Boogschot',    purple:'Doornpijl' },
+  weaver:      { white:'Manavlaag',    gold:'Spreukbreker', purple:'Warreling' },
+  apprentice:  { white:'Steenworp',    purple:'Gruisgreep' },
+  runesmith:   { white:'Hamerslag',    purple:'Gloeirune' },
+  warden:      { white:'Bergbeuk',     purple:'Rotsgreep' },
+  skeleton:    { white:'Botzwaai',     purple:'Grafkilte' },
+  ghoul:       { white:'Klauwhaal',    purple:'Lijkengif' },
+  necromancer: { white:'Schaduwgreep', gold:'Zielenvlaag',  purple:'Doodsslaap' },
+  boar:        { white:'Stormram',     purple:'Woeste Duw' },
+  lupine:      { white:'Kaakklem',     purple:'Huilroep' },
+  wyrmling:    { white:'Staartzweep',  gold:'Vuurspuw',     purple:'Asadem' },
+  imp:         { white:'Prikvork',     purple:'Vonkenregen' },
+  hellhound:   { white:'Vlammenbeet',  purple:'Schroeiblaf' },
+  pitlord:     { white:'Verwoester',   gold:'Hellekling',   purple:'Zwavelvloek' }
+};
+function moveLabel(defKey, slot) {
+  const n = MOVE_NAMES[defKey] || {};
+  if (slot.k === 'white') return `${n.white || 'Aanval'} ${slot.v}`;
+  if (slot.k === 'gold')  return `${n.gold || 'Doorbraak'} ${slot.v}`;
+  if (slot.k === 'purple') return `${n.purple || 'Vloek'} ${'★'.repeat(slot.stars || 1)}`;
+  if (slot.k === 'blue')  return 'Verdedigd';
+  return 'Miss';
+}
 // ABILITIES-END (marker voor headless tests — niet verwijderen)
 
 // Echte character-art (base64). Elke nieuwe PNG van Koen = één regel erbij.
@@ -723,7 +764,7 @@ function openUnitDetail(key) {
   document.getElementById('detail-name').textContent = def.name;
   document.getElementById('detail-sub').textContent = `${def.fac} · ${def.mp} MP · ${rar === 'C' ? 'Common' : rar === 'U' ? 'Uncommon' : 'Rare'} · Level ${lvl}`;
   const slots = slotsAtLevel(key, lvl);
-  renderDisk('disk-preview', slots);
+  renderDisk('disk-preview', slots, key);
   // Slot-samenvatting per kleur
   const sum = {};
   for (const s of slots) {
@@ -1365,7 +1406,7 @@ function diskStars(svg, n, gx, gy, s) {
   return g;
 }
 
-function renderDisk(svgId, slots) {
+function renderDisk(svgId, slots, defKey) {
   const svg = document.getElementById(svgId); svg.innerHTML = ''; svg.style.transition = 'none'; svg.style.transform = 'rotate(0deg)'; svg.getBoundingClientRect();
   const cx=120, cy=120, R=100, IR=26;
   const uq = svgId.replace(/[^a-zA-Z0-9]/g, '');
@@ -1388,6 +1429,19 @@ function renderDisk(svgId, slots) {
     const ix1=cx+ri*Math.cos(sA), iy1=cy+ri*Math.sin(sA), ix2=cx+ri*Math.cos(eA), iy2=cy+ri*Math.sin(eA);
     return `M ${ix1} ${iy1} L ${x1} ${y1} A ${ro} ${ro} 0 ${large} 1 ${x2} ${y2} L ${ix2} ${iy2} A ${ri} ${ri} 0 ${large} 0 ${ix1} ${iy1} Z`;
   };
+  // Gebogen move-naam langs de buitenrand van een wedge (leesbaar: onderin gespiegeld)
+  let arcSeq = 0;
+  const nameArc = (name, sA, eA, mA, color) => {
+    const nr = R - 10.5, pad = 0.10;
+    const id = `nm${uq}${arcSeq++}`;
+    const flip = Math.sin(mA) > 0;   // onderste helft: pad omkeren zodat de tekst rechtop staat
+    const a1 = flip ? eA - pad : sA + pad, a2 = flip ? sA + pad : eA - pad;
+    const p = el('path', { id, d:`M ${cx+nr*Math.cos(a1)} ${cy+nr*Math.sin(a1)} A ${nr} ${nr} 0 0 ${flip?0:1} ${cx+nr*Math.cos(a2)} ${cy+nr*Math.sin(a2)}`, fill:'none' }, svg);
+    const t = el('text', { 'font-size':9.5, 'font-family':"'Cinzel', serif", 'font-weight':'700', fill:color, 'letter-spacing':'0.04em' }, svg);
+    const tp = el('textPath', { href:`#${id}`, startOffset:'50%', 'text-anchor':'middle' }, t);
+    tp.textContent = name;
+  };
+  const names = MOVE_NAMES[defKey] || {};
   const merged = []; let i = 0;
   while (i < slots.length) { let j = i; while (j < slots.length && slots[i].k===slots[j].k && slots[i].v===slots[j].v && slots[i].stars===slots[j].stars) j++; merged.push({ slot: slots[i], start:i, end:j }); i = j; }
   for (const m of merged) {
@@ -1404,11 +1458,12 @@ function renderDisk(svgId, slots) {
     const k = m.slot.k;
     if (k === 'white' || k === 'gold') {
       // Schade-getal (Duel-look). Gold = doorbraak-aanval, krijgt fonkels.
-      const fs = narrow ? 17 : 24;
+      const fs = narrow ? 17 : 22;
       const t = el('text', { x:lx, y:ly, fill:TXT[k], 'font-family':"'Cinzel', serif", 'font-weight':'900', 'font-size':fs, 'text-anchor':'middle', 'dominant-baseline':'middle', 'paint-order':'stroke', stroke:'rgba(255,255,255,0.55)', 'stroke-width':2.5 }, svg);
       t.textContent = String(m.slot.v);
+      if (!narrow && names[k]) nameArc(names[k], sA, eA, mA, k === 'gold' ? '#78350f' : '#374151');
       if (k === 'gold') {
-        const gr = R - 8, gx = cx+gr*Math.cos(mA), gy = cy+gr*Math.sin(mA);
+        const gr = narrow ? R - 6 : R - 20, gx = cx+gr*Math.cos(mA), gy = cy+gr*Math.sin(mA);
         el('path', { d:`M ${gx} ${gy-3} L ${gx+0.9} ${gy-0.9} L ${gx+3} ${gy} L ${gx+0.9} ${gy+0.9} L ${gx} ${gy+3} L ${gx-0.9} ${gy+0.9} L ${gx-3} ${gy} L ${gx-0.9} ${gy-0.9} Z`, fill:'#fff', opacity:0.95 }, svg);
       }
     } else if (k === 'purple') {
@@ -1417,6 +1472,7 @@ function renderDisk(svgId, slots) {
       diskEffectGlyph(svg, m.slot.effect, lx, ly, gs);
       const sr = lr - (narrow ? 12 : 16), sx = cx+sr*Math.cos(mA), sy = cy+sr*Math.sin(mA);
       diskStars(svg, m.slot.stars || 1, sx, sy, narrow ? 3.4 : 4);
+      if (!narrow && names.purple) nameArc(names.purple, sA, eA, mA, '#ede9fe');
     } else if (k === 'blue') {
       diskShield(svg, lx, ly, narrow ? 8.5 : 12);
     } else if (k === 'red') {
@@ -1475,11 +1531,19 @@ async function runCombat(att, def) {
   document.getElementById(def.owner==='p2'?'combat-top-name':'combat-bottom-name').textContent = UNIT_DEFS[def.defKey].name;
 
   const aSlots = applyStatus(att.slots, att.status), dSlots = applyStatus(def.slots, def.status);
-  renderDisk(attDiskId, aSlots); renderDisk(defDiskId, dSlots);
+  renderDisk(attDiskId, aSlots, att.defKey); renderDisk(defDiskId, dSlots, def.defKey);
   document.getElementById('combat-result').textContent = ''; document.getElementById('btn-combat-continue').style.display = 'none';
   ov.classList.add('active');
 
   const [aIdx, dIdx] = await Promise.all([spin(attDiskId, 2800 + Math.random()*400), spin(defDiskId, 3400 + Math.random()*400)]);
+
+  // Clash: flits + schok zodra beide wielen stilstaan
+  if (!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+    const row = document.querySelector('#combat-overlay .disks-row');
+    const flash = document.getElementById('clash-flash');
+    if (row) { row.classList.remove('clash'); void row.offsetWidth; row.classList.add('clash'); }
+    if (flash) { flash.classList.remove('go'); void flash.offsetWidth; flash.classList.add('go'); }
+  }
 
   let finalAIdx = aIdx, finalDIdx = dIdx;
   if (att.status.includes('confusion')) finalAIdx = (finalAIdx + 1) % 16;
@@ -1525,7 +1589,8 @@ async function runCombat(att, def) {
 
   if (!r.attKO && !r.defKO && !attRetreat && !defRetreat && !r.statusOnAtt && !r.statusOnDef && !html) html += `<span style="opacity:0.8;font-style:italic">${noEffectReason(aSlot, dSlot)}</span>`;
 
-  document.getElementById('combat-result').innerHTML = html;
+  const movesLine = `<div class="clash-moves"><span class="mv-att">${moveLabel(att.defKey, aSlot)}</span><span class="vs">⚔</span><span class="mv-def">${moveLabel(def.defKey, dSlot)}</span></div>`;
+  document.getElementById('combat-result').innerHTML = movesLine + html;
   const btn = document.getElementById('btn-combat-continue'); btn.style.display = ''; setTimeout(() => btn.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
   await new Promise(res => { btn.onclick = res; }); ov.classList.remove('active');
 
