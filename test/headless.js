@@ -56,7 +56,7 @@ const evalCode = [
   resolveMatch[0],
   applyMatch[0],
   koMatch[0],
-  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase };',
+  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, MOVE_NAMES, moveLabel };',
 ].join('\n');
 
 // Schrijf tijdelijk evalueerbaar bestand (vermijdt new Function-beperkingen)
@@ -69,7 +69,7 @@ try {
   fs.unlinkSync(tmpPath);
 }
 
-const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase } = extracted;
+const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, MOVE_NAMES, moveLabel } = extracted;
 
 // ─── Test harness ──────────────────────────────────────────────────────────────
 let pass = 0, fail = 0;
@@ -288,6 +288,24 @@ section('=== ABILITIES (10 checks) ===');
     __setState(S); koUnit(w);
     check('Bergvast: KO → bank, niet HC', S.bench.p1.includes('w') && S.hc.p1.length === 0, true);
   }
+}
+
+// ─── 4c. MOVE-NAMEN ────────────────────────────────────────────────────────────
+section('=== MOVE-NAMEN (3 checks) ===');
+{
+  const keys = Object.keys(UNIT_DEFS);
+  // Elke unit heeft namen voor precies de vak-soorten die op z'n schijf staan
+  let complete = true;
+  for (const k of keys) {
+    const kinds = new Set(UNIT_DEFS[k].slots.map(s => s.k));
+    for (const kind of ['white','gold','purple']) {
+      if (kinds.has(kind) && !(MOVE_NAMES[k] && MOVE_NAMES[k][kind])) { complete = false; console.log('    ✗ naam ontbreekt:', k, kind); }
+      if (!kinds.has(kind) && MOVE_NAMES[k] && MOVE_NAMES[k][kind]) { complete = false; console.log('    ✗ naam voor niet-bestaand vak:', k, kind); }
+    }
+  }
+  check('Namen dekken exact de vak-soorten van alle 18 units', complete, true);
+  check('moveLabel: white → naam + schade', moveLabel('squire', { k:'white', v:30 }), 'Schildstoot 30');
+  check('moveLabel: purple → naam + sterren', moveLabel('wyrmling', { k:'purple', effect:'burn', stars:2 }), 'Asadem ★★');
 }
 
 // ─── 5. SYNTAX-CHECK volledige game-JS ─────────────────────────────────────────
