@@ -142,6 +142,24 @@ HUIDIGE DELIVERABLE
   - Symmetrische Duel-resolutie (headless getest: 14/14 spec-checks OK)
   - Bord-topologie headless getest: 12/12 checks OK
 
+GEDAAN IN SESSIE 23 (7 juli 2026, vervolg)
+- KOENS MISS-LOOP (2e patstelling-melding, screenshot: burned Imp-vs-Imp met
+  wielen zonder één aanvalsvak). WORTEL: elke unit had maar ÉÉN white-aanval
+  (bv. Imp 5×20); burn/paralysis ("kleinste White → Miss") wiste daarmee het
+  complete aanvalsvermogen. In Duel kan dat niet omdat figuren MEERDERE
+  aanvallen met verschillende waardes hebben.
+- HERONTWERP DISK-DATA: elke unit heeft nu TWEE onderscheiden white-aanvallen
+  (hoofdaanval + snelle bijaanval, verschillende waarde, eigen naam) — burn/
+  paralysis pakt alleen de bijaanval af. Namen zitten nu ÍN de slots
+  (W/G/P-helpers hebben een naam-parameter); MOVE_NAMES-tabel vervallen.
+  Totale white-schade per unit ~gelijk gehouden (±20). Dit vervult ook Koens
+  eerdere wens ("verschillende waardes, kleine vakjes") nu écht.
+  LET OP: dit is een bewuste balanswijziging — speeltest opnieuw (open punt 2).
+- DISK_LAYOUT bijgewerkt (bijaanval gescheiden van hoofdaanval door Miss-zone).
+- REGRESSIETESTS: elke unit ≥2 onderscheiden aanvallen; na burn houdt elke
+  unit ≥1 werkende aanval over (anti-miss-loop-garantie); elk aanvalsslot
+  heeft een naam. Tests 67 → 70 headless, rooktest 20/20. SW-cache v30.
+
 GEDAAN IN SESSIE 22 (7 juli 2026)
 - KOENS PATSTELLING onderzocht (screenshot: iedereen gestatust, niemand kan
   nog raken). Twee spec-afwijkingen gevonden en gefixt na web-verificatie:

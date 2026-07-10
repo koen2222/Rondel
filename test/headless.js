@@ -59,7 +59,7 @@ const evalCode = [
   applyMatch[0],
   koMatch[0],
   condMatch[0],
-  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, MOVE_NAMES, moveLabel, applyCondition };',
+  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition };',
 ].join('\n');
 
 // Schrijf tijdelijk evalueerbaar bestand (vermijdt new Function-beperkingen)
@@ -72,7 +72,7 @@ try {
   fs.unlinkSync(tmpPath);
 }
 
-const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, MOVE_NAMES, moveLabel, applyCondition } = extracted;
+const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition } = extracted;
 
 // ─── Test harness ──────────────────────────────────────────────────────────────
 let pass = 0, fail = 0;
@@ -307,22 +307,41 @@ section('=== CONDITION-REGELS (4 checks) ===');
   check("'wait' toevoegen laat de condition intact", w.status.includes('poison') && w.status.includes('wait'), true);
 }
 
-// ─── 4c. MOVE-NAMEN ────────────────────────────────────────────────────────────
-section('=== MOVE-NAMEN (3 checks) ===');
+// ─── 4c. MOVES & ANTI-MISS-LOOP (twee-aanvallen-herontwerp, sessie 23) ─────────
+section('=== MOVES & ANTI-MISS-LOOP (6 checks) ===');
 {
   const keys = Object.keys(UNIT_DEFS);
-  // Elke unit heeft namen voor precies de vak-soorten die op z'n schijf staan
-  let complete = true;
-  for (const k of keys) {
-    const kinds = new Set(UNIT_DEFS[k].slots.map(s => s.k));
-    for (const kind of ['white','gold','purple']) {
-      if (kinds.has(kind) && !(MOVE_NAMES[k] && MOVE_NAMES[k][kind])) { complete = false; console.log('    ✗ naam ontbreekt:', k, kind); }
-      if (!kinds.has(kind) && MOVE_NAMES[k] && MOVE_NAMES[k][kind]) { complete = false; console.log('    ✗ naam voor niet-bestaand vak:', k, kind); }
-    }
+  // Elke aanval (white/gold/purple) draagt z'n eigen naam in het slot
+  let named = true;
+  for (const k of keys) for (const s of UNIT_DEFS[k].slots) {
+    if (['white','gold','purple'].includes(s.k) && !s.name) { named = false; console.log('    ✗ naamloos slot:', k, s.k); }
   }
-  check('Namen dekken exact de vak-soorten van alle 18 units', complete, true);
-  check('moveLabel: white → naam + schade', moveLabel('squire', { k:'white', v:30 }), 'Schildstoot 30');
-  check('moveLabel: purple → naam + sterren', moveLabel('wyrmling', { k:'purple', effect:'burn', stars:2 }), 'Asadem ★★');
+  check('Elk aanvalsslot van alle 18 units heeft een naam', named, true);
+
+  // Elke unit heeft ≥2 onderscheiden aanvallen (verschillende white-waarden of gold ernaast)
+  let multi = true;
+  for (const k of keys) {
+    const whites = new Set(UNIT_DEFS[k].slots.filter(s => s.k === 'white').map(s => s.v));
+    const hasGold = UNIT_DEFS[k].slots.some(s => s.k === 'gold');
+    if (whites.size + (hasGold ? 1 : 0) < 2) { multi = false; console.log('    ✗ maar één aanval:', k); }
+  }
+  check('Elke unit heeft ≥2 onderscheiden aanvallen', multi, true);
+
+  // DE regressietest voor Koens miss-loop: na burn (kleinste white → Miss)
+  // moet elke unit nog minstens één werkende aanval overhouden
+  let survivable = true;
+  for (const k of keys) {
+    const after = applyStatus(UNIT_DEFS[k].slots, ['burn']);
+    if (!after.some(s => s.k === 'white' || s.k === 'gold')) { survivable = false; console.log('    ✗ wiel dood na burn:', k); }
+  }
+  check('Na burn houdt elke unit ≥1 aanval over (anti-miss-loop)', survivable, true);
+  {
+    const after = applyStatus(UNIT_DEFS.imp.slots, ['burn']);
+    const whites = after.filter(s => s.k === 'white');
+    check('Imp na burn: hoofdaanval blijft (30-10=20)', whites.length === 3 && whites.every(s => s.v === 20), true);
+  }
+  check('moveLabel: white → naam + schade', moveLabel({ k:'white', v:40, name:'Schildstoot' }), 'Schildstoot 40');
+  check('moveLabel: purple → naam + sterren', moveLabel({ k:'purple', effect:'burn', stars:2, name:'Asadem' }), 'Asadem ★★');
 }
 
 // ─── 5. SYNTAX-CHECK volledige game-JS ─────────────────────────────────────────
