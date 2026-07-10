@@ -174,6 +174,12 @@
   .detail-disk-wrap svg { width: 230px; height: 230px; }
   .slot-summary { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 10px 0; }
   .slot-pill { font-size: 0.68rem; font-family: 'Cinzel', serif; border-radius: 10px; padding: 3px 10px; border: 1px solid rgba(255,255,255,0.2); }
+  .result-panel { background: linear-gradient(170deg, #1c1528, #0b0912); border: 1px solid rgba(245,158,11,0.4); border-radius: 18px; padding: 30px 26px; max-width: 340px; width: 90%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.9); }
+  .result-title { font-family: 'Cinzel', serif; font-weight: 900; font-size: 2rem; letter-spacing: 0.1em; }
+  .result-title.win { color: var(--gold); text-shadow: 0 0 25px var(--gold-glow); }
+  .result-title.lose { color: #f87171; text-shadow: 0 0 25px rgba(239,68,68,0.5); }
+  .result-reason { margin-top: 10px; font-style: italic; color: #a89f91; }
+  .result-reward { margin-top: 8px; font-family: 'Cinzel', serif; color: var(--gold); font-size: 1.05rem; }
   .ability-line { width: 100%; font-size: 0.72rem; color: #cdbfa6; margin-top: 8px; line-height: 1.35; }
   .ability-tag { display: inline-block; font-family: 'Cinzel', serif; font-weight: 700; color: #a78bfa; }
   .detail-actions { display: flex; gap: 10px; margin-top: 14px; }
@@ -232,7 +238,7 @@
 <div class="game">
   <div id="turn-banner" class="turn-banner p1">
     <span><span style="opacity:0.6; font-size:0.7rem;">FASE:</span> <span id="turn-name">Speler 1</span></span>
-    <span style="font-size:0.8rem; color:var(--gold);" id="turn-actions">1 ACTIE</span>
+    <span style="display:flex; gap:12px; align-items:center;"><span style="font-size:0.8rem;" id="turn-clock">⏱ 5:00</span><span style="font-size:0.8rem; color:var(--gold);" id="turn-actions">1 ACTIE</span></span>
   </div>
   <div class="board-wrap"><svg id="board" viewBox="0 0 540 850" xmlns="http://www.w3.org/2000/svg"></svg></div>
   <div id="plate-strip" class="plate-strip"></div>
@@ -241,6 +247,16 @@
     <button class="btn" id="btn-menu">Menu</button>
   </div>
 </div>
+</div>
+
+<!-- ===== RESULTAAT (einde match) ===== -->
+<div id="result-overlay" class="overlay">
+  <div class="result-panel">
+    <div class="result-title win" id="result-title">OVERWINNING</div>
+    <div class="result-reason" id="result-reason"></div>
+    <div class="result-reward" id="result-reward"></div>
+    <button class="btn primary" id="btn-result-menu" style="width:100%; margin-top:18px;">Terug naar het menu</button>
+  </div>
 </div>
 
 <!-- ===== UNIT-DETAIL (collectie) ===== -->
@@ -591,11 +607,38 @@ function unitSilhouette(defKey, owner) {
 let state;
 let currentMode = 'solo';
 
-function initialState() { return { turn:'p1', actionsLeft:1, units:{}, bench:{p1:[],p2:[]}, hc:{p1:[],p2:[]}, selected:null, legalTargets:new Set(), pendingDeploy:null, over:false, mode: currentMode, aiThinking: false, locked: false, plates:{p1:[],p2:[]}, plateUsed:false, pendingPlate:null, mpBonus:{}, warcry:{p1:false,p2:false}, firstMoveDone:false, animating:null, pendingFX:[] }; }
+function initialState() { return { turn:'p1', actionsLeft:1, units:{}, bench:{p1:[],p2:[]}, hc:{p1:[],p2:[]}, selected:null, legalTargets:new Set(), pendingDeploy:null, over:false, mode: currentMode, aiThinking: false, locked: false, plates:{p1:[],p2:[]}, plateUsed:false, pendingPlate:null, mpBonus:{}, warcry:{p1:false,p2:false}, firstMoveDone:false, animating:null, pendingFX:[], clock:{ p1:300000, p2:300000 } }; }
+
+// ===== Schaakklok (Duel-regel: 5 min per speler; tijd op = verlies) =====
+// De klok tikt alleen tijdens je eigen beurt en pauzeert tijdens
+// animaties/gevechten (state.locked).
+let clockTimer = null, clockLast = 0;
+function fmtClock(ms) { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`; }
+function startClock() { stopClock(); clockLast = performance.now(); clockTimer = setInterval(tickClock, 250); }
+function stopClock() { if (clockTimer) { clearInterval(clockTimer); clockTimer = null; } }
+function tickClock() {
+  const now = performance.now(); const dt = now - clockLast; clockLast = now;
+  if (!state || state.over || state.locked || !state.clock) return;
+  const gameActive = document.getElementById('screen-game').classList.contains('active');
+  if (!gameActive) return;
+  state.clock[state.turn] -= dt;
+  const cEl = document.getElementById('turn-clock');
+  if (cEl) { cEl.textContent = '⏱ ' + fmtClock(state.clock[state.turn]); cEl.style.color = state.clock[state.turn] < 30000 ? '#f87171' : ''; }
+  if (state.clock[state.turn] <= 0) { state.clock[state.turn] = 0; endMatch(state.turn === 'p1' ? 'p2' : 'p1', 'De tijd is om!'); }
+}
 
 // Duel-regel: KO → Healing Center (max 2 plekken). Een derde KO duwt de oudste
 // terug naar de bench met 'wait' (weer inzetbaar vanaf eigen volgende beurt).
 // Statussen genezen in het HC; level blijft behouden.
+// Duel-regel: maar ÉÉN special condition tegelijk — een nieuwe vervangt de
+// oude. 'wait' en 'bulwark' zijn geen conditions en blijven staan.
+function applyCondition(u, st) {
+  const SPECIAL = ['poison','badlypoison','burn','paralysis','confusion','sleep','frozen','curse'];
+  if (!SPECIAL.includes(st)) { if (!u.status.includes(st)) u.status.push(st); return; }
+  u.status = u.status.filter(s => !SPECIAL.includes(s));
+  u.status.push(st);
+}
+
 function koUnit(u) {
   u.node = null; u.status = [];
   // Bergvast (Mountain Warden): sla het Healing Center over, direct terug naar de bank
@@ -629,7 +672,9 @@ function renderHome() {
 }
 
 function goHome() {
+  stopClock();
   document.getElementById('deck-overlay').classList.remove('active');
+  document.getElementById('result-overlay').classList.remove('active');
   state = initialState(); state.over = true;
   renderHome(); showScreen('home');
 }
@@ -717,19 +762,28 @@ function startGame() {
   }
   state.plates.p1 = [...p1Deck.plates];
   showScreen('game');
+  const cEl = document.getElementById('turn-clock'); if (cEl) { cEl.textContent = '⏱ 5:00'; cEl.style.color = ''; }
+  startClock();
   renderAll();
 }
 
 function endMatch(winner, msg) {
-  toast(msg);
+  if (state.over) return;   // dubbele triggers (klok + zet) afvangen
+  state.over = true; stopClock();
+  let gain = 0;
   if (state.mode === 'solo') {
-    const gain = winner === 'p1' ? WIN_CREDITS : LOSS_CREDITS;
+    gain = winner === 'p1' ? WIN_CREDITS : LOSS_CREDITS;
     profile.credits += gain;
     if (winner === 'p1') profile.stats.wins++; else profile.stats.losses++;
     saveProfile();
-    setTimeout(() => toast(`+${gain} credits`), 1400);
   }
-  setTimeout(() => goHome(), 3000);
+  const won = winner === 'p1';
+  document.getElementById('result-title').textContent = state.mode === 'solo' ? (won ? 'OVERWINNING' : 'VERSLAGEN') : (won ? 'SPELER 1 WINT' : 'SPELER 2 WINT');
+  document.getElementById('result-title').className = 'result-title ' + (state.mode !== 'solo' || won ? 'win' : 'lose');
+  document.getElementById('result-reason').textContent = msg;
+  document.getElementById('result-reward').textContent = state.mode === 'solo' ? `+${gain} credits` : '';
+  renderAll();
+  setTimeout(() => document.getElementById('result-overlay').classList.add('active'), 900);
 }
 
 // ===== Collectie: bekijken + upgraden (met disk-preview) =====
@@ -1086,7 +1140,7 @@ function usePlate(player, idx, targetUid, targetNode) {
   else if (key === 'bulwark') { if (!u.status.includes('bulwark')) u.status.push('bulwark'); }
   else if (key === 'recall') { u.node = null; state.bench[player].push(u.uid); }
   else if (key === 'blink') { u.node = targetNode; }
-  else if (pl.status) { if (!u.status.includes(pl.status)) u.status.push(pl.status); }
+  else if (pl.status) { applyCondition(u, pl.status); }
   state.plates[player].splice(idx, 1); state.plateUsed = true; state.pendingPlate = null; state.legalTargets = new Set();
   toast(`${pl.name} gebruikt`); renderAll();
 }
@@ -1344,7 +1398,8 @@ function hasAnyAction(player) {
 
 function endTurn() {
   if (state.over || state.locked) return;
-  for (const u of Object.values(state.units)) { if (!u.node) continue; if (u.status.includes('sleep')||u.status.includes('frozen')) { const hasAdj = [...ADJ[u.node]].some(n => { const o = unitAt(n); return o && o.owner === u.owner; }); if (hasAdj) u.status = u.status.filter(s => s!=='sleep' && s!=='frozen'); } }
+  // Sleep geneest via een aangrenzende bondgenoot; frozen geneest sinds sessie 22 ná een gevecht (Duel-regel)
+  for (const u of Object.values(state.units)) { if (!u.node) continue; if (u.status.includes('sleep')) { const hasAdj = [...ADJ[u.node]].some(n => { const o = unitAt(n); return o && o.owner === u.owner; }); if (hasAdj) u.status = u.status.filter(s => s!=='sleep'); } }
   state.turn = state.turn==='p1'?'p2':'p1'; state.actionsLeft = 1; state.selected = null; state.pendingDeploy = null; state.legalTargets = new Set();
   state.plateUsed = false; state.pendingPlate = null; state.mpBonus = {}; state.warcry = { p1:false, p2:false };
   for (const uid of state.bench[state.turn]) { const u = state.units[uid]; if (u.status.includes('wait')) u.status = u.status.filter(s => s !== 'wait'); }
@@ -1549,8 +1604,9 @@ async function runCombat(att, def) {
   if (att.status.includes('confusion')) finalAIdx = (finalAIdx + 1) % 16;
   if (def.status.includes('confusion')) finalDIdx = (finalDIdx + 1) % 16;
 
-  let aSlot = att.status.includes('frozen') ? {k:'red'} : aSlots[finalAIdx];
-  let dSlot = def.status.includes('frozen') ? {k:'red'} : dSlots[finalDIdx];
+  const attWasFrozen = att.status.includes('frozen'), defWasFrozen = def.status.includes('frozen');
+  let aSlot = attWasFrozen ? {k:'red'} : aSlots[finalAIdx];
+  let dSlot = defWasFrozen ? {k:'red'} : dSlots[finalDIdx];
 
   if (att.status.includes('bulwark')) { att.status = att.status.filter(s => s !== 'bulwark'); if (aSlot.k === 'red') aSlot = {k:'blue'}; }
   if (def.status.includes('bulwark')) { def.status = def.status.filter(s => s !== 'bulwark'); if (dSlot.k === 'red') dSlot = {k:'blue'}; }
@@ -1575,14 +1631,14 @@ async function runCombat(att, def) {
 
   if (r.defKO && !r.attKO) { attNextNode = defInitialNode; }
 
-  if (r.statusOnAtt) { if (!att.status.includes(r.statusOnAtt)) att.status.push(r.statusOnAtt); html += `<span class="status">-> ${r.statusOnAtt.toUpperCase()}</span><br>`; }
-  if (r.statusOnDef) { if (!def.status.includes(r.statusOnDef)) def.status.push(r.statusOnDef); html += `<span class="status">-> ${r.statusOnDef.toUpperCase()}</span><br>`; }
+  if (r.statusOnAtt) { applyCondition(att, r.statusOnAtt); html += `<span class="status">-> ${r.statusOnAtt.toUpperCase()}</span><br>`; }
+  if (r.statusOnDef) { applyCondition(def, r.statusOnDef); html += `<span class="status">-> ${r.statusOnDef.toUpperCase()}</span><br>`; }
 
   // Contact-abilities: status op de overlevende tegenstander (en op zichzelf bij Helse Jacht)
   const applyContact = (src, tgt, srcSurvives, tgtSurvives) => {
     const st = contactStatusOf(abilityOf(src)); if (!st) return;
-    if (tgtSurvives && !tgt.status.includes(st)) { tgt.status.push(st); html += `<span class="status">${UNIT_DEFS[src.defKey].name}: ${UNIT_DEFS[tgt.defKey].name} -> ${st.toUpperCase()}</span><br>`; }
-    if (abilityOf(src) === 'infernal' && srcSurvives && !src.status.includes('burn')) src.status.push('burn');
+    if (tgtSurvives && !tgt.status.includes(st)) { applyCondition(tgt, st); html += `<span class="status">${UNIT_DEFS[src.defKey].name}: ${UNIT_DEFS[tgt.defKey].name} -> ${st.toUpperCase()}</span><br>`; }
+    if (abilityOf(src) === 'infernal' && srcSurvives && !src.status.includes('burn')) applyCondition(src, 'burn');
   };
   applyContact(att, def, !attToBench, !defToBench);
   applyContact(def, att, !defToBench, !attToBench);
@@ -1601,6 +1657,10 @@ async function runCombat(att, def) {
   // Onverwoestbaar-terugtocht: statussen behouden (geen HC-genezing), wél 'wait'
   if (attRetreat) { att.status.push('wait'); state.bench[att.owner].push(att.uid); queueFX(NODES[attInitialNode].x, NODES[attInitialNode].y, 'poof'); }
   if (defRetreat) { def.status.push('wait'); state.bench[def.owner].push(def.uid); queueFX(NODES[defInitialNode].x, NODES[defInitialNode].y, 'poof'); }
+
+  // Duel-regel (Serebii): Frozen wordt na een gevecht gewist, ongeacht de uitkomst
+  if (attWasFrozen) att.status = att.status.filter(s => s !== 'frozen');
+  if (defWasFrozen) def.status = def.status.filter(s => s !== 'frozen');
 
   if (r.defKO && !r.attKO) levelUp(att);
   if (r.attKO && !r.defKO) levelUp(def);
@@ -1657,6 +1717,7 @@ document.getElementById('tile-store').addEventListener('click', () => { renderSt
 for (const b of document.querySelectorAll('.btn-back')) b.addEventListener('click', () => { renderHome(); showScreen(b.dataset.back); });
 document.getElementById('btn-detail-close').addEventListener('click', () => document.getElementById('detail-overlay').classList.remove('active'));
 document.getElementById('btn-detail-upgrade').addEventListener('click', doUpgrade);
+document.getElementById('btn-result-menu').addEventListener('click', goHome);
 
 const AI = 'p2';
 

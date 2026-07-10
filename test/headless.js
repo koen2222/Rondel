@@ -43,6 +43,8 @@ const abilitySection = html.slice(
 const resolveMatch = html.match(/\nfunction resolve\([\s\S]*?\n\}/);
 const applyMatch   = html.match(/\nfunction applyStatus\([\s\S]*?\n\}/);
 const koMatch      = html.match(/\nfunction koUnit\([\s\S]*?\n\}/);
+const condMatch    = html.match(/\nfunction applyCondition\([\s\S]*?\n\}/);
+if (!condMatch) throw new Error('applyCondition() niet gevonden');
 if (!resolveMatch) throw new Error('resolve() niet gevonden');
 if (!applyMatch)   throw new Error('applyStatus() niet gevonden');
 if (!koMatch)      throw new Error('koUnit() niet gevonden');
@@ -56,7 +58,8 @@ const evalCode = [
   resolveMatch[0],
   applyMatch[0],
   koMatch[0],
-  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, MOVE_NAMES, moveLabel };',
+  condMatch[0],
+  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, MOVE_NAMES, moveLabel, applyCondition };',
 ].join('\n');
 
 // Schrijf tijdelijk evalueerbaar bestand (vermijdt new Function-beperkingen)
@@ -69,7 +72,7 @@ try {
   fs.unlinkSync(tmpPath);
 }
 
-const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, MOVE_NAMES, moveLabel } = extracted;
+const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, MOVE_NAMES, moveLabel, applyCondition } = extracted;
 
 // ─── Test harness ──────────────────────────────────────────────────────────────
 let pass = 0, fail = 0;
@@ -288,6 +291,20 @@ section('=== ABILITIES (10 checks) ===');
     __setState(S); koUnit(w);
     check('Bergvast: KO → bank, niet HC', S.bench.p1.includes('w') && S.hc.p1.length === 0, true);
   }
+}
+
+// ─── 4b2. CONDITION-REGELS (Duel: één status tegelijk) ─────────────────────────
+section('=== CONDITION-REGELS (4 checks) ===');
+{
+  const u = { status: ['burn', 'bulwark'] };
+  applyCondition(u, 'paralysis');
+  check('Nieuwe condition vervangt de oude (burn → paralysis)', u.status.includes('paralysis') && !u.status.includes('burn'), true);
+  check('Bulwark blijft staan (geen special condition)', u.status.includes('bulwark'), true);
+  applyCondition(u, 'paralysis');
+  check('Zelfde condition opnieuw → geen duplicaat', u.status.filter(s => s === 'paralysis').length, 1);
+  const w = { status: ['poison'] };
+  applyCondition(w, 'wait');
+  check("'wait' toevoegen laat de condition intact", w.status.includes('poison') && w.status.includes('wait'), true);
 }
 
 // ─── 4c. MOVE-NAMEN ────────────────────────────────────────────────────────────

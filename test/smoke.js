@@ -53,6 +53,8 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
   ok('Bord gerenderd (32 nodes)', await page.locator('#board circle.node-rim, #board [id^="glow-"]').count() >= 32);
   ok('Bench P1: 6 figuren naast het bord', await page.locator('#board g.bench-p1 g.bench-fig').count() === 6);
   ok('Bench P2: 6 figuren naast het bord', await page.locator('#board g.bench-p2 g.bench-fig').count() === 6);
+  await page.waitForTimeout(600);
+  ok('Schaakklok tikt (m:ss zichtbaar)', /⏱ [0-9]:[0-5][0-9]/.test(await page.locator('#turn-clock').innerText()));
 
   // 5a. Een paar beurten spelen zodat ability-hooks (deploy/combat/MP) echt draaien
   page.on('dialog', d => d.accept());
