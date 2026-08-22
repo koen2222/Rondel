@@ -1,5 +1,5 @@
 RONDEL — STATUS EN BESLISSINGEN
-Laatste update: 22 augustus 2026 (sessie 24)
+Laatste update: 22 augustus 2026 (sessie 25)
 
 KERNCONCEPT
 - Tabletop-first fantasy bordspel, einddoel = digitale app
@@ -49,15 +49,26 @@ Statussen (ALLEMAAL functioneel in code sinds sessie 5)
 - Frozen: kan niet aanvallen (eigen spin = Miss); kan WEL bewegen (sessie-5 fix conform spec); geneest via adjacent ally
 - Curse: gereserveerd (relevant zodra revive-mechanics bestaan)
 
-Bord (DEFINITIEF — sessie 6: terug naar 32-node layout, vlak, exact conform Koens foto)
-- 32 nodes: outer ring 20 (7 top / 7 bottom incl. goals + entries, 3 per zijkant)
-  + inner rechthoek 12 (5 boven IT1-5, 5 onder IB1-5, 1 mid per zijde IL/IR)
-- Spokes: 4 hoek-diagonalen (entry → inner hoek), G2→IT2 (diagonaal linksaf),
-  G1→IB4 (180°-spiegel, rechtsaf)
-- GESCHRAPT (sessie-3 markeringen, blijft gelden): G2↔IT3, G1↔IB2-kant, L2↔IL, R2↔IR
-- Vlakke 2D-weergave (cirkels), donkere stijl conform foto — de v12-trapezoïde met
-  8-node octagon is hiermee VERVALLEN op expliciete aanwijzing van Koen
-- Topologie headless gevalideerd: 32 nodes, 38 edges, volledig verbonden, 180° rotatiesymmetrisch
+Bord (DEFINITIEF — sessie 25: gelijkgetrokken met het ECHTE Duel-bord, 28 posities)
+- 28 posities = 26 punten + 2 doelen, exact zoals pokemon.com Duel beschrijft
+  ("fields made up of 26 points (and two goals)").
+- Vorm: 7x5 BUITENRAND (20 randpunten) + 3x3 BINNENVIERKANT (8 randpunten,
+  midden leeg). Bron voor de vorm: een nagebouwd fysiek Duel-bord beschrijft
+  het als "a 7x5 measurement on the outer square and an even 3x3 inner square,
+  with the corners of both squares connecting".
+- Doelen G1/G2 in het midden van onder- en bovenrand; 4 entries op de hoeken.
+- Routes (32): buitenring 20 + binnenring 8 + 4 hoekdiagonalen (elke entry naar
+  de dichtstbijzijnde hoek van het binnenvierkant). MEER verbindingen tussen
+  binnen en buiten zijn er NIET.
+- Geverifieerd: volledig verbonden, 180°-rotatiesymmetrisch, entry→vijandelijk
+  doel = 7 stappen vanaf ALLE vier de entries, en elk doel houdt precies 2
+  toegangen. De rush-fix van sessie 17 blijft dus intact.
+- VERVALLEN: de 32-node layout met 5x3 binnenrechthoek (sessie 6/17). Die had
+  4 punten te veel t.o.v. het echte Duel-bord.
+- Weergave: sinds sessie 17 in PERSPECTIEF (trapezoïde, schuin zoals een echte
+  duel-tafel). De oudere "vlak conform foto"-beslissing van sessie 6 is daarmee
+  vervallen; de topologie staat daar los van.
+- Topologie headless gevalideerd: 28 nodes, 32 edges, volledig verbonden, 180° rotatiesymmetrisch
 
 Win conditions
 - Goal-rush: figure eindigt op tegenstander's goal
@@ -141,6 +152,37 @@ HUIDIGE DELIVERABLE
     level-up, alle statussen functioneel
   - Symmetrische Duel-resolutie (headless getest: 14/14 spec-checks OK)
   - Bord-topologie headless getest: 12/12 checks OK
+
+GEDAAN IN SESSIE 25 (22 aug 2026) — BORD GELIJKGETROKKEN MET DUEL
+Koen: "het bord klopt nog niet met Pokémon Duel, die heeft nog een lijn na het
+een-na-laatste puntje naar het startpunt toe — zoek maar even op en zorg dat het
+bord klopt; en zorg dat alle poppen ongeveer dezelfde MP hebben; kopieer gewoon
+de hele mechaniek."
+
+- BORD: onderzocht en gecorrigeerd. pokemon.com zegt letterlijk dat Duel-velden
+  bestaan uit "26 points (and two goals)" = 28 posities. Wij hadden er 32.
+  De vorm blijkt een 7x5 buitenrand (20 randpunten) met een 3x3 BINNENVIERKANT
+  (8 randpunten), waarbij de hoeken van beide vierkanten verbonden zijn — ons
+  binnenvierkant was een 5x3 rechthoek met 12 punten, dus 4 te veel.
+  Nu: 20 + 8 = 28 posities, 32 routes (buitenring 20 + binnenring 8 + 4
+  hoekdiagonalen). De hoekdiagonalen zijn precies de lijnen die vanaf elk
+  startpunt het bord in lopen (waarschijnlijk wat Koen bedoelde).
+  GEVERIFIEERD na de ombouw: volledig verbonden, 180°-rotatiesymmetrisch,
+  entry→vijandelijk doel = 7 stappen vanaf alle vier de entries, elk doel houdt
+  precies 2 toegangen. De rush-fix van sessie 17 is dus NIET ongedaan gemaakt.
+- MP GELIJKGETROKKEN: was 1 MP (4 units), 2 MP (10), 3 MP (4). Op een bord van
+  7 stappen betekende 1 MP zeven beurten oversteken — die units voelden
+  onspeelbaar. Nu 2 MP voor 14 units en 3 MP voor de vier snelle verkenners
+  (Forest Scout, Lupine Hunter, Imp, Hellhound): hoogstens 1 stap verschil over
+  de hele roster. LET OP: dit is een BEWUSTE balanswijziging. Duel zelf gebruikt
+  wél 1 MP voor zware figuren (Charizard), en onze 1-MP-units waren juist de
+  sterkste (Warden 90 dmg, Pit Lord 100 + gold). Ze zijn nu dus sterker
+  geworden — speeltesten, en makkelijk terug te draaien.
+- Deploy-regel nagelopen op Koens vraag ("kunnen ze lopen als je ze inzet"):
+  klopt al met Duel — inzetten via een vrij eigen entry kost 1 MP en met de
+  resterende MP mag de figuur meteen doorlopen naar lege punten.
+- Tests: 98 → 102 headless (bord 28/26/32, MP-bereik), rooktest 34 (bord-check
+  nu exact 28 punten i.p.v. een losse ondergrens). SW-cache v35.
 
 GEDAAN IN SESSIE 24 (22 aug 2026) — "MAAK HET AF ZOALS BEDOELD"
 Koens opdracht: het spel afmaken zoals oorspronkelijk bedoeld, zo dicht mogelijk

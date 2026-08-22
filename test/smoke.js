@@ -72,7 +72,7 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
   await page.click('#btn-deck-start');
   await page.waitForSelector('#screen-game.active');
   ok('Game-scherm actief', true);
-  ok('Bord gerenderd (32 nodes)', await page.locator('#board circle.node-rim, #board [id^="glow-"]').count() >= 32);
+  ok('Bord gerenderd met precies 28 punten (Duel: 26 + 2 doelen)', await page.locator('#board [data-node]').count() === 28);
   ok('Bench P1: 6 figuren naast het bord', await page.locator('#board g.bench-p1 g.bench-fig').count() === 6);
   ok('Bench P2: 6 figuren naast het bord', await page.locator('#board g.bench-p2 g.bench-fig').count() === 6);
   await page.waitForTimeout(600);

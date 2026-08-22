@@ -431,12 +431,18 @@
 
 <script>
 // ==========================================
-// BORD — 32-node layout (sessie 6), sinds sessie 17 in PERSPECTIEF gerenderd:
-// de logische kolom/rij-topologie is ongewijzigd, maar de coördinaten vormen
-// een trapezoïde (bovenkant smaller + rijen dichter op elkaar) zodat het bord
-// schuin ligt zoals een echte duel-tafel. Figuren blijven rechtop staan.
-// Outer ring 20 + inner rechthoek 12; spokes: 4 hoek-diagonalen.
-// Goal-diagonalen G2-IT2/G1-IB4 GESCHRAPT in sessie 17 (rush-fix, zie doc).
+// BORD — 28-node layout, sessie 25 gelijkgetrokken met het ECHTE Duel-bord.
+// Bron: pokemon.com noemt "fields made up of 26 points (and two goals)"; een
+// na-gebouwd fysiek Duel-bord beschrijft de vorm als een 7x5 buitenrand met
+// een 3x3 binnenvierkant, waarbij de hoeken van beide vierkanten met elkaar
+// verbonden zijn. Dat geeft precies 20 + 8 = 28 posities, waarvan 2 doelen —
+// dus 26 punten + 2 doelen. Wij hadden een 5x3 binnenrechthoek (12 punten) en
+// dus 4 punten te veel; dat is nu gecorrigeerd.
+//
+// Rendering blijft in PERSPECTIEF (trapezoïde: bovenkant smaller, rijen dichter
+// op elkaar) zodat het bord schuin ligt zoals een echte duel-tafel.
+// Entry->vijandelijk doel blijft 7 stappen aan beide kanten, en het doel houdt
+// precies 2 toegangen — de rush-fix van sessie 17 blijft dus intact.
 // ==========================================
 const BOARD_CX = 270, BOARD_ROW_Y = [205, 315, 450, 590, 705], BOARD_ROW_W = [0.60, 0.70, 0.80, 0.90, 1.00];
 function depthScale(y) { return 0.78 + 0.22 * Math.min(1, Math.max(0, (y - BOARD_ROW_Y[0]) / (BOARD_ROW_Y[4] - BOARD_ROW_Y[0]))); }
@@ -452,10 +458,10 @@ const NODES = (function() {
   add('R1',6,1); add('R2',6,2); add('R3',6,3);
   // Outer bottom (P1-kant)
   add('E1_BL',0,4,'entry','p1'); add('B1',1,4); add('B2',2,4); add('G1',3,4,'goal','p1'); add('B3',4,4); add('B4',5,4); add('E1_BR',6,4,'entry','p1');
-  // Inner rechthoek (5 boven, 5 onder, 1 mid per zijde)
-  add('IT1',1,1); add('IT2',2,1); add('IT3',3,1); add('IT4',4,1); add('IT5',5,1);
-  add('IL',1,2); add('IR',5,2);
-  add('IB1',1,3); add('IB2',2,3); add('IB3',3,3); add('IB4',4,3); add('IB5',5,3);
+  // Binnenvierkant 3x3 (8 randpunten, midden blijft leeg) — Duel-conform
+  add('IT1',2,1); add('IT2',3,1); add('IT3',4,1);
+  add('IL',2,2);                  add('IR',4,2);
+  add('IB1',2,3); add('IB2',3,3); add('IB3',4,3);
   return N;
 })();
 
@@ -465,15 +471,14 @@ const ROUTES = [
   ['E2_TR','R1'], ['R1','R2'], ['R2','R3'], ['R3','E1_BR'],
   ['E1_BR','B4'], ['B4','B3'], ['B3','G1'], ['G1','B2'], ['B2','B1'], ['B1','E1_BL'],
   ['E1_BL','L3'], ['L3','L2'], ['L2','L1'], ['L1','E2_TL'],
-  // Inner rechthoek
-  ['IT1','IT2'], ['IT2','IT3'], ['IT3','IT4'], ['IT4','IT5'],
-  ['IT1','IL'], ['IL','IB1'], ['IT5','IR'], ['IR','IB5'],
-  ['IB1','IB2'], ['IB2','IB3'], ['IB3','IB4'], ['IB4','IB5'],
-  // Spokes: 4 hoek-diagonalen
-  // (G2↔IT3, G1↔IB1, L2↔IL, R2↔IR geschrapt — sessie-3 markeringen)
-  // (G2↔IT2, G1↔IB4 geschrapt — sessie 17: rush-fix, entry→doel nu 7 stappen
-  //  aan beide kanten en het doel heeft nog maar 2 toegangen)
-  ['E2_TL','IT1'], ['E2_TR','IT5'], ['E1_BL','IB1'], ['E1_BR','IB5']
+  // Binnenvierkant (gesloten ring van 8)
+  ['IT1','IT2'], ['IT2','IT3'], ['IT3','IR'], ['IR','IB3'],
+  ['IB3','IB2'], ['IB2','IB1'], ['IB1','IL'], ['IL','IT1'],
+  // De vier hoeken van de buitenrand verbinden met de vier hoeken van het
+  // binnenvierkant — dit is de lijn die vanaf elk startpunt het bord in loopt.
+  // Meer verbindingen tussen binnen en buiten zijn er NIET: het doel houdt
+  // daardoor precies twee toegangen (T2/T3 resp. B2/B3).
+  ['E2_TL','IT1'], ['E2_TR','IT3'], ['E1_BL','IB1'], ['E1_BR','IB3']
 ];
 
 const ADJ = {}; for (const k of Object.keys(NODES)) ADJ[k] = new Set();
@@ -492,18 +497,18 @@ const UNIT_DEFS = {
   scout:       { name:'Forest Scout',      fac:'Elves',   mp:3, slots:[...W(3,30,'Dolksteek'), ...W(2,10,'Schampschot'), ...P(3,'poison',1,'Gifpijl'), ...B(2), ...R(6)] },
   archer:      { name:'Elven Archer',      fac:'Elves',   mp:2, slots:[...W(4,60,'Boogschot'), ...W(2,20,'Snelschot'), ...P(2,'poison',1,'Doornpijl'), ...B(4), ...R(4)] },
   weaver:      { name:'Arcane Weaver',     fac:'Elves',   mp:2, slots:[...W(2,70,'Manavlaag'), ...G(4,40,'Spreukbreker'), ...P(4,'confusion',2,'Warreling'), ...B(3), ...R(3)] },
-  apprentice:  { name:'Stone Apprentice',  fac:'Dwarves', mp:1, slots:[...W(3,60,'Steenworp'), ...W(2,30,'Gruisgooi'), ...P(1,'paralysis',1,'Gruisgreep'), ...B(4), ...R(6)] },
+  apprentice:  { name:'Stone Apprentice',  fac:'Dwarves', mp:2, slots:[...W(3,60,'Steenworp'), ...W(2,30,'Gruisgooi'), ...P(1,'paralysis',1,'Gruisgreep'), ...B(4), ...R(6)] },
   runesmith:   { name:'Runesmith',         fac:'Dwarves', mp:2, slots:[...W(3,60,'Hamerslag'), ...W(2,30,'Vonkslag'), ...P(4,'burn',1,'Gloeirune'), ...B(3), ...R(4)] },
-  warden:      { name:'Mountain Warden',   fac:'Dwarves', mp:1, slots:[...W(4,90,'Bergbeuk'), ...W(2,50,'Rotsworp'), ...P(3,'paralysis',2,'Rotsgreep'), ...B(4), ...R(3)] },
+  warden:      { name:'Mountain Warden',   fac:'Dwarves', mp:2, slots:[...W(4,90,'Bergbeuk'), ...W(2,50,'Rotsworp'), ...P(3,'paralysis',2,'Rotsgreep'), ...B(4), ...R(3)] },
   skeleton:    { name:'Restless Skeleton', fac:'Undead',  mp:2, slots:[...W(4,30,'Botzwaai'), ...W(2,10,'Ribbenstoot'), ...P(2,'confusion',1,'Grafkilte'), ...B(2), ...R(6)] },
   ghoul:       { name:'Ghoul',             fac:'Undead',  mp:2, slots:[...W(3,50,'Klauwhaal'), ...W(2,20,'Knagende Beet'), ...P(4,'badlypoison',1,'Lijkengif'), ...B(3), ...R(4)] },
-  necromancer: { name:'Necromancer',       fac:'Undead',  mp:1, slots:[...W(2,60,'Schaduwgreep'), ...G(4,30,'Zielenvlaag'), ...P(4,'sleep',2,'Doodsslaap'), ...B(3), ...R(3)] },
+  necromancer: { name:'Necromancer',       fac:'Undead',  mp:2, slots:[...W(2,60,'Schaduwgreep'), ...G(4,30,'Zielenvlaag'), ...P(4,'sleep',2,'Doodsslaap'), ...B(3), ...R(3)] },
   boar:        { name:'Boar Brute',        fac:'Beasts',  mp:2, slots:[...W(5,60,'Stormram'), ...W(2,20,'Hoefslag'), ...P(1,'confusion',1,'Woeste Duw'), ...B(2), ...R(6)] },
   lupine:      { name:'Lupine Hunter',     fac:'Beasts',  mp:3, slots:[...W(4,50,'Kaakklem'), ...W(2,20,'Scheurbeet'), ...P(2,'paralysis',1,'Huilroep'), ...B(3), ...R(5)] },
   wyrmling:    { name:'Wyrmling',          fac:'Beasts',  mp:2, slots:[...W(3,60,'Staartzweep'), ...W(2,30,'Klauwzwiep'), ...G(3,60,'Vuurspuw'), ...P(4,'burn',2,'Asadem'), ...B(2), ...R(2)] },
   imp:         { name:'Imp',               fac:'Inferno', mp:3, slots:[...W(3,30,'Prikvork'), ...W(2,10,'Plaagstoot'), ...P(3,'burn',1,'Vonkenregen'), ...B(2), ...R(6)] },
   hellhound:   { name:'Hellhound',         fac:'Inferno', mp:3, slots:[...W(4,50,'Vlammenbeet'), ...W(2,20,'Snauw'), ...P(3,'burn',1,'Schroeiblaf'), ...B(3), ...R(4)] },
-  pitlord:     { name:'Pit Lord',          fac:'Inferno', mp:1, slots:[...W(4,100,'Verwoester'), ...W(2,60,'Zwavelklauw'), ...G(4,70,'Hellekling'), ...P(2,'burn',2,'Zwavelvloek'), ...B(1), ...R(3)] }
+  pitlord:     { name:'Pit Lord',          fac:'Inferno', mp:2, slots:[...W(4,100,'Verwoester'), ...W(2,60,'Zwavelklauw'), ...G(4,70,'Hellekling'), ...P(2,'burn',2,'Zwavelvloek'), ...B(1), ...R(3)] }
 };
 
 // ==========================================
