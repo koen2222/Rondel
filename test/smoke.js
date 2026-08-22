@@ -120,6 +120,21 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
   await page.click('#tile-settings');
   await page.waitForSelector('#screen-settings.active');
   ok('Instellingen-scherm opent', await page.locator('.set-group').count() >= 3);
+  {
+    // Duim-norm: elk bedienelement minstens 44px hoog (schakelaars tellen hun
+    // opgerekte tikgebied mee, dat 9px boven en onder de pil uitsteekt)
+    const small = await page.evaluate(() => {
+      const bad = [];
+      for (const el of document.querySelectorAll('.toggle, .seg button, .set-slider input')) {
+        const r = el.getBoundingClientRect();
+        const h = el.classList.contains('toggle') ? r.height + 18 : r.height;
+        if (h < 44) bad.push((el.className || el.tagName) + ':' + Math.round(h));
+      }
+      return bad;
+    });
+    ok('Alle bedienelementen zijn duim-groot (>=44px)', small.length === 0);
+    if (small.length) console.log('    te klein:', small.join(', '));
+  }
   await page.locator('.toggle[data-setting="sfx"]').click();
   const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('rondel_profile')).settings.sfx);
   ok('Instelling wordt direct opgeslagen', stored === false);
