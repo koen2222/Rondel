@@ -56,21 +56,65 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
   await page.waitForTimeout(600);
   ok('Schaakklok tikt (m:ss zichtbaar)', /⏱ [0-9]:[0-5][0-9]/.test(await page.locator('#turn-clock').innerText()));
 
-  // 5a. Een paar beurten spelen zodat ability-hooks (deploy/combat/MP) echt draaien
+  // 5a. Een figuur inzetten en z'n info-kaart openen (lang indrukken, Duel-gebaar)
   page.on('dialog', d => d.accept());
-  for (let t = 0; t < 6; t++) {
-    // deploy: eerste vrije eigen figuur op een entry, anders end-turn
+  const deployOne = async () => {
     const fig = page.locator('#board g.bench-p1 g.bench-fig').first();
-    if (await fig.count()) { await fig.click().catch(()=>{}); const glow = page.locator('#board .node-glow.active').first(); if (await glow.count()) await glow.click().catch(()=>{}); }
+    if (!await fig.count()) return false;
+    await fig.click().catch(()=>{});
     await page.waitForTimeout(150);
+    const glow = page.locator('#board .node-glow.active').first();
+    if (!await glow.count()) return false;
+    const gb = await glow.boundingBox();
+    if (!gb) return false;
+    await page.mouse.click(gb.x + gb.width/2, gb.y + gb.height/2);
+    await page.waitForTimeout(700);
+    return true;
+  };
+  await deployOne();
+  const unit = page.locator('#board g.unit-fig').first();
+  ok('Figuur staat op het bord na inzetten', await unit.count() === 1);
+  {
+    const box = await unit.boundingBox();
+    await page.mouse.move(box.x + box.width/2, box.y + box.height/2);
+    await page.mouse.down(); await page.waitForTimeout(650); await page.mouse.up();
+    await page.waitForTimeout(350);
+  }
+  ok('Lang indrukken opent de figuur-info', await page.locator('#info-overlay.active').count() === 1);
+  ok('Info-kaart toont de schijf', await page.locator('#info-disk path').count() > 4);
+  await page.click('#btn-info-close');
+
+  // 5a2. Nog een paar beurten spelen zodat ability-hooks (deploy/combat/MP) echt draaien
+  for (let t = 0; t < 5; t++) {
     if (await page.locator('#btn-end-turn').count()) await page.click('#btn-end-turn').catch(()=>{});
     await page.waitForTimeout(500); // AI-beurt
+    await deployOne();
   }
   ok('Enkele beurten gespeeld zonder crash', errors.length === 0);
 
-  // 5b. Ability zichtbaar in collectie-detail
+  // 5a3. Instellingen: geluid uitzetten en controleren dat het bewaard blijft
   if (await page.locator('#screen-game.active').count()) await page.click('#btn-menu');
   await page.waitForSelector('#screen-home.active');
+  await page.click('#tile-settings');
+  await page.waitForSelector('#screen-settings.active');
+  ok('Instellingen-scherm opent', await page.locator('.set-group').count() >= 3);
+  await page.locator('.toggle[data-setting="sfx"]').click();
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('rondel_profile')).settings.sfx);
+  ok('Instelling wordt direct opgeslagen', stored === false);
+  await page.locator('.seg[data-setting="clockMinutes"] button', { hasText: 'Uit' }).click();
+  const clk = await page.evaluate(() => JSON.parse(localStorage.getItem('rondel_profile')).settings.clockMinutes);
+  ok('Bedenktijd kan uitgezet worden', clk === 0);
+  await page.locator('.toggle[data-setting="sfx"]').click();   // weer aan voor de rest
+  await page.click('#screen-settings .btn-back');
+
+  // 5a4. Hoe speel je
+  await page.click('#tile-help');
+  await page.waitForSelector('#screen-help.active');
+  ok('Uitlegscherm toont alle secties', await page.locator('.help-sec').count() >= 10);
+  ok('Uitleg noemt de vijf schijfkleuren', await page.locator('.help-swatch').count() === 5);
+  await page.click('#screen-help .btn-back');
+
+  // 5b. Ability zichtbaar in collectie-detail
   await page.click('#tile-collection');
   await page.locator('#coll-grid .coll-card', { hasText: 'Forest Scout' }).click();
   await page.waitForSelector('#detail-overlay.active');

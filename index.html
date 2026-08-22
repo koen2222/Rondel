@@ -315,6 +315,22 @@
   </div>
 </div>
 
+<!-- ===== FIGUUR-INFO tijdens het duel (Duel: figuur vasthouden = data bekijken) ===== -->
+<div id="info-overlay" class="overlay">
+  <div class="detail-panel">
+    <div class="detail-head">
+      <div id="info-art"></div>
+      <div>
+        <div class="detail-name" id="info-name"></div>
+        <div class="detail-sub" id="info-sub"></div>
+      </div>
+    </div>
+    <div class="detail-disk-wrap"><svg id="info-disk" viewBox="0 0 240 240"></svg></div>
+    <div class="slot-summary" id="info-slots"></div>
+    <div class="detail-actions"><button class="btn primary" id="btn-info-close" style="width:100%">Sluiten</button></div>
+  </div>
+</div>
+
 <!-- ===== UNIT-DETAIL (collectie) ===== -->
 <div id="detail-overlay" class="overlay">
   <div class="detail-panel">
@@ -1198,7 +1214,8 @@ const HELP_SECTIONS = [
     'Je kunt niet op een bezet punt landen. Sommige figuren hebben een ability waarmee ze er wél <b>doorheen</b> lopen.' ]},
   { h:'Gevechten: de draaischijf', p:[
     'Loop je op een vijand af, dan draaien <b>beide schijven</b>. Waar de pijl landt, bepaalt wat er gebeurt.',
-    'De grootte van een vak is precies de kans erop — een groot wit vak betekent dus vaak raak.' ]},
+    'De grootte van een vak is precies de kans erop — een groot wit vak betekent dus vaak raak.',
+    'Wil je een schijf van tevoren zien? <b>Houd een figuur even vast</b> op het bord — ook die van je tegenstander. Je ziet dan de schijf zoals hij nú draait, inclusief het effect van een status.' ]},
   { h:'De vijf kleuren', swatches:[
     ['#e5e7eb','<b>Wit — aanval.</b> Het getal is de kracht. Hoogste getal wint; gelijk = niemand valt.'],
     ['#fbbf24','<b>Goud — doorbraak.</b> Slaat dwars door paars, blauw én mis heen. Alleen een sterkere aanval stopt hem.'],
@@ -1410,7 +1427,7 @@ function renderBoard() {
     g.setAttribute('class', 'unit-fig' + (state.selected===u.uid?' selected':''));
     g.setAttribute('transform', `translate(${n.x},${n.y}) scale(${depthScale(n.y).toFixed(3)})`);
     g.setAttribute('data-uid', u.uid);
-    g.addEventListener('click', e => { e.stopPropagation(); onUnitTap(u.uid); });
+    bindUnitGestures(g, u.uid);
     gUnits.appendChild(g);
   }
   for (const t of state.legalTargets) { const glow = document.getElementById(`glow-${t}`); if (glow) glow.classList.add('active'); }
@@ -1448,7 +1465,7 @@ function renderBench() {
         // MP-badge zoals op de oude bench-kaarten
         el('circle', { cx:-15, cy:-44, r:8, fill:'#fbbf24', stroke:'#fff', 'stroke-width':1.5 }, g);
         const t = el('text', { x:-15, y:-40.5, 'font-size':10.5, 'text-anchor':'middle', fill:'#000', 'font-weight':'900', 'font-family':'sans-serif' }, g); t.textContent = UNIT_DEFS[u.defKey].mp;
-        g.addEventListener('click', e => { e.stopPropagation(); onBenchTap(uid); });
+        bindUnitGestures(g, uid, () => onBenchTap(uid));
       }
       gRow.appendChild(g);
     });
@@ -1531,16 +1548,46 @@ function spawnFX(x, y, kind) {
 
 function renderAll() { renderBoard(); renderBench(); renderTurnBanner(); renderPlates(); flushFX(); }
 
+// Tik = actie, vasthouden (450 ms) = figuur-info. Werkt met muis én aanraking;
+// bewegen tijdens het vasthouden annuleert, zodat scrollen niet per ongeluk de
+// info-kaart opent.
+function bindUnitGestures(g, uid, onTap) {
+  let timer = null, longFired = false, sx = 0, sy = 0;
+  const start = (e) => {
+    longFired = false;
+    const p = e.touches ? e.touches[0] : e;
+    sx = p.clientX; sy = p.clientY;
+    timer = setTimeout(() => { longFired = true; Audio_.buzz(20); showUnitInfo(uid); }, 450);
+  };
+  const move = (e) => {
+    if (!timer) return;
+    const p = e.touches ? e.touches[0] : e;
+    if (Math.abs(p.clientX - sx) > 12 || Math.abs(p.clientY - sy) > 12) { clearTimeout(timer); timer = null; }
+  };
+  const cancel = () => { if (timer) { clearTimeout(timer); timer = null; } };
+  g.addEventListener('pointerdown', start);
+  g.addEventListener('pointermove', move);
+  g.addEventListener('pointerup', cancel);
+  g.addEventListener('pointercancel', cancel);
+  g.addEventListener('pointerleave', cancel);
+  g.addEventListener('click', e => {
+    e.stopPropagation(); cancel();
+    if (longFired) { longFired = false; return; }   // lang indrukken telt niet als tik
+    (onTap || (() => onUnitTap(uid)))();
+  });
+}
+
 function onBenchTap(uid) {
   if (state.over || state.locked) return; const u = state.units[uid];
-  if (u.owner !== state.turn) { toast('Niet jouw beurt'); return; }
-  if (u.status.includes('wait')) { toast('Unit herstelt nog'); return; }
-  if (state.actionsLeft <= 0) { toast('Geen acties over'); return; }
+  if (u.owner !== state.turn) { sfx('denied'); hint('Dit is niet jouw figuur'); return; }
+  if (u.status.includes('wait')) { sfx('denied'); toast(`${UNIT_DEFS[u.defKey].name} herstelt nog — vanaf je volgende beurt inzetbaar`); return; }
+  if (state.actionsLeft <= 0) { sfx('denied'); hint('Je hebt je zet al gedaan — tik op End Turn'); return; }
 
-  if (state.pendingDeploy === uid) { state.pendingDeploy = null; state.legalTargets = new Set(); } 
+  if (state.pendingDeploy === uid) { state.pendingDeploy = null; state.legalTargets = new Set(); }
   else {
     state.selected = null; state.pendingDeploy = uid; state.legalTargets = deployTargets(u);
-    if (state.legalTargets.size === 0) { state.pendingDeploy = null; toast('Entries geblokkeerd'); }
+    if (state.legalTargets.size === 0) { state.pendingDeploy = null; sfx('denied'); toast('Je entry-punten zijn geblokkeerd — maak er eerst één vrij'); }
+    else { sfx('select'); hint(`Inzetten kost 1 MP; met de rest mag ${UNIT_DEFS[u.defKey].name} meteen doorlopen`); }
   }
   renderAll();
 }
@@ -1643,13 +1690,78 @@ function onUnitTap(uid) {
     toast('Ongeldig doelwit'); return;
   }
   if (u.owner === state.turn && u.node) {
-    if (state.actionsLeft<=0) { toast('Geen acties over'); return; }
-    if (u.status.includes('sleep')) { toast(`${UNIT_DEFS[u.defKey].name} slaapt`); return; }
-    state.pendingDeploy = null; state.selected = (state.selected===uid) ? null : uid; state.legalTargets = state.selected ? legalMoves(u) : new Set(); renderAll(); return;
+    if (state.actionsLeft<=0) { hint('Je hebt je zet al gedaan — tik op End Turn'); sfx('denied'); return; }
+    if (u.status.includes('sleep')) { hint(`${UNIT_DEFS[u.defKey].name} slaapt — zet een bondgenoot ernaast om hem te wekken`); sfx('denied'); return; }
+    state.pendingDeploy = null; state.selected = (state.selected===uid) ? null : uid;
+    state.legalTargets = state.selected ? legalMoves(u) : new Set();
+    if (state.selected) {
+      sfx('select');
+      if (state.legalTargets.size === 0) hint(`${UNIT_DEFS[u.defKey].name} kan nergens heen — alle buurpunten zijn bezet`);
+      else if (S('showHints')) hint(unitHint(u));
+    }
+    renderAll(); return;
   }
-  if (u.owner !== state.turn && u.node && state.selected) { 
-     if (state.legalTargets.has(u.node)) { onNodeTap(u.node); } else { toast('Buiten bereik'); }
+  if (u.owner !== state.turn && u.node) {
+    if (state.selected && state.legalTargets.has(u.node)) { onNodeTap(u.node); return; }
+    // Niets geselecteerd? Dan wil je die vijand waarschijnlijk bekíjken (Duel-gewoonte)
+    if (!state.selected) { showUnitInfo(uid); return; }
+    sfx('denied');
+    hint('Te ver weg — deze vijand ligt buiten het bereik van je figuur');
   }
+}
+
+// Hint-regel (respecteert de instelling "Hints tonen"); waarschuwingen die je
+// écht moet zien lopen gewoon via toast().
+function hint(msg) { if (S('showHints') && msg) toast(msg); }
+
+// ===== Figuur-info tijdens het duel =====
+// In Duel houd je een figuur vast om z'n data te zien. Hier: lang indrukken op
+// een figuur op het bord, of een vijand aantikken zonder eigen selectie.
+// Cruciaal is dat de schijf HIER de status meerekent — je ziet dus precies wat
+// brand of verlamming van je wiel heeft overgelaten.
+const STATUS_NL = { poison:'Vergiftigd', badlypoison:'Zwaar vergiftigd', burn:'Brandend', paralysis:'Verlamd', confusion:'Verward', sleep:'Slaapt', frozen:'Bevroren', curse:'Vervloekt', bulwark:'Bolwerk actief', wait:'Herstelt' };
+function showUnitInfo(uid) {
+  const u = state.units[uid]; if (!u) return;
+  const def = UNIT_DEFS[u.defKey];
+  document.getElementById('info-art').innerHTML = unitVisual(u.defKey, u.owner, 64);
+  document.getElementById('info-name').textContent = def.name;
+  const side = u.owner === 'p1' ? 'Jouw figuur' : (state.mode === 'solo' ? 'Tegenstander' : 'Speler 2');
+  const mp = u.node ? effMP(u) : def.mp;
+  const st = u.status.map(s => STATUS_NL[s] || s);
+  document.getElementById('info-sub').textContent =
+    `${side} · ${def.fac} · Level ${u.level} · ${mp} MP${st.length ? ' · ' + st.join(', ') : ''}`;
+  const shown = applyStatus(u.slots, u.status);   // schijf zoals hij NU draait
+  renderDisk('info-disk', shown, u.defKey);
+  const sum = {};
+  for (const s of shown) {
+    const k = s.k === 'white' || s.k === 'gold' ? `${s.k}-${s.v}` : (s.k === 'purple' ? `purple-${s.effect}` : s.k);
+    sum[k] = (sum[k] || 0) + 1;
+  }
+  const NL = { red:'Miss', blue:'Verdedig' };
+  let pills = Object.entries(sum).map(([k, n]) => {
+    const [kind, val] = k.split('-');
+    const label = kind === 'white' ? `${val} dmg` : kind === 'gold' ? `★ ${val} dmg` : kind === 'purple' ? val : NL[kind];
+    return `<span class="slot-pill" style="color:${TXT[kind]};background:${COLORS[kind]}">${n}× ${label}</span>`;
+  }).join('');
+  const ab = def.ability;
+  pills += ab ? `<div class="ability-line"><span class="ability-tag">✦ ${ABILITIES[ab].name}</span> ${ABILITIES[ab].desc}</div>` : '';
+  if (u.status.some(s => !['wait','bulwark'].includes(s))) pills += `<div class="ability-line" style="color:#fca5a5">Deze schijf is aangepast door de status.</div>`;
+  document.getElementById('info-slots').innerHTML = pills;
+  document.getElementById('info-overlay').classList.add('active');
+  sfx('select');
+}
+
+// Korte uitleg bij het selecteren van een figuur: wat kan hij nu?
+function unitHint(u) {
+  const mp = effMP(u), name = UNIT_DEFS[u.defKey].name;
+  const bits = [`${name}: ${mp} MP`];
+  if (!state.firstMoveDone) bits.push('(eerste zet kost 1 MP extra)');
+  const ab = abilityOf(u);
+  if (ab && abilityMPBonus(u) > 0) bits.push(`· ${ABILITIES[ab].name} actief`);
+  else if (ab === 'command' || ab === 'pack') bits.push(`· ${ABILITIES[ab].name} werkt naast een bondgenoot`);
+  const st = u.status.filter(s => !['wait','bulwark'].includes(s));
+  if (st.length) bits.push(`· ${st[0]}`);
+  return bits.join(' ');
 }
 
 // Ability-MP: +1 als deze unit 'pack' heeft en naast een bondgenoot staat,
@@ -2128,6 +2240,8 @@ for (const b of document.querySelectorAll('.btn-back')) b.addEventListener('clic
 document.getElementById('btn-detail-close').addEventListener('click', () => document.getElementById('detail-overlay').classList.remove('active'));
 document.getElementById('btn-detail-upgrade').addEventListener('click', doUpgrade);
 document.getElementById('btn-result-menu').addEventListener('click', goHome);
+document.getElementById('btn-info-close').addEventListener('click', () => document.getElementById('info-overlay').classList.remove('active'));
+document.getElementById('info-overlay').addEventListener('click', (e) => { if (e.target.id === 'info-overlay') e.currentTarget.classList.remove('active'); });
 
 const AI = 'p2';
 
