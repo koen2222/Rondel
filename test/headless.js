@@ -39,6 +39,13 @@ const abilitySection = html.slice(
   html.indexOf('// ABILITIES-END')
 );
 
+// Instellingen (SETTING_DEFS, freshSettings, normalizeSettings)
+const settingsSection = html.slice(
+  html.indexOf('const SETTING_DEFS ='),
+  html.indexOf('// SETTINGS-END')
+);
+if (!settingsSection) throw new Error('SETTINGS-blok niet gevonden');
+
 // resolve + applyStatus — puur-functioneel, geen state; koUnit werkt op state (injecteerbaar)
 const resolveMatch = html.match(/\nfunction resolve\([\s\S]*?\n\}/);
 const applyMatch   = html.match(/\nfunction applyStatus\([\s\S]*?\n\}/);
@@ -55,11 +62,12 @@ const evalCode = [
   boardSection,
   diskSection,
   abilitySection,
+  settingsSection,
   resolveMatch[0],
   applyMatch[0],
   koMatch[0],
   condMatch[0],
-  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition };',
+  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings };',
 ].join('\n');
 
 // Schrijf tijdelijk evalueerbaar bestand (vermijdt new Function-beperkingen)
@@ -72,7 +80,7 @@ try {
   fs.unlinkSync(tmpPath);
 }
 
-const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition } = extracted;
+const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings } = extracted;
 
 // ─── Test harness ──────────────────────────────────────────────────────────────
 let pass = 0, fail = 0;
@@ -342,6 +350,26 @@ section('=== MOVES & ANTI-MISS-LOOP (6 checks) ===');
   }
   check('moveLabel: white → naam + schade', moveLabel({ k:'white', v:40, name:'Schildstoot' }), 'Schildstoot 40');
   check('moveLabel: purple → naam + sterren', moveLabel({ k:'purple', effect:'burn', stars:2, name:'Asadem' }), 'Asadem ★★');
+}
+
+// ─── 4d. INSTELLINGEN (sessie 24) ──────────────────────────────────────────────
+section('=== INSTELLINGEN (8 checks) ===');
+{
+  const d = freshSettings();
+  check('Verse instellingen bevatten elke sleutel', Object.keys(d).length, Object.keys(SETTING_DEFS).length);
+  check('Standaard bedenktijd = 5 min (Duel-regel)', d.clockMinutes, 5);
+  check('Standaard moeilijkheid = normaal', d.difficulty, 'normaal');
+  // Een leeg/oud profiel krijgt gewoon de defaults (migratie)
+  check('normalizeSettings(undefined) → defaults', normalizeSettings(undefined), d);
+  // Rommel mag het spel nooit breken
+  check('Onzin-waarden vallen terug op default',
+    normalizeSettings({ clockMinutes: 999, difficulty: 'hacker', animSpeed: 42, sfx: 'ja' }),
+    d);
+  // Geldige waarden blijven staan
+  check('Geldige waarden blijven behouden',
+    normalizeSettings({ clockMinutes: 0, difficulty: 'moeilijk', sfx: false }).clockMinutes, 0);
+  check('Volume wordt geklemd tot 0..1', normalizeSettings({ sfxVolume: 5 }).sfxVolume, 1);
+  check('Negatief volume wordt 0', normalizeSettings({ sfxVolume: -3 }).sfxVolume, 0);
 }
 
 // ─── 5. SYNTAX-CHECK volledige game-JS ─────────────────────────────────────────

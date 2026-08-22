@@ -185,6 +185,38 @@
   .detail-actions { display: flex; gap: 10px; margin-top: 14px; }
   .detail-actions .btn { flex: 1; }
   .upg-note { text-align: center; font-size: 0.72rem; color: #a89f91; font-style: italic; margin-top: 8px; }
+
+  /* ===== Instellingen ===== */
+  .set-group { background: linear-gradient(160deg, #1d1729, #100c1a); border: 1px solid rgba(125,211,252,0.12); border-radius: 14px; padding: 4px 14px; }
+  .set-group-title { font-family: 'Cinzel', serif; font-size: 0.72rem; letter-spacing: 0.16em; color: var(--gold); padding: 12px 0 6px; opacity: 0.9; }
+  .set-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid rgba(255,255,255,0.05); }
+  .set-row:first-of-type { border-top: none; }
+  .set-label { flex: 1; min-width: 0; }
+  .set-label .t { font-family: 'Cinzel', serif; font-size: 0.85rem; color: var(--ink); }
+  .set-label .d { font-size: 0.7rem; color: #8f8676; margin-top: 2px; line-height: 1.3; }
+  /* Schuifknop (aan/uit) — groot genoeg voor een duim */
+  .toggle { flex: 0 0 auto; width: 52px; height: 30px; border-radius: 15px; background: #2a2438; border: 1px solid rgba(255,255,255,0.12); position: relative; cursor: pointer; transition: background 0.2s; }
+  .toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: linear-gradient(160deg, #8b8497, #4b4459); transition: transform 0.2s, background 0.2s; }
+  .toggle.on { background: linear-gradient(90deg, #b45309, #f59e0b); border-color: rgba(245,158,11,0.6); }
+  .toggle.on::after { transform: translateX(22px); background: linear-gradient(160deg, #fff8e7, #fbbf24); }
+  /* Segment-keuze (2-4 opties naast elkaar) */
+  .seg { flex: 0 0 auto; display: flex; background: #191325; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
+  .seg button { background: none; border: none; color: #9a9186; font-family: 'Cinzel', serif; font-size: 0.72rem; padding: 8px 11px; cursor: pointer; min-width: 44px; }
+  .seg button.on { background: linear-gradient(180deg, #fbbf24, #b45309); color: #000; font-weight: 700; }
+  .set-slider { flex: 0 0 128px; display: flex; align-items: center; gap: 8px; }
+  .set-slider input { flex: 1; accent-color: var(--gold); }
+  .set-slider .val { font-family: 'Cinzel', serif; font-size: 0.72rem; color: var(--gold); width: 34px; text-align: right; }
+  .set-danger { color: #f87171 !important; border-color: rgba(248,113,113,0.4) !important; }
+  .set-about { text-align: center; font-size: 0.7rem; color: #665f52; line-height: 1.6; padding: 4px 0 10px; }
+
+  /* ===== Hoe speel je ===== */
+  .help-sec { background: linear-gradient(160deg, #1d1729, #100c1a); border: 1px solid rgba(125,211,252,0.12); border-radius: 14px; padding: 14px 16px; }
+  .help-sec h3 { font-family: 'Cinzel', serif; font-size: 0.9rem; color: var(--gold); margin: 0 0 8px; letter-spacing: 0.08em; }
+  .help-sec p { margin: 0 0 8px; font-size: 0.85rem; line-height: 1.55; color: #d6ccbb; }
+  .help-sec p:last-child { margin-bottom: 0; }
+  .help-sec b { color: var(--ink); }
+  .help-key { display: flex; align-items: center; gap: 10px; margin: 7px 0; font-size: 0.82rem; color: #d6ccbb; }
+  .help-swatch { flex: 0 0 auto; width: 26px; height: 26px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.5); box-shadow: inset 0 2px 4px rgba(255,255,255,0.25); }
 </style>
 </head>
 <body>
@@ -203,7 +235,9 @@
       <div class="home-tile big" id="tile-solo"><span class="ico">⚔️</span><div class="tname">DUEL</div><div class="tdesc">Solo tegen het AI-systeem — verdien credits</div></div>
       <div class="home-tile" id="tile-hotseat"><span class="ico">🤝</span><div class="tname">HOTSEAT</div><div class="tdesc">2 spelers, één toestel</div></div>
       <div class="home-tile" id="tile-collection"><span class="ico">🛡️</span><div class="tname">COLLECTIE</div><div class="tdesc">Bekijk &amp; verbeter je units</div></div>
-      <div class="home-tile" id="tile-store" style="grid-column: 1 / -1;"><span class="ico">◈</span><div class="tname">WINKEL</div><div class="tdesc">Nieuwe units kopen met credits</div></div>
+      <div class="home-tile" id="tile-store"><span class="ico">◈</span><div class="tname">WINKEL</div><div class="tdesc">Nieuwe units kopen met credits</div></div>
+      <div class="home-tile" id="tile-help"><span class="ico">📖</span><div class="tname">HOE SPEEL JE</div><div class="tdesc">Alle regels kort uitgelegd</div></div>
+      <div class="home-tile" id="tile-settings"><span class="ico">⚙️</span><div class="tname">INSTELLINGEN</div><div class="tdesc">Geluid, tempo, klok en meer</div></div>
     </div>
     <div class="home-foot">Rondel-prototype · fase 1.5 · mechanics naar Duel-model</div>
   </div>
@@ -230,6 +264,28 @@
       <div class="subscreen-credits" id="store-credits"></div>
     </div>
     <div class="coll-grid" id="store-grid"></div>
+  </div>
+</div>
+
+<!-- ===== INSTELLINGEN ===== -->
+<div id="screen-settings" class="screen">
+  <div class="subscreen">
+    <div class="subscreen-head">
+      <button class="btn-back" data-back="home">‹ Terug</button>
+      <div class="subscreen-title">INSTELLINGEN</div>
+    </div>
+    <div id="settings-body" style="display:flex; flex-direction:column; gap:12px;"></div>
+  </div>
+</div>
+
+<!-- ===== HOE SPEEL JE ===== -->
+<div id="screen-help" class="screen">
+  <div class="subscreen">
+    <div class="subscreen-head">
+      <button class="btn-back" data-back="home">‹ Terug</button>
+      <div class="subscreen-title">HOE SPEEL JE</div>
+    </div>
+    <div id="help-body" style="display:flex; flex-direction:column; gap:12px;"></div>
   </div>
 </div>
 
@@ -543,15 +599,169 @@ const PRICE = { C:100, U:200, R:400 };
 const UPGRADE_COST = { 1:150, 2:250, 3:400 }; // kosten van huidig level naar volgend (max 4)
 const WIN_CREDITS = 100, LOSS_CREDITS = 25;
 
+// ==========================================
+// INSTELLINGEN (sessie 24) — leven in het profiel zodat ze meegaan met
+// localStorage. Elke waarde wordt bij het laden gevalideerd, zodat een oud of
+// beschadigd profiel nooit het spel kan breken (defaults winnen).
+// ==========================================
+// SETTINGS-START (marker voor headless tests — niet verwijderen)
+const SETTING_DEFS = {
+  sfx:         { def: true,     type:'bool' },
+  sfxVolume:   { def: 0.7,      type:'num',    min: 0, max: 1 },
+  music:       { def: false,    type:'bool' },
+  haptics:     { def: true,     type:'bool' },
+  animSpeed:   { def: 'normaal',type:'enum',   opts: ['normaal','snel','uit'] },
+  clockMinutes:{ def: 5,        type:'enum',   opts: [3, 5, 10, 0] },   // 0 = geen klok
+  difficulty:  { def: 'normaal',type:'enum',   opts: ['makkelijk','normaal','moeilijk'] },
+  confirmExit: { def: true,     type:'bool' },
+  showHints:   { def: true,     type:'bool' },
+};
+function freshSettings() { const s = {}; for (const [k, d] of Object.entries(SETTING_DEFS)) s[k] = d.def; return s; }
+// Valideert elke sleutel apart: onbekende/ongeldige waarden vallen terug op de default.
+function normalizeSettings(raw) {
+  const out = freshSettings();
+  if (!raw || typeof raw !== 'object') return out;
+  for (const [k, d] of Object.entries(SETTING_DEFS)) {
+    const v = raw[k];
+    if (v === undefined || v === null) continue;
+    if (d.type === 'bool' && typeof v === 'boolean') out[k] = v;
+    else if (d.type === 'num' && typeof v === 'number' && isFinite(v)) out[k] = Math.min(d.max, Math.max(d.min, v));
+    else if (d.type === 'enum' && d.opts.includes(v)) out[k] = v;
+  }
+  return out;
+}
+// SETTINGS-END (marker voor headless tests — niet verwijderen)
+
 let profile;
-function freshProfile() { return { credits: 300, owned: { squire:1, scout:1, apprentice:1, skeleton:1, boar:1, imp:1 }, stats: { wins:0, losses:0 } }; }
+function freshProfile() { return { credits: 300, owned: { squire:1, scout:1, apprentice:1, skeleton:1, boar:1, imp:1 }, stats: { wins:0, losses:0 }, settings: freshSettings() }; }
 function loadProfile() {
   try { const raw = localStorage.getItem('rondel_profile'); profile = raw ? JSON.parse(raw) : freshProfile(); }
   catch(e) { profile = freshProfile(); }
   if (!profile || typeof profile.credits !== 'number' || !profile.owned) profile = freshProfile();
   if (!profile.stats) profile.stats = { wins:0, losses:0 };
+  profile.settings = normalizeSettings(profile.settings);   // migratie voor oude profielen
 }
 function saveProfile() { try { localStorage.setItem('rondel_profile', JSON.stringify(profile)); } catch(e) {} }
+// Korte accessor; valt terug op de default als het profiel nog niet geladen is.
+function S(key) { return (profile && profile.settings ? profile.settings : SETTING_DEFS)[key] ?? SETTING_DEFS[key].def; }
+
+// Animatie-beleid op één plek: de systeeminstelling van de telefoon én onze
+// eigen instelling tellen allebei mee.
+function prefersReduced() { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
+function animOff() { return prefersReduced() || S('animSpeed') === 'uit'; }
+function animScale() { return animOff() ? 0 : (S('animSpeed') === 'snel' ? 0.5 : 1); }
+
+// ==========================================
+// AUDIO (sessie 24) — alle geluid wordt in code gesynthetiseerd met de
+// WebAudio-API: geen enkel extern bestand, dus de PWA blijft offline werken en
+// het spel wordt er geen byte zwaarder van. Mobiele browsers staan audio pas
+// toe ná een gebruikersgebaar; daarom wordt de context lui aangemaakt en bij de
+// eerste tik hervat (unlockAudio).
+// ==========================================
+const Audio_ = {
+  ctx: null, master: null, musicGain: null, musicNodes: [], unlocked: false,
+  ensure() {
+    if (this.ctx) return this.ctx;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    try {
+      this.ctx = new AC();
+      this.master = this.ctx.createGain();
+      this.master.gain.value = S('sfxVolume');
+      this.master.connect(this.ctx.destination);
+      this.musicGain = this.ctx.createGain();
+      this.musicGain.gain.value = 0;
+      this.musicGain.connect(this.master);
+    } catch (e) { this.ctx = null; }
+    return this.ctx;
+  },
+  unlock() {
+    const ctx = this.ensure(); if (!ctx) return;
+    if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+    this.unlocked = true;
+    if (S('music')) this.startMusic();
+  },
+  setVolume(v) { if (this.master) this.master.gain.value = v; },
+  // Eén toon met ADSR-envelope.
+  tone({ freq = 440, dur = 0.15, type = 'sine', vol = 0.3, attack = 0.005, decay = null, slideTo = null, delay = 0 }) {
+    if (!S('sfx')) return;
+    const ctx = this.ensure(); if (!ctx || ctx.state === 'suspended') return;
+    const t0 = ctx.currentTime + delay;
+    const osc = ctx.createOscillator(), g = ctx.createGain();
+    osc.type = type; osc.frequency.setValueAtTime(freq, t0);
+    if (slideTo) osc.frequency.exponentialRampToValueAtTime(Math.max(1, slideTo), t0 + dur);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0001, vol), t0 + attack);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + (decay || dur));
+    osc.connect(g); g.connect(this.master);
+    osc.start(t0); osc.stop(t0 + (decay || dur) + 0.02);
+  },
+  // Ruis-burst (voor klappen, explosies, whooshes).
+  noise({ dur = 0.2, vol = 0.3, filter = 1200, sweepTo = null, delay = 0, type = 'lowpass' }) {
+    if (!S('sfx')) return;
+    const ctx = this.ensure(); if (!ctx || ctx.state === 'suspended') return;
+    const t0 = ctx.currentTime + delay;
+    const frames = Math.max(1, Math.floor(ctx.sampleRate * dur));
+    const buf = ctx.createBuffer(1, frames, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < frames; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / frames);
+    const src = ctx.createBufferSource(); src.buffer = buf;
+    const bp = ctx.createBiquadFilter(); bp.type = type; bp.frequency.setValueAtTime(filter, t0);
+    if (sweepTo) bp.frequency.exponentialRampToValueAtTime(Math.max(40, sweepTo), t0 + dur);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(vol, t0);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    src.connect(bp); bp.connect(g); g.connect(this.master);
+    src.start(t0); src.stop(t0 + dur + 0.02);
+  },
+  buzz(ms) { if (S('haptics') && navigator.vibrate) { try { navigator.vibrate(ms); } catch (e) {} } },
+  // Zachte ambient-loop: twee trage zwevende tonen, heel laag in de mix.
+  startMusic() {
+    const ctx = this.ensure(); if (!ctx || this.musicNodes.length) return;
+    const mk = (freq, detune) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'sine'; o.frequency.value = freq; o.detune.value = detune;
+      g.gain.value = 0.5; o.connect(g); g.connect(this.musicGain); o.start();
+      return o;
+    };
+    const lfo = ctx.createOscillator(), lfoGain = ctx.createGain();
+    lfo.frequency.value = 0.07; lfoGain.gain.value = 0.02;
+    lfo.connect(lfoGain); lfoGain.connect(this.musicGain.gain); lfo.start();
+    this.musicNodes = [mk(110, 0), mk(164.81, 6), mk(220, -5), lfo];
+    this.musicGain.gain.setValueAtTime(0.0001, ctx.currentTime);
+    this.musicGain.gain.exponentialRampToValueAtTime(0.035, ctx.currentTime + 2.5);
+  },
+  stopMusic() {
+    if (!this.ctx || !this.musicNodes.length) return;
+    try {
+      this.musicGain.gain.cancelScheduledValues(this.ctx.currentTime);
+      this.musicGain.gain.setValueAtTime(this.musicGain.gain.value, this.ctx.currentTime);
+      this.musicGain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.6);
+      for (const n of this.musicNodes) { try { n.stop(this.ctx.currentTime + 0.7); } catch (e) {} }
+    } catch (e) {}
+    this.musicNodes = [];
+  },
+};
+
+// Benoemde spel-geluiden. Eén plek, zodat de rest van de code alleen sfx('ko') doet.
+const SFX = {
+  click:   () => Audio_.tone({ freq: 320, dur: 0.05, type: 'triangle', vol: 0.16 }),
+  select:  () => Audio_.tone({ freq: 620, dur: 0.07, type: 'triangle', vol: 0.18 }),
+  denied:  () => { Audio_.tone({ freq: 150, dur: 0.12, type: 'square', vol: 0.12 }); Audio_.buzz(18); },
+  hop:     () => Audio_.noise({ dur: 0.09, vol: 0.13, filter: 900, sweepTo: 300 }),
+  deploy:  () => { Audio_.noise({ dur: 0.28, vol: 0.2, filter: 400, sweepTo: 2400, type: 'bandpass' }); Audio_.tone({ freq: 220, slideTo: 660, dur: 0.25, type: 'triangle', vol: 0.16 }); },
+  tick:    () => Audio_.tone({ freq: 1500, dur: 0.028, type: 'square', vol: 0.08 }),
+  clash:   () => { Audio_.noise({ dur: 0.35, vol: 0.42, filter: 2600, sweepTo: 200 }); Audio_.tone({ freq: 180, slideTo: 60, dur: 0.3, type: 'sawtooth', vol: 0.24 }); Audio_.buzz(45); },
+  ko:      () => { Audio_.noise({ dur: 0.6, vol: 0.5, filter: 1800, sweepTo: 90 }); Audio_.tone({ freq: 140, slideTo: 40, dur: 0.5, type: 'square', vol: 0.22 }); Audio_.buzz([30, 40, 60]); },
+  status:  () => { Audio_.tone({ freq: 880, dur: 0.1, type: 'sine', vol: 0.14 }); Audio_.tone({ freq: 1320, dur: 0.14, type: 'sine', vol: 0.11, delay: 0.06 }); },
+  block:   () => Audio_.tone({ freq: 400, dur: 0.14, type: 'square', vol: 0.16, slideTo: 300 }),
+  levelup: () => [523, 659, 784, 1046].forEach((f, i) => Audio_.tone({ freq: f, dur: 0.16, type: 'triangle', vol: 0.2, delay: i * 0.075 })),
+  plate:   () => { Audio_.tone({ freq: 700, slideTo: 1400, dur: 0.2, type: 'sine', vol: 0.16 }); Audio_.noise({ dur: 0.2, vol: 0.1, filter: 3000 }); },
+  win:     () => [523, 659, 784, 1046, 1318].forEach((f, i) => Audio_.tone({ freq: f, dur: 0.4, type: 'triangle', vol: 0.24, delay: i * 0.13 })),
+  lose:    () => [392, 349, 294, 220].forEach((f, i) => Audio_.tone({ freq: f, dur: 0.45, type: 'sine', vol: 0.2, delay: i * 0.17 })),
+  turn:    () => Audio_.tone({ freq: 480, slideTo: 720, dur: 0.16, type: 'triangle', vol: 0.14 }),
+};
+function sfx(name) { const f = SFX[name]; if (f) { try { f(); } catch (e) {} } }
 
 function unitVisual(defKey, owner, h) {
   const art = UNIT_ART[defKey];
@@ -591,7 +801,10 @@ function unitSilhouette(defKey, owner) {
 let state;
 let currentMode = 'solo';
 
-function initialState() { return { turn:'p1', actionsLeft:1, units:{}, bench:{p1:[],p2:[]}, hc:{p1:[],p2:[]}, selected:null, legalTargets:new Set(), pendingDeploy:null, over:false, mode: currentMode, aiThinking: false, locked: false, plates:{p1:[],p2:[]}, plateUsed:false, pendingPlate:null, mpBonus:{}, warcry:{p1:false,p2:false}, firstMoveDone:false, animating:null, pendingFX:[], clock:{ p1:300000, p2:300000 } }; }
+function initialState() {
+  const ms = S('clockMinutes') * 60000;   // 0 = klok uit
+  return { turn:'p1', actionsLeft:1, units:{}, bench:{p1:[],p2:[]}, hc:{p1:[],p2:[]}, selected:null, legalTargets:new Set(), pendingDeploy:null, over:false, mode: currentMode, aiThinking: false, locked: false, plates:{p1:[],p2:[]}, plateUsed:false, pendingPlate:null, mpBonus:{}, warcry:{p1:false,p2:false}, firstMoveDone:false, animating:null, pendingFX:[], clock: ms ? { p1:ms, p2:ms } : null };
+}
 
 // ===== Schaakklok (Duel-regel: 5 min per speler; tijd op = verlies) =====
 // De klok tikt alleen tijdens je eigen beurt en pauzeert tijdens
@@ -605,9 +818,12 @@ function tickClock() {
   if (!state || state.over || state.locked || !state.clock) return;
   const gameActive = document.getElementById('screen-game').classList.contains('active');
   if (!gameActive) return;
+  const before = state.clock[state.turn];
   state.clock[state.turn] -= dt;
   const cEl = document.getElementById('turn-clock');
   if (cEl) { cEl.textContent = '⏱ ' + fmtClock(state.clock[state.turn]); cEl.style.color = state.clock[state.turn] < 30000 ? '#f87171' : ''; }
+  // Laatste 5 seconden: één tik per seconde, alleen in je eigen beurt
+  if (state.clock[state.turn] < 5000 && Math.ceil(before / 1000) !== Math.ceil(state.clock[state.turn] / 1000)) sfx('tick');
   if (state.clock[state.turn] <= 0) { state.clock[state.turn] = 0; endMatch(state.turn === 'p1' ? 'p2' : 'p1', 'De tijd is om!'); }
 }
 
@@ -767,7 +983,7 @@ function endMatch(winner, msg) {
   document.getElementById('result-reason').textContent = msg;
   document.getElementById('result-reward').textContent = state.mode === 'solo' ? `+${gain} credits` : '';
   renderAll();
-  setTimeout(() => document.getElementById('result-overlay').classList.add('active'), 900);
+  setTimeout(() => { sfx(state.mode !== 'solo' || won ? 'win' : 'lose'); document.getElementById('result-overlay').classList.add('active'); }, 900);
 }
 
 // ===== Collectie: bekijken + upgraden (met disk-preview) =====
@@ -857,6 +1073,171 @@ function renderStore() {
       toast(`${def.name} gekocht!`); renderStore();
     });
     g.appendChild(c);
+  }
+}
+
+// ===== Instellingen-scherm =====
+// Bouwt zichzelf op uit een declaratieve lijst, zodat een instelling toevoegen
+// één regel is. Elke wijziging slaat direct op (geen "opslaan"-knop nodig).
+function setSetting(key, value) {
+  profile.settings[key] = value;
+  profile.settings = normalizeSettings(profile.settings);
+  saveProfile();
+  // Directe effecten van bepaalde instellingen
+  if (key === 'sfxVolume') Audio_.setVolume(profile.settings.sfxVolume);
+  if (key === 'music') { if (profile.settings.music) Audio_.startMusic(); else Audio_.stopMusic(); }
+  if (key === 'clockMinutes' && state && !state.over) toast('Nieuwe kloktijd geldt vanaf het volgende duel');
+}
+
+const SETTINGS_UI = [
+  { group: 'Geluid', rows: [
+    { key:'sfx',       kind:'toggle', t:'Geluidseffecten', d:'Draaischijf, klappen, KO en menu-tikken' },
+    { key:'sfxVolume', kind:'slider', t:'Volume',          d:'Geldt voor alle geluiden' },
+    { key:'music',     kind:'toggle', t:'Achtergrondmuziek', d:'Rustige sfeertoon tijdens het spelen' },
+    { key:'haptics',   kind:'toggle', t:'Trillen',         d:'Korte trilling bij klappen en KO (telefoon)' },
+  ]},
+  { group: 'Weergave & tempo', rows: [
+    { key:'animSpeed', kind:'seg', t:'Animatiesnelheid', d:'Sneller speelt vlotter; uit slaat animaties over',
+      opts:[['normaal','Normaal'],['snel','Snel'],['uit','Uit']] },
+    { key:'showHints', kind:'toggle', t:'Hints tonen', d:'Korte tips tijdens je beurt (bv. waarom een zet niet mag)' },
+  ]},
+  { group: 'Duel-regels', rows: [
+    { key:'clockMinutes', kind:'seg', t:'Bedenktijd', d:'Tijd per speler; op = verloren (Duel-regel: 5 min)',
+      opts:[[3,'3 min'],[5,'5 min'],[10,'10 min'],[0,'Uit']] },
+    { key:'difficulty', kind:'seg', t:'Moeilijkheid', d:'Hoe scherp het AI-systeem speelt in Duel-modus',
+      opts:[['makkelijk','Licht'],['normaal','Normaal'],['moeilijk','Zwaar']] },
+    { key:'confirmExit', kind:'toggle', t:'Vragen bij verlaten', d:'Bevestiging voordat je een lopend duel afbreekt' },
+  ]},
+];
+
+function renderSettings() {
+  const body = document.getElementById('settings-body'); body.innerHTML = '';
+  for (const grp of SETTINGS_UI) {
+    const box = document.createElement('div'); box.className = 'set-group';
+    const title = document.createElement('div'); title.className = 'set-group-title'; title.textContent = grp.group.toUpperCase();
+    box.appendChild(title);
+    for (const row of grp.rows) {
+      const r = document.createElement('div'); r.className = 'set-row';
+      r.innerHTML = `<div class="set-label"><div class="t">${row.t}</div><div class="d">${row.d}</div></div>`;
+      if (row.kind === 'toggle') {
+        const tg = document.createElement('div');
+        tg.className = 'toggle' + (S(row.key) ? ' on' : '');
+        tg.setAttribute('role', 'switch'); tg.setAttribute('aria-checked', String(!!S(row.key)));
+        tg.dataset.setting = row.key;
+        tg.addEventListener('click', () => {
+          const nv = !S(row.key); setSetting(row.key, nv);
+          tg.classList.toggle('on', nv); tg.setAttribute('aria-checked', String(nv));
+          sfx(nv ? 'select' : 'click');
+        });
+        r.appendChild(tg);
+      } else if (row.kind === 'seg') {
+        const seg = document.createElement('div'); seg.className = 'seg'; seg.dataset.setting = row.key;
+        for (const [val, label] of row.opts) {
+          const b = document.createElement('button');
+          b.textContent = label; b.className = S(row.key) === val ? 'on' : '';
+          b.addEventListener('click', () => {
+            setSetting(row.key, val); sfx('select');
+            for (const sib of seg.children) sib.className = '';
+            b.className = 'on';
+          });
+          seg.appendChild(b);
+        }
+        r.appendChild(seg);
+      } else if (row.kind === 'slider') {
+        const wrap = document.createElement('div'); wrap.className = 'set-slider';
+        const inp = document.createElement('input');
+        inp.type = 'range'; inp.min = '0'; inp.max = '100'; inp.step = '5';
+        inp.value = String(Math.round(S(row.key) * 100)); inp.dataset.setting = row.key;
+        const val = document.createElement('span'); val.className = 'val'; val.textContent = inp.value + '%';
+        inp.addEventListener('input', () => { val.textContent = inp.value + '%'; setSetting(row.key, Number(inp.value) / 100); });
+        inp.addEventListener('change', () => sfx('click'));
+        wrap.appendChild(inp); wrap.appendChild(val);
+        r.appendChild(wrap);
+      }
+      box.appendChild(r);
+    }
+    body.appendChild(box);
+  }
+
+  // Profiel-blok: voortgang en de reset-knop
+  const pbox = document.createElement('div'); pbox.className = 'set-group';
+  pbox.innerHTML = `<div class="set-group-title">PROFIEL</div>
+    <div class="set-row"><div class="set-label"><div class="t">Jouw voortgang</div>
+      <div class="d">◈ ${profile.credits} credits · ${Object.keys(profile.owned).length}/18 units · ${profile.stats.wins} gewonnen, ${profile.stats.losses} verloren</div></div></div>`;
+  const rr = document.createElement('div'); rr.className = 'set-row';
+  rr.innerHTML = `<div class="set-label"><div class="t set-danger">Alles wissen</div><div class="d">Verwijdert je credits, units en statistieken. Dit kan niet ongedaan worden gemaakt.</div></div>`;
+  const rb = document.createElement('button'); rb.className = 'btn set-danger'; rb.style.flex = '0 0 auto'; rb.textContent = 'Wissen';
+  rb.addEventListener('click', () => {
+    if (!confirm('Weet je het zeker? Al je credits, units en statistieken worden gewist.')) return;
+    if (!confirm('Echt zeker? Dit kan niet ongedaan worden gemaakt.')) return;
+    const keep = profile.settings;
+    profile = freshProfile(); profile.settings = keep; saveProfile();
+    renderSettings(); renderHome(); toast('Profiel gewist — je begint opnieuw');
+  });
+  rr.appendChild(rb); pbox.appendChild(rr);
+  body.appendChild(pbox);
+
+  const about = document.createElement('div'); about.className = 'set-about';
+  about.innerHTML = `Rondel · prototype fase 1.5<br>Spelregels naar het model van Pokémon Duel<br>Eigen fantasy-units en art — geen beschermd IP`;
+  body.appendChild(about);
+}
+
+// ===== "Hoe speel je" — de regels zoals ze ECHT in deze code zitten =====
+const HELP_SECTIONS = [
+  { h:'Het doel', p:[
+    'Je wint door met één van je figuren op het <b>doelpunt van je tegenstander</b> te eindigen — de gloeiende cirkel aan de overkant.',
+    'Je wint ook als je tegenstander <b>niets meer kan doen</b>, of als zijn <b>bedenktijd</b> op is.',
+    'Je wint <b>niet</b> door alle vijanden te verslaan. Verslagen figuren komen namelijk gewoon terug.' ]},
+  { h:'Je beurt: één actie', p:[
+    'Per beurt doe je <b>precies één ding</b>: een figuur verplaatsen, een figuur inzetten vanaf de zijkant, of met een figuur aanvallen.',
+    'Een <b>plate</b> (de kaartjes onder het bord) kost géén actie — je mag er één per beurt gebruiken, bovenop je zet.',
+    'De allereerste zet van het potje kost <b>1 MP extra</b>, zodat wie begint geen gratis voorsprong krijgt.' ]},
+  { h:'Bewegen en inzetten', p:[
+    'Elk figuur heeft <b>MP</b> (het gouden getal): zoveel punten mag hij per beurt afleggen.',
+    'Inzetten doe je via je eigen <b>entry-punten</b> in de hoeken. Dat kost 1 MP; met je resterende MP mag je meteen doorlopen naar een leeg punt.',
+    'Je kunt niet op een bezet punt landen. Sommige figuren hebben een ability waarmee ze er wél <b>doorheen</b> lopen.' ]},
+  { h:'Gevechten: de draaischijf', p:[
+    'Loop je op een vijand af, dan draaien <b>beide schijven</b>. Waar de pijl landt, bepaalt wat er gebeurt.',
+    'De grootte van een vak is precies de kans erop — een groot wit vak betekent dus vaak raak.' ]},
+  { h:'De vijf kleuren', swatches:[
+    ['#e5e7eb','<b>Wit — aanval.</b> Het getal is de kracht. Hoogste getal wint; gelijk = niemand valt.'],
+    ['#fbbf24','<b>Goud — doorbraak.</b> Slaat dwars door paars, blauw én mis heen. Alleen een sterkere aanval stopt hem.'],
+    ['#3b82f6','<b>Blauw — verdediging.</b> Blokt wit en paars. Verliest wél van goud.'],
+    ['#8b5cf6','<b>Paars — vloek.</b> Geen schade, maar een status. Twee paarse tegen elkaar: de meeste sterren wint.'],
+    ['#ef4444','<b>Rood — mis.</b> Je doet niets. De ander kan je wel raken.'] ]},
+  { h:'Statussen', p:[
+    'Een figuur kan <b>één status tegelijk</b> hebben; een nieuwe vervangt de oude.',
+    '<b>Gif</b> verzwakt je aanvallen, <b>zwaar gif</b> nog meer. <b>Brand</b> verzwakt alles én maakt je kleinste aanval een mis. <b>Verlamming</b> maakt je kleinste aanval een mis.',
+    '<b>Verwarring</b> laat de schijf één vakje verspringen. <b>Slaap</b> houdt je stil tot een bondgenoot naast je staat. <b>Bevroren</b> laat je wel lopen maar niet aanvallen, en gaat na één gevecht vanzelf weg.',
+    'Genezen doe je met de <b>Cleanse</b>-plate, via het Healing Center, of met een ability.' ]},
+  { h:'Omsingelen', p:[
+    'Staat een figuur met <b>geen enkel vrij buurpunt</b> én met minstens één vijand ernaast, dan gaat hij <b>direct KO</b> — zonder gevecht.',
+    'Dat geldt voor beide kanten, dus let op waar je je eigen figuren neerzet.' ]},
+  { h:'Healing Center', p:[
+    'Verslagen figuren gaan naar het <b>Healing Center</b> (maximaal twee tegelijk), waar hun status geneest en hun level behouden blijft.',
+    'Gaat er een <b>derde</b> figuur KO, dan schuift de langst wachtende terug naar je zijlijn en mag je hem de beurt erna weer inzetten.' ]},
+  { h:'Sterker worden', p:[
+    'Versla je een vijand, dan gaat je figuur <b>een level omhoog</b> (tot level 4): zijn sterkste aanval wordt een groter vak en er verdwijnt een mis-vak.',
+    'In de <b>Collectie</b> kun je units met credits permanent upgraden. Die levels blijven voor altijd.' ]},
+  { h:'Abilities', p:[
+    'Sommige figuren hebben een <b>ability</b>: een eigen kracht die vanzelf werkt, bijvoorbeeld door units heen lopen, buren extra MP geven, of een vijand vergiftigen die met ze vecht.',
+    'Je ziet de ability van elke unit in de <b>Collectie</b>, onder de schijf.' ]},
+  { h:'De klok', p:[
+    'Elke speler heeft <b>bedenktijd</b> (standaard 5 minuten, net als in Duel). Je klok loopt alleen tijdens je eigen beurt en staat stil tijdens gevechten.',
+    'Is je tijd op, dan verlies je. Zo loopt een potje nooit eindeloos vast. Je kunt de kloktijd aanpassen bij <b>Instellingen</b>.' ]},
+];
+
+function renderHelp() {
+  const body = document.getElementById('help-body'); body.innerHTML = '';
+  for (const sec of HELP_SECTIONS) {
+    const d = document.createElement('div'); d.className = 'help-sec';
+    let html = `<h3>${sec.h}</h3>`;
+    for (const p of (sec.p || [])) html += `<p>${p}</p>`;
+    for (const [color, txt] of (sec.swatches || [])) {
+      html += `<div class="help-key"><div class="help-swatch" style="background:${color}"></div><div>${txt}</div></div>`;
+    }
+    d.innerHTML = html;
+    body.appendChild(d);
   }
 }
 
@@ -1126,13 +1507,14 @@ function usePlate(player, idx, targetUid, targetNode) {
   else if (key === 'blink') { u.node = targetNode; }
   else if (pl.status) { applyCondition(u, pl.status); }
   state.plates[player].splice(idx, 1); state.plateUsed = true; state.pendingPlate = null; state.legalTargets = new Set();
+  sfx('plate');
   toast(`${pl.name} gebruikt`); renderAll();
 }
 
 function queueFX(x, y, kind) { (state.pendingFX = state.pendingFX || []).push({ x, y, kind }); }
 function flushFX() { const list = state.pendingFX || []; state.pendingFX = []; for (const f of list) spawnFX(f.x, f.y, f.kind); }
 function spawnFX(x, y, kind) {
-  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (animOff()) return;
   const svg = document.getElementById('board');
   const g = el('g', {}, svg);
   const n = kind === 'poof' ? 4 : 7;
@@ -1199,8 +1581,7 @@ function moveUnit(u, end) {
   return new Promise(res => {
     const path = bfs(u.node, end, canPhase(u));
     if (!path || path.length < 2) { u.node = end; renderAll(); res(); return; }
-    const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduced) { let i = 1; const step = () => { u.node = path[i]; renderAll(); i++; if (i < path.length) setTimeout(step, 120); else res(); }; setTimeout(step, 80); return; }
+    if (animOff()) { u.node = path[path.length - 1]; renderAll(); res(); return; }
     state.animating = u.uid;
     renderAll(); // één keer: statische figuur verbergen, daarna alleen de ghost bewegen
     const svg = document.getElementById('board');
@@ -1209,7 +1590,8 @@ function moveUnit(u, end) {
     let seg = 0;
     const hopOne = () => {
       const A = NODES[path[seg]], B = NODES[path[seg + 1]];
-      const dur = 250;
+      const dur = 250 * (animScale() || 1);
+      sfx('hop');
       let t = 0, last = performance.now();
       const frame = (now) => {
         // Tijdstap klemmen: bij haperende frames vertraagt de sprong i.p.v. overslaan
@@ -1309,6 +1691,7 @@ function doDeploy(u, target) {
   }
   u.node = entry;
   state.bench[u.owner] = state.bench[u.owner].filter(x => x !== u.uid);
+  sfx('deploy');
   if (target === entry || !entry) { onDeployComplete(u); renderAll(); return Promise.resolve(); }
   return moveUnit(u, target).then(() => onDeployComplete(u));
 }
@@ -1387,8 +1770,9 @@ function endTurn() {
   state.turn = state.turn==='p1'?'p2':'p1'; state.actionsLeft = 1; state.selected = null; state.pendingDeploy = null; state.legalTargets = new Set();
   state.plateUsed = false; state.pendingPlate = null; state.mpBonus = {}; state.warcry = { p1:false, p2:false };
   for (const uid of state.bench[state.turn]) { const u = state.units[uid]; if (u.status.includes('wait')) u.status = u.status.filter(s => s !== 'wait'); }
-  renderAll(); if (!hasAnyAction(state.turn)) { endMatch(state.turn==='p1'?'p2':'p1', 'Lockout!'); return; }
-  if (state.mode === 'solo' && state.turn === 'p2') { setTimeout(aiTurn, 400); }
+  sfx('turn');
+  renderAll(); if (!hasAnyAction(state.turn)) { endMatch(state.turn==='p1'?'p2':'p1', 'Vastgelopen — geen zet meer mogelijk!'); return; }
+  if (state.mode === 'solo' && state.turn === 'p2') { setTimeout(aiTurn, Math.max(150, 400 * (animScale() || 0.4))); }
 }
 
 const SLOT_COUNT = 16, SLOT_DEG = 22.5;
@@ -1527,12 +1911,35 @@ function spin(svgId, ms) {
   return new Promise(res => {
     const svg = document.getElementById(svgId);
     const idx = Math.floor(Math.random()*SLOT_COUNT);
+    // Animatie-instelling: 'uit' toont het resultaat meteen, 'snel' halveert.
+    if (animOff()) {
+      svg.style.transition = 'none';
+      svg.style.transform = `rotate(${-((idx+0.5)*SLOT_DEG)}deg)`;
+      setTimeout(() => res(idx), 60);
+      return;
+    }
+    const dur = Math.max(400, ms * animScale());
     const fullRots = 5 + Math.floor(Math.random()*2);
     const deg = 360*fullRots - ((idx+0.5)*SLOT_DEG);
-    svg.style.transition = `transform ${ms}ms cubic-bezier(0.15, 0.85, 0.1, 1)`;
+    svg.style.transition = `transform ${dur}ms cubic-bezier(0.15, 0.85, 0.1, 1)`;
     svg.getBoundingClientRect(); svg.style.transform = `rotate(${deg}deg)`;
-    setTimeout(() => { res(idx); }, ms+100);
+    scheduleSpinTicks(dur, fullRots);
+    setTimeout(() => { res(idx); }, dur+100);
   });
+}
+
+// Tik-geluid dat meeloopt met de vertragende schijf: we sampelen dezelfde
+// easing-curve als de CSS-transitie, zodat elke tik met een slot-grens samenvalt.
+function scheduleSpinTicks(dur, fullRots) {
+  if (!S('sfx')) return;
+  const totalSlots = fullRots * SLOT_COUNT;
+  const ease = t => 1 - Math.pow(1 - t, 3);            // benadert cubic-bezier(.15,.85,.1,1)
+  let last = 0;
+  for (let i = 1; i <= 90; i++) {
+    const t = i / 90;
+    const slotsPassed = Math.floor(ease(t) * totalSlots);
+    if (slotsPassed > last) { last = slotsPassed; setTimeout(() => sfx('tick'), t * dur); }
+  }
 }
 
 function applyStatus(slots, st) {
@@ -1576,7 +1983,8 @@ async function runCombat(att, def) {
   const [aIdx, dIdx] = await Promise.all([spin(attDiskId, 2800 + Math.random()*400), spin(defDiskId, 3400 + Math.random()*400)]);
 
   // Clash: flits + schok zodra beide wielen stilstaan
-  if (!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+  sfx('clash');
+  if (!animOff()) {
     const row = document.querySelector('#combat-overlay .disks-row');
     const flash = document.getElementById('clash-flash');
     if (row) { row.classList.remove('clash'); void row.offsetWidth; row.classList.add('clash'); }
@@ -1627,6 +2035,12 @@ async function runCombat(att, def) {
   applyContact(def, att, !defToBench, !attToBench);
 
   if (!r.attKO && !r.defKO && !attRetreat && !defRetreat && !r.statusOnAtt && !r.statusOnDef && !html) html += `<span style="opacity:0.8;font-style:italic">${noEffectReason(aSlot, dSlot)}</span>`;
+
+  // Uitkomst-geluid: KO gaat voor status, status voor een geblokte klap
+  if (r.attKO || r.defKO) sfx('ko');
+  else if (attRetreat || defRetreat) sfx('block');
+  else if (r.statusOnAtt || r.statusOnDef) sfx('status');
+  else if (aSlot.k === 'blue' || dSlot.k === 'blue') sfx('block');
 
   const movesLine = `<div class="clash-moves"><span class="mv-att">${moveLabel(aSlot)}</span><span class="vs">⚔</span><span class="mv-def">${moveLabel(dSlot)}</span></div>`;
   document.getElementById('combat-result').innerHTML = movesLine + html;
@@ -1682,13 +2096,14 @@ function levelSlotBoost(u) {
 function levelUp(u) {
   if (u.level >= 4) return; u.level++;
   levelSlotBoost(u);
+  sfx('levelup');
   toast(`${UNIT_DEFS[u.defKey].name} → Level ${u.level}!`);
 }
 
 let toastT; function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2000); }
 
 document.getElementById('btn-end-turn').addEventListener('click', endTurn);
-document.getElementById('btn-menu').addEventListener('click', () => { if (state.over || confirm('Duel verlaten en terug naar het menu?')) goHome(); });
+document.getElementById('btn-menu').addEventListener('click', () => { if (state.over || !S('confirmExit') || confirm('Duel verlaten en terug naar het menu?')) goHome(); });
 document.getElementById('btn-deck-random').addEventListener('click', () => { const owned = Object.keys(profile.owned); deckSel.units = randomPick(owned, Math.min(6, owned.length)); deckSel.plates = randomPick(Object.keys(PLATES), 3); renderDeckSelect(); });
 document.getElementById('btn-deck-start').addEventListener('click', onDeckConfirm);
 document.getElementById('btn-deck-back').addEventListener('click', goHome);
@@ -1697,12 +2112,34 @@ document.getElementById('tile-solo').addEventListener('click', () => startMatchF
 document.getElementById('tile-hotseat').addEventListener('click', () => startMatchFlow('hotseat'));
 document.getElementById('tile-collection').addEventListener('click', () => { renderCollection(); showScreen('collection'); });
 document.getElementById('tile-store').addEventListener('click', () => { renderStore(); showScreen('store'); });
+document.getElementById('tile-settings').addEventListener('click', () => { renderSettings(); showScreen('settings'); });
+document.getElementById('tile-help').addEventListener('click', () => { renderHelp(); showScreen('help'); });
+
+// Audio mag op mobiel pas starten ná een gebruikersgebaar — de eerste tik waar
+// dan ook in de app ontgrendelt de AudioContext.
+for (const ev of ['pointerdown', 'touchstart', 'keydown']) {
+  window.addEventListener(ev, () => Audio_.unlock(), { once: true, passive: true });
+}
+// Elke tik op een knop/tegel geeft feedback; overige klikgeluiden staan bij de actie zelf.
+document.addEventListener('click', (e) => {
+  if (e.target.closest('.home-tile, .btn-back, .coll-card, .plate-chip, .deck-card')) sfx('click');
+}, true);
 for (const b of document.querySelectorAll('.btn-back')) b.addEventListener('click', () => { renderHome(); showScreen(b.dataset.back); });
 document.getElementById('btn-detail-close').addEventListener('click', () => document.getElementById('detail-overlay').classList.remove('active'));
 document.getElementById('btn-detail-upgrade').addEventListener('click', doUpgrade);
 document.getElementById('btn-result-menu').addEventListener('click', goHome);
 
 const AI = 'p2';
+
+// Moeilijkheidsgraad (sessie 24). 'jitter' = hoeveel toeval er op elke score zit,
+// 'slip' = kans dat de AI niet z'n beste maar z'n op-één-na-beste zet kiest,
+// 'horizon' = hoeveel beurten vooruit een rush als dreiging telt.
+const AI_LEVELS = {
+  makkelijk: { jitter: 45, slip: 0.35, horizon: 1, keeper: 0.5, abilityWeight: 0.3, think: 500 },
+  normaal:   { jitter: 5,  slip: 0.08, horizon: 3, keeper: 1.0, abilityWeight: 1.0, think: 800 },
+  moeilijk:  { jitter: 2,  slip: 0,    horizon: 4, keeper: 1.3, abilityWeight: 1.4, think: 650 },
+};
+function aiCfg() { return AI_LEVELS[S('difficulty')] || AI_LEVELS.normaal; }
 
 function distTo(start, goalKey) {
   if (start === goalKey) return 0;
@@ -1711,16 +2148,56 @@ function distTo(start, goalKey) {
   return 99;
 }
 
+// Wat een unit RÉÉL per beurt aflegt, inclusief ability-aura's — de oude
+// dreigingsmeting keek alleen naar de basis-MP en onderschatte dus Roedel/
+// Aanvoerder-units (open punt 12).
+function aiEffMP(u) {
+  if (!u.node) return Math.min(3, UNIT_DEFS[u.defKey].mp);
+  return Math.min(3, UNIT_DEFS[u.defKey].mp + abilityMPBonus(u));
+}
+
 function combatEV(att, def) {
   const aS = applyStatus(att.slots, att.status), dS = applyStatus(def.slots, def.status);
   const aFroz = att.status.includes('frozen'), dFroz = def.status.includes('frozen');
+  const w = aiCfg().abilityWeight;
+  // Ability-correcties op de ruwe kansen (open punt 12):
+  // Onverwoestbaar overleeft z'n eerste KO, Bergvast komt na een KO meteen terug,
+  // en contact-abilities delen sowieso status uit aan wie ermee vecht.
+  const attUndying = abilityOf(att) === 'undying' && !att.undyingUsed;
+  const defUndying = abilityOf(def) === 'undying' && !def.undyingUsed;
+  const attCheapKO = abilityOf(att) === 'mountain' ? 0.55 : 1;   // KO doet minder pijn
+  const defCheapKO = abilityOf(def) === 'mountain' ? 0.55 : 1;
   let ev = 0;
   for (let i = 0; i < 16; i++) for (let j = 0; j < 16; j++) {
     const r = resolve(aFroz ? {k:'red'} : aS[i], dFroz ? {k:'red'} : dS[j]);
-    if (r.defKO) ev += 1; if (r.attKO) ev -= 1;
+    if (r.defKO) ev += defUndying ? 0.15 * w : defCheapKO;
+    if (r.attKO) ev -= attUndying ? 0.15 * w : attCheapKO;
     if (r.statusOnDef) ev += 0.25; if (r.statusOnAtt) ev -= 0.25;
   }
-  return ev / 256;
+  ev /= 256;
+  // Wie een contact-ability heeft, wint elk treffen een beetje extra
+  if (contactStatusOf(abilityOf(att))) ev += 0.10 * w;
+  if (contactStatusOf(abilityOf(def))) ev -= 0.12 * w;
+  return ev;
+}
+
+// Positionele ability-waarde: hoeveel is het waard dat DEZE unit op DIT punt staat?
+function abilityPosBonus(u, node) {
+  const ab = abilityOf(u); if (!ab) return 0;
+  const w = aiCfg().abilityWeight;
+  let s = 0;
+  const allies = [...ADJ[node]].filter(n => { const o = unitAt(n); return o && o.owner === u.owner && o.uid !== u.uid; });
+  const enemies = [...ADJ[node]].filter(n => { const o = unitAt(n); return o && o.owner !== u.owner; });
+  // MP-aura's willen naast bondgenoten staan
+  if (ab === 'pack' && allies.length) s += 30;
+  if (ab === 'command') s += allies.length * 25;
+  // Contact-abilities zijn uitstekende blokkers: laat de vijand maar komen
+  if (contactStatusOf(ab)) s += enemies.length * 20 + (GOAL_ZONE.includes(node) ? 35 : 0);
+  // Onverwoestbaar/Bergvast mogen risico nemen — vooraan is prima
+  if ((ab === 'undying' && !u.undyingUsed) || ab === 'mountain') s += enemies.length * 22;
+  // Zegenende Aura wil naast bondgenoten mét status staan
+  if (ab === 'blessing') s += allies.filter(n => { const o = unitAt(n); return o && o.status.some(x => !['wait','bulwark'].includes(x)); }).length * 45;
+  return s * w;
 }
 
 function aiUsePlate() {
@@ -1736,14 +2213,16 @@ function aiUsePlate() {
 }
 
 function rushThreat() {
-  // Snelste speler-unit richting G2, in beurten
+  // Snelste speler-unit richting G2, in beurten. Houdt sinds sessie 24 rekening
+  // met ability-MP (Roedel/Aanvoerder) en met phasers, die niet te blokkeren zijn.
   let best = null;
   for (const u of Object.values(state.units)) {
     if (u.owner !== 'p1' || !u.node || u.status.includes('sleep')) continue;
-    const mp = Math.min(3, UNIT_DEFS[u.defKey].mp);
+    const mp = aiEffMP(u);
     const d = distTo(u.node, 'G2');
-    const turns = Math.ceil(d / mp);
-    if (!best || turns < best.turns || (turns === best.turns && d < best.d)) best = { uid: u.uid, turns, d };
+    let turns = Math.ceil(d / mp);
+    if (canPhase(u)) turns -= 0.5;   // loopt door blokkades heen: gevaarlijker dan de afstand suggereert
+    if (!best || turns < best.turns || (turns === best.turns && d < best.d)) best = { uid: u.uid, turns, d, phasing: canPhase(u) };
   }
   return best;
 }
@@ -1753,11 +2232,12 @@ const GOAL_ZONE = ['G2','T2','T3'];
 
 function aiTurn() {
   if (state.over || state.turn !== AI || state.mode !== 'solo' || state.locked) return; state.aiThinking = true; renderAll();
+  const cfg = aiCfg();
   setTimeout(() => {
     state.aiThinking = false; if (state.over) return;
     aiUsePlate();
     const threat = rushThreat();
-    const danger = threat && threat.turns <= 3;
+    const danger = threat && threat.turns <= cfg.horizon;
     const zoneUnits = Object.values(state.units).filter(u => u.owner === AI && u.node && GOAL_ZONE.includes(u.node));
     const lastDefender = zoneUnits.length === 1 ? zoneUnits[0].uid : null;
     const zoneEmpty = zoneUnits.length === 0;
@@ -1765,26 +2245,32 @@ function aiTurn() {
     const actions = [];
 
     const g2Empty = !unitAt('G2');
-    const posScore = (t, dNow) => {
+    const posScore = (t, dNow, u) => {
       let s = (dNow - distTo(t, 'G1')) * 25;
       if (NODES[t].type === 'goal' && NODES[t].owner === 'p1') s = 1000;
       if (GOAL_ZONE.includes(t)) {
-        if (zoneEmpty && onBoard >= 1) s += danger ? 400 : 150; // zone altijd hermannen, niet alleen bij paniek
+        if (zoneEmpty && onBoard >= 1) s += (danger ? 400 : 150) * cfg.keeper; // zone altijd hermannen, niet alleen bij paniek
         if (t === 'G2') {
           s += 60;
           // In de zone staan blokkeert niets — alleen een keeper OP het doel blokkeert.
           // Bij dreiging moet G2 zelf bezetten daarom (bijna) alles overtroeven.
-          if (danger && g2Empty) s += threat.turns <= 2 ? 600 : 250;
+          if (danger && g2Empty) s += (threat.turns <= 2 ? 600 : 250) * cfg.keeper;
         }
       }
+      if (u) s += abilityPosBonus(u, t);
+      // Phasers zijn onze béste aanvallers: die mogen juist wél oprukken
+      if (u && canPhase(u) && !GOAL_ZONE.includes(t)) s += (dNow - distTo(t, 'G1')) * 15 * cfg.abilityWeight;
       return s;
     };
 
     for (const uid of state.bench[AI]) {
       const u = state.units[uid]; if (u.status.includes('wait')) continue;
+      // Zielenoproep wil op het veld als er nog units staan te wachten
+      const raiseBonus = abilityOf(u) === 'raise'
+        ? state.bench[AI].filter(x => state.units[x].status.includes('wait')).length * 40 * cfg.abilityWeight : 0;
       for (const t of deployTargets(u)) {
-        let s = 25 + Math.max(0, 4 - onBoard) * 15 + posScore(t, distTo(t, 'G1') + 2) * 0.6;
-        actions.push({ type:'deploy', uid, target:t, score: s + Math.random() * 5 });
+        let s = 25 + Math.max(0, 4 - onBoard) * 15 + posScore(t, distTo(t, 'G1') + 2, u) * 0.6 + raiseBonus;
+        actions.push({ type:'deploy', uid, target:t, score: s + Math.random() * cfg.jitter });
       }
     }
     for (const u of Object.values(state.units)) {
@@ -1796,18 +2282,24 @@ function aiTurn() {
         if (occ && occ.owner !== AI) {
           let s = combatEV(u, occ) * 120 + 10;
           if (threat && occ.uid === threat.uid && threat.turns <= 2) s += 120;
+          // Een phasende rusher is niet te blokkeren — die moet je aanvállen
+          if (threat && occ.uid === threat.uid && threat.phasing) s += 90 * cfg.abilityWeight;
           if (u.uid === lastDefender && !(threat && occ.uid === threat.uid)) s -= 300; // laatste verdediger jaagt niet
-          actions.push({ type:'attack', uid:u.uid, target:t, defenderUid:occ.uid, score: s + Math.random() * 5 });
+          actions.push({ type:'attack', uid:u.uid, target:t, defenderUid:occ.uid, score: s + Math.random() * cfg.jitter });
         } else {
-          let s = posScore(t, dNow);
+          let s = posScore(t, dNow, u);
           if (u.uid === lastDefender && !GOAL_ZONE.includes(t)) s -= 500;       // laatste verdediger blijft ALTIJD
           else if (inZone && danger && !GOAL_ZONE.includes(t)) s -= 150;        // bij dreiging blijft iedereen liever
-          actions.push({ type:'move', uid:u.uid, target:t, score: s + Math.random() * 5 });
+          actions.push({ type:'move', uid:u.uid, target:t, score: s + Math.random() * cfg.jitter });
         }
       }
     }
     if (actions.length === 0) { renderAll(); setTimeout(endTurn, 300); return; }
-    actions.sort((a, b) => b.score - a.score); const best = actions[0];
+    actions.sort((a, b) => b.score - a.score);
+    // Op 'Licht' kiest de AI soms bewust niet z'n beste zet (menselijker, minder frustrerend)
+    let pick = 0;
+    if (cfg.slip && actions.length > 1 && Math.random() < cfg.slip) pick = 1 + Math.floor(Math.random() * Math.min(2, actions.length - 1));
+    const best = actions[pick];
     if (best.type === 'deploy') { state.locked = true; doDeploy(state.units[best.uid], best.target).then(() => { state.actionsLeft--; state.locked = false; afterAction(); }); }
     else if (best.type === 'move') { state.locked = true; moveUnit(state.units[best.uid], best.target).then(()=>{ const g = NODES[best.target]; if (g.type==='goal' && g.owner !== AI) { endMatch(AI, 'AI BEREIKT JE DOEL!'); return; } state.actionsLeft--; state.locked = false; afterAction(); }); }
     else if (best.type === 'attack') { 
@@ -1818,7 +2310,7 @@ function aiTurn() {
             else { state.actionsLeft--; runCombat(u, state.units[best.defenderUid]); }
         } else { state.locked = false; setTimeout(endTurn, 300); }
     }
-  }, 800);
+  }, Math.max(120, cfg.think * (animScale() || 0.35)));
 }
 
 loadProfile();
