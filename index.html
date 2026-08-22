@@ -218,17 +218,19 @@
   .set-label { flex: 1; min-width: 0; }
   .set-label .t { font-family: 'Cinzel', serif; font-size: 0.85rem; color: var(--ink); }
   .set-label .d { font-size: 0.7rem; color: #8f8676; margin-top: 2px; line-height: 1.3; }
-  /* Schuifknop (aan/uit) — groot genoeg voor een duim */
+  /* Schuifknop (aan/uit). Visueel 52×30, maar het tikgebied is via ::before
+     opgerekt tot ruim 44px hoog — de norm voor een duim op een telefoon. */
   .toggle { flex: 0 0 auto; width: 52px; height: 30px; border-radius: 15px; background: #2a2438; border: 1px solid rgba(255,255,255,0.12); position: relative; cursor: pointer; transition: background 0.2s; }
+  .toggle::before { content: ''; position: absolute; inset: -9px -6px; border-radius: 22px; }
   .toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: linear-gradient(160deg, #8b8497, #4b4459); transition: transform 0.2s, background 0.2s; }
   .toggle.on { background: linear-gradient(90deg, #b45309, #f59e0b); border-color: rgba(245,158,11,0.6); }
   .toggle.on::after { transform: translateX(22px); background: linear-gradient(160deg, #fff8e7, #fbbf24); }
   /* Segment-keuze (2-4 opties naast elkaar) */
   .seg { flex: 0 0 auto; display: flex; background: #191325; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
-  .seg button { background: none; border: none; color: #9a9186; font-family: 'Cinzel', serif; font-size: 0.72rem; padding: 8px 11px; cursor: pointer; min-width: 44px; }
+  .seg button { background: none; border: none; color: #9a9186; font-family: 'Cinzel', serif; font-size: 0.72rem; padding: 14px 11px; cursor: pointer; min-width: 44px; min-height: 44px; }
   .seg button.on { background: linear-gradient(180deg, #fbbf24, #b45309); color: #000; font-weight: 700; }
   .set-slider { flex: 0 0 128px; display: flex; align-items: center; gap: 8px; }
-  .set-slider input { flex: 1; accent-color: var(--gold); }
+  .set-slider input { flex: 1; accent-color: var(--gold); height: 44px; }   /* hoog tikgebied voor een duim */
   .set-slider .val { font-family: 'Cinzel', serif; font-size: 0.72rem; color: var(--gold); width: 34px; text-align: right; }
   .set-danger { color: #f87171 !important; border-color: rgba(248,113,113,0.4) !important; }
   .set-about { text-align: center; font-size: 0.7rem; color: #665f52; line-height: 1.6; padding: 4px 0 10px; }
@@ -261,7 +263,7 @@
       <div class="home-tile" id="tile-collection"><span class="ico">🛡️</span><div class="tname">COLLECTIE</div><div class="tdesc">Bekijk &amp; verbeter je units</div></div>
       <div class="home-tile" id="tile-store"><span class="ico">◈</span><div class="tname">WINKEL</div><div class="tdesc">Nieuwe units kopen met credits</div></div>
       <div class="home-tile" id="tile-help"><span class="ico">📖</span><div class="tname">HOE SPEEL JE</div><div class="tdesc">Alle regels kort uitgelegd</div></div>
-      <div class="home-tile" id="tile-settings"><span class="ico">⚙️</span><div class="tname">INSTELLINGEN</div><div class="tdesc">Geluid, tempo, klok en meer</div></div>
+      <div class="home-tile" id="tile-settings" style="grid-column: 1 / -1;"><span class="ico">⚙️</span><div class="tname">INSTELLINGEN</div><div class="tdesc">Geluid, tempo, klok en meer</div></div>
     </div>
     <div class="home-foot">Rondel-prototype · fase 1.5 · mechanics naar Duel-model</div>
   </div>

@@ -424,6 +424,35 @@ section('=== BOOSTERKIST (7 checks) ===');
   check('Duplicaat betaalt credits terug', dup.refund > 0, true);
 }
 
+// ─── 4g. UITLEG KLOPT MET DE CODE (sessie 24) ──────────────────────────────────
+// Het "Hoe speel je"-scherm beschrijft de regels. Deze checks verankeren de
+// belangrijkste getallen aan de echte code, zodat de uitleg niet stilletjes
+// kan gaan liegen als we later iets balanceren.
+section('=== UITLEG vs CODE (8 checks) ===');
+{
+  const help = html.slice(html.indexOf('const HELP_SECTIONS'), html.indexOf('function renderHelp'));
+  if (!help) throw new Error('HELP_SECTIONS niet gevonden');
+
+  check('Uitleg noemt dezelfde standaard-bedenktijd als de code',
+    /standaard 5 minuten/.test(help) && SETTING_DEFS.clockMinutes.def === 5, true);
+  check('Uitleg noemt hetzelfde max level als de code',
+    /tot level 4/.test(help) && /u\.level >= 4/.test(html), true);
+  check('Uitleg noemt dezelfde Healing-Center-capaciteit',
+    /maximaal\s*<b>?twee|maximaal twee tegelijk/.test(help) && /state\.hc\[u\.owner\]\.length > 2/.test(html), true);
+  check('Uitleg noemt de één-status-regel die applyCondition afdwingt',
+    /één status tegelijk/.test(help) && /u\.status = u\.status\.filter\(s => !SPECIAL\.includes\(s\)\)/.test(html), true);
+  check('Uitleg zegt dat bevroren na een gevecht weggaat, net als de code',
+    /na één gevecht vanzelf weg/.test(help) && /Frozen wordt na een gevecht gewist/.test(html), true);
+  check('Uitleg zegt dat een plate geen actie kost, net als de code',
+    /kost géén actie/.test(help) && /state\.plateUsed = true/.test(html), true);
+  check('Uitleg noemt de eerste-zet-regel die effMP afdwingt',
+    /1 MP extra/.test(help) && /allereerste zet van het potje MP-1/.test(html), true);
+  // De vijf kleurstalen in de uitleg moeten exact de disk-kleuren zijn
+  const swatch = [...help.matchAll(/\['(#[0-9a-fA-F]{6})',/g)].map(m => m[1].toLowerCase());
+  const diskColors = ['#e5e7eb', '#fbbf24', '#3b82f6', '#8b5cf6', '#ef4444'];
+  check('De vijf kleurstalen zijn exact de schijfkleuren', swatch, diskColors);
+}
+
 // ─── 5. SYNTAX-CHECK volledige game-JS ─────────────────────────────────────────
 section('=== SYNTAX (1 check) ===');
 {

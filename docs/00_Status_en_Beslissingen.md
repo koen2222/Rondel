@@ -192,9 +192,27 @@ bij Pokémon Duel, en "de OPTIES moeten beter" (twee keer benadrukt).
   andere lade. Onthul-animatie + "nog een kist". De winkel blijft ONGEWIJZIGD
   ernaast bestaan (gericht kopen, duurder) — dit is een TOEVOEGING aan Koens
   economie, geen vervanging. LET OP: economie-balans opnieuw speeltesten.
-- Tests: 70 → 90 headless (instellingen, team-validatie, boosterkansen),
-  rooktest 20 → 33 (info-kaart, instellingen bewaren, uitleg, kist, slots).
-  SW-cache v33.
+- REVIEW-RONDE (zelf gedaan; de parallelle review-agents kregen een kapotte
+  tool-omgeving en weigerden terecht te speculeren over ongeziene code):
+  * Eigen correctheids-review vond 3 echte fouten, alle gefixt: S() gaf de
+    setting-DEFINITIE terug i.p.v. de waarde vóór het profiel geladen was
+    (volume werd NaN); een lokale `S` in unitSilhouette overschaduwde de
+    globale instellingen-functie (hernoemd naar SIL); spin-tikken plaatsten
+    tot ~180 oscillators per gevecht (nu 1 per 2 slots, hard gecapt op 40,
+    en opgeruimd bij match-einde/menu). Ook: startClock() start geen interval
+    meer als de bedenktijd uit staat.
+  * Telefoon-UX-audit op 390×844: alle bedienelementen waren TE KLEIN voor een
+    duim (schakelaars 30px, segmentknoppen 28px, volumeschuif 16px — norm is
+    44px). Gefixt: segmentknoppen en schuif naar 44px, schakelaars houden hun
+    look maar krijgen via ::before een opgerekt tikgebied. Bewaakt door een
+    rooktest. Ook de verweesde INSTELLINGEN-tegel over de volle breedte gezet.
+  * Uitleg-vs-code geverifieerd en VASTGELEGD in 8 tests: bedenktijd, max
+    level, HC-capaciteit, één-status-regel, frozen-na-gevecht, plate kost geen
+    actie, eerste-zet-MP, en de vijf kleurstalen == de echte schijfkleuren.
+    Zo kan het uitlegscherm niet stilletjes gaan liegen als we balanceren.
+- Tests: 70 → 98 headless (instellingen, team-validatie, boosterkansen,
+  uitleg-vs-code), rooktest 20 → 34 (info-kaart, instellingen bewaren, uitleg,
+  kist, slots, tikdoel-maten). SW-cache v34.
 - NIET gedaan / bewust laten liggen: fusion-systeem (open punt 10, groot en
   raakt de hele economie), online multiplayer (fase 3), bord-thema-art.
 - KANTTEKENING: een parallelle research-workflow om Duel-features te
