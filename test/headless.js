@@ -164,23 +164,24 @@ const baseSlots = [
 }
 
 // ─── 3. BOARD TOPOLOGIE (12 checks) ───────────────────────────────────────────
-section('=== BOARD TOPOLOGIE (12 checks) ===');
+section('=== BOARD TOPOLOGIE (13 checks) ===');
 
 const nodeKeys = Object.keys(NODES);
-check('32 nodes',            nodeKeys.length, 32);
-check('36 edges (ROUTES, sessie 17: goal-diagonalen geschrapt)', ROUTES.length, 36);
+check('28 nodes (Duel: 26 punten + 2 doelen)', nodeKeys.length, 28);
+check('26 gewone punten, exact zoals Duel', nodeKeys.filter(k => NODES[k].type !== 'goal').length, 26);
+check('32 edges (buitenring 20 + binnenring 8 + 4 hoekdiagonalen)', ROUTES.length, 32);
 
 // ADJ: Set → count undirected edges
 let edgeSum = 0;
 for (const k of nodeKeys) edgeSum += ADJ[k].size;
-check('ADJ-som = 72 (36×2)', edgeSum, 72);
+check('ADJ-som = 64 (32×2)', edgeSum, 64);
 
 // BFS volledig verbonden
 {
   const seen = new Set(['G1']);
   const q = ['G1'];
   while (q.length) { const n=q.shift(); for (const nb of ADJ[n]) { if(!seen.has(nb)){seen.add(nb);q.push(nb);} } }
-  check('Volledig verbonden (BFS)', seen.size, 32);
+  check('Volledig verbonden (BFS)', seen.size, 28);
 }
 
 // Geïsoleerde nodes
@@ -206,10 +207,10 @@ check('G2 aanwezig en type=goal',  NODES['G2']?.type, 'goal');
   check('4 entry-nodes', entries.length, 4);
 }
 
-// Inner-nodes (IT1-5, IB1-5, IL, IR = 12)
+// Binnenvierkant: 3x3 heeft 8 randpunten (Duel-conform, was 12 bij ons 5x3)
 {
   const inner = nodeKeys.filter(k => k.startsWith('IT')||k.startsWith('IB')||k==='IL'||k==='IR');
-  check('12 inner nodes (IT×5 + IB×5 + IL + IR)', inner.length, 12);
+  check('8 binnenpunten (3x3-vierkant, midden leeg)', inner.length, 8);
 }
 
 // Goal-connecties (sessie 17): G2 alleen nog via T2 en T3 — de rush-fix
@@ -289,6 +290,16 @@ section('=== HEALING CENTER (8 checks) ===');
   koUnit(u3);
   check('KO 3: oudste (u1) terug naar bench met wait', S.bench.p1.includes('u1') && u1.status.includes('wait'), true);
   check('KO 3: HC bevat nu u2+u3',         S.hc.p1, ['u2','u3']);
+}
+
+// ─── 4a2. MP-BEREIK (sessie 25) ────────────────────────────────────────────────
+section('=== MP-BEREIK (3 checks) ===');
+{
+  const mps = Object.values(UNIT_DEFS).map(d => d.mp);
+  check('Geen enkele unit onder 2 MP (was 1 = 7 beurten oversteken)', Math.min(...mps), 2);
+  check('Snelste units op 3 MP, net als in Duel', Math.max(...mps), 3);
+  // "Ongeveer dezelfde MP": hooguit 1 stap verschil tussen traagste en snelste
+  check('Hoogstens 1 MP verschil over de hele roster', Math.max(...mps) - Math.min(...mps), 1);
 }
 
 // ─── 4b. ABILITIES ─────────────────────────────────────────────────────────────
