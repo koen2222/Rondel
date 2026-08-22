@@ -39,6 +39,21 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
   await page.click('#tile-store');
   ok('Winkel opent', await page.locator('#screen-store.active').count() === 1);
   ok('Koopbare kaarten aanwezig', await page.locator('#store-grid .price-chip').count() === 18);
+  ok('Boosterkist zichtbaar in de winkel', await page.locator('#booster-card').count() === 1);
+  {
+    const snap = () => page.evaluate(() => ({ credits: profile.credits, units: Object.keys(profile.owned).length }));
+    const before = await snap();
+    await page.click('#booster-card');
+    await page.waitForSelector('#booster-overlay.active');
+    await page.waitForTimeout(1500);
+    const after = await snap();
+    // Je krijgt altijd iets: een nieuwe unit, of credits terug bij een duplicaat
+    const gotUnit = after.units > before.units;
+    const gotRefund = after.credits > before.credits - 150;
+    ok('Kist levert een unit of credits terug', gotUnit || gotRefund);
+    ok('Kist toont de naam van de unit', (await page.locator('#booster-name').innerText()).length > 2);
+    await page.click('#btn-booster-close');
+  }
   await page.click('.btn-back >> nth=1');
 
   // 5. Solo-flow: deck kiezen → game start

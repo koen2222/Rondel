@@ -39,6 +39,13 @@ const abilitySection = html.slice(
   html.indexOf('// ABILITIES-END')
 );
 
+// Boosterkist (BOOSTER_COST, BOOSTER_ODDS, rollBooster)
+const boosterSection = html.slice(
+  html.indexOf('const BOOSTER_COST ='),
+  html.indexOf('// BOOSTER-END')
+);
+if (!boosterSection) throw new Error('BOOSTER-blok niet gevonden');
+
 // Instellingen (SETTING_DEFS, freshSettings, normalizeSettings)
 const settingsSection = html.slice(
   html.indexOf('const SETTING_DEFS ='),
@@ -67,13 +74,14 @@ const evalCode = [
   diskSection,
   abilitySection,
   settingsSection,
+  boosterSection,
   resolveMatch[0],
   applyMatch[0],
   koMatch[0],
   condMatch[0],
   platesMatch[0],
   decksMatch[0],
-  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, DECK_SLOTS, normalizeDecks };',
+  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster };',
 ].join('\n');
 
 // Schrijf tijdelijk evalueerbaar bestand (vermijdt new Function-beperkingen)
@@ -86,7 +94,7 @@ try {
   fs.unlinkSync(tmpPath);
 }
 
-const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, DECK_SLOTS, normalizeDecks } = extracted;
+const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster } = extracted;
 
 // ─── Test harness ──────────────────────────────────────────────────────────────
 let pass = 0, fail = 0;
@@ -392,6 +400,28 @@ section('=== OPGESLAGEN TEAMS (5 checks) ===');
   const badPlate = { units: good.units, plates:['rally','cleanse','bestaatniet'] };
   check('Team met onbekende plate wordt leeggemaakt', normalizeDecks([badPlate], owned)[0], null);
   check('Rommel-invoer geeft lege slots', normalizeDecks('kapot', owned), [null, null, null]);
+}
+
+// ─── 4f. BOOSTERKIST (sessie 24) ───────────────────────────────────────────────
+section('=== BOOSTERKIST (7 checks) ===');
+{
+  const RAR = { squire:'C', scout:'C', apprentice:'C', skeleton:'C', boar:'C', imp:'C',
+    cleric:'U', archer:'U', runesmith:'U', ghoul:'U', lupine:'U', hellhound:'U',
+    commander:'R', weaver:'R', warden:'R', necromancer:'R', wyrmling:'R', pitlord:'R' };
+  check('Kansen tellen op tot 100%', BOOSTER_ODDS.reduce((a, [, p]) => a + p, 0).toFixed(2), '1.00');
+  const none = {};
+  check('Lage worp geeft een Common', rollBooster(0.1, 0.5, none, RAR).rarity, 'C');
+  check('Hoge worp geeft een Rare', rollBooster(0.99, 0.5, none, RAR).rarity, 'R');
+  check('Nieuwe unit is geen duplicaat', rollBooster(0.1, 0.5, none, RAR).duplicate, false);
+  // Alle commons in bezit → de kist geeft liever iets nieuws dan een duplicaat
+  const allC = { squire:1, scout:1, apprentice:1, skeleton:1, boar:1, imp:1 };
+  const r = rollBooster(0.1, 0.5, allC, RAR);
+  check('Commons compleet → kist geeft toch iets nieuws', r.duplicate, false);
+  // Alles in bezit → duplicaat mét terugbetaling (nooit geld weggooien)
+  const all = {}; for (const k of Object.keys(RAR)) all[k] = 1;
+  const dup = rollBooster(0.1, 0.5, all, RAR);
+  check('Alles in bezit → duplicaat', dup.duplicate, true);
+  check('Duplicaat betaalt credits terug', dup.refund > 0, true);
 }
 
 // ─── 5. SYNTAX-CHECK volledige game-JS ─────────────────────────────────────────

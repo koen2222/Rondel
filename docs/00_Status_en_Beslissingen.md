@@ -1,5 +1,5 @@
 RONDEL — STATUS EN BESLISSINGEN
-Laatste update: 14 juni 2026 (sessie 15)
+Laatste update: 22 augustus 2026 (sessie 24)
 
 KERNCONCEPT
 - Tabletop-first fantasy bordspel, einddoel = digitale app
@@ -141,6 +141,66 @@ HUIDIGE DELIVERABLE
     level-up, alle statussen functioneel
   - Symmetrische Duel-resolutie (headless getest: 14/14 spec-checks OK)
   - Bord-topologie headless getest: 12/12 checks OK
+
+GEDAAN IN SESSIE 24 (22 aug 2026) — "MAAK HET AF ZOALS BEDOELD"
+Koens opdracht: het spel afmaken zoals oorspronkelijk bedoeld, zo dicht mogelijk
+bij Pokémon Duel, en "de OPTIES moeten beter" (twee keer benadrukt).
+
+- INSTELLINGEN-SCHERM (de hoofdvraag; bestond niet). Groepen Geluid /
+  Weergave & tempo / Duel-regels / Profiel:
+  geluidseffecten aan-uit + volume, achtergrondmuziek, trillen,
+  animatiesnelheid (normaal/snel/uit), hints tonen, bedenktijd (3/5/10/uit),
+  AI-moeilijkheid (licht/normaal/zwaar), bevestiging bij verlaten, profiel
+  wissen (dubbele bevestiging, behoudt instellingen), voortgang + versie-info.
+  Instellingen leven in profile.settings, worden bij ELKE load per sleutel
+  gevalideerd (SETTING_DEFS + normalizeSettings) zodat een oud of corrupt
+  profiel nooit het spel kan breken. setSetting() slaat direct op — geen
+  opslaan-knop. Elke instelling is echt aangesloten op de mechaniek.
+- GELUID (open punt 13 afgerond): volledig gesynthetiseerd via WebAudio, geen
+  enkel extern bestand — de offline-PWA blijft dus intact en het bestand wordt
+  er niet zwaarder van. Audio_-object (tone/noise/buzz/muziek) + benoemde
+  SFX-tabel. Spin-tikken lopen mee met de vertragende schijf (dezelfde
+  easing-curve gesampeld), clash, KO, status, blok, level-up, plate, inzetten,
+  beurtwissel, win/verlies-fanfare, kloktik in de laatste 5 sec, afgekeurde
+  tikken. AudioContext wordt pas na het eerste gebruikersgebaar ontgrendeld
+  (mobiele browsers eisen dat). Trillen via navigator.vibrate.
+- HOE SPEEL JE-SCHERM: 11 secties in het Nederlands, geschreven vanaf de
+  code (niet vanaf een ideaalbeeld), inclusief kleurstalen voor de vijf
+  schijfkleuren. Dit ontbrak volledig terwijl de regels complex zijn.
+- FIGUUR-INFO TIJDENS HET DUEL (Duel-gebaar, ontbrak): figuur vasthouden
+  (450 ms) op het bord — of een vijand aantikken zonder eigen selectie — toont
+  z'n kaart met de schijf ZOALS HIJ NU DRAAIT (applyStatus toegepast), plus
+  level, MP, status en ability. Schijven waren tot nu toe alleen in de
+  collectie te zien, wat tactisch spelen bijna onmogelijk maakte.
+- HINTS werkend gemaakt: MP + actieve ability bij selectie; geblokkeerde
+  acties leggen uit waarom.
+- OPGESLAGEN TEAMS: 3 deck-slots met laad-/bewaarknop. Slots worden bij het
+  laden gevalideerd (niet-bezeten unit of onbekende plate → slot leeg), zodat
+  een oud slot nooit een ongeldig potje start.
+- AI (open punt 12 afgerond): weegt nu abilities mee. Dreigingsmeting telt
+  ability-MP mee en behandelt phasers als extra gevaarlijk; combat-EV
+  corrigeert voor Onverwoestbaar/Bergvast/contact-status; positiescore beloont
+  MP-aura's naast bondgenoten, contact-blockers in de goal-zone en Zegenende
+  Aura naast gestatuste bondgenoten. Moeilijkheidsgraad stuurt jitter,
+  foutkans, dreigingshorizon, keeper-gewicht en denktijd.
+- TEGENSTANDER-DECKS: de AI kreeg 6 willekeurige units op level 1. Nu een echt
+  deck per moeilijkheidsgraad (Licht = commons L1 + ondersteunende plates,
+  Normaal/Zwaar = factie-samenhangend + rares op L2/L3 + aanvallende plates).
+- BOOSTERKIST (Duel-progressie; wij hadden alleen een vaste winkel): 150
+  credits, kansen C 65 / U 27 / R 8, duplicaat geeft credits terug, en als een
+  hele zeldzaamheidslade vol is levert de kist bewust iets nieuws uit een
+  andere lade. Onthul-animatie + "nog een kist". De winkel blijft ONGEWIJZIGD
+  ernaast bestaan (gericht kopen, duurder) — dit is een TOEVOEGING aan Koens
+  economie, geen vervanging. LET OP: economie-balans opnieuw speeltesten.
+- Tests: 70 → 90 headless (instellingen, team-validatie, boosterkansen),
+  rooktest 20 → 33 (info-kaart, instellingen bewaren, uitleg, kist, slots).
+  SW-cache v33.
+- NIET gedaan / bewust laten liggen: fusion-systeem (open punt 10, groot en
+  raakt de hele economie), online multiplayer (fase 3), bord-thema-art.
+- KANTTEKENING: een parallelle research-workflow om Duel-features te
+  verifiëren liep vast op sessielimieten; dit werk is gebaseerd op dit
+  statusdocument, de eerder geverifieerde Duel-regels (sessies 19-23) en
+  eigen code-analyse.
 
 GEDAAN IN SESSIE 23 (7 juli 2026, vervolg)
 - KOENS MISS-LOOP (2e patstelling-melding, screenshot: burned Imp-vs-Imp met
@@ -449,11 +509,14 @@ OPEN PUNTEN — IN VOLGORDE VAN URGENTIE
 9. Beslissing fase 2 framework: Godot vs Unity vs Web
 10. Fusion-systeem ontwerpen voor app-versie (sluit aan op store/upgrade-systeem)
 11. Factie-puriteit als design-knop overwegen
-12. AI bewust maken van abilities (nu functioneren ze wel, maar de AI weegt ze
-    niet in z'n scoring — bv. phasers voor rushes, undying-tanks vooraan)
-13. Nog-openstaande "meer-op-Duel"-opties (sessie 19-lijst): gevechts-
-    presentatie (move-namen/clash/resultaatscherm), sudden death + winstscherm,
-    geluid. Abilities is gedaan (sessie 20).
+12. AFGEROND (sessie 24): AI weegt abilities mee in dreiging, combat-EV en
+    positiescore; moeilijkheidsgraad instelbaar.
+13. AFGEROND (sessie 24): gevechts-presentatie (s21), resultaatscherm + klok
+    i.p.v. sudden death (s22), geluid (s24). Hele lijst is nu af.
+14. NIEUW (sessie 24): boosterkist-economie balanceren — 150 credits, C65/U27/
+    R8, duplicaat-terugbetaling 60/120/240. Eerste gok, speeltesten.
+15. NIEUW (sessie 24): AI-moeilijkheidsgraden speeltesten — is "Licht" echt
+    toegankelijk en "Zwaar" echt uitdagend maar eerlijk?
 
 INSPIRATIE-REFERENTIE
 - Mechanics: Pokémon Duel / Comaster — Duel is bron van waarheid

@@ -186,6 +186,20 @@
   .detail-actions .btn { flex: 1; }
   .upg-note { text-align: center; font-size: 0.72rem; color: #a89f91; font-style: italic; margin-top: 8px; }
 
+  /* ===== Boosterkist ===== */
+  .booster-card { display: flex; align-items: center; gap: 12px; background: linear-gradient(145deg, #33240f, #1a1208); border: 1px solid rgba(245,158,11,0.5); border-radius: 14px; padding: 12px 14px; cursor: pointer; box-shadow: 0 0 20px rgba(245,158,11,0.12); }
+  .booster-card:active { transform: scale(0.98); }
+  .booster-card.broke { opacity: 0.5; }
+  .booster-chest { font-size: 2.2rem; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.7)); }
+  .booster-txt { flex: 1; min-width: 0; }
+  .bt-name { font-family: 'Cinzel', serif; font-weight: 700; color: var(--gold); letter-spacing: 0.1em; font-size: 0.9rem; }
+  .bt-desc { font-size: 0.68rem; color: #b8ab97; margin-top: 3px; line-height: 1.35; }
+  .booster-price { font-family: 'Cinzel', serif; color: var(--gold); font-size: 0.95rem; white-space: nowrap; }
+  .booster-reveal-chest { font-size: 4.5rem; text-align: center; }
+  .booster-reveal-chest.shake { animation: chestShake 1.1s ease-in-out; }
+  @keyframes chestShake { 0%,100% { transform: rotate(0) scale(1); } 15% { transform: rotate(-11deg) scale(1.05); } 30% { transform: rotate(10deg) scale(1.05); } 45% { transform: rotate(-8deg) scale(1.1); } 60% { transform: rotate(8deg) scale(1.1); } 80% { transform: rotate(-4deg) scale(1.2); } 92% { transform: scale(1.35); } }
+  @media (prefers-reduced-motion: reduce) { .booster-reveal-chest.shake { animation: none; } }
+
   /* ===== Opgeslagen teams (deck-slots) ===== */
   .slot-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
   .slot-chip { position: relative; background: linear-gradient(145deg, #241c33, #120e1e); border: 1px solid rgba(125,211,252,0.15); border-radius: 10px; padding: 7px 6px 6px; text-align: center; cursor: pointer; min-height: 58px; }
@@ -273,6 +287,15 @@
       <div class="subscreen-title">WINKEL</div>
       <div class="subscreen-credits" id="store-credits"></div>
     </div>
+    <div class="booster-card" id="booster-card">
+      <div class="booster-chest">🎁</div>
+      <div class="booster-txt">
+        <div class="bt-name">BOOSTERKIST</div>
+        <div class="bt-desc">Eén willekeurige unit. Kleine kans op een Rare. Dubbel? Credits terug.</div>
+      </div>
+      <div class="booster-price" id="booster-price">◈ 150</div>
+    </div>
+    <div class="deck-sub" style="margin-top:4px;">Of koop gericht</div>
     <div class="coll-grid" id="store-grid"></div>
   </div>
 </div>
@@ -322,6 +345,21 @@
     <div class="result-reason" id="result-reason"></div>
     <div class="result-reward" id="result-reward"></div>
     <button class="btn primary" id="btn-result-menu" style="width:100%; margin-top:18px;">Terug naar het menu</button>
+  </div>
+</div>
+
+<!-- ===== BOOSTERKIST-ONTHULLING ===== -->
+<div id="booster-overlay" class="overlay">
+  <div class="result-panel">
+    <div class="booster-reveal-chest" id="booster-anim">🎁</div>
+    <div id="booster-result" style="display:none;">
+      <div id="booster-art" style="margin: 4px 0 8px;"></div>
+      <div class="result-title win" id="booster-name" style="font-size:1.3rem;"></div>
+      <div class="result-reason" id="booster-sub"></div>
+      <div class="result-reward" id="booster-bonus"></div>
+      <button class="btn primary" id="btn-booster-close" style="width:100%; margin-top:16px;">Mooi!</button>
+      <button class="btn" id="btn-booster-again" style="width:100%; margin-top:8px;">Nog een kist ◈ 150</button>
+    </div>
   </div>
 </div>
 
@@ -626,6 +664,33 @@ const RARITY = {
 const PRICE = { C:100, U:200, R:400 };
 const UPGRADE_COST = { 1:150, 2:250, 3:400 }; // kosten van huidig level naar volgend (max 4)
 const WIN_CREDITS = 100, LOSS_CREDITS = 25;
+
+// ==========================================
+// BOOSTERKIST (sessie 24) — in Duel kwam je aan figuren via boosters, niet via
+// een vaste winkel. De winkel blijft ongewijzigd (gericht kopen, duurder); de
+// kist is de goedkope gok. Dubbel? Dan krijg je credits terug, zodat een kist
+// nooit weggegooid geld is.
+// ==========================================
+// BOOSTER-START (marker voor headless tests — niet verwijderen)
+const BOOSTER_COST = 150;
+const BOOSTER_ODDS = [['C', 0.65], ['U', 0.27], ['R', 0.08]];
+const BOOSTER_REFUND = { C: 60, U: 120, R: 240 };
+// Puur: rand01 = getal in [0,1) voor de rarity, pick01 = idem voor de unitkeuze.
+function rollBooster(rand01, pick01, owned, rarityMap) {
+  let acc = 0, rar = 'C';
+  for (const [r, p] of BOOSTER_ODDS) { acc += p; if (rand01 < acc) { rar = r; break; } }
+  let pool = Object.keys(rarityMap).filter(k => rarityMap[k] === rar);
+  // Alles van deze zeldzaamheid al in bezit? Dan liever iets nieuws uit een
+  // andere lade dan gegarandeerd een duplicaat.
+  const fresh = pool.filter(k => !owned[k]);
+  const anyFresh = Object.keys(rarityMap).filter(k => !owned[k]);
+  if (!fresh.length && anyFresh.length) pool = anyFresh;
+  else if (fresh.length) pool = fresh;
+  const key = pool[Math.min(pool.length - 1, Math.floor(pick01 * pool.length))];
+  const duplicate = !!owned[key];
+  return { key, rarity: rarityMap[key], duplicate, refund: duplicate ? BOOSTER_REFUND[rarityMap[key]] : 0 };
+}
+// BOOSTER-END (marker voor headless tests — niet verwijderen)
 
 // ==========================================
 // INSTELLINGEN (sessie 24) — leven in het profiel zodat ze meegaan met
@@ -1170,6 +1235,15 @@ function doUpgrade() {
 // ===== Winkel: units kopen =====
 function renderStore() {
   document.getElementById('store-credits').textContent = `◈ ${profile.credits}`;
+  const bc = document.getElementById('booster-card');
+  if (bc) {
+    const allOwned = Object.keys(UNIT_DEFS).every(k => profile.owned[k]);
+    document.getElementById('booster-price').textContent = `◈ ${BOOSTER_COST}`;
+    bc.classList.toggle('broke', profile.credits < BOOSTER_COST);
+    bc.querySelector('.bt-desc').textContent = allOwned
+      ? 'Je hebt alles al — een kist geeft nu alleen credits terug.'
+      : 'Eén willekeurige unit. Kleine kans op een Rare. Dubbel? Credits terug.';
+  }
   const g = document.getElementById('store-grid'); g.innerHTML = '';
   const entries = Object.entries(UNIT_DEFS).sort(([a], [b]) => (profile.owned[a] ? 1 : 0) - (profile.owned[b] ? 1 : 0));
   for (const [key, def] of entries) {
@@ -1188,6 +1262,41 @@ function renderStore() {
     });
     g.appendChild(c);
   }
+}
+
+// ===== Boosterkist openen =====
+function openBooster() {
+  if (profile.credits < BOOSTER_COST) { sfx('denied'); toast('Te weinig credits — win duels om te sparen'); return; }
+  profile.credits -= BOOSTER_COST;
+  const roll = rollBooster(Math.random(), Math.random(), profile.owned, RARITY);
+  const def = UNIT_DEFS[roll.key];
+  if (roll.duplicate) profile.credits += roll.refund; else profile.owned[roll.key] = 1;
+  saveProfile();
+
+  const ov = document.getElementById('booster-overlay');
+  const chest = document.getElementById('booster-anim');
+  const res = document.getElementById('booster-result');
+  res.style.display = 'none'; chest.style.display = '';
+  ov.classList.add('active');
+  sfx('plate');
+  const revealDelay = animOff() ? 0 : 1100;
+  if (!animOff()) { chest.classList.remove('shake'); void chest.offsetWidth; chest.classList.add('shake'); }
+  setTimeout(() => {
+    chest.style.display = 'none'; res.style.display = '';
+    document.getElementById('booster-art').innerHTML = unitVisual(roll.key, 'p1', 84);
+    document.getElementById('booster-name').textContent = def.name;
+    const rarLabel = roll.rarity === 'C' ? 'Common' : roll.rarity === 'U' ? 'Uncommon' : 'Rare';
+    document.getElementById('booster-sub').textContent = `${def.fac} · ${def.mp} MP · ${rarLabel}`;
+    document.getElementById('booster-bonus').textContent = roll.duplicate
+      ? `Had je al — +${roll.refund} credits terug`
+      : 'Nieuw in je collectie!';
+    document.getElementById('booster-name').className = 'result-title ' + (roll.duplicate ? 'lose' : 'win');
+    document.getElementById('btn-booster-again').textContent = `Nog een kist ◈ ${BOOSTER_COST}`;
+    document.getElementById('btn-booster-again').disabled = profile.credits < BOOSTER_COST;
+    sfx(roll.duplicate ? 'block' : (roll.rarity === 'R' ? 'win' : 'levelup'));
+    if (!roll.duplicate) Audio_.buzz(roll.rarity === 'R' ? [40, 60, 90] : 35);
+    renderStore(); renderHome();
+  }, revealDelay);
 }
 
 // ===== Instellingen-scherm =====
@@ -2339,6 +2448,9 @@ document.getElementById('btn-detail-close').addEventListener('click', () => docu
 document.getElementById('btn-detail-upgrade').addEventListener('click', doUpgrade);
 document.getElementById('btn-result-menu').addEventListener('click', goHome);
 document.getElementById('btn-info-close').addEventListener('click', () => document.getElementById('info-overlay').classList.remove('active'));
+document.getElementById('booster-card').addEventListener('click', openBooster);
+document.getElementById('btn-booster-close').addEventListener('click', () => document.getElementById('booster-overlay').classList.remove('active'));
+document.getElementById('btn-booster-again').addEventListener('click', () => { document.getElementById('booster-overlay').classList.remove('active'); openBooster(); });
 document.getElementById('info-overlay').addEventListener('click', (e) => { if (e.target.id === 'info-overlay') e.currentTarget.classList.remove('active'); });
 
 const AI = 'p2';
