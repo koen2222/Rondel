@@ -753,7 +753,13 @@ function loadProfile() {
 }
 function saveProfile() { try { localStorage.setItem('rondel_profile', JSON.stringify(profile)); } catch(e) {} }
 // Korte accessor; valt terug op de default als het profiel nog niet geladen is.
-function S(key) { return (profile && profile.settings ? profile.settings : SETTING_DEFS)[key] ?? SETTING_DEFS[key].def; }
+function S(key) {
+  const s = profile && profile.settings ? profile.settings : null;
+  const v = s ? s[key] : undefined;
+  // Let op: nooit terugvallen op SETTING_DEFS[key] zelf — dat is de definitie
+  // ({def,type,...}), niet de waarde. Voor het profiel geladen is moet .def eruit.
+  return v === undefined ? SETTING_DEFS[key].def : v;
+}
 
 // Animatie-beleid op één plek: de systeeminstelling van de telefoon én onze
 // eigen instelling tellen allebei mee.
@@ -885,7 +891,7 @@ function unitSilhouette(defKey, owner) {
     Undead: ['#e5e7eb', '#a78bfa'], Beasts: ['#b45309', '#fde68a'], Inferno: ['#ef4444', '#fb923c']
   };
   const [f, a] = PAL[(UNIT_DEFS[defKey] || {}).fac] || ['#cbd5e1', '#ffffff'];
-  const S = {
+  const SIL = {
     squire:      `<rect x="10" y="6" width="4" height="10" fill="${f}"/><circle cx="12" cy="4" r="2" fill="${a}"/><rect x="15" y="2" width="2" height="12" fill="${a}"/>`,
     cleric:      `<rect x="9" y="6" width="6" height="11" fill="${f}"/><circle cx="12" cy="4" r="2" fill="${a}"/><rect x="5" y="8" width="2" height="8" fill="${a}"/><rect x="3" y="10" width="6" height="2" fill="${a}"/>`,
     commander:   `<path d="M8 6 L16 6 L15 17 L9 17 Z" fill="${f}"/><circle cx="12" cy="4" r="2.2" fill="${a}"/><path d="M9 2 L12 0 L15 2" stroke="${a}" stroke-width="1.5" fill="none"/><rect x="17" y="1" width="2" height="14" fill="${a}"/>`,
@@ -905,7 +911,7 @@ function unitSilhouette(defKey, owner) {
     hellhound:   `<path d="M5 14 Q8 8 13 9 L18 6 L17 10 Q19 13 15 14 Z" fill="${f}"/><circle cx="17" cy="7.5" r="1.3" fill="${a}"/><path d="M6 9 L4 6 L8 8" fill="${a}"/>`,
     pitlord:     `<path d="M7 6 L17 6 L16 18 L8 18 Z" fill="${f}"/><circle cx="12" cy="4" r="2.4" fill="${a}"/><path d="M9 2 Q7 0 6 2 M15 2 Q17 0 18 2" stroke="${a}" stroke-width="1.5" fill="none"/><rect x="19" y="3" width="2" height="13" fill="${a}"/>`
   };
-  return `<svg viewBox="0 0 24 22" width="100%" height="100%">${S[defKey] || S.squire}</svg>`;
+  return `<svg viewBox="0 0 24 22" width="100%" height="100%">${SIL[defKey] || SIL.squire}</svg>`;
 }
 
 let state;
@@ -921,7 +927,7 @@ function initialState() {
 // animaties/gevechten (state.locked).
 let clockTimer = null, clockLast = 0;
 function fmtClock(ms) { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`; }
-function startClock() { stopClock(); clockLast = performance.now(); clockTimer = setInterval(tickClock, 250); }
+function startClock() { stopClock(); if (!state || !state.clock) return; clockLast = performance.now(); clockTimer = setInterval(tickClock, 250); }
 function stopClock() { if (clockTimer) { clearInterval(clockTimer); clockTimer = null; } }
 function tickClock() {
   const now = performance.now(); const dt = now - clockLast; clockLast = now;
@@ -982,7 +988,7 @@ function renderHome() {
 }
 
 function goHome() {
-  stopClock();
+  stopClock(); clearSpinTicks();
   document.getElementById('deck-overlay').classList.remove('active');
   document.getElementById('result-overlay').classList.remove('active');
   state = initialState(); state.over = true;
@@ -1148,7 +1154,7 @@ function startGame() {
 
 function endMatch(winner, msg) {
   if (state.over) return;   // dubbele triggers (klok + zet) afvangen
-  state.over = true; stopClock();
+  state.over = true; stopClock(); clearSpinTicks();
   let gain = 0;
   if (state.mode === 'solo') {
     gain = winner === 'p1' ? WIN_CREDITS : LOSS_CREDITS;
@@ -2249,16 +2255,26 @@ function spin(svgId, ms) {
 
 // Tik-geluid dat meeloopt met de vertragende schijf: we sampelen dezelfde
 // easing-curve als de CSS-transitie, zodat elke tik met een slot-grens samenvalt.
+// Openstaande tikken opruimen als het gevecht/scherm wegvalt, zodat er nooit
+// geluid natikt in een menu.
+let spinTickTimers = [];
+function clearSpinTicks() { for (const t of spinTickTimers) clearTimeout(t); spinTickTimers = []; }
+
 function scheduleSpinTicks(dur, fullRots) {
   if (!S('sfx')) return;
+  // We tikken niet op élk slot: dat zouden ~90 losse oscillators per gevecht
+  // zijn (×2 schijven), wat op een telefoon hoorbaar hapert. Eén tik per twee
+  // slots klinkt hetzelfde en is de helft van het werk; bovendien harde grens.
   const totalSlots = fullRots * SLOT_COUNT;
   const ease = t => 1 - Math.pow(1 - t, 3);            // benadert cubic-bezier(.15,.85,.1,1)
+  const timers = [];
   let last = 0;
-  for (let i = 1; i <= 90; i++) {
-    const t = i / 90;
+  for (let i = 1; i <= 120 && timers.length < 40; i++) {
+    const t = i / 120;
     const slotsPassed = Math.floor(ease(t) * totalSlots);
-    if (slotsPassed > last) { last = slotsPassed; setTimeout(() => sfx('tick'), t * dur); }
+    if (slotsPassed >= last + 2) { last = slotsPassed; timers.push(setTimeout(() => sfx('tick'), t * dur)); }
   }
+  spinTickTimers.push(...timers);
 }
 
 function applyStatus(slots, st) {
