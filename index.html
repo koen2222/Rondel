@@ -186,6 +186,16 @@
   .detail-actions .btn { flex: 1; }
   .upg-note { text-align: center; font-size: 0.72rem; color: #a89f91; font-style: italic; margin-top: 8px; }
 
+  /* ===== Opgeslagen teams (deck-slots) ===== */
+  .slot-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .slot-chip { position: relative; background: linear-gradient(145deg, #241c33, #120e1e); border: 1px solid rgba(125,211,252,0.15); border-radius: 10px; padding: 7px 6px 6px; text-align: center; cursor: pointer; min-height: 58px; }
+  .slot-chip.filled { border-color: rgba(245,158,11,0.45); }
+  .slot-chip .sname { font-family: 'Cinzel', serif; font-size: 0.62rem; color: var(--gold); letter-spacing: 0.06em; }
+  .slot-chip .sbody { font-size: 0.55rem; color: #8f8676; margin-top: 3px; line-height: 1.35; }
+  .slot-chip .sfigs { display: flex; justify-content: center; gap: 1px; margin-top: 3px; }
+  .slot-chip .sfigs img { height: 16px; width: auto; }
+  .slot-save { position: absolute; top: -6px; right: -6px; width: 22px; height: 22px; border-radius: 50%; background: linear-gradient(145deg, #3a2f1c, #1a1410); border: 1px solid rgba(245,158,11,0.5); color: var(--gold); font-size: 0.7rem; line-height: 20px; text-align: center; cursor: pointer; }
+
   /* ===== Instellingen ===== */
   .set-group { background: linear-gradient(160deg, #1d1729, #100c1a); border: 1px solid rgba(125,211,252,0.12); border-radius: 14px; padding: 4px 14px; }
   .set-group-title { font-family: 'Cinzel', serif; font-size: 0.72rem; letter-spacing: 0.16em; color: var(--gold); padding: 12px 0 6px; opacity: 0.9; }
@@ -354,6 +364,8 @@
   <div class="deck-panel">
     <div class="deck-title">— STEL JE LEGER SAMEN —</div>
     <div id="deck-credits" class="deck-credits"></div>
+    <div class="deck-sub">Opgeslagen teams</div>
+    <div class="slot-row" id="deck-slots"></div>
     <div class="deck-sub" id="deck-count-units">Units: 0 / 6</div>
     <div class="deck-grid" id="deck-units"></div>
     <div class="deck-sub" id="deck-count-plates">Plates: 0 / 3</div>
@@ -649,13 +661,30 @@ function normalizeSettings(raw) {
 // SETTINGS-END (marker voor headless tests — niet verwijderen)
 
 let profile;
-function freshProfile() { return { credits: 300, owned: { squire:1, scout:1, apprentice:1, skeleton:1, boar:1, imp:1 }, stats: { wins:0, losses:0 }, settings: freshSettings() }; }
+const DECK_SLOTS = 3;
+function freshProfile() { return { credits: 300, owned: { squire:1, scout:1, apprentice:1, skeleton:1, boar:1, imp:1 }, stats: { wins:0, losses:0 }, settings: freshSettings(), decks: Array(DECK_SLOTS).fill(null) }; }
+// Opgeslagen teams valideren: units die je niet (meer) bezit vallen weg, en een
+// slot dat daardoor incompleet wordt gaat leeg — zo kan een oud slot nooit een
+// ongeldig potje starten.
+function normalizeDecks(raw, owned) {
+  const out = Array(DECK_SLOTS).fill(null);
+  if (!Array.isArray(raw)) return out;
+  for (let i = 0; i < DECK_SLOTS; i++) {
+    const d = raw[i];
+    if (!d || !Array.isArray(d.units) || !Array.isArray(d.plates)) continue;
+    const units = d.units.filter(k => UNIT_DEFS[k] && owned[k]);
+    const plates = d.plates.filter(k => PLATES[k]);
+    if (units.length === 6 && plates.length === 3) out[i] = { units, plates, name: typeof d.name === 'string' ? d.name.slice(0, 16) : '' };
+  }
+  return out;
+}
 function loadProfile() {
   try { const raw = localStorage.getItem('rondel_profile'); profile = raw ? JSON.parse(raw) : freshProfile(); }
   catch(e) { profile = freshProfile(); }
   if (!profile || typeof profile.credits !== 'number' || !profile.owned) profile = freshProfile();
   if (!profile.stats) profile.stats = { wins:0, losses:0 };
   profile.settings = normalizeSettings(profile.settings);   // migratie voor oude profielen
+  profile.decks = normalizeDecks(profile.decks, profile.owned);
 }
 function saveProfile() { try { localStorage.setItem('rondel_profile', JSON.stringify(profile)); } catch(e) {} }
 // Korte accessor; valt terug op de default als het profiel nog niet geladen is.
@@ -921,12 +950,45 @@ function onDeckConfirm() {
   startGame();
 }
 
+// Opgeslagen teams: tik een gevuld slot om het te laden, of het ◇-knopje om je
+// huidige keuze erin te bewaren. Scheelt elk potje opnieuw negen kaarten kiezen.
+function renderDeckSlots() {
+  const row = document.getElementById('deck-slots'); if (!row) return;
+  row.innerHTML = '';
+  const selectionValid = deckSel.units.length === 6 && deckSel.plates.length === 3;
+  for (let i = 0; i < DECK_SLOTS; i++) {
+    const d = profile.decks[i];
+    const chip = document.createElement('div');
+    chip.className = 'slot-chip' + (d ? ' filled' : '');
+    chip.dataset.slot = String(i);
+    const figs = d ? `<div class="sfigs">${d.units.slice(0, 6).map(k => unitVisual(k, 'p1', 16)).join('')}</div>` : '';
+    chip.innerHTML = `<div class="sname">TEAM ${i + 1}</div>${figs}<div class="sbody">${d ? 'Tik om te laden' : 'Leeg'}</div>`;
+    chip.addEventListener('click', () => {
+      if (!d) { toast(selectionValid ? 'Tik op ◇ om je team hier te bewaren' : 'Kies eerst 6 units en 3 plates'); return; }
+      deckSel = { units: [...d.units], plates: [...d.plates] };
+      sfx('select'); toast(`Team ${i + 1} geladen`); renderDeckSelect();
+    });
+    const save = document.createElement('div');
+    save.className = 'slot-save'; save.textContent = '◇'; save.title = 'Huidige keuze hier bewaren';
+    save.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!selectionValid) { sfx('denied'); toast('Kies eerst 6 units en 3 plates'); return; }
+      if (d && !confirm(`Team ${i + 1} overschrijven?`)) return;
+      profile.decks[i] = { units: [...deckSel.units], plates: [...deckSel.plates], name: '' };
+      saveProfile(); sfx('plate'); toast(`Bewaard als Team ${i + 1}`); renderDeckSlots();
+    });
+    chip.appendChild(save);
+    row.appendChild(chip);
+  }
+}
+
 function renderDeckSelect() {
   const title = document.querySelector('#deck-overlay .deck-title');
   if (currentMode === 'hotseat') title.textContent = deckStage === 'p1' ? '— SPELER 1 (BLAUW) — STEL JE LEGER SAMEN —' : '— SPELER 2 (ROOD) — STEL JE LEGER SAMEN —';
   else title.textContent = '— STEL JE LEGER SAMEN —';
   document.getElementById('btn-deck-start').textContent = (currentMode === 'hotseat' && deckStage === 'p1') ? 'Volgende' : 'Start';
   document.getElementById('deck-credits').textContent = `◈ ${profile.credits} CREDITS`;
+  renderDeckSlots();
   const ug = document.getElementById('deck-units'); ug.innerHTML = '';
   for (const [key, def] of Object.entries(UNIT_DEFS)) {
     const lvl = profile.owned[key] || 0; const rar = RARITY[key];
@@ -958,6 +1020,40 @@ function renderDeckSelect() {
   document.getElementById('btn-deck-start').disabled = !(deckSel.units.length === 6 && deckSel.plates.length === 3);
 }
 
+// Tegenstander-decks per moeilijkheidsgraad (sessie 24). Voorheen kreeg de AI
+// zes willekeurige units uit de hele roster op level 1 — vaak een onsamenhangend
+// team. Nu krijgt hij een écht deck: op 'Licht' vooral commons, op 'Zwaar' een
+// factie-samenhangend team met rares op een hoger level.
+const AI_DECKS = {
+  makkelijk: { pool: ['squire','scout','apprentice','skeleton','boar','imp','archer','lupine'], rares: 0, level: 1 },
+  normaal:   { pool: null, rares: 2, level: 2 },     // pool null = één factie + aanvulling
+  moeilijk:  { pool: null, rares: 3, level: 3 },
+};
+function aiDeck() {
+  const d = AI_DECKS[S('difficulty')] || AI_DECKS.normaal;
+  const keys = Object.keys(UNIT_DEFS);
+  let units;
+  if (d.pool) {
+    units = randomPick(d.pool, 6);
+  } else {
+    // Kies een factie als ruggengraat, vul aan met de sterkste rest
+    const facs = [...new Set(keys.map(k => UNIT_DEFS[k].fac))];
+    const fac = facs[Math.floor(Math.random() * facs.length)];
+    const own = keys.filter(k => UNIT_DEFS[k].fac === fac);
+    const rares = keys.filter(k => RARITY[k] === 'R' && !own.includes(k));
+    units = [...own, ...randomPick(rares, d.rares)];
+    const rest = keys.filter(k => !units.includes(k));
+    units = [...units, ...randomPick(rest, Math.max(0, 6 - units.length))].slice(0, 6);
+  }
+  // Plates die bij het niveau passen: licht = alleen ondersteunend, zwaar = agressief
+  const supportive = ['rally','cleanse','bulwark','warcry'];
+  const aggressive = ['hex','ensnare','scorch','venom','recall','blink'];
+  const plates = S('difficulty') === 'makkelijk'
+    ? randomPick(supportive, 3)
+    : randomPick([...aggressive, ...supportive], 3);
+  return { units, plates, level: d.level };
+}
+
 function startGame() {
   document.getElementById('deck-overlay').classList.remove('active');
   state = initialState(); let id = 0;
@@ -973,12 +1069,14 @@ function startGame() {
     for (const k of deckSel.units) mk(k, 'p2', profile.owned[k] || 1);
     state.plates.p2 = [...deckSel.plates];
   } else {
-    for (const k of randomPick(Object.keys(UNIT_DEFS), 6)) mk(k, 'p2');
-    state.plates.p2 = randomPick(Object.keys(PLATES), 3);
+    const foe = aiDeck();
+    for (const k of foe.units) mk(k, 'p2', foe.level);
+    state.plates.p2 = foe.plates;
   }
   state.plates.p1 = [...p1Deck.plates];
   showScreen('game');
-  const cEl = document.getElementById('turn-clock'); if (cEl) { cEl.textContent = '⏱ 5:00'; cEl.style.color = ''; }
+  const cEl = document.getElementById('turn-clock');
+  if (cEl) { cEl.textContent = state.clock ? '⏱ ' + fmtClock(state.clock.p1) : '⏱ —'; cEl.style.color = ''; }
   startClock();
   renderAll();
 }

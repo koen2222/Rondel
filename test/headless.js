@@ -51,6 +51,10 @@ const resolveMatch = html.match(/\nfunction resolve\([\s\S]*?\n\}/);
 const applyMatch   = html.match(/\nfunction applyStatus\([\s\S]*?\n\}/);
 const koMatch      = html.match(/\nfunction koUnit\([\s\S]*?\n\}/);
 const condMatch    = html.match(/\nfunction applyCondition\([\s\S]*?\n\}/);
+const platesMatch  = html.match(/\nconst PLATES = \{[\s\S]*?\n\};/);
+const decksMatch   = html.match(/\nconst DECK_SLOTS[\s\S]*?\nfunction normalizeDecks\([\s\S]*?\n\}/);
+if (!platesMatch) throw new Error('PLATES niet gevonden');
+if (!decksMatch)  throw new Error('normalizeDecks() niet gevonden');
 if (!condMatch) throw new Error('applyCondition() niet gevonden');
 if (!resolveMatch) throw new Error('resolve() niet gevonden');
 if (!applyMatch)   throw new Error('applyStatus() niet gevonden');
@@ -67,7 +71,9 @@ const evalCode = [
   applyMatch[0],
   koMatch[0],
   condMatch[0],
-  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings };',
+  platesMatch[0],
+  decksMatch[0],
+  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, DECK_SLOTS, normalizeDecks };',
 ].join('\n');
 
 // Schrijf tijdelijk evalueerbaar bestand (vermijdt new Function-beperkingen)
@@ -80,7 +86,7 @@ try {
   fs.unlinkSync(tmpPath);
 }
 
-const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings } = extracted;
+const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, DECK_SLOTS, normalizeDecks } = extracted;
 
 // ─── Test harness ──────────────────────────────────────────────────────────────
 let pass = 0, fail = 0;
@@ -370,6 +376,22 @@ section('=== INSTELLINGEN (8 checks) ===');
     normalizeSettings({ clockMinutes: 0, difficulty: 'moeilijk', sfx: false }).clockMinutes, 0);
   check('Volume wordt geklemd tot 0..1', normalizeSettings({ sfxVolume: 5 }).sfxVolume, 1);
   check('Negatief volume wordt 0', normalizeSettings({ sfxVolume: -3 }).sfxVolume, 0);
+}
+
+// ─── 4e. OPGESLAGEN TEAMS (sessie 24) ──────────────────────────────────────────
+section('=== OPGESLAGEN TEAMS (5 checks) ===');
+{
+  const owned = { squire:1, scout:1, apprentice:1, skeleton:1, boar:1, imp:1 };
+  const good = { units:['squire','scout','apprentice','skeleton','boar','imp'], plates:['rally','cleanse','hex'] };
+  check('Geldig team blijft behouden', normalizeDecks([good], owned)[0].units.length, 6);
+  check('Altijd precies 3 slots', normalizeDecks([good], owned).length, DECK_SLOTS);
+  // Unit verkocht/niet in bezit → slot wordt ongeldig en dus leeg
+  const partial = { units:['squire','scout','apprentice','skeleton','boar','pitlord'], plates:['rally','cleanse','hex'] };
+  check('Team met niet-bezeten unit wordt leeggemaakt', normalizeDecks([partial], owned)[0], null);
+  // Onzin-plate → slot ongeldig
+  const badPlate = { units: good.units, plates:['rally','cleanse','bestaatniet'] };
+  check('Team met onbekende plate wordt leeggemaakt', normalizeDecks([badPlate], owned)[0], null);
+  check('Rommel-invoer geeft lege slots', normalizeDecks('kapot', owned), [null, null, null]);
 }
 
 // ─── 5. SYNTAX-CHECK volledige game-JS ─────────────────────────────────────────

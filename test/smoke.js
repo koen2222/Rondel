@@ -47,6 +47,13 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
   ok('Deck-selectie opent', true);
   await page.click('#btn-deck-random');
   ok('Start-knop actief na random', await page.locator('#btn-deck-start:not([disabled])').count() === 1);
+  ok('Drie team-slots zichtbaar', await page.locator('.slot-chip').count() === 3);
+  await page.locator('.slot-chip[data-slot="0"] .slot-save').click();
+  await page.waitForTimeout(200);
+  {
+    const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('rondel_profile')).decks[0]);
+    ok('Team bewaren werkt', !!saved && saved.units.length === 6 && saved.plates.length === 3);
+  }
   await page.click('#btn-deck-start');
   await page.waitForSelector('#screen-game.active');
   ok('Game-scherm actief', true);
