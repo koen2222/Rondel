@@ -85,6 +85,115 @@
   @keyframes arenaBreath { 0%,100% { opacity: 1; } 50% { opacity: 0.82; } }
   @media (prefers-reduced-motion: reduce) { #arena-fx i, .board-wrap::after { animation: none; } #arena-fx { display: none; } }
 
+  /* ===== Aanvalsanimaties ===== */
+  #attack-fx { position: absolute; inset: 0; pointer-events: none; z-index: 6; overflow: hidden; }
+  .fx-scene { position: absolute; left: 50%; top: 46%; width: 0; height: 0; }
+  .fx-scene i { position: absolute; display: block; }
+  .fx-scene.omhoog { top: 30%; }
+
+  .fx-ring { left: -6px; top: -6px; width: 12px; height: 12px; border-radius: 50%;
+    border: 3px solid var(--fxk); animation: fxRing 0.5s ease-out forwards; }
+  .fx-ring.r2 { animation-delay: 0.12s; }
+  @keyframes fxRing { 0% { transform: scale(0.4); opacity: 0.95; } 100% { transform: scale(16); opacity: 0; } }
+
+  /* Hamer die neerkomt */
+  .fx-hamer { left: -34px; top: -104px; width: 68px; height: 68px;
+    background: linear-gradient(160deg, #f1f5f9, #64748b);
+    clip-path: polygon(18% 0, 82% 0, 82% 46%, 60% 46%, 60% 100%, 40% 100%, 40% 46%, 18% 46%);
+    transform-origin: 50% 100%; animation: fxHamer 0.45s cubic-bezier(.5,-0.4,.4,1.6) forwards; }
+  @keyframes fxHamer { 0% { transform: translateY(-90px) rotate(-58deg); opacity: 0; }
+    35% { opacity: 1; } 70% { transform: translateY(6px) rotate(6deg); } 100% { transform: translateY(0) rotate(0); opacity: 0; } }
+
+  /* Giftanden met druppels */
+  .fx-tand { top: -46px; width: 20px; height: 52px; background: #f8fafc;
+    clip-path: polygon(50% 100%, 0 0, 100% 0); animation: fxTand 0.55s ease-out forwards; }
+  .fx-tand.l { left: -46px; transform-origin: 50% 0; }
+  .fx-tand.r { left: 26px; transform-origin: 50% 0; }
+  @keyframes fxTand { 0% { transform: translateY(-40px) scaleY(0.4); opacity: 0; }
+    40% { opacity: 1; transform: translateY(0) scaleY(1); } 100% { transform: translateY(14px) scaleY(1); opacity: 0; } }
+  .fx-drup { width: 12px; height: 16px; border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
+    background: var(--fxk); animation: fxDrup 0.8s ease-in forwards; }
+  .fx-drup.d1 { left: -40px; top: 0; } .fx-drup.d2 { left: 30px; top: 6px; animation-delay: .1s; }
+  .fx-drup.d3 { left: -4px; top: 10px; animation-delay: .2s; }
+  @keyframes fxDrup { 0% { transform: translateY(0) scale(0.5); opacity: 0; } 25% { opacity: .95; }
+    100% { transform: translateY(72px) scale(1.1); opacity: 0; } }
+
+  /* Vuurexplosie */
+  .fx-vlam { left: -12px; top: -12px; width: 24px; height: 24px; border-radius: 50% 50% 50% 0;
+    background: radial-gradient(circle at 40% 40%, #fff3c4, var(--fxk) 55%, rgba(180,40,0,0) 78%);
+    animation: fxVlam 0.75s ease-out forwards; }
+  .fx-vlam.v0 { --a: 0deg; } .fx-vlam.v1 { --a: 40deg; } .fx-vlam.v2 { --a: 80deg; }
+  .fx-vlam.v3 { --a: 120deg; } .fx-vlam.v4 { --a: 160deg; } .fx-vlam.v5 { --a: 200deg; }
+  .fx-vlam.v6 { --a: 240deg; } .fx-vlam.v7 { --a: 290deg; } .fx-vlam.v8 { --a: 330deg; }
+  @keyframes fxVlam { 0% { transform: rotate(var(--a)) translateX(0) scale(0.4); opacity: 0; }
+    30% { opacity: 1; } 100% { transform: rotate(var(--a)) translateX(96px) scale(1.5); opacity: 0; } }
+
+  /* Bliksem */
+  .fx-flits { left: -14px; top: -110px; width: 28px; height: 150px; background: var(--fxk);
+    clip-path: polygon(55% 0, 20% 54%, 46% 54%, 30% 100%, 82% 42%, 52% 42%, 84% 0);
+    filter: drop-shadow(0 0 10px var(--fxk)); animation: fxFlits 0.42s steps(3) forwards; }
+  .fx-flits.f2 { transform: scaleX(-0.7) translateX(60px); animation-delay: .1s; }
+  @keyframes fxFlits { 0% { opacity: 0; } 20% { opacity: 1; } 60% { opacity: .3; } 100% { opacity: 0; } }
+
+  /* Pijl */
+  .fx-pijl { left: -160px; top: -5px; width: 130px; height: 10px;
+    background: linear-gradient(90deg, transparent, var(--fxk) 62%, #fff);
+    clip-path: polygon(0 44%, 76% 44%, 76% 0, 100% 50%, 76% 100%, 76% 56%, 0 56%);
+    animation: fxPijl 0.4s cubic-bezier(.3,0,.2,1) forwards; }
+  @keyframes fxPijl { 0% { transform: translateX(-70px); opacity: 0; } 25% { opacity: 1; }
+    100% { transform: translateX(190px); opacity: 0; } }
+
+  /* IJsscherven */
+  .fx-scherf { left: -9px; top: -9px; width: 18px; height: 30px; background: var(--fxk);
+    clip-path: polygon(50% 0, 100% 42%, 68% 100%, 32% 100%, 0 42%); opacity: 0;
+    animation: fxScherf 0.7s ease-out forwards; }
+  .fx-scherf.s0 { --a: 12deg; } .fx-scherf.s1 { --a: 68deg; } .fx-scherf.s2 { --a: 128deg; }
+  .fx-scherf.s3 { --a: 188deg; } .fx-scherf.s4 { --a: 246deg; } .fx-scherf.s5 { --a: 308deg; }
+  @keyframes fxScherf { 0% { transform: rotate(var(--a)) translateY(0) scale(0.4); opacity: 0; }
+    35% { opacity: .95; } 100% { transform: rotate(var(--a)) translateY(-84px) scale(1.15); opacity: 0; } }
+
+  /* Klauwsporen */
+  .fx-kras { width: 15px; height: 190px; background: linear-gradient(180deg, transparent, var(--fxk), transparent);
+    border-radius: 50%; transform-origin: 50% 50%; opacity: 0; animation: fxKras 0.45s ease-out forwards; }
+  .fx-kras.k1 { left: -66px; top: -95px; transform: rotate(20deg); }
+  .fx-kras.k2 { left: -8px;  top: -100px; transform: rotate(20deg); animation-delay: .05s; }
+  .fx-kras.k3 { left: 50px;  top: -95px; transform: rotate(20deg); animation-delay: .1s; }
+  @keyframes fxKras { 0% { opacity: 0; transform: rotate(20deg) scaleY(0.1); }
+    30% { opacity: 1; transform: rotate(20deg) scaleY(1); } 100% { opacity: 0; transform: rotate(20deg) scaleY(1); } }
+
+  /* Zwaardsnede */
+  .fx-snee { left: -120px; top: -6px; width: 240px; height: 12px; border-radius: 50%;
+    background: linear-gradient(90deg, transparent, #fff, var(--fxk), transparent);
+    opacity: 0; animation: fxSnee 0.4s ease-out forwards; }
+  .fx-snee.n1 { transform: rotate(-28deg); }
+  .fx-snee.n2 { transform: rotate(28deg); animation-delay: .13s; }
+  @keyframes fxSnee { 0% { opacity: 0; transform: rotate(var(--r,-28deg)) scaleX(0.2); }
+    30% { opacity: 1; } 100% { opacity: 0; transform: rotate(var(--r,-28deg)) scaleX(1.25); } }
+  .fx-snee.n1 { --r: -28deg; } .fx-snee.n2 { --r: 28deg; }
+
+  /* Schildbots */
+  .fx-schild { left: -40px; top: -46px; width: 80px; height: 92px;
+    background: linear-gradient(160deg, #dbeafe, var(--fxk));
+    clip-path: polygon(50% 0, 100% 18%, 100% 62%, 50% 100%, 0 62%, 0 18%);
+    animation: fxSchild 0.5s cubic-bezier(.4,-0.3,.4,1.5) forwards; }
+  @keyframes fxSchild { 0% { transform: scale(0.3); opacity: 0; } 45% { transform: scale(1.15); opacity: 1; }
+    100% { transform: scale(1.4); opacity: 0; } }
+
+  /* Magische rune */
+  .fx-rune { left: -52px; top: -52px; width: 104px; height: 104px; border-radius: 50%;
+    border: 4px dashed var(--fxk); animation: fxRune 0.8s linear forwards; }
+  @keyframes fxRune { 0% { transform: rotate(0) scale(0.3); opacity: 0; } 30% { opacity: 1; }
+    100% { transform: rotate(220deg) scale(1.5); opacity: 0; } }
+
+  @media (prefers-reduced-motion: reduce) { #attack-fx { display: none; } }
+
+  /* Poorten waar de legers uit komen */
+  .spawn-glow { animation: spawnPulse 3.2s ease-in-out infinite; }
+  .spawn-twinkle { animation: spawnTwinkle 2.1s ease-in-out infinite; }
+  @keyframes spawnPulse { 0%,100% { opacity: 0.55; } 50% { opacity: 1; } }
+  @keyframes spawnTwinkle { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+  @media (prefers-reduced-motion: reduce) { .spawn-glow, .spawn-twinkle { animation: none; } }
+
   /* Plate-kaarten die op tafel liggen */
   .plate-card { transition: transform 0.15s; }
   .plate-card.spent { opacity: 0.4; }
@@ -487,6 +596,7 @@
 </div>
 <div id="combat-overlay" class="overlay">
   <div id="clash-flash"></div>
+  <div id="attack-fx"></div>
   <div class="combat-vs">— DUEL —</div>
   <div class="disks-row">
     <div class="disk-cell"><div class="who" id="combat-top-name" style="color:var(--p2-soft); text-shadow: 0 0 8px var(--p2-glow);">Tegenstander</div><div class="disk-wrap"><div class="disk-pointer"></div><svg id="disk-top" class="disk-svg" viewBox="0 0 240 240"></svg></div></div>
@@ -1825,6 +1935,12 @@ const BOARD_DEFS = `
   <radialGradient id="gGoalGold" cx="40%" cy="32%" r="80%">
     <stop offset="0%" stop-color="#fde68a"/><stop offset="55%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#92400e"/>
   </radialGradient>
+  <radialGradient id="gGate" cx="50%" cy="70%" r="70%">
+    <stop offset="0%" stop-color="rgba(255,255,255,0.95)"/><stop offset="45%" stop-color="rgba(191,219,254,0.75)"/><stop offset="100%" stop-color="rgba(96,165,250,0.25)"/>
+  </radialGradient>
+  <radialGradient id="gPit" cx="50%" cy="72%" r="72%">
+    <stop offset="0%" stop-color="#7c2d12"/><stop offset="42%" stop-color="#1c0d08"/><stop offset="100%" stop-color="#0a0503"/>
+  </radialGradient>
   <linearGradient id="gCardBack" x1="0" y1="0" x2="0" y2="1">
     <stop offset="0%" stop-color="#7f1d1d"/><stop offset="55%" stop-color="#5b1414"/><stop offset="100%" stop-color="#380c0c"/>
   </linearGradient>
@@ -1839,32 +1955,62 @@ const BOARD_DEFS = `
 // Klein kasteelpoortje: twee torens met kantelen, een donkere doorgang en een
 // vlag in de teamkleur. Puur decor — het maakt zichtbaar wáár je leger vandaan
 // komt, zoals het apparaat linksonder in Duel.
-function drawCastle(svg, cx, cy, scale, owner) {
-  const g = el('g', { transform:`translate(${cx},${cy}) scale(${scale})`, class:'castle' }, svg);
-  const flag = owner === 'p1' ? '#3b82f6' : '#ef4444';
-  const stone = '#8d8272', dark = '#5b5346', light = '#b3a893';
-  // Grondschaduw
-  el('ellipse', { cx:0, cy:26, rx:46, ry:11, fill:'rgba(0,0,0,0.45)' }, g);
-  // Muur tussen de torens
-  el('rect', { x:-26, y:-6, width:52, height:32, fill:stone, stroke:dark, 'stroke-width':1.5 }, g);
-  el('rect', { x:-26, y:-6, width:52, height:7, fill:light, opacity:0.45 }, g);
-  // Poortopening
-  el('path', { d:'M -11 26 L -11 8 A 11 11 0 0 1 11 8 L 11 26 Z', fill:'#1b1410', stroke:dark, 'stroke-width':1.5 }, g);
-  el('path', { d:'M -11 26 L -11 8 A 11 11 0 0 1 11 8 L 11 26', fill:'none', stroke:'rgba(255,220,150,0.35)', 'stroke-width':2 }, g);
-  // Twee torens
-  for (const sx of [-34, 34]) {
-    el('rect', { x:sx-11, y:-22, width:22, height:48, fill:stone, stroke:dark, 'stroke-width':1.5 }, g);
-    el('rect', { x:sx-11, y:-22, width:22, height:7, fill:light, opacity:0.45 }, g);
-    // Kantelen
-    for (const k of [-9, -2, 5]) el('rect', { x:sx+k, y:-29, width:5, height:8, fill:stone, stroke:dark, 'stroke-width':1 }, g);
-    // Schietgat
-    el('rect', { x:sx-2.5, y:-10, width:5, height:9, rx:2.5, fill:'#241b14' }, g);
+// De plek waar je leger vandaan komt. Twee heel verschillende poorten, zodat je
+// in een oogopslag ziet van wie welke kant is:
+//  - p1 (jij, blauw): een HEMELPOORT — een lichtende boog met wolken en stralen
+//  - p2 (rood): een PUT — een donker gat in de grond met gloed en klauwsporen
+function drawSpawn(svg, cx, cy, scale, owner) {
+  const g = el('g', { transform:`translate(${cx},${cy}) scale(${scale})`, class:'spawn' }, svg);
+  if (owner === 'p1') {
+    // ---- Hemelpoort ----
+    el('ellipse', { cx:0, cy:22, rx:52, ry:16, fill:'rgba(96,165,250,0.22)', class:'spawn-glow' }, g);
+    // Lichtstralen die naar boven waaieren
+    for (const a of [-52, -32, -12, 8, 28, 48]) {
+      const rad = (a - 90) * Math.PI / 180;
+      el('path', { d:`M 0 12 L ${Math.cos(rad)*70 - 5} ${Math.sin(rad)*70} L ${Math.cos(rad)*70 + 5} ${Math.sin(rad)*70} Z`,
+        fill:'rgba(147,197,253,0.16)' }, g);
+    }
+    // Twee zuilen
+    for (const sx of [-30, 30]) {
+      el('rect', { x:sx-9, y:-34, width:18, height:56, fill:'#e8eef8', stroke:'#93a7c4', 'stroke-width':1.4 }, g);
+      el('rect', { x:sx-9, y:-34, width:6, height:56, fill:'#ffffff', opacity:0.5 }, g);
+      el('rect', { x:sx-12, y:-39, width:24, height:6, rx:2, fill:'#f6f9ff', stroke:'#93a7c4', 'stroke-width':1.2 }, g);
+      el('rect', { x:sx-13, y:18, width:26, height:6, rx:2, fill:'#f6f9ff', stroke:'#93a7c4', 'stroke-width':1.2 }, g);
+    }
+    // De boog tussen de zuilen
+    el('path', { d:'M -30 -34 A 30 30 0 0 1 30 -34', fill:'none', stroke:'#f6f9ff', 'stroke-width':7, 'stroke-linecap':'round' }, g);
+    el('path', { d:'M -30 -34 A 30 30 0 0 1 30 -34', fill:'none', stroke:'#93c5fd', 'stroke-width':2 }, g);
+    // De doorgang zelf: gloeiend licht
+    el('path', { d:'M -21 22 L -21 -30 A 21 21 0 0 1 21 -30 L 21 22 Z', fill:'url(#gGate)' }, g);
+    // Wolkjes aan de voet
+    for (const [wx, wy, wr] of [[-38, 20, 12], [-24, 24, 9], [30, 21, 11], [16, 25, 8]]) {
+      el('ellipse', { cx:wx, cy:wy, rx:wr, ry:wr*0.55, fill:'rgba(255,255,255,0.72)' }, g);
+    }
+    // Ster boven de boog
+    el('path', { d:'M 0 -52 l 3 8 l 8 3 l -8 3 l -3 8 l -3 -8 l -8 -3 l 8 -3 Z', fill:'#fef9c3', class:'spawn-twinkle' }, g);
+  } else {
+    // ---- Duistere put ----
+    el('ellipse', { cx:0, cy:10, rx:54, ry:22, fill:'rgba(0,0,0,0.5)' }, g);
+    // Rotsrand rondom
+    el('ellipse', { cx:0, cy:8, rx:48, ry:19, fill:'#3a2b26', stroke:'#241a16', 'stroke-width':2 }, g);
+    el('ellipse', { cx:0, cy:5, rx:44, ry:17, fill:'#4a372f' }, g);
+    // Het gat: donker met gloed uit de diepte
+    el('ellipse', { cx:0, cy:6, rx:34, ry:13, fill:'url(#gPit)' }, g);
+    el('ellipse', { cx:0, cy:9, rx:20, ry:7, fill:'rgba(249,115,22,0.55)', class:'spawn-glow' }, g);
+    el('ellipse', { cx:0, cy:10, rx:10, ry:3.5, fill:'rgba(254,215,170,0.75)' }, g);
+    // Gekartelde rotspunten langs de rand
+    const punten = [[-46,2],[-36,-6],[-24,-11],[-10,-13],[6,-12],[20,-9],[33,-4],[44,1]];
+    for (const [x, y] of punten) {
+      el('path', { d:`M ${x-6} ${y+9} L ${x} ${y-7} L ${x+6} ${y+9} Z`, fill:'#4a372f', stroke:'#241a16', 'stroke-width':1.2, 'stroke-linejoin':'round' }, g);
+    }
+    // Twee ogen die uit het donker gluren
+    el('circle', { cx:-9, cy:4, r:2.6, fill:'#fbbf24', class:'spawn-twinkle' }, g);
+    el('circle', { cx:8, cy:5, r:2.6, fill:'#fbbf24', class:'spawn-twinkle' }, g);
+    // Klauwsporen op de rand
+    for (const kx of [-30, 26]) {
+      el('path', { d:`M ${kx} -2 l 3 8 M ${kx+5} -3 l 3 9 M ${kx+10} -2 l 3 8`, stroke:'#241a16', 'stroke-width':1.4, 'stroke-linecap':'round', fill:'none', opacity:0.8 }, g);
+    }
   }
-  // Kantelen op de muur
-  for (const k of [-24, -15, -6, 3, 12, 19]) el('rect', { x:k, y:-12, width:6, height:7, fill:stone, stroke:dark, 'stroke-width':1 }, g);
-  // Vlag in de teamkleur
-  el('line', { x1:0, y1:-13, x2:0, y2:-40, stroke:'#6b5b45', 'stroke-width':2.4 }, g);
-  el('path', { d:'M 1 -39 L 20 -33 L 1 -27 Z', fill:flag, stroke:'rgba(0,0,0,0.5)', 'stroke-width':1 }, g);
 }
 
 function renderBoard() {
@@ -1882,8 +2028,8 @@ function renderBoard() {
   }
   // De burchten waar de figuren vandaan komen: die van jou linksonder, die van
   // je tegenstander rechtsboven — dezelfde plek als het apparaat in Duel.
-  drawCastle(svg, 62, 800, 1.0, 'p1');
-  drawCastle(svg, 478, 62, 0.8, 'p2');
+  drawSpawn(svg, 78, 788, 0.95, 'p1');
+  drawSpawn(svg, 468, 78, 0.85, 'p2');
   // Scheidingslijnen tussen de zijlijn en het speelveld (staan ook in Duel)
   for (const y of [190, 700]) {
     el('line', { x1:22, y1:y, x2:518, y2:y, stroke:'rgba(255,255,255,0.75)', 'stroke-width':3, 'stroke-linecap':'round' }, svg);
@@ -1989,6 +2135,68 @@ function renderFoeCards(svg, n) {
   }
   const t = el('text', { x:96, y:114, 'font-size':9, 'text-anchor':'middle', fill:'rgba(255,220,220,0.75)', 'font-family':"'Cinzel', serif" }, g);
   t.textContent = `${n} kaart${n === 1 ? '' : 'en'}`;
+}
+
+// ==========================================
+// AANVALSANIMATIES (sessie 35)
+// Elke aanval heeft een naam; die naam bepaalt wat je ziet. Slangenbeet toont
+// giftanden, Smidshamer een hamer die neerkomt, Vonkenspel een vuurexplosie.
+// De koppeling gaat op TREFWOORD in de naam, met de vak-kleur als terugval,
+// zodat een nieuwe aanval automatisch iets passends krijgt.
+// ==========================================
+// FX-START (marker voor headless tests — niet verwijderen)
+const FX_TREFWOORDEN = [
+  [/schild|muur|wering/i,                                'schild'],
+  [/hamer|aambeeld|smids|beuk|vuist|zuil|brons/i,        'hamer'],
+  [/slangen|gif|venijn|walm|lijken|zwavel/i,             'gif'],
+  [/vuur|vlam|brand|laaiend|vonk|zonne|as|gloed|sintel/i,'vuur'],
+  [/bliksem|verlam|bevel|huil|storm|raven|ziel/i,        'bliksem'],
+  [/pijl|boog|pees|schot/i,                              'pijl'],
+  [/kou|vries|ijs|rijp/i,                                'kou'],
+  [/beet|klauw|kaak|tand|scheur|slagtand|grauw|blaf/i,   'klauw'],
+  [/dolk|zwaard|steek|bijl|slag|haal|snee|prik|drietand/i,'snede'],
+  [/greep|klem/i,                                        'schild'],
+  [/dwaal|schijn|bedrog|licht|staf|caduceus|veer|slaap/i,'magie'],
+];
+function attackFx(slot) {
+  if (!slot) return null;
+  if (slot.k === 'red' || slot.k === 'blue') return null;   // mis of blok: geen klap
+  const naam = slot.name || '';
+  for (const [re, fx] of FX_TREFWOORDEN) if (re.test(naam)) return fx;
+  if (slot.k === 'purple') return { poison:'gif', badlypoison:'gif', burn:'vuur',
+    paralysis:'bliksem', confusion:'magie', sleep:'magie', frozen:'kou' }[slot.effect] || 'magie';
+  return slot.k === 'gold' ? 'bliksem' : 'snede';
+}
+// FX-END (marker voor headless tests — niet verwijderen)
+
+// Tekent de animatie als een laag over het gevechtsscherm.
+function speelAanvalFx(soort, richtingOmhoog) {
+  if (!soort || animOff()) return 0;
+  const laag = document.getElementById('attack-fx');
+  if (!laag) return 0;
+  const kleur = { hamer:'#cbd5e1', gif:'#4ade80', vuur:'#fb923c', bliksem:'#fde047',
+                  pijl:'#e5e7eb', kou:'#7dd3fc', klauw:'#f87171', snede:'#f8fafc',
+                  schild:'#60a5fa', magie:'#c084fc' }[soort] || '#fff';
+  const d = document.createElement('div');
+  d.className = 'fx-scene fx-' + soort + (richtingOmhoog ? ' omhoog' : '');
+  d.style.setProperty('--fxk', kleur);
+  const stuk = (cls, extra) => `<i class="${cls}" ${extra || ''}></i>`;
+  let html = '';
+  if (soort === 'hamer')      html = stuk('fx-hamer') + stuk('fx-ring') + stuk('fx-ring r2');
+  else if (soort === 'gif')   html = stuk('fx-tand l') + stuk('fx-tand r') + stuk('fx-drup d1') + stuk('fx-drup d2') + stuk('fx-drup d3');
+  else if (soort === 'vuur')  html = Array.from({length:9}, (_,i)=>`<i class="fx-vlam v${i}"></i>`).join('') + stuk('fx-ring');
+  else if (soort === 'bliksem') html = stuk('fx-flits') + stuk('fx-flits f2') + stuk('fx-ring');
+  else if (soort === 'pijl')  html = stuk('fx-pijl') + stuk('fx-ring r2');
+  else if (soort === 'kou')   html = Array.from({length:6}, (_,i)=>`<i class="fx-scherf s${i}"></i>`).join('');
+  else if (soort === 'klauw') html = stuk('fx-kras k1') + stuk('fx-kras k2') + stuk('fx-kras k3');
+  else if (soort === 'snede') html = stuk('fx-snee n1') + stuk('fx-snee n2');
+  else if (soort === 'schild')html = stuk('fx-schild') + stuk('fx-ring');
+  else                        html = stuk('fx-rune') + stuk('fx-ring') + stuk('fx-ring r2');
+  d.innerHTML = html;
+  laag.appendChild(d);
+  const duur = 900 * (animScale() || 1);
+  setTimeout(() => d.remove(), duur + 200);
+  return duur;
 }
 
 // ===== Plates als KAARTEN op tafel (Duel-look) =====
@@ -2872,6 +3080,17 @@ async function runCombat(att, def) {
 
   for (const nm of saved) html += `<span class="status">${nm} houdt stand dankzij je kaart!</span><br>`;
   if (!r.attKO && !r.defKO && !attRetreat && !defRetreat && !r.statusOnAtt && !r.statusOnDef && !html) html += `<span style="opacity:0.8;font-style:italic">${noEffectReason(aSlot, dSlot)}</span>`;
+
+  // AANVALSANIMATIE: laat zien WAT er wordt gedaan. De aanvaller komt van
+  // onderen, de verdediger van boven, zodat je ziet wie wat doet.
+  {
+    const fxA = attackFx(aSlot), fxD = attackFx(dSlot);
+    let wacht = 0;
+    if (fxA) wacht = Math.max(wacht, speelAanvalFx(fxA, false));
+    if (fxD) setTimeout(() => speelAanvalFx(fxD, true), 140);
+    if (fxD) wacht = Math.max(wacht, 140 + 900 * (animScale() || 1));
+    if (wacht) await new Promise(r => setTimeout(r, Math.min(wacht, 1100)));
+  }
 
   // Uitkomst-geluid: KO gaat voor status, status voor een geblokte klap
   if (r.attKO || r.defKO) sfx('ko');
