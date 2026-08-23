@@ -350,8 +350,30 @@ Vierkant beeld, transparante achtergrond, geen sokkel, geen schaduw op de grond.
 Zet de bestanden in `art/` met exact deze namen (dus `art/squire.png`, `art/wyrmling.png`, enzovoort).
 Meer hoeft er niet te gebeuren: het spel laadt ze automatisch, ook in de collectie, de winkel en de boosterkist.
 
-Twee dingen om op te letten:
-- **Echte transparantie.** Sla op als PNG met alfakanaal. `art/warden.png` heeft nu nog een dichte
-  achtergrond — dat is meteen een goede eerste om te vervangen.
-- **Geen sokkel meetekenen.** Het spel tekent zelf de ronde voet in de teamkleur eronder. Staat er ook
-  een sokkel in het plaatje, dan krijg je er twee onder elkaar.
+**Geen sokkel meetekenen.** Het spel tekent zelf de ronde voet in de teamkleur eronder. Staat er ook
+een sokkel in het plaatje, dan krijg je er twee onder elkaar.
+
+---
+
+## Witte achtergrond? Die haal je er zo af
+
+Beeldgeneratoren leveren vaak een PNG met een dichte **witte achtergrond**, terwijl het spel
+transparantie nodig heeft. Daar is een gereedschap voor:
+
+```bash
+python3 tools/cutout.py -o art/ ~/Downloads/*.png
+```
+
+Het vult vanaf de randen naar binnen, dus alleen het wit áán de buitenkant verdwijnt. Wit BINNEN de
+figuur — botten, tanden, een wit gewaad, highlights op een helm — blijft staan. Daarna wordt de rand
+een paar pixels zacht gemaakt zodat er geen kartels of witte zoom overblijft, en wordt het plaatje
+bijgesneden op wat er nog over is.
+
+Getest op de bestaande figuren: het skelet houdt 98,5% van zijn witte botten, de Warden 100%.
+Losse onderdelen die er wél bij horen — de zwevende dwaallichtjes van Hel bijvoorbeeld — blijven
+staan, omdat het gereedschap alleen kleurloze of bijna-witte restjes wegpoetst.
+
+Handige opties:
+- `--drempel 40` — losser, als er nog een grijzige zoom overblijft
+- `--drempel 20` — strenger, als er te veel van de figuur af gaat
+- `--hoogte 220` — meteen op dezelfde hoogte schalen als de huidige figuren

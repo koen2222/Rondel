@@ -243,6 +243,18 @@ SESSIE 28 — TAFEL, DECOR EN EEN AGRESSIEVE AI (Koens vier punten)
   vanaf beurt 5; in een ander potje blokkeerde hij een spawn in beurt 3 en won
   in beurt 4.
 
+ART-GEREEDSCHAP (sessie 33): tools/cutout.py haalt een witte achtergrond van
+gegenereerde figuur-PNG's af. Beeldgeneratoren leveren vaak geen transparantie.
+Het vult vanaf de RANDEN naar binnen, zodat wit BINNEN de figuur (botten,
+tanden, een wit gewaad) blijft staan — domweg alle witte pixels wissen sloopt
+het skelet. Daarna wordt de rand zacht gemaakt en het beeld bijgesneden.
+Losse onderdelen die er wél bij horen (zwevende dwaallichtjes) blijven staan:
+het despeckle-filter poetst alleen kleurloze of bijna-witte restjes weg. Die
+uitzondering is er gekomen nadat een eerste versie een van Hels dwaallichtjes
+opat. Gemeten: skelet houdt 98,5% van z'n witte botten, Warden 100%.
+Meteen toegepast op de drie bestanden die nog een dichte hoek hadden
+(warden, commander, necromancer); alle 18 zijn nu volledig transparant.
+
 SPEEL-SIMULATIE (nieuw in sessie 25): test/simulate.js speelt N volledige
 potjes headless. De testspeler doet ofwel willekeurige legale zetten ("random",
 test of de regels blijven werken) ofwel beent zo hard mogelijk naar het doel
