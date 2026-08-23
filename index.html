@@ -36,31 +36,66 @@
   .bench-card.hc .name { color: #f9a8d4; }
   .hc-badge { position: absolute; top: -4px; left: -4px; background: linear-gradient(135deg, #f472b6, #be185d); color: #fff; font-weight: 900; font-size: 0.7rem; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border: 1px solid #fff; }
 
-  .board-wrap { position: relative; background: linear-gradient(180deg, #5b4a82 0%, #423463 32%, #302750 62%, #201a38 100%); border-radius: 16px; padding: 0; border: 1px solid rgba(147,197,253,0.25); box-shadow: inset 0 0 70px rgba(10,6,20,0.45), 0 10px 30px rgba(0,0,0,0.9); overflow: hidden; }
-  /* Holografische ringen, heel subtiel — Duel-sfeer */
-  .board-wrap::before { content: ''; position: absolute; inset: 0; background: repeating-radial-gradient(circle at 50% 50%, rgba(125,211,252,0.035) 0 1px, transparent 1px 64px); pointer-events: none; }
-  .board-wrap::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 45%, rgba(125,211,252,0.04) 100%); pointer-events: none; mix-blend-mode: overlay; }
-  
-  #board { display: block; width: 100%; height: auto; filter: drop-shadow(0 15px 15px rgba(0,0,0,0.6)); }
-  
-  /* Licht Duel-veld: donkere lijnen/punten op glanzend bord */
-  .route-halo { stroke: rgba(30,58,138,0.16); stroke-width: 8; stroke-linecap: round; fill: none; }
-  .route-core { stroke: rgba(30,41,89,0.75); stroke-width: 2.5; stroke-linecap: round; fill: none; }
+  /* ===== ARENA =====
+     Het bord is DOORZICHTIG: je kijkt op een gloeiende arenavloer, precies zoals
+     in Duel. De achtergrond zit in CSS (statisch) en niet in de SVG, omdat de
+     SVG bij elke zet opnieuw wordt opgebouwd — een filter/textuur daarin zou
+     elke render opnieuw berekend worden en op een telefoon gaan haperen. */
+  .board-wrap { position: relative; border-radius: 16px; padding: 0; overflow: hidden;
+    border: 1px solid rgba(255,170,90,0.28);
+    box-shadow: inset 0 0 90px rgba(0,0,0,0.7), 0 10px 34px rgba(0,0,0,0.92); }
+  .board-wrap[data-arena="vuur"] {
+    background:
+      radial-gradient(ellipse 62% 34% at 50% 36%, rgba(253,186,116,0.40), transparent 72%),
+      radial-gradient(ellipse 85% 62% at 50% 44%, #8a3410 0%, #4a1408 52%, #1a0705 100%); }
+  .board-wrap[data-arena="kristal"] {
+    background:
+      radial-gradient(ellipse 62% 34% at 50% 36%, rgba(147,197,253,0.28), transparent 72%),
+      linear-gradient(180deg, #5b4a82 0%, #423463 32%, #302750 62%, #1a1530 100%); }
+  .board-wrap[data-arena="woud"] {
+    background:
+      radial-gradient(ellipse 62% 34% at 50% 36%, rgba(190,242,100,0.26), transparent 72%),
+      radial-gradient(ellipse 85% 62% at 50% 44%, #1f4023 0%, #12281a 52%, #060f0a 100%); }
+  /* Rots-/nevelstructuur: één statische SVG-ruis als achtergrondlaag */
+  .board-wrap::before { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0.5;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.02 0.035' numOctaves='4' seed='9'/><feColorMatrix type='saturate' values='0'/></filter><rect width='260' height='260' filter='url(%23n)' opacity='0.55'/></svg>");
+    background-size: 300px 300px; }
+  /* Vignet: randen donker, midden warm */
+  .board-wrap::after { content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse 70% 58% at 50% 46%, transparent 45%, rgba(0,0,0,0.78) 100%); }
 
-  .node-rim { stroke: rgba(255,255,255,0.6); stroke-width: 1.5; }
-  .entry-ring.p1 { stroke: var(--p1); stroke-width: 3.5; filter: drop-shadow(0 0 10px var(--p1-glow)); }
-  .entry-ring.p2 { stroke: var(--p2); stroke-width: 3.5; filter: drop-shadow(0 0 10px var(--p2-glow)); }
-  .goal-halo { fill: none; stroke-width: 2; animation: goalPulse 2.4s ease-in-out infinite; }
-  .goal-halo.p1 { stroke: var(--p1); filter: drop-shadow(0 0 8px var(--p1-glow)); }
-  .goal-halo.p2 { stroke: var(--gold); filter: drop-shadow(0 0 8px var(--gold-glow)); }
-  @keyframes goalPulse { 0%, 100% { opacity: 0.25; } 50% { opacity: 0.85; } }
-  @media (prefers-reduced-motion: reduce) { .goal-halo { animation: none; opacity: 0.6; } }
+  #board { display: block; width: 100%; height: auto; position: relative; z-index: 1; }
+
+  /* Lichtgevende witte routes en ringpunten (Duel-look). De gloed staat op de
+     GROEP, niet per lijn — één filter i.p.v. zestig scheelt enorm op mobiel. */
+  .routes-glow { filter: drop-shadow(0 0 4px rgba(255,236,200,0.85)); }
+  .route-halo { stroke: rgba(255,190,120,0.22); stroke-width: 8; stroke-linecap: round; fill: none; }
+  .route-core { stroke: #fff; stroke-width: 2.6; stroke-linecap: round; fill: none; }
+  .nodes-glow { filter: drop-shadow(0 0 3px rgba(255,255,255,0.6)); }
+  .node-rim { stroke: #fff; }
+
+  .goal-halo { fill: none; stroke-width: 2.5; animation: goalPulse 2.4s ease-in-out infinite; }
+  .goal-halo.p1 { stroke: #60a5fa; }
+  .goal-halo.p2 { stroke: #fb923c; }
+  .goal-ring.p1 { filter: drop-shadow(0 0 9px rgba(59,130,246,0.95)); }
+  .goal-ring.p2 { filter: drop-shadow(0 0 9px rgba(249,115,22,0.95)); }
+  .entry-ring.p1 { filter: drop-shadow(0 0 7px var(--p1-glow)); }
+  .entry-ring.p2 { filter: drop-shadow(0 0 7px var(--p2-glow)); }
+  @keyframes goalPulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.95; } }
+  @media (prefers-reduced-motion: reduce) { .goal-halo { animation: none; opacity: 0.7; } }
   
   .node-glow { fill: rgba(245, 158, 11, 0.25); stroke: var(--gold); stroke-width: 2; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
   .node-glow.active { opacity: 1; filter: drop-shadow(0 0 8px var(--gold)); }
   
   .unit-fig { cursor: pointer; }
   .unit-fig.selected .fig-base { stroke: var(--gold); stroke-width: 3; filter: drop-shadow(0 0 12px var(--gold)); }
+  .unit-fig.selected .fig-glow { opacity: 0.9; }
+  .fig-art { filter: drop-shadow(0 3px 3px rgba(0,0,0,0.75)); }
+  /* Gele wijzers naast een geselecteerde figuur, zoals de markers in Duel */
+  .sel-marker { fill: #fde047; stroke: rgba(120,53,15,0.9); stroke-width: 1.2; animation: selPulse 1s ease-in-out infinite; }
+  @keyframes selPulse { 0%,100% { opacity: 1; transform: translateX(0); } 50% { opacity: 0.55; } }
+  @media (prefers-reduced-motion: reduce) { .sel-marker { animation: none; } }
 
   .action-bar { display: flex; gap: 10px; padding: 8px 0; }
   .btn { flex: 1; padding: 12px; background: linear-gradient(180deg, #2a201a, #14100d); color: var(--ink); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; font-family: 'Cinzel', serif; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.4); }
@@ -475,10 +510,14 @@ const ROUTES = [
   ['IT1','IT2'], ['IT2','IT3'], ['IT3','IR'], ['IR','IB3'],
   ['IB3','IB2'], ['IB2','IB1'], ['IB1','IL'], ['IL','IT1'],
   // De vier hoeken van de buitenrand verbinden met de vier hoeken van het
-  // binnenvierkant — dit is de lijn die vanaf elk startpunt het bord in loopt.
-  // Meer verbindingen tussen binnen en buiten zijn er NIET: het doel houdt
-  // daardoor precies twee toegangen (T2/T3 resp. B2/B3).
-  ['E2_TL','IT1'], ['E2_TR','IT3'], ['E1_BL','IB1'], ['E1_BR','IB3']
+  // binnenvierkant — de lijn die vanaf elk startpunt het bord in loopt.
+  ['E2_TL','IT1'], ['E2_TR','IT3'], ['E1_BL','IB1'], ['E1_BR','IB3'],
+  // DOEL-DIAGONALEN (sessie 26, afgelezen van een echte Duel-screenshot):
+  // vanaf het midden van het binnenvierkant loopt één schuine lijn naar een
+  // flank van het doel — bovenin naar links, onderin naar rechts, dus 180°
+  // gespiegeld. Precies zoals Koen ze in sessie 3 al beschreef; ze waren in
+  // sessie 17 geschrapt als rush-fix, maar dat week af van Duel.
+  ['T2','IT2'], ['B3','IB2']
 ];
 
 const ADJ = {}; for (const k of Object.keys(NODES)) ADJ[k] = new Set();
@@ -711,6 +750,7 @@ const SETTING_DEFS = {
   music:       { def: false,    type:'bool' },
   haptics:     { def: true,     type:'bool' },
   animSpeed:   { def: 'normaal',type:'enum',   opts: ['normaal','snel','uit'] },
+  arena:       { def: 'vuur',   type:'enum',   opts: ['vuur','kristal','woud'] },
   clockMinutes:{ def: 5,        type:'enum',   opts: [3, 5, 10, 0] },   // 0 = geen klok
   difficulty:  { def: 'normaal',type:'enum',   opts: ['makkelijk','normaal','moeilijk'] },
   confirmExit: { def: true,     type:'bool' },
@@ -1345,6 +1385,7 @@ function setSetting(key, value) {
   // Directe effecten van bepaalde instellingen
   if (key === 'sfxVolume') Audio_.setVolume(profile.settings.sfxVolume);
   if (key === 'music') { if (profile.settings.music) Audio_.startMusic(); else Audio_.stopMusic(); }
+  if (key === 'arena') { const w = document.querySelector('.board-wrap'); if (w) w.setAttribute('data-arena', profile.settings.arena); }
   if (key === 'clockMinutes' && state && !state.over) toast('Nieuwe kloktijd geldt vanaf het volgende duel');
 }
 
@@ -1356,6 +1397,8 @@ const SETTINGS_UI = [
     { key:'haptics',   kind:'toggle', t:'Trillen',         d:'Korte trilling bij klappen en KO (telefoon)' },
   ]},
   { group: 'Weergave & tempo', rows: [
+    { key:'arena', kind:'seg', t:'Arena', d:'De omgeving waarin je duelleert',
+      opts:[['vuur','Vuur'],['kristal','Kristal'],['woud','Woud']] },
     { key:'animSpeed', kind:'seg', t:'Animatiesnelheid', d:'Sneller speelt vlotter; uit slaat animaties over',
       opts:[['normaal','Normaal'],['snel','Snel'],['uit','Uit']] },
     { key:'showHints', kind:'toggle', t:'Hints tonen', d:'Korte tips tijdens je beurt (bv. waarom een zet niet mag)' },
@@ -1570,26 +1613,58 @@ function statusFX(g, u) {
   }
 }
 
+// Figuur op het bord. Naar Duel-verhoudingen: de figuur is FORS ten opzichte
+// van z'n sokkel (ruwweg 1,4x de sokkeldiameter hoog), de sokkel is een dikke
+// schijf met een fel oplichtende teamrand en een gekleurde gloed op de grond.
 function unitGroup(u, withShadow = true) {
   const g = document.createElementNS(SVG_NS, 'g');
-  if (withShadow) el('ellipse', { cx:0, cy:11, rx:21, ry:7.5, fill:'rgba(0,0,0,0.4)' }, g);
-  const side = u.owner==='p1' ? '#11255c' : '#4c0f0f'; const rim = u.owner==='p1' ? '#60a5fa' : '#f87171';
-  el('ellipse', { cx:0, cy:5, rx:19, ry:9, fill:side, stroke:'rgba(0,0,0,0.45)', 'stroke-width':1 }, g);
-  el('ellipse', { class:'fig-base', cx:0, cy:0, rx:19, ry:9, fill:`url(#gBaseTop${u.owner==='p1'?'P1':'P2'})`, stroke:rim, 'stroke-width':1.5 }, g);
-  el('path', { d:'M -12 -2.5 A 14 6 0 0 1 12 -2.5', fill:'none', stroke:'rgba(255,255,255,0.35)', 'stroke-width':1.5, 'stroke-linecap':'round' }, g);
+  const p1 = u.owner === 'p1';
+  const rim   = p1 ? '#60a5fa' : '#f87171';
+  const glow  = p1 ? 'rgba(59,130,246,0.55)' : 'rgba(239,68,68,0.55)';
+  const side  = p1 ? '#0e2050' : '#450d0d';
+  const RX = 20, RY = 9.5;                 // sokkelmaat
+
+  if (withShadow) {
+    el('ellipse', { cx:0, cy:13, rx:RX+3, ry:RY*0.85, fill:'rgba(0,0,0,0.45)' }, g);
+    el('ellipse', { cx:0, cy:11, rx:RX+7, ry:RY, fill:glow, class:'fig-glow' }, g);
+  }
+  // Dikke zijwand: twee lagen geven de schijf hoogte
+  el('ellipse', { cx:0, cy:7.5, rx:RX, ry:RY, fill:'rgba(0,0,0,0.55)' }, g);
+  el('ellipse', { cx:0, cy:5,   rx:RX, ry:RY, fill:side }, g);
+  el('rect', { x:-RX, y:0, width:RX*2, height:5, fill:side }, g);
+  // Bovenvlak met felle teamrand
+  el('ellipse', { class:'fig-base', cx:0, cy:0, rx:RX, ry:RY, fill:`url(#gBaseTop${p1?'P1':'P2'})`, stroke:rim, 'stroke-width':2 }, g);
+  el('path', { d:`M -13 -2.8 A 15 6.5 0 0 1 13 -2.8`, fill:'none', stroke:'rgba(255,255,255,0.45)', 'stroke-width':1.6, 'stroke-linecap':'round' }, g);
+
   const art = UNIT_ART[u.defKey];
   if (art) {
-    el('image', { x:-17, y:-49, width:34, height:48, href:art }, g);
+    // Groter dan voorheen (34x48 -> 42x58) en iets dieper in de sokkel gezet,
+    // zodat de figuur er echt OP lijkt te staan in plaats van erboven te zweven.
+    el('image', { x:-24, y:-63, width:48, height:66, href:art, class:'fig-art' }, g);
   } else {
     const fo = document.createElementNS(SVG_NS, 'foreignObject');
-    fo.setAttribute('x',-15); fo.setAttribute('y',-22); fo.setAttribute('width',30); fo.setAttribute('height',26);
+    fo.setAttribute('x',-18); fo.setAttribute('y',-28); fo.setAttribute('width',36); fo.setAttribute('height',31);
     fo.innerHTML = unitSilhouette(u.defKey, u.owner); g.appendChild(fo);
   }
-  if (u.level > 1) { el('rect', { x:-24, y:-21, width:17, height:11, rx:3, fill:'#fbbf24', stroke:'#000', 'stroke-width':1 }, g); const lt = el('text', { x:-15.5, y:-12.5, 'font-size':8, 'text-anchor':'middle', fill:'#000', 'font-weight':'900', 'font-family':'sans-serif' }, g); lt.textContent = 'L' + u.level; }
+
+  // MP op de rand van de sokkel, zoals het cijfer op een Duel-figuur.
+  // Alleen op het BORD: de figuren aan de zijlijn krijgen hun badge al van
+  // renderBench, en twee cijfers op één poppetje leest als rommel.
+  if (u.node) {
+    el('circle', { cx:15, cy:4, r:8, fill: p1 ? '#2563eb' : '#dc2626', stroke:'#fff', 'stroke-width':1.6 }, g);
+    const mt = el('text', { x:15, y:7.5, 'font-size':10, 'text-anchor':'middle', fill:'#fff', 'font-weight':'900', 'font-family':'sans-serif' }, g);
+    mt.textContent = effMP(u);
+  }
+
+  if (u.level > 1) {
+    el('rect', { x:-27, y:-6, width:18, height:12, rx:3, fill:'#fbbf24', stroke:'#000', 'stroke-width':1 }, g);
+    const lt = el('text', { x:-18, y:3.5, 'font-size':9, 'text-anchor':'middle', fill:'#000', 'font-weight':'900', 'font-family':'sans-serif' }, g);
+    lt.textContent = 'L' + u.level;
+  }
   if (u.status.length) {
     const c = STATUS_COLORS[u.status[0]] || '#f59e0b';
-    el('circle', { cx:14, cy:-16, r:7, fill:c, stroke:'#000', 'stroke-width':1 }, g);
-    const t = el('text', { x:14, y:-12, 'font-size':10, 'text-anchor':'middle', fill:'#000', 'font-weight':'900', 'font-family':'sans-serif' }, g);
+    el('circle', { cx:16, cy:-24, r:7.5, fill:c, stroke:'#000', 'stroke-width':1.2 }, g);
+    const t = el('text', { x:16, y:-20.5, 'font-size':10, 'text-anchor':'middle', fill:'#000', 'font-weight':'900', 'font-family':'sans-serif' }, g);
     t.textContent = u.status[0][0].toUpperCase();
   }
   statusFX(g, u);
@@ -1608,7 +1683,7 @@ const BOARD_DEFS = `
     <stop offset="0%" stop-color="rgba(255,255,255,0.55)"/><stop offset="45%" stop-color="rgba(255,255,255,0.10)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/>
   </radialGradient>
   <radialGradient id="gArenaGlow" cx="50%" cy="42%" r="65%">
-    <stop offset="0%" stop-color="rgba(147,197,253,0.20)"/><stop offset="60%" stop-color="rgba(147,197,253,0.06)"/><stop offset="100%" stop-color="rgba(147,197,253,0)"/>
+    <stop offset="0%" stop-color="rgba(255,225,180,0.16)"/><stop offset="60%" stop-color="rgba(255,190,120,0.05)"/><stop offset="100%" stop-color="rgba(255,190,120,0)"/>
   </radialGradient>
   <radialGradient id="gNode" cx="35%" cy="30%" r="85%">
     <stop offset="0%" stop-color="#46405c"/><stop offset="55%" stop-color="#1c1729"/><stop offset="100%" stop-color="#100c1a"/>
@@ -1629,37 +1704,45 @@ const BOARD_DEFS = `
 
 function renderBoard() {
   const svg = document.getElementById('board'); svg.innerHTML = BOARD_DEFS;
-  // Schuine duel-tafel: licht glanzend veld (Duel-stijl) met 3D-randwand
-  el('ellipse', { cx:270, cy:455, rx:300, ry:330, fill:'url(#gArenaGlow)' }, svg);
-  el('polygon', { points:'108,168 432,168 516,742 24,742', fill:'url(#gPlate)', stroke:'rgba(255,255,255,0.75)', 'stroke-width':3 }, svg);
-  el('polygon', { points:'108,168 432,168 516,742 24,742', fill:'url(#gPlateSheen)' }, svg);
-  el('polygon', { points:'24,742 516,742 508,764 32,764', fill:'url(#gPlateWall)' }, svg);
-  el('polygon', { points:'32,764 508,764 506,770 34,770', fill:'rgba(0,0,0,0.35)' }, svg);
-  const gHalo = el('g', {}, svg), gRoute = el('g', {}, svg);
+  const wrap = document.querySelector('.board-wrap');
+  if (wrap) wrap.setAttribute('data-arena', S('arena'));
+  // GEEN speelplaat meer: het bord is doorzichtig en zweeft boven de arena,
+  // net als in Duel. Alleen een warme grondgloed onder de routes.
+  el('ellipse', { cx:270, cy:452, rx:250, ry:290, fill:'url(#gArenaGlow)' }, svg);
+  // Routes: brede zachte halo + witte kern; de gloed staat op de groep
+  const gRoutes = el('g', { class:'routes-glow' }, svg);
+  const gHalo = el('g', {}, gRoutes), gRoute = el('g', {}, gRoutes);
   for (const [a,b] of ROUTES) { const A = NODES[a], B = NODES[b]; el('line', { x1:A.x, y1:A.y, x2:B.x, y2:B.y, class:'route-halo' }, gHalo); el('line', { x1:A.x, y1:A.y, x2:B.x, y2:B.y, class:'route-core' }, gRoute); }
-  const gNodes = el('g', {}, svg);
+  const gNodes = el('g', { class:'nodes-glow' }, svg);
   for (const [key, n] of Object.entries(NODES)) {
     const ds = 0.85 + 0.15 * (depthScale(n.y) - 0.78) / 0.22;   // nodes achterin iets kleiner
     const g = el('g', { 'data-node':key, style:'cursor:pointer;' }, gNodes);
     if (n.type === 'entry') {
+      // Startpunt = concentrische ringen, als een schietschijf (Duel-look)
       el('circle', { cx:n.x, cy:n.y, r:24*ds, class:'node-glow', id:`glow-${key}` }, g);
-      el('circle', { cx:n.x, cy:n.y, r:18*ds, fill:'url(#gNode)', class: 'entry-ring ' + n.owner }, g);
-      el('circle', { cx:n.x, cy:n.y, r:6*ds, fill: n.owner==='p1' ? '#3b82f6' : '#ef4444', opacity:0.9 }, g);
-      el('ellipse', { cx:n.x-4*ds, cy:n.y-6*ds, rx:6*ds, ry:3.5*ds, fill:'rgba(255,255,255,0.16)' }, g);
+      const col = n.owner === 'p1' ? '#60a5fa' : '#f87171';
+      el('circle', { cx:n.x, cy:n.y, r:16*ds, fill:'rgba(12,6,10,0.88)', stroke:'#fff', 'stroke-width':2.2*ds, class:'entry-ring ' + n.owner }, g);
+      el('circle', { cx:n.x, cy:n.y, r:11*ds, fill:'none', stroke:col, 'stroke-width':2*ds, opacity:0.95 }, g);
+      el('circle', { cx:n.x, cy:n.y, r:6.5*ds, fill:'none', stroke:'rgba(255,255,255,0.8)', 'stroke-width':1.5*ds }, g);
+      el('circle', { cx:n.x, cy:n.y, r:2.4*ds, fill:'#fff' }, g);
     }
     else if (n.type === 'goal') {
-      el('circle', { cx:n.x, cy:n.y, r:26*ds, class:'goal-halo ' + n.owner }, g);
-      el('circle', { cx:n.x, cy:n.y, r:24*ds, class:'node-glow', id:`glow-${key}` }, g);
-      el('circle', { cx:n.x, cy:n.y, r:18*ds, fill: n.owner==='p1' ? 'url(#gGoalBlue)' : 'url(#gGoalGold)', stroke:'#fff', 'stroke-width':2 }, g);
-      const t8 = 8*ds, t5 = 5*ds, t7 = 7*ds;
-      const tri = n.owner==='p2' ? `${n.x},${n.y+t7} ${n.x-t8},${n.y-t5} ${n.x+t8},${n.y-t5}` : `${n.x},${n.y-t7} ${n.x-t8},${n.y+t5} ${n.x+t8},${n.y+t5}`;
-      el('polygon', { points:tri, fill:'rgba(0,0,0,0.85)' }, g);
-      el('ellipse', { cx:n.x-5*ds, cy:n.y-8*ds, rx:8*ds, ry:4*ds, fill:'rgba(255,255,255,0.3)' }, g);
+      // Doel = grote gloeiende ring met een pijl naar binnen
+      const col = n.owner === 'p1' ? '#3b82f6' : '#f97316';
+      const bright = n.owner === 'p1' ? '#93c5fd' : '#fdba74';
+      el('circle', { cx:n.x, cy:n.y, r:29*ds, class:'goal-halo ' + n.owner }, g);
+      el('circle', { cx:n.x, cy:n.y, r:26*ds, class:'node-glow', id:`glow-${key}` }, g);
+      el('circle', { cx:n.x, cy:n.y, r:20*ds, fill:'rgba(10,5,8,0.72)', stroke:col, 'stroke-width':4.5*ds, class:'goal-ring ' + n.owner }, g);
+      el('circle', { cx:n.x, cy:n.y, r:14.5*ds, fill:'none', stroke:bright, 'stroke-width':1.6*ds, opacity:0.9 }, g);
+      // Pijl wijst het veld in, richting de speler die er doorheen moet
+      const t9 = 9*ds, t6 = 6*ds, t8 = 8*ds;
+      const tri = n.owner==='p2' ? `${n.x},${n.y+t8} ${n.x-t9},${n.y-t6} ${n.x+t9},${n.y-t6}` : `${n.x},${n.y-t8} ${n.x-t9},${n.y+t6} ${n.x+t9},${n.y+t6}`;
+      el('polygon', { points:tri, fill:bright }, g);
     }
     else {
+      // Gewoon punt = witte ring met donker hart
       el('circle', { cx:n.x, cy:n.y, r:16*ds, class:'node-glow', id:`glow-${key}` }, g);
-      el('circle', { cx:n.x, cy:n.y, r:11.5*ds, fill:'url(#gNode)', class:'node-rim' }, g);
-      el('ellipse', { cx:n.x-3*ds, cy:n.y-4*ds, rx:4.5*ds, ry:2.8*ds, fill:'rgba(255,255,255,0.18)' }, g);
+      el('circle', { cx:n.x, cy:n.y, r:8.4*ds, fill:'rgba(10,6,12,0.82)', class:'node-rim', 'stroke-width':2.8*ds }, g);
     }
     g.addEventListener('click', () => onNodeTap(key));
   }
@@ -1667,6 +1750,11 @@ function renderBoard() {
   for (const u of Object.values(state.units)) {
     if (!u.node || state.animating === u.uid) continue; const n = NODES[u.node];
     const g = unitGroup(u);
+    if (state.selected === u.uid) {
+      // Twee gele wijzers links en rechts van de sokkel
+      el('polygon', { points:'-34,-10 -22,-2 -34,6', class:'sel-marker' }, g);
+      el('polygon', { points:'34,-10 22,-2 34,6', class:'sel-marker' }, g);
+    }
     g.setAttribute('class', 'unit-fig' + (state.selected===u.uid?' selected':''));
     g.setAttribute('transform', `translate(${n.x},${n.y}) scale(${depthScale(n.y).toFixed(3)})`);
     g.setAttribute('data-uid', u.uid);
