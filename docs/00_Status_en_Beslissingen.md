@@ -1,5 +1,5 @@
 RONDEL — STATUS EN BESLISSINGEN
-Laatste update: 22 augustus 2026 (sessie 25)
+Laatste update: 23 augustus 2026 (sessie 37)
 
 KERNCONCEPT
 - Tabletop-first fantasy bordspel, einddoel = digitale app
@@ -254,6 +254,56 @@ SESSIE 28 — TAFEL, DECOR EN EEN AGRESSIEVE AI (Koens vier punten)
   Gemeten: de AI bouwt nu op naar 5 figuren op het bord en bezet een spawnpunt
   vanaf beurt 5; in een ander potje blokkeerde hij een spawn in beurt 3 en won
   in beurt 4.
+
+SESSIE 37 — DE KLAP TUSSEN DE TWEE POPPETJES, EN EEN STIL SCHERM
+Koen: "het scherm wordt de hele tijd groter en kleiner als ik op End Turn druk,
+alsof hij steeds herkalibreert. En ik wil voor elke aanval een animatie TUSSEN
+de twee poppetjes nadat het wiel spint — een zwaardje dat door het andere
+poppetje heen gaat, en bij een blok een schild-icoontje. Elke aanval moet een
+belevenis zijn, en alles moet een animatie hebben; dat geldt dus ook voor de
+kaarten."
+
+- SCHERM VERSPRINGT NIET MEER. Oorzaak gevonden: renderPlates() zette de
+  kaartenstrip op display:none zodra de speler aan zet geen kaarten had. De
+  strip verdween, de flex-layout herverdeelde de ruimte en het bord werd groter
+  — en bij de volgende beurt weer kleiner. De strip blijft nu altijd staan met
+  een vaste hoogte (62px), en de beurtbalk kreeg een vaste 52px.
+  GEMETEN: bordhoogte 638/638/638/638/638 over vijf beurten. Bewaakt door een
+  smoke-check ("Bordhoogte blijft stabiel over de beurten heen").
+- DE TWEE VECHTERS STAAN NU IN BEELD. In het gevechtsscherm staat naast elke
+  schijf het figuur zelf (art, 104px hoog, met teamkleurige grondschaduw). Zo
+  is er iets om de klap TUSSEN te laten gebeuren.
+- PROJECTIELEN. Na het draaien vliegt er iets van de aanvaller naar de
+  verdediger: zwaard, pijl, vuurbol, hamer, giftanden, bliksemschicht,
+  ijsscherf, klauwhaal, schildstoot of rune. De baan wordt uitgerekend uit de
+  echte posities van de twee figuren (--x0/--y0 -> --x1/--y1 -> --x2/--y2), en
+  het projectiel schiet 50% DOOR het doelwit heen — precies wat Koen vroeg met
+  "een zwaartje dat door het andere poppetje heen gaat". Op het inslagmoment
+  (64% van de baan) speelt de bestaande inslag-animatie, nu OP de verdediger in
+  plaats van in het midden van het scherm.
+- BLOK, MIS EN KO. Een blauw vak toont een groot schild met vonkenregen op het
+  figuur dat de klap opvangt. Een rood vak laat 'MIS' boven het hoofd hangen,
+  met de zwieper die er net langs ging. Wie het gevecht niet overleeft, licht
+  wit op en valt om (fighterKO) — ook als de winnende klap onzichtbaar was
+  (goud dat op een blok stukloopt), want de KO wordt centraal afgehandeld.
+- GELUID PER AANVALSSOORT. Elke soort heeft nu een eigen klank (fxsnede,
+  fxvuur, fxbliksem, fxkou, fxhamer, fxgif, fxklauw, fxmagie, fxschild, fxpijl)
+  plus een zwiep bij het afvuren en een mis-geluid. Het oude generieke
+  blok-geluid ná afloop is weg — dat klonk dubbel.
+- KAARTEN HEBBEN NU OOK EEN MOMENT. Een gespeelde kaart vliegt uit de waaier
+  (of, bij de AI, van het stapeltje linksboven) naar het midden van het scherm,
+  wordt groot met een glansveeg over het oppervlak, en spat dan uiteen op het
+  punt waar hij z'n werk doet — met een ring en tien vonken in de kleur van het
+  kaart-icoon. Bron- en doelpositie worden gemeten VOORDAT het bord opnieuw
+  wordt getekend. De toast is bij animaties uit beeld: de kaart zelf is groot
+  genoeg als melding.
+- KNOP-BUG onderweg gevonden: .btn heeft flex:1, en in de kolom-layout van het
+  gevechtsscherm rekte 'Voltooien' zich daardoor uit tot een blok van een halve
+  schermhoogte. Nu flex:0 0 auto.
+- TESTS: headless 110 -> 119 checks (nieuwe sectie AANVALSANIMATIES: elke
+  benoemde aanval heeft een animatie, elke soort heeft een kleur, elk
+  projectiel staat ook echt in de CSS). Smoke +7 checks voor de bordhoogte, de
+  twee vechters, het vliegende projectiel, het schild-icoon en de kaartvlucht.
 
 SESSIE 36 — SCHERMPASSING, INSLAGEN OP HET BORD, AI-CHOKEPUNTEN
 - HET SPEL PAST NU OP HET SCHERM. Het spelscherm is 100dvh hoog met flex; het

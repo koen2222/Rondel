@@ -20,7 +20,7 @@
     height: 100dvh; max-height: 100dvh; box-sizing: border-box; }
   .game .turn-banner, .game .plate-strip, .game .action-bar { flex: 0 0 auto; }
   
-  .turn-banner { padding: 12px 16px; border-radius: 12px; background: linear-gradient(90deg, #1f1814, #0a0806); border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 15px rgba(0,0,0,0.5); font-family: 'Cinzel', serif; font-size: 0.95rem; letter-spacing: 0.08em; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s ease; }
+  .turn-banner { padding: 12px 16px; height: 52px; box-sizing: border-box; border-radius: 12px; background: linear-gradient(90deg, #1f1814, #0a0806); border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 15px rgba(0,0,0,0.5); font-family: 'Cinzel', serif; font-size: 0.95rem; letter-spacing: 0.08em; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s ease; }
   .turn-banner.p1 { border-left: 4px solid var(--p1); box-shadow: 0 0 15px var(--p1-glow); }
   .turn-banner.p2 { border-left: 4px solid var(--p2); box-shadow: 0 0 15px var(--p2-glow); }
 
@@ -189,7 +189,131 @@
   @keyframes fxRune { 0% { transform: rotate(0) scale(0.3); opacity: 0; } 30% { opacity: 1; }
     100% { transform: rotate(220deg) scale(1.5); opacity: 0; } }
 
-  @media (prefers-reduced-motion: reduce) { #attack-fx { display: none; } }
+  /* ===== De klap gaat VAN het ene poppetje NAAR het andere =====
+     Elk projectiel is een wrapper die verschuift en meedraait met de baan; het
+     <i> erin is de vorm zelf. Zo hoeft elke aanval alleen z'n plaatje te
+     leveren en regelt de baan zich vanzelf. --x0/--y0 is de vertrekplek,
+     --x1/--y1 het doelwit en --x2/--y2 een stukje daar voorbij, zodat een
+     zwaard er ook echt dwars DOORHEEN vliegt in plaats van ervoor te stoppen. */
+  .fx-vlieg { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 8;
+    animation: fxVlieg var(--fxt, 380ms) cubic-bezier(.3,.02,.35,1) forwards; }
+  .fx-vlieg i { position: absolute; display: block; }
+  @keyframes fxVlieg {
+    0%   { transform: translate(var(--x0), var(--y0)) rotate(var(--rot)) scale(0.45); opacity: 0; }
+    16%  { opacity: 1; }
+    64%  { transform: translate(var(--x1), var(--y1)) rotate(var(--rot)) scale(1); opacity: 1; }
+    100% { transform: translate(var(--x2), var(--y2)) rotate(var(--rot)) scale(0.9); opacity: 0; }
+  }
+  /* Sliert achter het projectiel aan */
+  .fx-sliert { left: -96px; top: -4px; width: 96px; height: 8px; border-radius: 4px;
+    background: linear-gradient(90deg, transparent, var(--fxk)); opacity: 0.75;
+    filter: blur(2px); }
+
+  .pr-zwaard { left: -40px; top: -8px; width: 84px; height: 16px;
+    background: linear-gradient(180deg, #ffffff, #cbd5e1 45%, #64748b);
+    clip-path: polygon(0 30%, 8% 30%, 8% 8%, 14% 8%, 14% 30%, 66% 22%, 100% 50%, 66% 78%, 14% 70%, 14% 92%, 8% 92%, 8% 70%, 0 70%);
+    filter: drop-shadow(0 0 7px var(--fxk)); }
+  .pr-pijl { left: -34px; top: -5px; width: 72px; height: 10px;
+    background: linear-gradient(90deg, #6b4423 0 62%, #e5e7eb 62%);
+    clip-path: polygon(0 30%, 74% 30%, 74% 0, 100% 50%, 74% 100%, 74% 70%, 0 70%);
+    filter: drop-shadow(0 0 6px var(--fxk)); }
+  .pr-bol { left: -22px; top: -22px; width: 44px; height: 44px; border-radius: 50%;
+    background: radial-gradient(circle at 38% 34%, #fff9e6, var(--fxk) 52%, rgba(0,0,0,0) 76%);
+    filter: drop-shadow(0 0 14px var(--fxk)); animation: prBol .5s linear infinite; }
+  @keyframes prBol { 0% { transform: scale(1); } 50% { transform: scale(1.16); } 100% { transform: scale(1); } }
+  .pr-hamer { left: -28px; top: -30px; width: 56px; height: 60px;
+    background: linear-gradient(150deg, #f1f5f9, #475569);
+    clip-path: polygon(20% 0, 80% 0, 80% 44%, 58% 44%, 58% 100%, 42% 100%, 42% 44%, 20% 44%);
+    filter: drop-shadow(0 0 8px var(--fxk)); animation: prTol .35s linear infinite; }
+  @keyframes prTol { 0% { transform: rotate(0); } 100% { transform: rotate(360deg); } }
+  .pr-tand { left: -26px; top: -22px; width: 52px; height: 44px;
+    background: var(--fxk); filter: drop-shadow(0 0 9px var(--fxk));
+    clip-path: polygon(0 34%, 26% 34%, 34% 100%, 44% 34%, 56% 34%, 66% 100%, 74% 34%, 100% 34%, 100% 60%, 0 60%); }
+  .pr-flits { left: -34px; top: -20px; width: 68px; height: 40px; background: var(--fxk);
+    clip-path: polygon(0 44%, 52% 0, 40% 40%, 100% 30%, 44% 100%, 56% 56%, 6% 62%);
+    filter: drop-shadow(0 0 12px var(--fxk)); animation: prKnipper .12s steps(2) infinite; }
+  @keyframes prKnipper { 0% { opacity: 1; } 100% { opacity: 0.55; } }
+  .pr-scherf { left: -26px; top: -13px; width: 56px; height: 26px; background: var(--fxk);
+    clip-path: polygon(0 50%, 34% 0, 100% 42%, 100% 58%, 34% 100%);
+    filter: drop-shadow(0 0 9px var(--fxk)); opacity: 0.92; }
+  .pr-klauw { left: -26px; top: -30px; width: 54px; height: 60px;
+    border-right: 7px solid var(--fxk); border-radius: 50%;
+    filter: drop-shadow(0 0 8px var(--fxk)); }
+  .pr-schild { left: -24px; top: -28px; width: 48px; height: 56px;
+    background: linear-gradient(160deg, #dbeafe, var(--fxk));
+    clip-path: polygon(50% 0, 100% 18%, 100% 62%, 50% 100%, 0 62%, 0 18%);
+    filter: drop-shadow(0 0 10px var(--fxk)); }
+  .pr-rune { left: -25px; top: -25px; width: 50px; height: 50px; border-radius: 50%;
+    border: 4px dashed var(--fxk); box-shadow: 0 0 16px var(--fxk), inset 0 0 12px var(--fxk);
+    animation: prTol .9s linear infinite; }
+
+  /* De aanvaller doet een uitval richting de tegenstander */
+  .fighter.stoot { animation: fighterLunge 0.42s cubic-bezier(.3,-0.4,.4,1.5); }
+  @keyframes fighterLunge { 0%,100% { transform: translateX(0) scale(1); }
+    30% { transform: translateX(var(--lunge, 14px)) scale(1.06); } }
+
+  /* Badge boven het poppetje: schild bij een blok, MIS bij een misser */
+  .fx-badge { position: absolute; z-index: 9; transform: translate(-50%, -50%);
+    pointer-events: none; animation: fxBadge 1s ease-out forwards; }
+  @keyframes fxBadge { 0% { transform: translate(-50%,-50%) scale(0.2); opacity: 0; }
+    24% { transform: translate(-50%,-50%) scale(1.18); opacity: 1; }
+    40% { transform: translate(-50%,-50%) scale(1); }
+    100% { transform: translate(-50%,-62%) scale(1.05); opacity: 0; } }
+  .fx-badge .bd-schild { width: 62px; height: 72px;
+    background: linear-gradient(160deg, #eff6ff, #3b82f6 60%, #1d4ed8);
+    clip-path: polygon(50% 0, 100% 18%, 100% 62%, 50% 100%, 0 62%, 0 18%);
+    box-shadow: 0 0 24px rgba(96,165,250,0.95); position: relative; }
+  .fx-badge .bd-schild::after { content: ''; position: absolute; inset: 6px;
+    border: 2px solid rgba(255,255,255,0.7);
+    clip-path: polygon(50% 0, 100% 18%, 100% 62%, 50% 100%, 0 62%, 0 18%); }
+  .fx-badge .bd-mis { font-family: 'Cinzel', serif; font-weight: 900; font-size: 1.6rem;
+    letter-spacing: 0.16em; color: #f1f5f9; -webkit-text-stroke: 1px rgba(15,23,42,0.9);
+    text-shadow: 0 0 14px rgba(148,163,184,0.9), 0 3px 8px #000; }
+  /* De zwieper die er nét langs ging */
+  .fx-badge .bd-zwieper { position: absolute; left: 50%; top: 46px; width: 118px; height: 14px;
+    margin-left: -59px; border-radius: 50%; transform: rotate(-24deg);
+    background: linear-gradient(90deg, transparent, rgba(226,232,240,0.85), transparent);
+    animation: bdZwieper .45s ease-out forwards; }
+  @keyframes bdZwieper { 0% { opacity: 0; transform: rotate(-24deg) scaleX(0.2); }
+    35% { opacity: 1; } 100% { opacity: 0; transform: rotate(-24deg) scaleX(1.3); } }
+  /* Vonkenregen op het punt waar een blok de klap opvangt */
+  .fx-badge .bd-vonk { position: absolute; left: 50%; top: 50%; width: 5px; height: 5px;
+    border-radius: 50%; background: #fef3c7; box-shadow: 0 0 8px #fde047;
+    animation: bdVonk .6s ease-out forwards; }
+  @keyframes bdVonk { 0% { transform: rotate(var(--a)) translateX(6px); opacity: 1; }
+    100% { transform: rotate(var(--a)) translateX(64px); opacity: 0; } }
+
+  @media (prefers-reduced-motion: reduce) { #attack-fx { display: none; }
+    .fighter.stoot, .fighter.raakt, .fighter.valt { animation: none; } }
+
+  /* ===== Een kaart spelen is ook een moment ===== */
+  #kaart-fx { position: fixed; inset: 0; pointer-events: none; z-index: 95; overflow: hidden; }
+  .kaart-vlucht { position: absolute; left: 0; top: 0; width: 132px; height: 182px; border-radius: 12px;
+    background: linear-gradient(160deg, #fdf4dc, #e8d3a3 55%, #c9ae74);
+    border: 3px solid var(--kk); box-shadow: 0 0 30px var(--kk), 0 18px 30px rgba(0,0,0,0.7);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+    overflow: hidden; will-change: transform; }
+  .kaart-vlucht .kv-ico { filter: drop-shadow(0 2px 3px rgba(0,0,0,0.35)); }
+  .kaart-vlucht .kv-naam { font-family: 'Cinzel', serif; font-weight: 900; font-size: 0.86rem;
+    color: #3b2a12; letter-spacing: 0.04em; text-align: center; padding: 0 8px; line-height: 1.2; }
+  .kaart-vlucht .kv-duel { font-size: 0.58rem; color: #7c6339; letter-spacing: 0.1em; text-transform: uppercase; }
+  .kaart-vlucht .kv-glans { position: absolute; inset: 0; overflow: hidden; }
+  .kaart-vlucht .kv-glans::after { content: ''; position: absolute; top: -40%; left: -60%;
+    width: 40%; height: 180%; transform: rotate(18deg);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent);
+    animation: kvGlans 0.85s ease-in-out 0.22s; }
+  @keyframes kvGlans { 0% { left: -60%; } 100% { left: 130%; } }
+  .kaart-inslag { position: absolute; left: 0; top: 0; width: 0; height: 0; }
+  .kaart-inslag i { position: absolute; display: block; }
+  .kaart-inslag .ki-ring { left: -13px; top: -13px; width: 26px; height: 26px; border-radius: 50%;
+    border: 3px solid var(--kk); box-shadow: 0 0 18px var(--kk);
+    animation: kiRing 0.62s ease-out forwards; }
+  @keyframes kiRing { 0% { transform: scale(0.3); opacity: 1; } 100% { transform: scale(7); opacity: 0; } }
+  .kaart-inslag .ki-vonk { left: -4px; top: -4px; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--kk); box-shadow: 0 0 10px var(--kk); animation: kiVonk 0.7s ease-out forwards; }
+  @keyframes kiVonk { 0% { transform: rotate(var(--a)) translateX(4px); opacity: 1; }
+    100% { transform: rotate(var(--a)) translateX(76px) scale(0.3); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { #kaart-fx { display: none; } }
 
   /* Poorten waar de legers uit komen */
   .spawn-glow { animation: spawnPulse 3.2s ease-in-out infinite; }
@@ -248,13 +372,32 @@
   .btn:active { transform: translateY(2px); box-shadow: 0 1px 2px rgba(0,0,0,0.6); }
   .btn.primary { background: linear-gradient(180deg, #fbbf24, #b45309); color: #000; border: none; box-shadow: 0 4px 15px var(--gold-glow); }
 
-  .overlay { position: fixed; inset: 0; background: rgba(5, 4, 3, 0.95); backdrop-filter: blur(10px); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+  .overlay { position: fixed; inset: 0; background: rgba(5, 4, 3, 0.95); backdrop-filter: blur(10px); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 100; padding: 20px; overflow-y: auto; }
   .overlay.active { display: flex; }
   .combat-vs { font-family: 'Cinzel', serif; color: var(--gold); font-size: 1.5rem; letter-spacing: 0.3em; margin-bottom: 20px; text-shadow: 0 0 15px var(--gold-glow); }
   .disks-row { display: flex; flex-direction: column; gap: 20px; align-items: center; width: 100%; }
-  .disk-cell { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .disk-cell { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  /* De twee kemphanen staan naast hun schijf, zodat de aanval er tussendoor kan */
+  .fight-row { display: flex; align-items: center; gap: 6px; }
+  .fighter { position: relative; width: 84px; height: 104px; flex: 0 0 84px;
+    display: flex; align-items: flex-end; justify-content: center; }
+  .fighter img { max-width: 100%; max-height: 100%; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.8)); }
+  .fighter svg { width: 100%; height: 100%; }
+  .fighter::after { content: ''; position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%);
+    width: 62px; height: 16px; border-radius: 50%; }
+  .fighter.p1::after { background: radial-gradient(ellipse, rgba(59,130,246,0.6), transparent 70%); }
+  .fighter.p2::after { background: radial-gradient(ellipse, rgba(239,68,68,0.6), transparent 70%); }
+  .fighter.raakt { animation: fighterHit 0.5s ease-out; }
+  .fighter.valt  { animation: fighterKO 0.9s ease-in forwards; }
+  @keyframes fighterHit { 0%,100% { transform: translate(0,0); }
+    20% { transform: translate(-8px,3px) rotate(-5deg); } 45% { transform: translate(7px,-2px) rotate(4deg); }
+    70% { transform: translate(-4px,1px) rotate(-2deg); } }
+  @keyframes fighterKO { 0% { transform: rotate(0) translateY(0); opacity: 1; filter: none; }
+    25% { filter: brightness(3) saturate(0); }
+    100% { transform: rotate(74deg) translateY(46px); opacity: 0; } }
+  .disk-wrap { flex: 0 0 auto; }
   .disk-cell .who { font-family: 'Cinzel', serif; font-size: 0.9rem; letter-spacing: 0.1em; text-transform: uppercase; }
-  .disk-wrap { position: relative; width: 220px; height: 220px; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.8)); }
+  .disk-wrap { position: relative; width: 196px; height: 196px; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.8)); }
   .disk-pointer { position: absolute; top: -6px; left: 50%; transform: translateX(-50%); width: 18px; height: 26px; background: linear-gradient(180deg, #ef4444, #991b1b); border: 2px solid #fff; clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); z-index: 5; box-shadow: 0 0 10px rgba(255,0,0,0.8); }
   .disk-svg { width: 100%; height: 100%; transition: transform 3s cubic-bezier(0.2, 0.8, 0.1, 1); }
   .combat-result { margin-top: 24px; font-family: 'Cinzel', serif; font-size: 1.1rem; text-align: center; min-height: 50px; line-height: 1.5; }
@@ -270,7 +413,7 @@
   @keyframes clashShake { 0%,100% { transform: translate(0,0); } 15% { transform: translate(-7px,2px); } 30% { transform: translate(6px,-2px); } 45% { transform: translate(-4px,1px); } 60% { transform: translate(3px,-1px); } 80% { transform: translate(-1px,0); } }
   @media (prefers-reduced-motion: reduce) { .disks-row.clash, #clash-flash.go { animation: none; } }
 
-  .plate-strip { display: flex; gap: 6px; overflow-x: auto; padding: 2px; max-height: 62px; }
+  .plate-strip { display: flex; gap: 6px; overflow-x: auto; padding: 2px; height: 62px; min-height: 62px; flex: 0 0 62px; }
   .plate-chip { flex: 0 0 auto; min-width: 110px; background: linear-gradient(145deg, #2a201a, #14100d); border: 1px solid rgba(245,158,11,0.3); border-radius: 8px; padding: 6px 10px; display: flex; flex-direction: column; gap: 2px; cursor: pointer; transition: transform 0.15s; }
   .plate-chip b { font-family: 'Cinzel', serif; font-size: 0.7rem; color: var(--gold); letter-spacing: 0.05em; }
   .plate-chip span { font-size: 0.6rem; color: #a89f91; }
@@ -621,12 +764,25 @@
   <div id="attack-fx"></div>
   <div class="combat-vs">— DUEL —</div>
   <div class="disks-row">
-    <div class="disk-cell"><div class="who" id="combat-top-name" style="color:var(--p2-soft); text-shadow: 0 0 8px var(--p2-glow);">Tegenstander</div><div class="disk-wrap"><div class="disk-pointer"></div><svg id="disk-top" class="disk-svg" viewBox="0 0 240 240"></svg></div></div>
-    <div class="disk-cell"><div class="who" id="combat-bottom-name" style="color:var(--p1-soft); text-shadow: 0 0 8px var(--p1-glow);">Jij</div><div class="disk-wrap"><div class="disk-pointer"></div><svg id="disk-bottom" class="disk-svg" viewBox="0 0 240 240"></svg></div></div>
+    <div class="disk-cell">
+      <div class="who" id="combat-top-name" style="color:var(--p2-soft); text-shadow: 0 0 8px var(--p2-glow);">Tegenstander</div>
+      <div class="fight-row">
+        <div class="fighter p2" id="fighter-top"></div>
+        <div class="disk-wrap"><div class="disk-pointer"></div><svg id="disk-top" class="disk-svg" viewBox="0 0 240 240"></svg></div>
+      </div>
+    </div>
+    <div class="disk-cell">
+      <div class="fight-row">
+        <div class="fighter p1" id="fighter-bottom"></div>
+        <div class="disk-wrap"><div class="disk-pointer"></div><svg id="disk-bottom" class="disk-svg" viewBox="0 0 240 240"></svg></div>
+      </div>
+      <div class="who" id="combat-bottom-name" style="color:var(--p1-soft); text-shadow: 0 0 8px var(--p1-glow);">Jij</div>
+    </div>
   </div>
   <div class="combat-result" id="combat-result"></div>
-  <button class="btn primary" id="btn-combat-continue" style="margin-top:20px; width:100%; max-width: 240px; display:none;">Voltooien</button>
+  <button class="btn primary" id="btn-combat-continue" style="flex:0 0 auto; margin-top:20px; width:100%; max-width: 240px; display:none;">Voltooien</button>
 </div>
+<div id="kaart-fx"></div>
 <div id="toast" class="toast"></div>
 
 <script>
@@ -1134,7 +1290,23 @@ const SFX = {
   win:     () => [523, 659, 784, 1046, 1318].forEach((f, i) => Audio_.tone({ freq: f, dur: 0.4, type: 'triangle', vol: 0.24, delay: i * 0.13 })),
   lose:    () => [392, 349, 294, 220].forEach((f, i) => Audio_.tone({ freq: f, dur: 0.45, type: 'sine', vol: 0.2, delay: i * 0.17 })),
   turn:    () => Audio_.tone({ freq: 480, slideTo: 720, dur: 0.16, type: 'triangle', vol: 0.14 }),
+  // Per aanvalssoort een eigen klank — zo hoor je wat er op je afkomt nog
+  // vóór je het ziet inslaan.
+  zwiep:   () => Audio_.noise({ dur: 0.18, vol: 0.2, filter: 4200, sweepTo: 700, type: 'bandpass' }),
+  fxsnede: () => { Audio_.noise({ dur: 0.16, vol: 0.26, filter: 5200, sweepTo: 900, type: 'bandpass' }); Audio_.tone({ freq: 2100, slideTo: 700, dur: 0.14, type: 'sawtooth', vol: 0.1 }); },
+  fxpijl:  () => { Audio_.noise({ dur: 0.2, vol: 0.2, filter: 3200, sweepTo: 1400, type: 'bandpass' }); Audio_.tone({ freq: 1300, slideTo: 420, dur: 0.16, type: 'triangle', vol: 0.09 }); },
+  fxvuur:  () => { Audio_.noise({ dur: 0.5, vol: 0.34, filter: 700, sweepTo: 2600, type: 'lowpass' }); Audio_.tone({ freq: 90, slideTo: 46, dur: 0.42, type: 'sawtooth', vol: 0.2 }); },
+  fxbliksem: () => { Audio_.noise({ dur: 0.34, vol: 0.44, filter: 6500, sweepTo: 260 }); Audio_.tone({ freq: 3200, slideTo: 120, dur: 0.16, type: 'square', vol: 0.12 }); Audio_.buzz(40); },
+  fxkou:   () => { [1800, 2400, 3100].forEach((f, i) => Audio_.tone({ freq: f, slideTo: f * 1.6, dur: 0.14, type: 'sine', vol: 0.12, delay: i * 0.045 })); Audio_.noise({ dur: 0.3, vol: 0.14, filter: 5200, type: 'highpass' }); },
+  fxhamer: () => { Audio_.tone({ freq: 150, slideTo: 55, dur: 0.4, type: 'square', vol: 0.26 }); Audio_.noise({ dur: 0.3, vol: 0.3, filter: 1200, sweepTo: 140 }); Audio_.buzz(50); },
+  fxgif:   () => { Audio_.noise({ dur: 0.42, vol: 0.2, filter: 2600, sweepTo: 5200, type: 'bandpass' }); Audio_.tone({ freq: 340, slideTo: 200, dur: 0.3, type: 'sine', vol: 0.1 }); },
+  fxklauw: () => { Audio_.noise({ dur: 0.24, vol: 0.3, filter: 2200, sweepTo: 500, type: 'bandpass' }); Audio_.tone({ freq: 620, slideTo: 180, dur: 0.2, type: 'sawtooth', vol: 0.12 }); },
+  fxmagie: () => { [700, 1050, 1400].forEach((f, i) => Audio_.tone({ freq: f, slideTo: f * 1.5, dur: 0.26, type: 'sine', vol: 0.11, delay: i * 0.06 })); },
+  fxschild: () => { Audio_.tone({ freq: 520, slideTo: 300, dur: 0.22, type: 'square', vol: 0.2 }); Audio_.noise({ dur: 0.2, vol: 0.18, filter: 2600, sweepTo: 600 }); },
+  mis:     () => Audio_.noise({ dur: 0.24, vol: 0.16, filter: 2000, sweepTo: 380, type: 'bandpass' }),
 };
+// Welke klank hoort bij welke aanvalssoort?
+function fxSfx(soort) { return SFX['fx' + soort] ? 'fx' + soort : 'clash'; }
 function sfx(name) { const f = SFX[name]; if (f) { try { f(); } catch (e) {} } }
 
 function unitVisual(defKey, owner, h) {
@@ -2195,16 +2367,21 @@ function attackFx(slot) {
 }
 // FX-END (marker voor headless tests — niet verwijderen)
 
-// Tekent de animatie als een laag over het gevechtsscherm.
-function speelAanvalFx(soort, richtingOmhoog) {
+const FX_KLEUR = { hamer:'#cbd5e1', gif:'#4ade80', vuur:'#fb923c', bliksem:'#fde047',
+                   pijl:'#e5e7eb', kou:'#7dd3fc', klauw:'#f87171', snede:'#f8fafc',
+                   schild:'#60a5fa', magie:'#c084fc' };
+
+// Tekent de inslag-animatie als een laag over het gevechtsscherm.
+// `pos` is optioneel: {x, y} in pixels binnen de laag. Zonder pos speelt de
+// animatie in het midden, zoals vroeger.
+function speelAanvalFx(soort, pos) {
   if (!soort || animOff()) return 0;
   const laag = document.getElementById('attack-fx');
   if (!laag) return 0;
-  const kleur = { hamer:'#cbd5e1', gif:'#4ade80', vuur:'#fb923c', bliksem:'#fde047',
-                  pijl:'#e5e7eb', kou:'#7dd3fc', klauw:'#f87171', snede:'#f8fafc',
-                  schild:'#60a5fa', magie:'#c084fc' }[soort] || '#fff';
+  const kleur = FX_KLEUR[soort] || '#fff';
   const d = document.createElement('div');
-  d.className = 'fx-scene fx-' + soort + (richtingOmhoog ? ' omhoog' : '');
+  d.className = 'fx-scene fx-' + soort;
+  if (pos) { d.style.left = pos.x + 'px'; d.style.top = pos.y + 'px'; }
   d.style.setProperty('--fxk', kleur);
   const stuk = (cls, extra) => `<i class="${cls}" ${extra || ''}></i>`;
   let html = '';
@@ -2223,6 +2400,109 @@ function speelAanvalFx(soort, richtingOmhoog) {
   const duur = 900 * (animScale() || 1);
   setTimeout(() => d.remove(), duur + 200);
   return duur;
+}
+
+// ==========================================
+// DE KLAP TUSSEN DE TWEE POPPETJES (sessie 37)
+// Koen: "als ik een poppetje doe die 30 getagd heeft dan wil ik dat er een
+// soort zwaardje door het andere poppetje heen gaat, en als ik blok dan wil ik
+// dat er een schild icoontje verschijnt."
+// Dus: eerst vliegt er iets van de aanvaller naar de verdediger, dan slaat het
+// in OP de verdediger, en dan reageert die — geraakt, geblokt of neergegaan.
+// ==========================================
+// DUELFX-START (marker voor headless tests — niet verwijderen)
+// Welk projectiel hoort bij welke soort aanval?
+const FX_PROJECTIEL = {
+  snede:  'pr-zwaard', pijl: 'pr-pijl',   vuur:  'pr-bol',   hamer: 'pr-hamer',
+  gif:    'pr-tand',   bliksem:'pr-flits', kou:  'pr-scherf', klauw: 'pr-klauw',
+  schild: 'pr-schild', magie:'pr-rune',
+};
+function projectielVoor(soort) { return FX_PROJECTIEL[soort] || 'pr-rune'; }
+// DUELFX-END (marker voor headless tests — niet verwijderen)
+
+// Middelpunt van een element, in pixels binnen de FX-laag.
+function fxMidden(elem, laag) {
+  if (!elem || !laag) return null;
+  const a = elem.getBoundingClientRect(), b = laag.getBoundingClientRect();
+  if (!a.width && !a.height) return null;
+  return { x: a.left - b.left + a.width / 2, y: a.top - b.top + a.height / 2 };
+}
+
+// Laat één projectiel van `van` naar `naar` vliegen. Geeft terug hoeveel ms het
+// duurt tot het ínslaat (niet tot het helemaal weg is).
+function schietProjectiel(soort, van, naar, vertraging) {
+  const laag = document.getElementById('attack-fx');
+  if (!laag || !van || !naar || animOff()) return 0;
+  const schaal = animScale() || 1;
+  const duur = Math.round(420 * schaal);
+  const dx = naar.x - van.x, dy = naar.y - van.y;
+  const hoek = Math.atan2(dy, dx) * 180 / Math.PI;
+  const d = document.createElement('div');
+  d.className = 'fx-vlieg';
+  d.style.setProperty('--fxk', FX_KLEUR[soort] || '#fff');
+  d.style.setProperty('--fxt', duur + 'ms');
+  d.style.setProperty('--rot', hoek.toFixed(1) + 'deg');
+  d.style.setProperty('--x0', van.x.toFixed(1) + 'px');
+  d.style.setProperty('--y0', van.y.toFixed(1) + 'px');
+  d.style.setProperty('--x1', naar.x.toFixed(1) + 'px');
+  d.style.setProperty('--y1', naar.y.toFixed(1) + 'px');
+  // Doorschieten: het zwaard komt er aan de andere kant weer uit.
+  d.style.setProperty('--x2', (naar.x + dx * 0.5).toFixed(1) + 'px');
+  d.style.setProperty('--y2', (naar.y + dy * 0.5).toFixed(1) + 'px');
+  d.style.animationDelay = (vertraging || 0) + 'ms';
+  d.innerHTML = `<i class="fx-sliert"></i><i class="${projectielVoor(soort)}"></i>`;
+  laag.appendChild(d);
+  setTimeout(() => d.remove(), (vertraging || 0) + duur + 120);
+  return Math.round(duur * 0.64);          // op 64% van de baan raakt hij doel
+}
+
+// Schild- of MIS-badge boven een poppetje.
+function toonBadge(soort, pos) {
+  const laag = document.getElementById('attack-fx');
+  if (!laag || !pos || animOff()) return;
+  const d = document.createElement('div');
+  d.className = 'fx-badge';
+  d.style.left = pos.x + 'px';
+  if (soort === 'schild') {
+    // Het schild vangt de klap op, dus het staat vóór het lijf
+    d.style.top = (pos.y - 8) + 'px';
+    const vonken = [0, 52, 104, 156, 208, 260, 312]
+      .map(a => `<i class="bd-vonk" style="--a:${a}deg"></i>`).join('');
+    d.innerHTML = `<div class="bd-schild"></div>${vonken}`;
+  } else {
+    // Een misser hangt boven het hoofd, met de zwieper die er langs ging
+    d.style.top = (pos.y - 62) + 'px';
+    d.innerHTML = `<i class="bd-zwieper"></i><div class="bd-mis">MIS</div>`;
+  }
+  laag.appendChild(d);
+  setTimeout(() => d.remove(), 1200);
+}
+
+function beweegKlasse(elem, klas, ms) {
+  if (!elem || animOff()) return;
+  elem.classList.remove(klas); void elem.offsetWidth; elem.classList.add(klas);
+  if (ms) setTimeout(() => elem.classList.remove(klas), ms);
+}
+
+// De hele choreografie van één treffer, van uitval tot inslag.
+// `bron` slaat, `doel` incasseert. Geeft terug hoe lang het duurt.
+function speelTreffer(bron, doel, soort, geblokt) {
+  if (animOff()) return 0;
+  const schaal = animScale() || 1;
+  const laag = document.getElementById('attack-fx');
+  const vanaf = fxMidden(bron, laag), naar = fxMidden(doel, laag);
+  // Geen maten (scherm nog niet zichtbaar)? Dan speelt de inslag in het midden.
+  if (!vanaf || !naar) { speelAanvalFx(soort); return 900 * schaal; }
+  // Uitval van de aanvaller, de goede kant op
+  bron.style.setProperty('--lunge', (naar.x > vanaf.x ? 16 : -16) + 'px');
+  beweegKlasse(bron, 'stoot', 460 * schaal);
+  sfx('zwiep');
+  const raakNa = schietProjectiel(soort, vanaf, naar, 0);
+  setTimeout(() => {
+    if (geblokt) { toonBadge('schild', naar); sfx('fxschild'); }
+    else { speelAanvalFx(soort, naar); beweegKlasse(doel, 'raakt', 520 * schaal); sfx(fxSfx(soort)); }
+  }, raakNa);
+  return raakNa + 620 * schaal;
 }
 
 // ===== Plates als KAARTEN op tafel (Duel-look) =====
@@ -2321,8 +2601,11 @@ function renderPlates() {
   const div = document.getElementById('plate-strip'); div.innerHTML = '';
   const player = (state.mode === 'solo') ? 'p1' : state.turn;
   const plates = state.plates[player] || [];
-  if (!plates.length) { div.style.display = 'none'; return; }
+  // De strip blijft ALTIJD even hoog, ook zonder kaarten. Anders klapt hij bij
+  // elke beurtwissel open en dicht en herschaalt het hele bord mee — dat was
+  // het 'hij kalibreert steeds'-effect.
   div.style.display = 'flex';
+  if (!plates.length) return;
   const mine = player === state.turn && !state.over;
   plates.forEach((key, idx) => {
     const c = document.createElement('div');
@@ -2354,9 +2637,85 @@ function onPlateTap(idx) {
   toast(`${pl.name}: kies doelwit`); renderAll();
 }
 
+// ==========================================
+// KAARTANIMATIE (sessie 37)
+// Koen: "alles moet een soort animatie hebben, dat geldt dus ook voor de
+// kaarten." Een kaart verdwijnt dus niet stilletjes uit je hand: hij vliegt
+// naar voren, licht op met z'n eigen kleur, en spat uiteen op het doelwit.
+// ==========================================
+// Waar ligt de kaart nu? Bij jezelf is dat de waaier rechtsonder, bij de
+// tegenstander het stapeltje met de rug omhoog linksboven.
+function kaartBronRect(player, idx) {
+  const kijker = (state.mode === 'solo') ? 'p1' : state.turn;
+  if (player === kijker) {
+    const lijst = document.querySelectorAll('#board g.plate-card');
+    const e = lijst[idx] || lijst[lijst.length - 1];
+    return e ? e.getBoundingClientRect() : null;
+  }
+  const g = document.querySelector('#board g.foe-cards');
+  return g ? g.getBoundingClientRect() : null;
+}
+// Waar landt hij? Op het punt waar de kaart z'n werk doet: het vak waar het
+// figuur naartoe gaat, anders het vak waar het nu staat, anders het bord.
+function kaartDoelRect(u, node) {
+  const plek = node || (u && u.node);
+  if (plek) {
+    const e = document.querySelector(`#board [data-node="${plek}"]`);
+    if (e) return e.getBoundingClientRect();
+  }
+  const b = document.getElementById('board');
+  return b ? b.getBoundingClientRect() : null;
+}
+
+function kaartInslag(laag, x, y, kleur) {
+  const g = document.createElement('div');
+  g.className = 'kaart-inslag';
+  g.style.left = x + 'px'; g.style.top = y + 'px';
+  g.style.setProperty('--kk', kleur);
+  g.innerHTML = '<i class="ki-ring"></i>' + Array.from({ length: 10 },
+    (_, i) => `<i class="ki-vonk" style="--a:${i * 36}deg; animation-delay:${i * 12}ms"></i>`).join('');
+  laag.appendChild(g);
+  setTimeout(() => g.remove(), 1000);
+}
+
+function speelKaartFx(key, van, naar) {
+  if (animOff()) return;
+  const laag = document.getElementById('kaart-fx'); const p = PLATES[key];
+  if (!laag || !p) return;
+  const kleur = (PLATE_ICONS[key] || ['#f59e0b'])[0];
+  const R = laag.getBoundingClientRect();
+  const mx = R.width / 2, my = R.height * 0.4;
+  const pt = (r, val) => r ? { x: r.left - R.left + r.width / 2, y: r.top - R.top + r.height / 2 } : val;
+  const start = pt(van, { x: mx, y: R.height * 0.86 });
+  const eind  = pt(naar, { x: mx, y: my });
+  const krimp = van ? Math.max(0.14, Math.min(0.5, van.width / 132)) : 0.24;
+
+  const kaart = document.createElement('div');
+  kaart.className = 'kaart-vlucht';
+  kaart.style.setProperty('--kk', kleur);
+  kaart.innerHTML = `<div class="kv-glans"></div><div class="kv-ico">${plateIcon(key, 48)}</div>` +
+    `<div class="kv-naam">${p.name}</div><div class="kv-duel">${p.duel}</div>`;
+  laag.appendChild(kaart);
+
+  const T = animScale() || 1, duur = 1020 * T;
+  const zet = (x, y, s, r) => `translate(${x.toFixed(0)}px, ${y.toFixed(0)}px) translate(-50%, -50%) scale(${s}) rotate(${r}deg)`;
+  const anim = kaart.animate([
+    { transform: zet(start.x, start.y, krimp, -22), opacity: 0.25, offset: 0 },
+    { transform: zet(mx, my, 1.08, 3), opacity: 1, offset: 0.3 },
+    { transform: zet(mx, my, 1, 0), opacity: 1, offset: 0.66 },
+    { transform: zet(eind.x, eind.y, 0.14, 16), opacity: 0, offset: 1 },
+  ], { duration: duur, easing: 'cubic-bezier(.3,.05,.3,1)', fill: 'forwards' });
+  anim.onfinish = () => kaart.remove();
+  setTimeout(() => { if (kaart.isConnected) kaart.remove(); }, duur + 400);
+  setTimeout(() => kaartInslag(laag, eind.x, eind.y, kleur), duur * 0.94);
+}
+
 function usePlate(player, idx, targetUid, targetNode) {
   const key = state.plates[player][idx]; const pl = PLATES[key];
   const u = targetUid ? state.units[targetUid] : null;
+  // Meten vóór we het bord opnieuw tekenen — daarna is de kaart weg
+  const kaartVan = kaartBronRect(player, idx);
+  const kaartNaar = kaartDoelRect(u, targetNode);
   if (key === 'fullheal') { u.status = u.status.filter(s => s === 'wait'); }
   else if (key === 'revive') {
     const back = state.hc[player].shift();
@@ -2373,7 +2732,10 @@ function usePlate(player, idx, targetUid, targetNode) {
   if (key !== 'recycle') { state.usedPlates[player] = state.usedPlates[player] || []; state.usedPlates[player].push(used); }
   state.plateUsed = true; state.pendingPlate = null; state.legalTargets = new Set();
   sfx('plate');
-  toast(`${pl.name} gebruikt`); renderAll();
+  // Speelt de kaart z'n eigen animatie? Dan is die groot genoeg als melding.
+  if (animOff()) toast(`${pl.name} gebruikt`);
+  renderAll();
+  speelKaartFx(key, kaartVan, kaartNaar);
 }
 
 // Plate-effecten die pas in het GEVECHT gelden. Ze worden hier toegepast op de
@@ -3131,6 +3493,14 @@ async function runCombat(att, def) {
   document.getElementById(att.owner==='p2'?'combat-top-name':'combat-bottom-name').textContent = UNIT_DEFS[att.defKey].name;
   document.getElementById(def.owner==='p2'?'combat-top-name':'combat-bottom-name').textContent = UNIT_DEFS[def.defKey].name;
 
+  // De twee kemphanen zelf, naast hun schijf. Zo zie je WIE er vecht en kan de
+  // aanval straks van de een naar de ander vliegen.
+  const attFig = document.getElementById(att.owner === 'p2' ? 'fighter-top' : 'fighter-bottom');
+  const defFig = document.getElementById(def.owner === 'p2' ? 'fighter-top' : 'fighter-bottom');
+  attFig.className = 'fighter ' + att.owner; attFig.innerHTML = unitVisual(att.defKey, att.owner, 100);
+  defFig.className = 'fighter ' + def.owner; defFig.innerHTML = unitVisual(def.defKey, def.owner, 100);
+  const fxLaag = document.getElementById('attack-fx'); if (fxLaag) fxLaag.innerHTML = '';
+
   const aSlots = applyStatus(att.slots, att.status), dSlots = applyStatus(def.slots, def.status);
   renderDisk(attDiskId, aSlots, att.defKey); renderDisk(defDiskId, dSlots, def.defKey);
   document.getElementById('combat-result').textContent = ''; document.getElementById('btn-combat-continue').style.display = 'none';
@@ -3223,22 +3593,43 @@ async function runCombat(att, def) {
   for (const nm of saved) html += `<span class="status">${nm} houdt stand dankzij je kaart!</span><br>`;
   if (!r.attKO && !r.defKO && !attRetreat && !defRetreat && !r.statusOnAtt && !r.statusOnDef && !html) html += `<span style="opacity:0.8;font-style:italic">${noEffectReason(aSlot, dSlot)}</span>`;
 
-  // AANVALSANIMATIE: laat zien WAT er wordt gedaan. De aanvaller komt van
-  // onderen, de verdediger van boven, zodat je ziet wie wat doet.
+  // AANVALSANIMATIE: de klap gaat van het ene poppetje NAAR het andere. Wat je
+  // draait bepaalt wat er vliegt — een zwaard, een pijl, een vuurbol — en waar
+  // het aankomt gebeurt de inslag. Blokkeer je, dan vangt een schild het op;
+  // mis je, dan blijft er een 'MIS' boven je hoofd hangen.
   {
+    const schaal = animOff() ? 0 : (animScale() || 1);
     const fxA = attackFx(aSlot), fxD = attackFx(dSlot);
+    const attNeer = r.attKO || attRetreat, defNeer = r.defKO || defRetreat;
     let wacht = 0;
-    if (fxA) wacht = Math.max(wacht, speelAanvalFx(fxA, false));
-    if (fxD) setTimeout(() => speelAanvalFx(fxD, true), 140);
-    if (fxD) wacht = Math.max(wacht, 140 + 900 * (animScale() || 1));
-    if (wacht) await new Promise(r => setTimeout(r, Math.min(wacht, 1100)));
+    if (fxA) wacht = Math.max(wacht, speelTreffer(attFig, defFig, fxA, dSlot.k === 'blue'));
+    if (fxD) {
+      const start = Math.round((fxA ? 220 : 0) * schaal);
+      setTimeout(() => speelTreffer(defFig, attFig, fxD, aSlot.k === 'blue'), start);
+      wacht = Math.max(wacht, start + 760 * schaal);
+    }
+    // Wie zelf niets uithaalt, laat zien wat hij dan wél deed
+    if (!fxA && aSlot.k === 'red') { toonBadge('mis', fxMidden(attFig, fxLaag)); sfx('mis'); }
+    if (!fxD && dSlot.k === 'red') { toonBadge('mis', fxMidden(defFig, fxLaag)); sfx('mis'); }
+    if (!fxA && !fxD && aSlot.k === 'blue') toonBadge('schild', fxMidden(attFig, fxLaag));
+    if (!fxA && !fxD && dSlot.k === 'blue') toonBadge('schild', fxMidden(defFig, fxLaag));
+    if (!fxA && !fxD) wacht = Math.max(wacht, 620 * schaal);
+    // Wie het niet overleeft gaat neer — ook als de winnende klap niet zichtbaar
+    // was (goud dat op een blok stukloopt, bijvoorbeeld).
+    if (attNeer || defNeer) {
+      const valNa = Math.max(0, wacht - 360 * schaal);
+      if (attNeer && attFig) setTimeout(() => attFig.classList.add('valt'), valNa);
+      if (defNeer && defFig) setTimeout(() => defFig.classList.add('valt'), valNa);
+      wacht = valNa + 820 * schaal;
+    }
+    if (wacht > 0) await new Promise(res => setTimeout(res, Math.min(wacht, 1800 * schaal)));
   }
 
-  // Uitkomst-geluid: KO gaat voor status, status voor een geblokte klap
+  // Uitkomst-geluid. De klap zelf klonk al tijdens de animatie (elke soort z'n
+  // eigen klank), dus hier alleen nog wat er ná de inslag gebeurt.
   if (r.attKO || r.defKO) sfx('ko');
   else if (attRetreat || defRetreat) sfx('block');
   else if (r.statusOnAtt || r.statusOnDef) sfx('status');
-  else if (aSlot.k === 'blue' || dSlot.k === 'blue') sfx('block');
 
   const movesLine = `<div class="clash-moves"><span class="mv-att">${moveLabel(aSlot)}</span><span class="vs">⚔</span><span class="mv-def">${moveLabel(dSlot)}</span></div>`;
   document.getElementById('combat-result').innerHTML = movesLine + html;

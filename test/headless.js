@@ -59,6 +59,13 @@ const applyMatch   = html.match(/\nfunction applyStatus\([\s\S]*?\n\}/);
 const koMatch      = html.match(/\nfunction koUnit\([\s\S]*?\n\}/);
 const condMatch    = html.match(/\nfunction applyCondition\([\s\S]*?\n\}/);
 const platesSection = html.slice(html.indexOf('const PLATE_BUDGET ='), html.indexOf('// PLATES-END'));
+// Aanvalsanimaties: trefwoord→soort (FX) en soort→projectiel (DUELFX)
+const fxSection = html.slice(html.indexOf('const FX_TREFWOORDEN ='), html.indexOf('// FX-END'));
+const duelFxSection = html.slice(html.indexOf('const FX_PROJECTIEL ='), html.indexOf('// DUELFX-END'));
+const kleurMatch = html.match(/\nconst FX_KLEUR = \{[\s\S]*?\};/);
+if (!fxSection) throw new Error('FX-blok niet gevonden');
+if (!duelFxSection) throw new Error('DUELFX-blok niet gevonden');
+if (!kleurMatch) throw new Error('FX_KLEUR niet gevonden');
 const decksMatch   = html.match(/\nconst DECK_SLOTS[\s\S]*?\nfunction normalizeDecks\([\s\S]*?\n\}/);
 if (!platesSection) throw new Error('PLATES-blok niet gevonden');
 if (!decksMatch)  throw new Error('normalizeDecks() niet gevonden');
@@ -81,7 +88,10 @@ const evalCode = [
   condMatch[0],
   platesSection,
   decksMatch[0],
-  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster };',
+  fxSection,
+  kleurMatch[0],
+  duelFxSection,
+  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster, FX_TREFWOORDEN, attackFx, FX_KLEUR, FX_PROJECTIEL, projectielVoor };',
 ].join('\n');
 
 // Schrijf tijdelijk evalueerbaar bestand (vermijdt new Function-beperkingen)
@@ -94,7 +104,7 @@ try {
   fs.unlinkSync(tmpPath);
 }
 
-const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster } = extracted;
+const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster, FX_TREFWOORDEN, attackFx, FX_KLEUR, FX_PROJECTIEL, projectielVoor } = extracted;
 
 // ─── Test harness ──────────────────────────────────────────────────────────────
 let pass = 0, fail = 0;
@@ -457,7 +467,43 @@ section('=== BOOSTERKIST (7 checks) ===');
   check('Duplicaat betaalt credits terug', dup.refund > 0, true);
 }
 
-// ─── 4g. UITLEG KLOPT MET DE CODE (sessie 24) ──────────────────────────────────
+// ─── 4g. AANVALSANIMATIES (sessie 37) ─────────────────────────────────────────
+// Koen wil dat ELKE aanval een belevenis is. Deze checks bewaken dat er geen
+// aanval bestaat zonder animatie, en dat elke animatie ook echt getekend kan
+// worden: een soort zonder projectiel-CSS of kleur zou onzichtbaar blijven.
+section('=== AANVALSANIMATIES (9 checks) ===');
+{
+  const soorten = new Set(FX_TREFWOORDEN.map(([, s]) => s));
+  for (const s of Object.keys(FX_PROJECTIEL)) soorten.add(s);
+
+  // Elke benoemde aanval van elke unit krijgt een soort
+  const zonderFx = [];
+  for (const k of Object.keys(UNIT_DEFS)) {
+    for (const s of UNIT_DEFS[k].slots) {
+      if (s.k === 'red' || s.k === 'blue' || !s.name) continue;
+      if (!attackFx(s)) zonderFx.push(UNIT_DEFS[k].name + ' / ' + s.name);
+    }
+  }
+  check('Elke benoemde aanval heeft een animatie', zonderFx, []);
+
+  // Trefwoorden komen op volgorde: 'Schildbeuk' is een schild, geen hamer
+  check('Schildbeuk → schild (niet hamer)', attackFx({ k:'blue', name:'Schildbeuk' }) || attackFx({ k:'white', v:20, name:'Schildbeuk' }), 'schild');
+  check('Grafzwaard → snede (niet kou)', attackFx({ k:'white', v:40, name:'Grafzwaard' }), 'snede');
+  check('Mis (rood) heeft geen aanvalsanimatie', attackFx({ k:'red' }), null);
+  check('Blok (blauw) heeft geen aanvalsanimatie', attackFx({ k:'blue' }), null);
+
+  // Statusvakken zonder naam vallen terug op het effect
+  check('Naamloos paars vak volgt het effect', attackFx({ k:'purple', effect:'burn', stars:2 }), 'vuur');
+  check('Naamloos goud vak krijgt toch iets', attackFx({ k:'gold', v:90 }), 'bliksem');
+
+  // Iedere soort moet een kleur én een projectiel-vorm hebben die in de CSS staat
+  const zonderKleur = [...soorten].filter(s => !FX_KLEUR[s]);
+  check('Elke soort heeft een kleur', zonderKleur, []);
+  const zonderVorm = [...soorten].filter(s => !new RegExp('\\.' + projectielVoor(s) + '\\b').test(html));
+  check('Elk projectiel is ook echt getekend in de CSS', zonderVorm, []);
+}
+
+// ─── 4h. UITLEG KLOPT MET DE CODE (sessie 24) ──────────────────────────────────
 // Het "Hoe speel je"-scherm beschrijft de regels. Deze checks verankeren de
 // belangrijkste getallen aan de echte code, zodat de uitleg niet stilletjes
 // kan gaan liegen als we later iets balanceren.

@@ -108,15 +108,84 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
   ok('Info-kaart toont de schijf', await page.locator('#info-disk path').count() > 4);
   await page.click('#btn-info-close');
 
-  // 5a2. Nog een paar beurten spelen zodat ability-hooks (deploy/combat/MP) echt draaien
+  // 5a2. Nog een paar beurten spelen zodat ability-hooks (deploy/combat/MP) echt draaien.
+  // Onderweg meten we de bordhoogte: die mag NIET per beurt verspringen, anders
+  // "herkalibreert" het scherm zichtbaar bij elke End Turn (klacht sessie 37).
+  const hoogtes = [];
+  const meetBord = async () => page.evaluate(() => Math.round(document.querySelector('.board-wrap').getBoundingClientRect().height));
+  hoogtes.push(await meetBord());
   for (let t = 0; t < 5; t++) {
     if (await page.locator('#btn-end-turn').count()) await page.click('#btn-end-turn').catch(()=>{});
     await page.waitForTimeout(500); // AI-beurt
     await deployOne();
+    hoogtes.push(await meetBord());
   }
   ok('Enkele beurten gespeeld zonder crash', errors.length === 0);
+  ok('Bordhoogte blijft stabiel over de beurten heen', new Set(hoogtes).size === 1);
+  if (new Set(hoogtes).size !== 1) console.log('    hoogtes:', hoogtes.join(', '));
 
-  // 5a3. Instellingen: geluid uitzetten en controleren dat het bewaard blijft
+  // 5a2b. Gevechtsanimatie: de twee poppetjes staan in beeld en er vliegt iets
+  // van de een naar de ander. We forceren een gevecht met een vaste uitkomst.
+  {
+    const opgezet = await page.evaluate(() => {
+      const uids = Object.keys(state.units);
+      const mine = uids.find(u => state.units[u].owner === 'p1');
+      const foe  = uids.find(u => state.units[u].owner === 'p2');
+      if (!mine || !foe) return false;
+      state.units[mine].node = 'B2'; state.units[foe].node = 'B3';
+      state.units[mine].status = []; state.units[foe].status = [];
+      state.bench.p1 = state.bench.p1.filter(u => u !== mine);
+      state.bench.p2 = state.bench.p2.filter(u => u !== foe);
+      state.locked = false; state.over = false;
+      const wit = applyStatus(state.units[mine].slots, []).findIndex(s => s.k === 'white' || s.k === 'gold');
+      const blauw = applyStatus(state.units[foe].slots, []).findIndex(s => s.k === 'blue');
+      window.spin = (id) => new Promise(r => setTimeout(() => r(id === 'disk-bottom' ? wit : blauw), 200));
+      runCombat(state.units[mine], state.units[foe]);
+      return true;
+    });
+    ok('Gevecht kon geforceerd worden', opgezet);
+    await page.waitForSelector('#combat-overlay.active');
+    await page.waitForTimeout(240);
+    ok('Beide vechters staan in het gevechtsscherm',
+      await page.locator('#fighter-top img, #fighter-top svg').count() === 1 &&
+      await page.locator('#fighter-bottom img, #fighter-bottom svg').count() === 1);
+    // Wacht tot het projectiel onderweg is (spin duurt 200ms in deze test)
+    let zagVlucht = false, zagSchild = false;
+    for (let i = 0; i < 30 && !(zagVlucht && zagSchild); i++) {
+      if (await page.locator('#attack-fx .fx-vlieg').count()) zagVlucht = true;
+      if (await page.locator('#attack-fx .fx-badge .bd-schild').count()) zagSchild = true;
+      await page.waitForTimeout(50);
+    }
+    ok('Er vliegt een aanval van de één naar de ander', zagVlucht);
+    ok('Een blok toont een schild-icoon', zagSchild);
+    await page.waitForSelector('#btn-combat-continue:visible', { timeout: 8000 });
+    await page.click('#btn-combat-continue');
+    await page.waitForTimeout(300);
+  }
+
+  // 5a2c. Kaartanimatie: de gespeelde kaart vliegt groot in beeld
+  {
+    await page.evaluate(() => {
+      const mine = Object.keys(state.units).find(u => state.units[u].owner === 'p1' && state.units[u].node);
+      state.plates.p1 = ['xattack']; state.plateUsed = false; state.locked = false;
+      window.__doel = mine; renderAll();
+      usePlate('p1', 0, mine);
+    });
+    await page.waitForTimeout(320);
+    ok('Gespeelde kaart vliegt in beeld', await page.locator('#kaart-fx .kaart-vlucht').count() === 1);
+    ok('De kaart toont z\'n eigen naam', /Krachtstoot/.test(await page.locator('#kaart-fx .kv-naam').innerText().catch(()=>'')));
+    await page.waitForTimeout(1200);
+    ok('Kaartanimatie ruimt zichzelf op', await page.locator('#kaart-fx .kaart-vlucht').count() === 0);
+  }
+
+  // 5a3. Instellingen: geluid uitzetten en controleren dat het bewaard blijft.
+  // Het geforceerde potje hierboven kan zijn afgelopen; het eindscherm komt met
+  // 900ms vertraging, dus even wachten en wegklikken voor we verder navigeren.
+  const sluitEinde = async () => {
+    if (await page.locator('#result-overlay.active').count()) { await page.click('#btn-result-menu'); await page.waitForTimeout(350); }
+  };
+  await page.waitForTimeout(1100);
+  await sluitEinde();
   if (await page.locator('#screen-game.active').count()) await page.click('#btn-menu');
   await page.waitForSelector('#screen-home.active');
   await page.click('#tile-settings');
