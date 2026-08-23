@@ -479,12 +479,20 @@
 // Entry->vijandelijk doel blijft 7 stappen aan beide kanten, en het doel houdt
 // precies 2 toegangen — de rush-fix van sessie 17 blijft dus intact.
 // ==========================================
-const BOARD_CX = 270, BOARD_ROW_Y = [205, 315, 450, 590, 705], BOARD_ROW_W = [0.60, 0.70, 0.80, 0.90, 1.00];
-function depthScale(y) { return 0.78 + 0.22 * Math.min(1, Math.max(0, (y - BOARD_ROW_Y[0]) / (BOARD_ROW_Y[4] - BOARD_ROW_Y[0]))); }
+// Sessie 27: het bord is RECHT, geen trapezium meer. Op Koens tweede screenshot
+// (bijna recht van boven) lopen de zijkanten evenwijdig. De verticale afstand
+// tussen rijen is GROTER dan de horizontale tussen kolommen (105 om 75), zodat
+// het geheel bijna vierkant uitkomt: 6x75 = 450 breed bij 4x105 = 420 hoog.
+// Boven en onder blijft ruimte over voor TWEE rijen figuren per speler.
+const BOARD_CX = 270;
+const BOARD_COL_X = [45, 120, 195, 270, 345, 420, 495];
+const BOARD_ROW_Y = [235, 340, 445, 550, 655];
+// Nauwelijks nog dieptewerking: alleen een subtiel verschil zodat de achterste
+// rij niet even zwaar oogt als de voorste.
+function depthScale(y) { return 0.93 + 0.07 * Math.min(1, Math.max(0, (y - BOARD_ROW_Y[0]) / (BOARD_ROW_Y[4] - BOARD_ROW_Y[0]))); }
 const NODES = (function() {
-  const colX = c => 60 + c * 70;
   const N = {};
-  const add = (k, c, r, type, owner) => { N[k] = { x: BOARD_CX + (colX(c) - BOARD_CX) * BOARD_ROW_W[r], y: BOARD_ROW_Y[r], type: type || 'regular', owner }; };
+  const add = (k, c, r, type, owner) => { N[k] = { x: BOARD_COL_X[c], y: BOARD_ROW_Y[r], type: type || 'regular', owner }; };
 
   // Outer top (P2-kant)
   add('E2_TL',0,0,'entry','p2'); add('T1',1,0); add('T2',2,0); add('G2',3,0,'goal','p2'); add('T3',4,0); add('T4',5,0); add('E2_TR',6,0,'entry','p2');
@@ -1708,7 +1716,12 @@ function renderBoard() {
   if (wrap) wrap.setAttribute('data-arena', S('arena'));
   // GEEN speelplaat meer: het bord is doorzichtig en zweeft boven de arena,
   // net als in Duel. Alleen een warme grondgloed onder de routes.
-  el('ellipse', { cx:270, cy:452, rx:250, ry:290, fill:'url(#gArenaGlow)' }, svg);
+  el('ellipse', { cx:270, cy:445, rx:255, ry:255, fill:'url(#gArenaGlow)' }, svg);
+  // Scheidingslijnen tussen de zijlijn en het speelveld (staan ook in Duel)
+  for (const y of [190, 700]) {
+    el('line', { x1:22, y1:y, x2:518, y2:y, stroke:'rgba(255,255,255,0.75)', 'stroke-width':3, 'stroke-linecap':'round' }, svg);
+    el('line', { x1:22, y1:y, x2:518, y2:y, stroke:'rgba(255,220,170,0.35)', 'stroke-width':8, 'stroke-linecap':'round' }, svg);
+  }
   // Routes: brede zachte halo + witte kern; de gloed staat op de groep
   const gRoutes = el('g', { class:'routes-glow' }, svg);
   const gHalo = el('g', {}, gRoutes), gRoute = el('g', {}, gRoutes);
@@ -1734,9 +1747,12 @@ function renderBoard() {
       el('circle', { cx:n.x, cy:n.y, r:26*ds, class:'node-glow', id:`glow-${key}` }, g);
       el('circle', { cx:n.x, cy:n.y, r:20*ds, fill:'rgba(10,5,8,0.72)', stroke:col, 'stroke-width':4.5*ds, class:'goal-ring ' + n.owner }, g);
       el('circle', { cx:n.x, cy:n.y, r:14.5*ds, fill:'none', stroke:bright, 'stroke-width':1.6*ds, opacity:0.9 }, g);
-      // Pijl wijst het veld in, richting de speler die er doorheen moet
-      const t9 = 9*ds, t6 = 6*ds, t8 = 8*ds;
-      const tri = n.owner==='p2' ? `${n.x},${n.y+t8} ${n.x-t9},${n.y-t6} ${n.x+t9},${n.y-t6}` : `${n.x},${n.y-t8} ${n.x-t9},${n.y+t6} ${n.x+t9},${n.y+t6}`;
+      // De pijl wijst OPZIJ, net als in Duel: bovenin naar links, onderin naar
+      // rechts — dezelfde 180°-spiegeling als de rest van het bord.
+      const t9 = 9*ds, t6 = 6*ds;
+      const tri = n.owner==='p2'
+        ? `${n.x-t9},${n.y} ${n.x+t6},${n.y-t9} ${n.x+t6},${n.y+t9}`
+        : `${n.x+t9},${n.y} ${n.x-t6},${n.y-t9} ${n.x-t6},${n.y+t9}`;
       el('polygon', { points:tri, fill:bright }, g);
     }
     else {
@@ -1767,19 +1783,38 @@ function renderBoard() {
 // Duel-stijl: de poppetjes staan als echte figuren klaar aan hun eigen kant
 // van de tafel (P2 achteraan, P1 vooraan) en worden vanuit daar ingezet.
 // Getekend ín de bord-SVG zodat ze meeschalen met het perspectief.
+// Zijlijn: TWEE rijen figuren per speler, boven en onder het bord — zoals in
+// Duel. De achterste rij staat iets kleiner en verder weg; lege plekken worden
+// als open ovaal getekend zodat je ziet hoeveel figuren je nog hebt.
+const BENCH_PER_ROW = 3;
+function benchSlot(player, i) {
+  const isP2 = player === 'p2';
+  const row = Math.floor(i / BENCH_PER_ROW), col = i % BENCH_PER_ROW;
+  // P2 (boven): achterste rij bovenaan. P1 (onder): achterste rij onderaan.
+  const rows = isP2 ? [58, 140] : [740, 818];
+  const y = rows[isP2 ? row : (1 - row)];
+  const scale = (isP2 ? 0.74 : 0.92) * (row === 0 ? 0.94 : 1);
+  // Rijen half verspringend, zodat ze elkaar niet overlappen
+  const spacing = 118, offset = (row % 2) ? 58 : 0;
+  const x = BOARD_CX + (col - (BENCH_PER_ROW - 1) / 2) * spacing + (isP2 ? offset : -offset);
+  return { x, y, scale };
+}
+
 function renderBench() {
   const svg = document.getElementById('board');
   for (const player of ['p1','p2']) {
     const gRow = el('g', { class:`bench-row bench-${player}` }, svg);
-    const isP2 = player === 'p2';
-    const y = isP2 ? 92 : 800;
-    const scale = isP2 ? 0.72 : 0.95;
     const dim = state.turn !== player && !state.over;
     const uids = [...state.bench[player], ...state.hc[player]];
-    const spacing = Math.min(isP2 ? 52 : 66, uids.length > 1 ? (isP2 ? 400 : 500) / uids.length : 66);
+    // Lege plekken eerst, als open ovalen achter de figuren
+    for (let i = uids.length; i < BENCH_PER_ROW * 2; i++) {
+      const s = benchSlot(player, i);
+      el('ellipse', { cx:s.x, cy:s.y, rx:20*s.scale, ry:9.5*s.scale, fill:'none', stroke:'rgba(255,255,255,0.30)', 'stroke-width':2 }, gRow);
+    }
     uids.forEach((uid, i) => {
       const u = state.units[uid];
-      const x = 270 + (i - (uids.length - 1) / 2) * spacing;
+      const s = benchSlot(player, i);
+      const x = s.x, y = s.y, scale = s.scale;
       const inHC = state.hc[player].includes(uid);
       const waiting = u.status.includes('wait');
       const g = unitGroup(u);
