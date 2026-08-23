@@ -72,9 +72,17 @@ Bord (DEFINITIEF — sessie 25: gelijkgetrokken met het ECHTE Duel-bord, 28 posi
   RUSH-punt hieronder.
 - VERVALLEN: de 32-node layout met 5x3 binnenrechthoek (sessie 6/17). Die had
   4 punten te veel t.o.v. het echte Duel-bord.
-- Weergave: sinds sessie 17 in PERSPECTIEF (trapezoïde, schuin zoals een echte
-  duel-tafel). De oudere "vlak conform foto"-beslissing van sessie 6 is daarmee
-  vervallen; de topologie staat daar los van.
+- WEERGAVE (sessie 27, na Koens tweede screenshot — bijna recht van boven):
+  het bord is RECHT, geen trapezium. De zijkanten lopen evenwijdig. De
+  verticale afstand tussen rijen is GROTER dan de horizontale tussen kolommen
+  (105 om 75), waardoor het geheel bijna vierkant uitkomt: 6x75 = 450 breed bij
+  4x105 = 420 hoog. Dieptewerking is teruggebracht tot bijna niets (0.93-1.00).
+  De perspectief-trapezoïde van sessie 17 is hiermee VERVALLEN.
+- ZIJLIJN: TWEE rijen figuren per speler (3 per rij), boven en onder het bord,
+  half verspringend, met open ovalen voor lege plekken — zoals in Duel.
+  Witte scheidingslijnen tussen zijlijn en speelveld.
+- Doelpijlen wijzen OPZIJ (bovenin naar links, onderin naar rechts), dezelfde
+  180°-spiegeling als de rest van het bord.
 - Topologie headless gevalideerd: 28 nodes, 32 edges, volledig verbonden, 180° rotatiesymmetrisch
 
 Win conditions
