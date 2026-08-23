@@ -67,7 +67,9 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
   await page.waitForTimeout(200);
   {
     const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('rondel_profile')).decks[0]);
-    ok('Team bewaren werkt', !!saved && saved.units.length === 6 && saved.plates.length === 3);
+    const cost = await page.evaluate(() => plateCost(JSON.parse(localStorage.getItem('rondel_profile')).decks[0].plates));
+    ok('Team bewaren werkt', !!saved && saved.units.length === 6 && saved.plates.length > 0);
+    ok('Kaarten passen binnen het budget van 8', cost > 0 && cost <= 8);
   }
   await page.click('#btn-deck-start');
   await page.waitForSelector('#screen-game.active');

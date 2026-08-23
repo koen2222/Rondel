@@ -58,9 +58,9 @@ const resolveMatch = html.match(/\nfunction resolve\([\s\S]*?\n\}/);
 const applyMatch   = html.match(/\nfunction applyStatus\([\s\S]*?\n\}/);
 const koMatch      = html.match(/\nfunction koUnit\([\s\S]*?\n\}/);
 const condMatch    = html.match(/\nfunction applyCondition\([\s\S]*?\n\}/);
-const platesMatch  = html.match(/\nconst PLATES = \{[\s\S]*?\n\};/);
+const platesSection = html.slice(html.indexOf('const PLATE_BUDGET ='), html.indexOf('// PLATES-END'));
 const decksMatch   = html.match(/\nconst DECK_SLOTS[\s\S]*?\nfunction normalizeDecks\([\s\S]*?\n\}/);
-if (!platesMatch) throw new Error('PLATES niet gevonden');
+if (!platesSection) throw new Error('PLATES-blok niet gevonden');
 if (!decksMatch)  throw new Error('normalizeDecks() niet gevonden');
 if (!condMatch) throw new Error('applyCondition() niet gevonden');
 if (!resolveMatch) throw new Error('resolve() niet gevonden');
@@ -79,9 +79,9 @@ const evalCode = [
   applyMatch[0],
   koMatch[0],
   condMatch[0],
-  platesMatch[0],
+  platesSection,
   decksMatch[0],
-  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster };',
+  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster };',
 ].join('\n');
 
 // Schrijf tijdelijk evalueerbaar bestand (vermijdt new Function-beperkingen)
@@ -94,7 +94,7 @@ try {
   fs.unlinkSync(tmpPath);
 }
 
-const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster } = extracted;
+const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster } = extracted;
 
 // ─── Test harness ──────────────────────────────────────────────────────────────
 let pass = 0, fail = 0;
@@ -401,16 +401,38 @@ section('=== INSTELLINGEN (8 checks) ===');
 section('=== OPGESLAGEN TEAMS (5 checks) ===');
 {
   const owned = { squire:1, scout:1, apprentice:1, skeleton:1, boar:1, imp:1 };
-  const good = { units:['squire','scout','apprentice','skeleton','boar','imp'], plates:['rally','cleanse','hex'] };
+  const good = { units:['squire','scout','apprentice','skeleton','boar','imp'], plates:['fullheal','xattack','respin'] };
   check('Geldig team blijft behouden', normalizeDecks([good], owned)[0].units.length, 6);
   check('Altijd precies 3 slots', normalizeDecks([good], owned).length, DECK_SLOTS);
   // Unit verkocht/niet in bezit → slot wordt ongeldig en dus leeg
-  const partial = { units:['squire','scout','apprentice','skeleton','boar','pitlord'], plates:['rally','cleanse','hex'] };
+  const partial = { units:['squire','scout','apprentice','skeleton','boar','pitlord'], plates:['fullheal','xattack','respin'] };
   check('Team met niet-bezeten unit wordt leeggemaakt', normalizeDecks([partial], owned)[0], null);
-  // Onzin-plate → slot ongeldig
-  const badPlate = { units: good.units, plates:['rally','cleanse','bestaatniet'] };
-  check('Team met onbekende plate wordt leeggemaakt', normalizeDecks([badPlate], owned)[0], null);
+  // Onbekende kaart wordt eruit gefilterd; de rest van het team blijft geldig
+  const badPlate = { units: good.units, plates:['fullheal','xattack','bestaatniet'] };
+  check('Onbekende kaart wordt uit het team gefilterd', normalizeDecks([badPlate], owned)[0].plates, ['fullheal','xattack']);
+  // Boven budget → slot ongeldig
+  const tooPricey = { units: good.units, plates:['cape','cape','cape','focus','revive'] };
+  check('Team boven het kaartbudget wordt leeggemaakt', normalizeDecks([tooPricey], owned)[0], null);
   check('Rommel-invoer geeft lege slots', normalizeDecks('kapot', owned), [null, null, null]);
+}
+
+// ─── 4e2. KAARTEN / PLATES (sessie 29, naar de echte Duel-plates) ──────────────
+section('=== KAARTEN (7 checks) ===');
+{
+  const keys = Object.keys(PLATES);
+  check('Elke kaart heeft een kostprijs van 1 t/m 3',
+    keys.every(k => [1,2,3].includes(PLATES[k].cost)), true);
+  check('Elke kaart verwijst naar z\'n Duel-origineel',
+    keys.every(k => typeof PLATES[k].duel === 'string' && PLATES[k].duel.length > 2), true);
+  check('Kaartbudget is 8, net als in Duel', PLATE_BUDGET, 8);
+  check('plateCost telt op', plateCost(['fullheal','focus','cape']), 1 + 2 + 3);
+  check('Lege hand kost 0', plateCost([]), 0);
+  // Duel-plates richten zich NOOIT op een vijandelijke figuur
+  check('Geen enkele kaart mikt op een vijand (Duel-conventie)',
+    keys.every(k => PLATES[k].target !== 'enemy'), true);
+  // Alle vijf de Duel-categorieen zijn vertegenwoordigd
+  const cats = new Set(keys.map(k => PLATES[k].cat));
+  check('Alle categorieen aanwezig', ['herstel','draai','gevecht','beweging','bijzonder'].every(c => cats.has(c)), true);
 }
 
 // ─── 4f. BOOSTERKIST (sessie 24) ───────────────────────────────────────────────

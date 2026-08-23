@@ -69,6 +69,22 @@
       radial-gradient(ellipse 36% 22% at 72% 78%, rgba(132,204,22,0.26), transparent 72%),
       radial-gradient(ellipse 85% 62% at 50% 44%, #1f4023 0%, #12281a 52%, #060f0a 100%); }
 
+  /* Zwevende sintels: geeft de arena leven zonder dat de SVG er zwaarder van
+     wordt. Statische laag, dus hij overleeft elke her-render van het bord. */
+  #arena-fx { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+  #arena-fx i { position: absolute; display: block; width: 4px; height: 4px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,236,190,0.95), rgba(255,170,90,0) 70%);
+    animation: emberRise linear infinite; }
+  @keyframes emberRise {
+    0%   { transform: translateY(0) scale(0.7); opacity: 0; }
+    12%  { opacity: 0.9; }
+    80%  { opacity: 0.5; }
+    100% { transform: translateY(-260px) scale(1.25); opacity: 0; }
+  }
+  .board-wrap::after { animation: arenaBreath 7s ease-in-out infinite; }
+  @keyframes arenaBreath { 0%,100% { opacity: 1; } 50% { opacity: 0.82; } }
+  @media (prefers-reduced-motion: reduce) { #arena-fx i, .board-wrap::after { animation: none; } #arena-fx { display: none; } }
+
   /* Plate-kaarten die op tafel liggen */
   .plate-card { transition: transform 0.15s; }
   .plate-card.spent { opacity: 0.4; }
@@ -383,7 +399,7 @@
     <span><span style="opacity:0.6; font-size:0.7rem;">FASE:</span> <span id="turn-name">Speler 1</span></span>
     <span style="display:flex; gap:12px; align-items:center;"><span style="font-size:0.8rem;" id="turn-clock">⏱ 5:00</span><span style="font-size:0.8rem; color:var(--gold);" id="turn-actions">1 ACTIE</span></span>
   </div>
-  <div class="board-wrap"><svg id="board" viewBox="0 0 540 850" xmlns="http://www.w3.org/2000/svg"></svg></div>
+  <div class="board-wrap"><div id="arena-fx"></div><svg id="board" viewBox="0 0 540 850" xmlns="http://www.w3.org/2000/svg"></svg></div>
   <div id="plate-strip" class="plate-strip"></div>
   <div class="action-bar">
     <button class="btn primary" id="btn-end-turn">End Turn</button>
@@ -658,7 +674,7 @@ for (const [k, ab] of Object.entries(UNIT_ABILITY)) UNIT_DEFS[k].ability = ab;
 function abilityOf(u) { return u && UNIT_DEFS[u.defKey] ? UNIT_DEFS[u.defKey].ability : null; }
 // Contact-status: welke status krijgt de tegenstander die ermee vecht?
 function contactStatusOf(ability) { return { enchant:'confusion', emberrune:'burn', rot:'poison', infernal:'burn' }[ability] || null; }
-function canPhase(u) { const a = abilityOf(u); return a === 'stalk' || a === 'fly'; }
+function canPhase(u) { const a = abilityOf(u); return a === 'stalk' || a === 'fly' || !!(u && u.fx && u.fx.phase); }
 
 // Move-labels (sessie 23): namen zitten sinds de twee-aanvallen-herontwerp
 // ín de slots zelf (zie UNIT_DEFS). Blauw en Miss blijven naamloos.
@@ -693,31 +709,65 @@ const UNIT_ART = {
   pitlord: "art/pitlord.png",
 };
 
+// ==========================================
+// PLATES (sessie 29) — herontworpen naar de ECHTE Duel-plates.
+// Bron: serebii.net/duel/plates.shtml. Belangrijkste structuurpunten die wij
+// misten: elke plate heeft een KOSTPRIJS en je deck mag samen niet boven de 8
+// uitkomen, en elke plate is één keer per potje te gebruiken.
+// Ook opvallend: Duel-plates geven de TEGENSTANDER nooit een status. Onze oude
+// Hex/Ensnare/Scorch/Venom bestonden daar dus niet en zijn vervallen; hun rol
+// is overgenomen door de echte archetypes hieronder.
+// Het veld 'duel' noemt de kaart waar hij op gemodelleerd is.
+// ==========================================
+// PLATES-START (marker voor headless tests — niet verwijderen)
+const PLATE_BUDGET = 8;
 const PLATES = {
-  rally:   { name:'Rally',   desc:'+1 MP, 1 unit (deze beurt)', target:'ally' },
-  warcry:  { name:'War Cry', desc:'+1 MP, alle units (deze beurt)', target:'none' },
-  cleanse: { name:'Cleanse', desc:'Wis statussen van eigen unit', target:'ally' },
-  hex:     { name:'Hex',     desc:'Confusion op vijand', target:'enemy', status:'confusion' },
-  ensnare: { name:'Ensnare', desc:'Paralysis op vijand', target:'enemy', status:'paralysis' },
-  scorch:  { name:'Scorch',  desc:'Burn op vijand', target:'enemy', status:'burn' },
-  venom:   { name:'Venom',   desc:'Poison op vijand', target:'enemy', status:'poison' },
-  bulwark: { name:'Bulwark', desc:'Volgende combat: Red wordt Blue', target:'ally' },
-  blink:   { name:'Blink',   desc:'Teleport naar leeg buurpunt', target:'ally-then-node' },
-  recall:  { name:'Recall',  desc:'Eigen unit terug naar bench', target:'ally' }
+  // — Herstel —
+  fullheal: { name:'Genezing',      duel:'Full Heal',      cost:1, cat:'herstel',  desc:'Wis alle statussen van één eigen figuur', target:'ally' },
+  revive:   { name:'Herrijzenis',   duel:'Max Revive',     cost:2, cat:'herstel',  desc:'Haal een figuur uit het Healing Center terug naar de zijlijn', target:'none' },
+  // — Draaien —
+  respin:   { name:'Tweede Kans',   duel:'Double Chance',  cost:1, cat:'draai',    desc:'Jouw figuur mag in het volgende gevecht één keer opnieuw draaien', target:'ally', fx:'respinSelf' },
+  dazzle:   { name:'Verblinding',   duel:'Bright Powder',  cost:1, cat:'draai',    desc:'De tegenstander moet in het volgende gevecht opnieuw draaien', target:'ally', fx:'respinFoe' },
+  trueaim:  { name:'Scherpschutter',duel:'X Accuracy',     cost:1, cat:'draai',    desc:'Draai je een Miss, dan schuift de wijzer naar het vak ernaast', target:'ally', fx:'xaccuracy' },
+  // — Gevecht —
+  xattack:  { name:'Krachtstoot',   duel:'X Attack',       cost:1, cat:'gevecht',  desc:'+30 schade in het volgende gevecht', target:'ally', fx:'xattack' },
+  xdefend:  { name:'Schildwacht',   duel:'X Defend',       cost:1, cat:'gevecht',  desc:'Wordt niet verslagen door een klap van 10 t/m 100', target:'ally', fx:'xdefend' },
+  xspeed:   { name:'Voorrang',      duel:'X Speed',        cost:1, cat:'gevecht',  desc:'Je witte aanval telt als een gouden doorbraak', target:'ally', fx:'xspeed' },
+  xhex:     { name:'Vervloeking',   duel:'X Sp. Atk',      cost:1, cat:'gevecht',  desc:'★+2 op je paarse vakken in het volgende gevecht', target:'ally', fx:'xspatk' },
+  focus:    { name:'Laatste Adem',  duel:'Focus Band',     cost:2, cat:'gevecht',  desc:'Kan in het volgende gevecht niet verslagen worden', target:'ally', fx:'focus' },
+  // — Beweging —
+  scoopup:  { name:'Terugroepen',   duel:'Scoop Up',       cost:1, cat:'beweging', desc:'Eigen figuur terug naar de zijlijn', target:'ally' },
+  swapspot: { name:'Stellingwissel',duel:'Swap Spot',      cost:1, cat:'beweging', desc:'Wissel twee van je figuren op het veld om', target:'ally-then-ally' },
+  hurdle:   { name:'Sprong',        duel:'Hurdle Jump',    cost:2, cat:'beweging', desc:'Spring met een figuur over een aangrenzende figuur heen', target:'ally-then-node' },
+  cape:     { name:'Sluiermantel',  duel:'Invisibility Cape', cost:3, cat:'beweging', desc:'Deze figuur loopt deze beurt dwars door anderen heen', target:'ally', fx:'phase' },
+  // — Bijzonder —
+  recycle:  { name:'Hergebruik',    duel:'Recycle',        cost:2, cat:'bijzonder',desc:'Al je gebruikte kaarten worden weer bruikbaar', target:'none' },
 };
+function plateCost(keys) { return (keys || []).reduce((a, k) => a + (PLATES[k] ? PLATES[k].cost : 0), 0); }
+// PLATES-END (marker voor headless tests — niet verwijderen)
 
 // Eigen plate-iconen (SVG, 24x24). Kleur per plate, stroke-stijl passend bij het bord.
 const PLATE_ICONS = {
-  rally:   ['#60a5fa', '<path d="M12 19 V6 M7 11 L12 6 L17 11" stroke-width="2.4"/><path d="M6 19 h12" stroke-width="1.6" opacity="0.6"/>'],
-  warcry:  ['#f59e0b', '<path d="M4 14 Q4 8 9 8 L14 5 V19 L9 16 Q4 16 4 14 Z" stroke-width="1.8"/><path d="M17 9 Q19 12 17 15 M19.5 7 Q22.5 12 19.5 17" stroke-width="1.6"/>'],
-  cleanse: ['#7dd3fc', '<path d="M12 4 Q17 10 17 14 A5 5 0 0 1 7 14 Q7 10 12 4 Z" stroke-width="1.8"/><path d="M10 14 a2.5 2.5 0 0 0 2 2.5" stroke-width="1.4" opacity="0.7"/>'],
-  hex:     ['#f472b6', '<path d="M12 12 m-6 0 a6 6 0 1 1 6 6" stroke-width="1.8"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="18.5" cy="18" r="1.2" fill="currentColor" stroke="none"/>'],
-  ensnare: ['#fde047', '<path d="M13 3 L7 13 h4 L9 21 L17 10 h-4.5 L15 3 Z" stroke-width="1.7" stroke-linejoin="round"/>'],
-  scorch:  ['#fb923c', '<path d="M12 3 Q16 8 15 12 Q18 11 18 9 Q20 13 18 17 A7 7 0 0 1 6 17 Q4.5 12 8 8 Q8 11 10 12 Q9 7 12 3 Z" stroke-width="1.7" stroke-linejoin="round"/>'],
-  venom:   ['#4ade80', '<path d="M12 4 Q16.5 10 16.5 14 A4.5 4.5 0 0 1 7.5 14 Q7.5 10 12 4 Z" stroke-width="1.8"/><circle cx="10.5" cy="14.5" r="1" fill="currentColor" stroke="none"/><circle cx="13.5" cy="12" r="0.8" fill="currentColor" stroke="none"/>'],
-  bulwark: ['#fbbf24', '<path d="M12 3 L19 6 V12 Q19 18 12 21 Q5 18 5 12 V6 Z" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 7 V17 M8.5 10 H15.5" stroke-width="1.4" opacity="0.7"/>'],
-  blink:   ['#a78bfa', '<circle cx="7" cy="12" r="3.2" stroke-width="1.7"/><circle cx="17" cy="12" r="3.2" stroke-width="1.7" stroke-dasharray="2.5 2"/><path d="M10.5 9 Q13.5 6.5 16 9 M16 9 l0.4 -2.2 M16 9 l-2.2 -0.4" stroke-width="1.4"/>'],
-  recall:  ['#9ca3af', '<path d="M14 5 H8 A4 4 0 0 0 8 13 H16 M13 16 l3 -3 l-3 -3" stroke-width="1.9" transform="rotate(180 12 10.5)"/><path d="M5 19.5 h14" stroke-width="1.7"/>']
+  // Herstel
+  fullheal: ['#7dd3fc', '<path d="M12 4 Q17 10 17 14 A5 5 0 0 1 7 14 Q7 10 12 4 Z" stroke-width="1.8"/><path d="M10 14 a2.5 2.5 0 0 0 2 2.5" stroke-width="1.4" opacity="0.7"/>'],
+  revive:   ['#f472b6', '<path d="M12 5 V19 M5 12 H19" stroke-width="3" stroke-linecap="round"/><circle cx="12" cy="12" r="8" stroke-width="1.4" opacity="0.5"/>'],
+  // Draaien
+  respin:   ['#a78bfa', '<path d="M19 12 a7 7 0 1 1 -2.4 -5.3" stroke-width="2"/><path d="M19 4.5 V9 H14.5" stroke-width="2" stroke-linejoin="round"/>'],
+  dazzle:   ['#fde047', '<circle cx="12" cy="12" r="3.4" stroke-width="1.8"/><path d="M12 3 V6 M12 18 V21 M3 12 H6 M18 12 H21 M5.6 5.6 L7.8 7.8 M16.2 16.2 L18.4 18.4 M18.4 5.6 L16.2 7.8 M7.8 16.2 L5.6 18.4" stroke-width="1.6" stroke-linecap="round"/>'],
+  trueaim:  ['#f87171', '<circle cx="12" cy="12" r="7.5" stroke-width="1.6"/><circle cx="12" cy="12" r="3.2" stroke-width="1.6"/><path d="M12 2.5 V6 M12 18 V21.5 M2.5 12 H6 M18 12 H21.5" stroke-width="1.6" stroke-linecap="round"/>'],
+  // Gevecht
+  xattack:  ['#fb923c', '<path d="M5 19 L15 9 M13 5 L19 5 L19 11" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 9 L19 5" stroke-width="2.2" stroke-linecap="round"/><path d="M4 15 L9 20" stroke-width="1.8" stroke-linecap="round"/>'],
+  xdefend:  ['#60a5fa', '<path d="M12 3 L19 6 V12 Q19 18 12 21 Q5 18 5 12 V6 Z" stroke-width="1.8" stroke-linejoin="round"/><path d="M8.5 12 l2.5 2.5 L16 9.5" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>'],
+  xspeed:   ['#fbbf24', '<path d="M13 3 L7 13 h4 L9 21 L17 10 h-4.5 L15 3 Z" stroke-width="1.7" stroke-linejoin="round"/>'],
+  xhex:     ['#c084fc', '<path d="M12 3 l2.3 6.2 L21 10 l-5 4.3 1.6 6.7 L12 17.5 L6.4 21 8 14.3 3 10 l6.7 -0.8 Z" stroke-width="1.6" stroke-linejoin="round"/>'],
+  focus:    ['#f59e0b', '<path d="M6 8 h12 v3 a6 6 0 0 1 -12 0 Z" stroke-width="1.8" stroke-linejoin="round"/><path d="M4 8 h16" stroke-width="2.2" stroke-linecap="round"/><path d="M12 17 v3" stroke-width="1.8" stroke-linecap="round"/>'],
+  // Beweging
+  scoopup:  ['#9ca3af', '<path d="M14 5 H8 A4 4 0 0 0 8 13 H16 M13 16 l3 -3 l-3 -3" stroke-width="1.9" transform="rotate(180 12 10.5)"/><path d="M5 19.5 h14" stroke-width="1.7"/>'],
+  swapspot: ['#38bdf8', '<path d="M4 9 h13 l-3 -3 M20 15 H7 l3 3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'],
+  hurdle:   ['#4ade80', '<path d="M4 18 Q12 2 20 18" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="18" r="2.4" stroke-width="1.6"/>'],
+  cape:     ['#a3a3a3', '<path d="M12 4 Q7 6 6 12 Q5.5 17 8 20 L12 17 L16 20 Q18.5 17 18 12 Q17 6 12 4 Z" stroke-width="1.7" stroke-linejoin="round" stroke-dasharray="3 2"/>'],
+  // Bijzonder
+  recycle:  ['#34d399', '<path d="M7 8 L4.5 12 L9 12 M17 16 L19.5 12 L15 12" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 12 a5 5 0 0 1 8.5 -2.5 M15 12 a5 5 0 0 1 -8.5 2.5" stroke-width="1.8"/>']
 };
 function plateIcon(key, size) {
   const [color, body] = PLATE_ICONS[key] || ['#f59e0b', '<circle cx="12" cy="12" r="7" stroke-width="1.8"/>'];
@@ -811,7 +861,7 @@ function normalizeDecks(raw, owned) {
     if (!d || !Array.isArray(d.units) || !Array.isArray(d.plates)) continue;
     const units = d.units.filter(k => UNIT_DEFS[k] && owned[k]);
     const plates = d.plates.filter(k => PLATES[k]);
-    if (units.length === 6 && plates.length === 3) out[i] = { units, plates, name: typeof d.name === 'string' ? d.name.slice(0, 16) : '' };
+    if (units.length === 6 && plates.length > 0 && plateCost(plates) <= PLATE_BUDGET) out[i] = { units, plates, name: typeof d.name === 'string' ? d.name.slice(0, 16) : '' };
   }
   return out;
 }
@@ -991,7 +1041,7 @@ let currentMode = 'solo';
 
 function initialState() {
   const ms = S('clockMinutes') * 60000;   // 0 = klok uit
-  return { turn:'p1', actionsLeft:1, units:{}, bench:{p1:[],p2:[]}, hc:{p1:[],p2:[]}, selected:null, legalTargets:new Set(), pendingDeploy:null, over:false, mode: currentMode, aiThinking: false, locked: false, plates:{p1:[],p2:[]}, plateUsed:false, pendingPlate:null, mpBonus:{}, warcry:{p1:false,p2:false}, firstMoveDone:false, animating:null, pendingFX:[], clock: ms ? { p1:ms, p2:ms } : null };
+  return { turn:'p1', actionsLeft:1, units:{}, bench:{p1:[],p2:[]}, hc:{p1:[],p2:[]}, selected:null, legalTargets:new Set(), pendingDeploy:null, over:false, mode: currentMode, aiThinking: false, locked: false, plates:{p1:[],p2:[]}, usedPlates:{p1:[],p2:[]}, plateUsed:false, pendingPlate:null, mpBonus:{}, warcry:{p1:false,p2:false}, firstMoveDone:false, animating:null, pendingFX:[], clock: ms ? { p1:ms, p2:ms } : null };
 }
 
 // ===== Schaakklok (Duel-regel: 5 min per speler; tijd op = verlies) =====
@@ -1043,6 +1093,20 @@ function koUnit(u) {
 let deckSel = { units: [], plates: [] };
 let deckStage = 'p1';      // hotseat: eerst P1, dan P2
 let deckP1 = null;          // P1-keuze geparkeerd tijdens P2-stage
+// Vult een willekeurige kaartenhand tot precies binnen het budget van 8.
+function randomPlates() {
+  const keys = Object.keys(PLATES);
+  const out = [];
+  let guard = 40;
+  while (guard-- > 0) {
+    const room = PLATE_BUDGET - plateCost(out);
+    const fits = keys.filter(k => !out.includes(k) && PLATES[k].cost <= room);
+    if (!fits.length) break;
+    out.push(fits[Math.floor(Math.random() * fits.length)]);
+  }
+  return out;
+}
+
 function randomPick(arr, n) { const a = [...arr]; const out = []; while (out.length < n && a.length) out.push(a.splice(Math.floor(Math.random()*a.length), 1)[0]); return out; }
 
 // ===== App-router: home / collection / store / game =====
@@ -1081,7 +1145,7 @@ function startMatchFlow(mode) {
 function newGame() { goHome(); }
 
 function onDeckConfirm() {
-  if (!(deckSel.units.length === 6 && deckSel.plates.length === 3)) return;
+  if (!(deckSel.units.length === 6 && deckSel.plates.length > 0)) return;
   if (currentMode === 'hotseat' && deckStage === 'p1') {
     deckP1 = { units: [...deckSel.units], plates: [...deckSel.plates] };
     deckSel = { units: [], plates: [] };
@@ -1098,7 +1162,7 @@ function onDeckConfirm() {
 function renderDeckSlots() {
   const row = document.getElementById('deck-slots'); if (!row) return;
   row.innerHTML = '';
-  const selectionValid = deckSel.units.length === 6 && deckSel.plates.length === 3;
+  const selectionValid = deckSel.units.length === 6 && deckSel.plates.length > 0 && plateCost(deckSel.plates) <= PLATE_BUDGET;
   for (let i = 0; i < DECK_SLOTS; i++) {
     const d = profile.decks[i];
     const chip = document.createElement('div');
@@ -1107,7 +1171,7 @@ function renderDeckSlots() {
     const figs = d ? `<div class="sfigs">${d.units.slice(0, 6).map(k => unitVisual(k, 'p1', 16)).join('')}</div>` : '';
     chip.innerHTML = `<div class="sname">TEAM ${i + 1}</div>${figs}<div class="sbody">${d ? 'Tik om te laden' : 'Leeg'}</div>`;
     chip.addEventListener('click', () => {
-      if (!d) { toast(selectionValid ? 'Tik op ◇ om je team hier te bewaren' : 'Kies eerst 6 units en 3 plates'); return; }
+      if (!d) { toast(selectionValid ? 'Tik op ◇ om je team hier te bewaren' : 'Kies eerst 6 units en minstens één kaart'); return; }
       deckSel = { units: [...d.units], plates: [...d.plates] };
       sfx('select'); toast(`Team ${i + 1} geladen`); renderDeckSelect();
     });
@@ -1115,7 +1179,7 @@ function renderDeckSlots() {
     save.className = 'slot-save'; save.textContent = '◇'; save.title = 'Huidige keuze hier bewaren';
     save.addEventListener('click', (e) => {
       e.stopPropagation();
-      if (!selectionValid) { sfx('denied'); toast('Kies eerst 6 units en 3 plates'); return; }
+      if (!selectionValid) { sfx('denied'); toast('Kies eerst 6 units en minstens één kaart'); return; }
       if (d && !confirm(`Team ${i + 1} overschrijven?`)) return;
       profile.decks[i] = { units: [...deckSel.units], plates: [...deckSel.plates], name: '' };
       saveProfile(); sfx('plate'); toast(`Bewaard als Team ${i + 1}`); renderDeckSlots();
@@ -1154,13 +1218,19 @@ function renderDeckSelect() {
   const pg = document.getElementById('deck-plates'); pg.innerHTML = '';
   for (const [key, p] of Object.entries(PLATES)) {
     const c = document.createElement('div'); c.className = 'deck-card' + (deckSel.plates.includes(key) ? ' selected' : '');
-    c.innerHTML = `<div style="display:flex;justify-content:center;margin-bottom:2px;">${plateIcon(key, 26)}</div><div class="name">${p.name}</div><div class="fac">${p.desc}</div>`;
-    c.addEventListener('click', () => { const i = deckSel.plates.indexOf(key); if (i >= 0) deckSel.plates.splice(i, 1); else if (deckSel.plates.length < 3) deckSel.plates.push(key); else toast('Max 3 plates'); renderDeckSelect(); });
+    c.innerHTML = `<span class="rar" style="color:var(--gold)">${p.cost}</span><div style="display:flex;justify-content:center;margin-bottom:2px;">${plateIcon(key, 26)}</div><div class="name">${p.name}</div><div class="fac">${p.desc}</div>`;
+    c.addEventListener('click', () => {
+      const i = deckSel.plates.indexOf(key);
+      if (i >= 0) { deckSel.plates.splice(i, 1); }
+      else if (plateCost(deckSel.plates) + p.cost <= PLATE_BUDGET) { deckSel.plates.push(key); }
+      else toast(`Geen ruimte meer — je mag voor ${PLATE_BUDGET} punten aan kaarten meenemen`);
+      renderDeckSelect();
+    });
     pg.appendChild(c);
   }
   document.getElementById('deck-count-units').textContent = `Units: ${deckSel.units.length} / 6 (collectie: ${Object.keys(profile.owned).length}/18)`;
-  document.getElementById('deck-count-plates').textContent = `Plates: ${deckSel.plates.length} / 3`;
-  document.getElementById('btn-deck-start').disabled = !(deckSel.units.length === 6 && deckSel.plates.length === 3);
+  document.getElementById('deck-count-plates').textContent = `Kaarten: ${plateCost(deckSel.plates)} / ${PLATE_BUDGET} punten (${deckSel.plates.length} stuks)`;
+  document.getElementById('btn-deck-start').disabled = !(deckSel.units.length === 6 && deckSel.plates.length > 0);
 }
 
 // Tegenstander-decks per moeilijkheidsgraad (sessie 24). Voorheen kreeg de AI
@@ -1197,12 +1267,30 @@ function aiDeck() {
   return { units, plates, level: d.level };
 }
 
+// Sintels één keer aanmaken; ze leven in de HTML-laag en overleven het
+// opnieuw opbouwen van de bord-SVG.
+function buildArenaFx() {
+  const box = document.getElementById('arena-fx');
+  if (!box || box.childElementCount || animOff()) return;
+  for (let i = 0; i < 14; i++) {
+    const e = document.createElement('i');
+    e.style.left = (4 + Math.random() * 92) + '%';
+    e.style.bottom = (-8 + Math.random() * 40) + '%';
+    e.style.animationDuration = (7 + Math.random() * 7).toFixed(1) + 's';
+    e.style.animationDelay = (-Math.random() * 12).toFixed(1) + 's';
+    e.style.opacity = (0.4 + Math.random() * 0.6).toFixed(2);
+    const sc = (0.6 + Math.random() * 1.3).toFixed(2);
+    e.style.width = e.style.height = (3 * sc).toFixed(1) + 'px';
+    box.appendChild(e);
+  }
+}
+
 function startGame() {
   document.getElementById('deck-overlay').classList.remove('active');
   state = initialState(); let id = 0;
   const mk = (defKey, owner, lvl) => {
     const uid = `u${++id}`;
-    const u = { uid, defKey, owner, node:null, status:[], level:1, slots: JSON.parse(JSON.stringify(UNIT_DEFS[defKey].slots)) };
+    const u = { uid, defKey, owner, node:null, status:[], fx:{}, level:1, slots: JSON.parse(JSON.stringify(UNIT_DEFS[defKey].slots)) };
     if (lvl && lvl > 1) { for (let i = 1; i < lvl; i++) levelSlotBoost(u); u.level = lvl; }
     state.units[uid] = u; state.bench[owner].push(uid);
   };
@@ -1221,6 +1309,7 @@ function startGame() {
   const cEl = document.getElementById('turn-clock');
   if (cEl) { cEl.textContent = state.clock ? '⏱ ' + fmtClock(state.clock.p1) : '⏱ —'; cEl.style.color = ''; }
   startClock();
+  buildArenaFx();
   renderAll();
 }
 
@@ -1517,7 +1606,7 @@ const HELP_SECTIONS = [
     'Je wint <b>niet</b> door alle vijanden te verslaan. Verslagen figuren komen namelijk gewoon terug.' ]},
   { h:'Je beurt: één actie', p:[
     'Per beurt doe je <b>precies één ding</b>: een figuur verplaatsen, een figuur inzetten vanaf de zijkant, of met een figuur aanvallen.',
-    'Een <b>plate</b> (de kaartjes onder het bord) kost géén actie — je mag er één per beurt gebruiken, bovenop je zet.',
+    'Een <b>kaart</b> (rechtsonder op tafel) kost géén actie — je mag er één per beurt spelen, bovenop je zet.',
     'De allereerste zet van het potje kost <b>1 MP extra</b>, zodat wie begint geen gratis voorsprong krijgt.' ]},
   { h:'Bewegen en inzetten', p:[
     'Elk figuur heeft <b>MP</b> (het gouden getal): zoveel punten mag hij per beurt afleggen.',
@@ -1547,6 +1636,10 @@ const HELP_SECTIONS = [
   { h:'Sterker worden', p:[
     'Versla je een vijand, dan gaat je figuur <b>een level omhoog</b> (tot level 4): zijn sterkste aanval wordt een groter vak en er verdwijnt een mis-vak.',
     'In de <b>Collectie</b> kun je units met credits permanent upgraden. Die levels blijven voor altijd.' ]},
+  { h:'Je kaarten', p:[
+    'Elke kaart heeft een <b>kostprijs</b> van 1, 2 of 3 punten. Je mag voor maximaal <b>8 punten</b> aan kaarten meenemen — dus veel goedkope of een paar dure.',
+    'Er zijn vijf soorten: <b>herstel</b> (statussen wissen, iemand uit het Healing Center halen), <b>draaien</b> (jij of je tegenstander moet opnieuw draaien), <b>gevecht</b> (meer schade, of juist niet verslagen kunnen worden), <b>beweging</b> (terugroepen, wisselen, springen) en <b>bijzonder</b>.',
+    'Elke kaart werkt <b>één keer per potje</b>. Met <b>Hergebruik</b> maak je al je gebruikte kaarten weer bruikbaar.' ]},
   { h:'Abilities', p:[
     'Sommige figuren hebben een <b>ability</b>: een eigen kracht die vanzelf werkt, bijvoorbeeld door units heen lopen, buren extra MP geven, of een vijand vergiftigen die met ze vecht.',
     'Je ziet de ability van elke unit in de <b>Collectie</b>, onder de schijf.' ]},
@@ -1768,6 +1861,12 @@ function renderBoard() {
   // GEEN speelplaat meer: het bord is doorzichtig en zweeft boven de arena,
   // net als in Duel. Alleen een warme grondgloed onder de routes.
   el('ellipse', { cx:270, cy:445, rx:255, ry:255, fill:'url(#gArenaGlow)' }, svg);
+  // Lichtvlek op de vloer onder elk doel: maakt de doelzones herkenbaar
+  for (const [k, n] of Object.entries(NODES)) {
+    if (n.type !== 'goal') continue;
+    const col = n.owner === 'p1' ? 'rgba(59,130,246,0.30)' : 'rgba(249,115,22,0.30)';
+    el('ellipse', { cx:n.x, cy:n.y, rx:88, ry:52, fill:col, filter:'blur(0px)', opacity:0.55, style:'mix-blend-mode:screen;' }, svg);
+  }
   // De burchten waar de figuren vandaan komen: die van jou linksonder, die van
   // je tegenstander rechtsboven — dezelfde plek als het apparaat in Duel.
   drawCastle(svg, 62, 800, 1.0, 'p1');
@@ -1863,12 +1962,18 @@ function renderPlateCards() {
   const player = (state.mode === 'solo') ? 'p1' : state.turn;
   const plates = state.plates[player] || [];
   const g = el('g', { class:'plate-cards' }, svg);
-  const CW = 46, CH = 64, BX = 424, BY = 790;
+  const n = plates.length;
+  const CW = 40, CH = 56, BY = 796;
+  // De waaier schaalt mee met het aantal kaarten (je mag er nu tot acht hebben)
+  // en blijft altijd binnen de rechterhelft van het bord.
+  const step = n <= 1 ? 0 : Math.min(30, 108 / (n - 1));
+  const BX = 452 - ((n - 1) * step) / 2;
   plates.forEach((key, i) => {
     const p = PLATES[key];
     const sel = state.pendingPlate && state.pendingPlate.idx === i;
-    // Ruim uitgewaaierd, zodat alle drie de namen leesbaar blijven
-    const rot = -11 + i * 11, dx = i * 40, dy = (i === 1 ? -8 : 0);
+    // Waaier: van -11° links naar +11° rechts, midden iets omhoog
+    const rot = n <= 1 ? 0 : -11 + (22 * i) / (n - 1);
+    const dx = i * step, dy = -Math.abs((n - 1) / 2 - i) * 3;
     const card = el('g', {
       class: 'plate-card' + (sel ? ' sel' : '') + (state.plateUsed ? ' spent' : ''),
       transform: `translate(${BX + dx},${BY + dy}) rotate(${rot})`,
@@ -1879,11 +1984,16 @@ function renderPlateCards() {
     el('rect', { x:-CW/2+3.5, y:-CH/2+3.5, width:CW-7, height:CH-7, rx:5, fill:'none', stroke:'rgba(255,255,255,0.22)', 'stroke-width':1 }, card);
     // Icoon van de plate, midden op de kaart
     const ico = document.createElementNS(SVG_NS, 'g');
-    ico.setAttribute('transform', 'translate(-11,-25)');
-    ico.innerHTML = plateIcon(key, 22);
+    const isz = n <= 4 ? 20 : 24;
+    ico.setAttribute('transform', `translate(${-isz/2},${n <= 4 ? -22 : -isz/2 - 2})`);
+    ico.innerHTML = plateIcon(key, isz);
     card.appendChild(ico);
-    const t = el('text', { x:0, y:20, 'font-size':7.2, 'text-anchor':'middle', fill:'#3b2a12', 'font-family':"'Cinzel', serif", 'font-weight':'700' }, card);
-    t.textContent = p.name.length > 9 ? p.name.slice(0, 8) + '.' : p.name;
+    // Bij een volle hand overlappen de kaarten te veel voor een leesbare naam;
+    // dan alleen het icoon. De namen staan toch in de strip onder het bord.
+    if (n <= 4) {
+      const t = el('text', { x:0, y:18, 'font-size':6.6, 'text-anchor':'middle', fill:'#3b2a12', 'font-family':"'Cinzel', serif", 'font-weight':'700' }, card);
+      t.textContent = p.name.length > 10 ? p.name.slice(0, 9) + '.' : p.name;
+    }
     card.addEventListener('click', (e) => { e.stopPropagation(); onPlateTap(i); });
   });
 }
@@ -1956,12 +2066,16 @@ function onPlateTap(idx) {
   if (state.plateUsed) { toast('Al een plate gebruikt deze beurt'); return; }
   if (state.pendingPlate && state.pendingPlate.idx === idx) { state.pendingPlate = null; state.legalTargets = new Set(); renderAll(); return; }
   const key = state.plates[player][idx]; const pl = PLATES[key];
-  if (pl.target === 'none') { usePlate(player, idx); return; }
+  if (pl.target === 'none') {
+    if (key === 'revive' && !state.hc[player].length) { sfx('denied'); toast('Je Healing Center is leeg'); return; }
+    if (key === 'recycle' && !(state.usedPlates[player] || []).length) { sfx('denied'); toast('Je hebt nog geen kaarten gebruikt'); return; }
+    usePlate(player, idx); return;
+  }
   state.pendingPlate = { idx, key, stage: 1 }; state.selected = null; state.pendingDeploy = null;
   state.legalTargets = new Set();
   for (const u of Object.values(state.units)) {
     if (!u.node) continue;
-    if ((pl.target === 'enemy' && u.owner !== player) || ((pl.target === 'ally' || pl.target === 'ally-then-node') && u.owner === player)) state.legalTargets.add(u.node);
+    if ((pl.target === 'enemy' && u.owner !== player) || ((pl.target === 'ally' || pl.target === 'ally-then-node' || pl.target === 'ally-then-ally') && u.owner === player)) state.legalTargets.add(u.node);
   }
   if (state.legalTargets.size === 0) { state.pendingPlate = null; toast('Geen geldig doelwit'); renderAll(); return; }
   toast(`${pl.name}: kies doelwit`); renderAll();
@@ -1970,17 +2084,36 @@ function onPlateTap(idx) {
 function usePlate(player, idx, targetUid, targetNode) {
   const key = state.plates[player][idx]; const pl = PLATES[key];
   const u = targetUid ? state.units[targetUid] : null;
-  if (key === 'rally') { state.mpBonus[u.uid] = (state.mpBonus[u.uid] || 0) + 1; }
-  else if (key === 'warcry') { state.warcry[player] = true; }
-  else if (key === 'cleanse') { u.status = u.status.filter(s => s === 'wait' || s === 'bulwark'); }
-  else if (key === 'bulwark') { if (!u.status.includes('bulwark')) u.status.push('bulwark'); }
-  else if (key === 'recall') { u.node = null; state.bench[player].push(u.uid); }
-  else if (key === 'blink') { u.node = targetNode; }
-  else if (pl.status) { applyCondition(u, pl.status); }
-  state.plates[player].splice(idx, 1); state.plateUsed = true; state.pendingPlate = null; state.legalTargets = new Set();
+  if (key === 'fullheal') { u.status = u.status.filter(s => s === 'wait'); }
+  else if (key === 'revive') {
+    const back = state.hc[player].shift();
+    if (back) { state.units[back].status = []; state.bench[player].push(back); }
+  }
+  else if (key === 'scoopup') { u.node = null; u.status = u.status.filter(s => s !== 'wait'); state.bench[player].push(u.uid); }
+  else if (key === 'swapspot') { const other = state.units[state.pendingPlate.uid]; const a = other.node; other.node = u.node; u.node = a; }
+  else if (key === 'hurdle') { state.units[state.pendingPlate.uid].node = targetNode; }
+  else if (key === 'recycle') { state.usedPlates[player] = (state.usedPlates[player] || []); state.plates[player].push(...state.usedPlates[player]); state.usedPlates[player] = []; }
+  else if (pl.fx) { u.fx = u.fx || {}; u.fx[pl.fx] = true; }
+  // Kaart is op — bewaren zodat Hergebruik hem kan terughalen
+  const [used] = state.plates[player].splice(idx, 1);
+  if (key !== 'recycle') { state.usedPlates[player] = state.usedPlates[player] || []; state.usedPlates[player].push(used); }
+  state.plateUsed = true; state.pendingPlate = null; state.legalTargets = new Set();
   sfx('plate');
   toast(`${pl.name} gebruikt`); renderAll();
 }
+
+// Plate-effecten die pas in het GEVECHT gelden. Ze worden hier toegepast op de
+// gedraaide vakjes; 'focus' en 'xdefend' grijpen later in op de uitkomst.
+function applyPlateFx(u, slot) {
+  const fx = u.fx || {};
+  let s = { ...slot };
+  if (fx.xaccuracy && s.k === 'red') s = { ...s, __shift: true };   // afgehandeld bij het draaien
+  if (fx.xspeed && s.k === 'white') s = { ...s, k: 'gold', name: (s.name || 'Aanval') + ' +' };
+  if (fx.xattack && (s.k === 'white' || s.k === 'gold')) s = { ...s, v: (s.v || 0) + 30 };
+  if (fx.xspatk && s.k === 'purple') s = { ...s, stars: (s.stars || 1) + 2 };
+  return s;
+}
+function clearPlateFx(u) { if (u) u.fx = {}; }
 
 function queueFX(x, y, kind) { (state.pendingFX = state.pendingFX || []).push({ x, y, kind }); }
 function flushFX() { const list = state.pendingFX || []; state.pendingFX = []; for (const f of list) spawnFX(f.x, f.y, f.kind); }
@@ -2132,16 +2265,40 @@ function onUnitTap(uid) {
   if (state.pendingPlate && state.pendingPlate.stage === 1) {
     if (u.node && state.legalTargets.has(u.node)) {
       const pp = state.pendingPlate;
-      if (pp.key === 'blink') {
+      if (pp.key === 'hurdle') {
+        // Sprong: over een AANGRENZENDE figuur heen naar het punt erachter
         pp.uid = uid; pp.stage = 2;
-        state.legalTargets = new Set([...ADJ[u.node]].filter(n => !unitAt(n) && NODES[n].type !== 'goal'));
-        if (!state.legalTargets.size) { state.pendingPlate = null; state.legalTargets = new Set(); toast('Geen vrij buurpunt'); }
-        else toast('Blink: kies bestemming');
+        const over = new Set();
+        for (const n of ADJ[u.node]) {
+          if (!unitAt(n)) continue;                      // je springt alleen over iemand heen
+          for (const beyond of ADJ[n]) {
+            if (beyond === u.node || unitAt(beyond)) continue;
+            // moet in dezelfde richting liggen, dus niet terug naar je startpunt
+            over.add(beyond);
+          }
+        }
+        state.legalTargets = over;
+        if (!over.size) { state.pendingPlate = null; state.legalTargets = new Set(); toast('Er staat niemand om overheen te springen'); }
+        else toast('Sprong: kies waar hij landt');
+        renderAll(); return;
+      }
+      if (pp.key === 'swapspot') {
+        // Stellingwissel: kies de tweede eigen figuur
+        pp.uid = uid; pp.stage = 2;
+        state.legalTargets = new Set(Object.values(state.units)
+          .filter(o => o.owner === state.turn && o.node && o.uid !== uid).map(o => o.node));
+        if (!state.legalTargets.size) { state.pendingPlate = null; state.legalTargets = new Set(); toast('Je hebt maar één figuur op het veld'); }
+        else toast('Stellingwissel: kies de tweede figuur');
         renderAll(); return;
       }
       usePlate(state.turn, pp.idx, uid); return;
     }
     toast('Ongeldig doelwit'); return;
+  }
+  // Tweede stap van Stellingwissel: de andere eigen figuur aantikken
+  if (state.pendingPlate && state.pendingPlate.stage === 2 && state.pendingPlate.key === 'swapspot') {
+    if (u.node && state.legalTargets.has(u.node)) { usePlate(state.turn, state.pendingPlate.idx, uid); return; }
+    toast('Kies een van je eigen figuren'); return;
   }
   if (u.owner === state.turn && u.node) {
     if (state.actionsLeft<=0) { hint('Je hebt je zet al gedaan — tik op End Turn'); sfx('denied'); return; }
@@ -2335,6 +2492,7 @@ function endTurn() {
   for (const u of Object.values(state.units)) { if (!u.node) continue; if (u.status.includes('sleep')) { const hasAdj = [...ADJ[u.node]].some(n => { const o = unitAt(n); return o && o.owner === u.owner; }); if (hasAdj) u.status = u.status.filter(s => s!=='sleep'); } }
   state.turn = state.turn==='p1'?'p2':'p1'; state.actionsLeft = 1; state.selected = null; state.pendingDeploy = null; state.legalTargets = new Set();
   state.plateUsed = false; state.pendingPlate = null; state.mpBonus = {}; state.warcry = { p1:false, p2:false };
+  for (const u of Object.values(state.units)) u.fx = {};   // plate-effecten gelden 'deze beurt'
   for (const uid of state.bench[state.turn]) { const u = state.units[uid]; if (u.status.includes('wait')) u.status = u.status.filter(s => s !== 'wait'); }
   sfx('turn');
   renderAll(); if (!hasAnyAction(state.turn)) { endMatch(state.turn==='p1'?'p2':'p1', 'lockout'); return; }
@@ -2568,8 +2726,27 @@ async function runCombat(att, def) {
   }
 
   let finalAIdx = aIdx, finalDIdx = dIdx;
+
+  // HERKANSINGEN (Duel: Double Chance / Bright Powder). Tweede Kans laat je
+  // eigen figuur opnieuw draaien, Verblinding dwingt de tegenstander ertoe.
+  const aFx = att.fx || {}, dFx = def.fx || {};
+  const respinAtt = aFx.respinSelf || dFx.respinFoe;
+  const respinDef = dFx.respinSelf || aFx.respinFoe;
+  if (respinAtt || respinDef) {
+    toast(respinAtt && respinDef ? 'Beide figuren draaien opnieuw!' : (respinAtt ? 'Herkansing voor de aanvaller!' : 'Herkansing voor de verdediger!'));
+    const again = await Promise.all([
+      respinAtt ? spin(attDiskId, 1600 + Math.random()*300) : Promise.resolve(finalAIdx),
+      respinDef ? spin(defDiskId, 1900 + Math.random()*300) : Promise.resolve(finalDIdx),
+    ]);
+    finalAIdx = again[0]; finalDIdx = again[1];
+    sfx('clash');
+  }
+
   if (att.status.includes('confusion')) finalAIdx = (finalAIdx + 1) % 16;
   if (def.status.includes('confusion')) finalDIdx = (finalDIdx + 1) % 16;
+  // Scherpschutter (X Accuracy): een Miss schuift door naar het vak ernaast
+  if (aFx.xaccuracy && aSlots[finalAIdx].k === 'red') finalAIdx = (finalAIdx + 1) % 16;
+  if (dFx.xaccuracy && dSlots[finalDIdx].k === 'red') finalDIdx = (finalDIdx + 1) % 16;
 
   const attWasFrozen = att.status.includes('frozen'), defWasFrozen = def.status.includes('frozen');
   let aSlot = attWasFrozen ? {k:'red'} : aSlots[finalAIdx];
@@ -2578,7 +2755,18 @@ async function runCombat(att, def) {
   if (att.status.includes('bulwark')) { att.status = att.status.filter(s => s !== 'bulwark'); if (aSlot.k === 'red') aSlot = {k:'blue'}; }
   if (def.status.includes('bulwark')) { def.status = def.status.filter(s => s !== 'bulwark'); if (dSlot.k === 'red') dSlot = {k:'blue'}; }
 
+  // Krachtstoot / Voorrang / Vervloeking passen het gedraaide vak aan
+  aSlot = applyPlateFx(att, aSlot);
+  dSlot = applyPlateFx(def, dSlot);
+
   const r = resolve(aSlot, dSlot); let html = "";
+
+  // Schildwacht (X Defend): overleeft een klap van 10 t/m 100.
+  // Laatste Adem (Focus Band): kan deze beurt helemaal niet verslagen worden.
+  const saved = [];
+  if (r.attKO && (aFx.focus || (aFx.xdefend && (dSlot.v || 0) >= 10 && (dSlot.v || 0) <= 100))) { r.attKO = false; saved.push(UNIT_DEFS[att.defKey].name); }
+  if (r.defKO && (dFx.focus || (dFx.xdefend && (aSlot.v || 0) >= 10 && (aSlot.v || 0) <= 100))) { r.defKO = false; saved.push(UNIT_DEFS[def.defKey].name); }
+  clearPlateFx(att); clearPlateFx(def);
 
   // Onverwoestbaar (Ruinous Helix): eerste KO wordt geen KO — de unit trekt
   // terug naar de bank en de tegenstander levelt NIET. Eenmalig per potje.
@@ -2610,6 +2798,7 @@ async function runCombat(att, def) {
   applyContact(att, def, !attToBench, !defToBench);
   applyContact(def, att, !defToBench, !attToBench);
 
+  for (const nm of saved) html += `<span class="status">${nm} houdt stand dankzij je kaart!</span><br>`;
   if (!r.attKO && !r.defKO && !attRetreat && !defRetreat && !r.statusOnAtt && !r.statusOnDef && !html) html += `<span style="opacity:0.8;font-style:italic">${noEffectReason(aSlot, dSlot)}</span>`;
 
   // Uitkomst-geluid: KO gaat voor status, status voor een geblokte klap
@@ -2680,7 +2869,7 @@ let toastT; function toast(msg) { const t = document.getElementById('toast'); t.
 
 document.getElementById('btn-end-turn').addEventListener('click', endTurn);
 document.getElementById('btn-menu').addEventListener('click', () => { if (state.over || !S('confirmExit') || confirm('Duel verlaten en terug naar het menu?')) goHome(); });
-document.getElementById('btn-deck-random').addEventListener('click', () => { const owned = Object.keys(profile.owned); deckSel.units = randomPick(owned, Math.min(6, owned.length)); deckSel.plates = randomPick(Object.keys(PLATES), 3); renderDeckSelect(); });
+document.getElementById('btn-deck-random').addEventListener('click', () => { const owned = Object.keys(profile.owned); deckSel.units = randomPick(owned, Math.min(6, owned.length)); deckSel.plates = randomPlates(); renderDeckSelect(); });
 document.getElementById('btn-deck-start').addEventListener('click', onDeckConfirm);
 document.getElementById('btn-deck-back').addEventListener('click', goHome);
 // Home-tegels & subschermen
@@ -2785,16 +2974,28 @@ function abilityPosBonus(u, node) {
   return s * w;
 }
 
+// De AI kiest zijn kaart naar de situatie. Duel-plates richten zich op je EIGEN
+// figuren, dus de logica draait om: wie gaat er zo vechten, en wie is gewond?
 function aiUsePlate() {
   if (state.plateUsed || !state.plates[AI].length) return;
-  const myPlates = state.plates[AI];
-  const threat = Object.values(state.units).find(u => u.owner === 'p1' && u.node && distTo(u.node, 'G2') <= 2);
-  if (threat) {
-    const idx = myPlates.findIndex(k => PLATES[k].target === 'enemy' && !threat.status.includes(PLATES[k].status));
-    if (idx >= 0) { usePlate(AI, idx, threat.uid); return; }
+  const mine = state.plates[AI];
+  const has = k => mine.indexOf(k);
+
+  // Staat er een eigen figuur naast een vijand? Dan is er zo een gevecht: geef
+  // hem een gevechtskaart mee.
+  const fighter = Object.values(state.units).find(u => u.owner === AI && u.node &&
+    [...ADJ[u.node]].some(n => { const o = unitAt(n); return o && o.owner !== AI; }));
+  if (fighter) {
+    for (const k of ['xattack', 'xspeed', 'respin', 'dazzle', 'focus', 'xdefend', 'trueaim', 'xhex']) {
+      const i = has(k); if (i >= 0) { usePlate(AI, i, fighter.uid); return; }
+    }
   }
-  const hurt = Object.values(state.units).find(u => u.owner === AI && u.node && u.status.some(s => !['wait','bulwark'].includes(s)));
-  if (hurt) { const idx = myPlates.indexOf('cleanse'); if (idx >= 0) { usePlate(AI, idx, hurt.uid); return; } }
+  // Gewonde figuur oplappen
+  const hurt = Object.values(state.units).find(u => u.owner === AI && u.node && u.status.some(s => s !== 'wait'));
+  if (hurt) { const i = has('fullheal'); if (i >= 0) { usePlate(AI, i, hurt.uid); return; } }
+  // Weinig volk op het bord? Haal er een terug uit het Healing Center.
+  const onBoard = Object.values(state.units).filter(u => u.owner === AI && u.node).length;
+  if (onBoard <= 2 && state.hc[AI].length) { const i = has('revive'); if (i >= 0) { usePlate(AI, i); return; } }
 }
 
 function rushThreat() {
