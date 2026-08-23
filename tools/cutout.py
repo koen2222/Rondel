@@ -28,13 +28,14 @@ except ImportError:
     sys.exit("Pillow ontbreekt. Installeer met: pip install pillow")
 
 
-def maak_transparant(im, drempel=32, zoom=2, marge=8):
+def maak_transparant(im, drempel=32, zoom=2, marge=8, gaten=True):
     """Geeft een RGBA-kopie terug waarin de buitenste (bijna-)witte rand weg is.
 
     drempel : hoeveel een pixel van puur wit mag afwijken en toch als
               achtergrond telt (0-255). Hoger = meer weghalen.
     zoom    : hoeveel pixels de rand zacht wordt gemaakt.
     marge   : lege ruimte die rond het figuur blijft staan bij het bijsnijden.
+    gaten   : ook ingesloten VLAK-witte vlakken weghalen (gat tussen arm en romp).
     """
     im = im.convert("RGBA")
     b, h = im.size
@@ -70,6 +71,48 @@ def maak_transparant(im, drempel=32, zoom=2, marge=8):
             if 0 <= nx < b and 0 <= ny < h and not weg[ny * b + nx] and is_achtergrond(nx, ny):
                 weg[ny * b + nx] = 1
                 rij.append((nx, ny))
+
+    # INGESLOTEN GATEN. De vulling hierboven laat wit staan dat helemaal
+    # omsloten is door de figuur — precies de bedoeling voor botten of een wit
+    # gewaad. Maar een gat tussen een arm en het lichaam is óók omsloten, en
+    # daar moet je juist doorheen kunnen kijken.
+    # Onderscheid: de achtergrond van een generator is VLAK wit (overal 255,
+    # geen schaduw). Geschilderd wit heeft altijd verloop en schaduwranden.
+    # We halen dus alleen ingesloten vlakken weg die bijna precies 255 zijn en
+    # nauwelijks variatie hebben.
+    if gaten:
+        gezien2 = bytearray(b * h)
+        for start in range(b * h):
+            if weg[start] or gezien2[start]:
+                continue
+            x0, y0 = start % b, start // b
+            r0, g0, b0, a0 = px[x0, y0]
+            if a0 == 0 or min(r0, g0, b0) < 252:
+                gezien2[start] = 1
+                continue
+            groep = []
+            stapel = [start]
+            gezien2[start] = 1
+            lo, hi = 255, 0
+            while stapel:
+                i = stapel.pop()
+                groep.append(i)
+                xx, yy = i % b, i // b
+                r, g, bb2, _ = px[xx, yy]
+                lo = min(lo, r, g, bb2); hi = max(hi, r, g, bb2)
+                for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                    nx, ny = xx + dx, yy + dy
+                    if 0 <= nx < b and 0 <= ny < h:
+                        j = ny * b + nx
+                        if not weg[j] and not gezien2[j]:
+                            r2, g2, b2c, a2 = px[nx, ny]
+                            if a2 > 0 and min(r2, g2, b2c) >= 252:
+                                gezien2[j] = 1
+                                stapel.append(j)
+            # vlak en licht genoeg? dan is het achtergrond die door een gat schijnt
+            if len(groep) >= 20 and lo >= 252 and hi - lo <= 3:
+                for i in groep:
+                    weg[i] = 1
 
     # Losse spikkels weghalen: kleine eilandjes die van het figuur los staan.
     # Generatoren laten vaak wat ruis of een half weggepoetst restje achter.
@@ -150,6 +193,7 @@ def main():
     ap.add_argument("-o", "--uit", default=None, help="map om naartoe te schrijven (standaard: naast het origineel, met -cut)")
     ap.add_argument("--drempel", type=int, default=32, help="hoe ver van puur wit nog als achtergrond telt (0-255, standaard 32)")
     ap.add_argument("--zoom", type=int, default=2, help="zachtheid van de rand in pixels (standaard 2)")
+    ap.add_argument("--geen-gaten", dest="geen_gaten", action="store_true", help="ingesloten witte vlakken laten staan (bv. als een wit gewaad wegvalt)")
     ap.add_argument("--hoogte", type=int, default=0, help="optioneel: schaal naar deze hoogte in pixels")
     args = ap.parse_args()
 
@@ -162,7 +206,7 @@ def main():
         except Exception as e:
             print(f"  ! {pad}: kan niet openen ({e})")
             continue
-        uit = maak_transparant(im, args.drempel, args.zoom)
+        uit = maak_transparant(im, args.drempel, args.zoom, gaten=not args.geen_gaten)
         if args.hoogte and uit.height:
             f = args.hoogte / uit.height
             uit = uit.resize((max(1, round(uit.width * f)), args.hoogte), Image.LANCZOS)

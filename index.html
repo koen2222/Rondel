@@ -571,24 +571,24 @@ for (const [a,b] of ROUTES) { ADJ[a].add(b); ADJ[b].add(a); }
 // Totale white-schade per unit is ~gelijk gehouden aan de oude data (±20).
 const W=(n,v,name)=>Array(n).fill({k:'white',v,name}), G=(n,v,name)=>Array(n).fill({k:'gold',v,name}), B=n=>Array(n).fill({k:'blue'}), R=n=>Array(n).fill({k:'red'}), P=(n,effect,stars,name)=>Array(n).fill({k:'purple',stars,effect,name});
 const UNIT_DEFS = {
-  squire:      { name:'Einherjar',         fac:'Hemelhal',  mp:2, slots:[...W(4,40,'Schildmuur'), ...W(2,10,'Beukstoot'), ...P(2,'paralysis',1,'Speerhaak'), ...B(2), ...R(6)] },
-  cleric:      { name:'Eir',               fac:'Hemelhal',  mp:2, slots:[...W(3,50,'Levensroede'), ...W(2,20,'Kalmerend Woord'), ...P(3,'sleep',1,'Slaaplied'), ...B(3), ...R(5)] },
+  squire:      { name:'Einherjar',         fac:'Hemelhal',  mp:2, slots:[...W(4,40,'Bijlslag'), ...W(2,10,'Schildstoot'), ...P(2,'paralysis',1,'Schildbeuk'), ...B(2), ...R(6)] },
+  cleric:      { name:'Eir',               fac:'Hemelhal',  mp:2, slots:[...W(3,50,'Lichtstaf'), ...W(2,20,'Kalmerend Woord'), ...P(3,'sleep',1,'Slaaplied'), ...B(3), ...R(5)] },
   commander:   { name:'Odin',              fac:'Hemelhal',  mp:2, slots:[...G(3,50,'Ravenzwerm'), ...W(3,70,'Gungnir-worp'), ...W(2,40,'Speerwering'), ...P(3,'paralysis',2,'Alvaderbevel'), ...B(2), ...R(3)] },
-  scout:       { name:'Hermes',            fac:'Halfgoden', mp:3, slots:[...W(3,30,'Snelle Steek'), ...W(2,10,'Vluchtige Haal'), ...P(3,'poison',1,'Slangenstaf'), ...B(2), ...R(6)] },
-  archer:      { name:'Chiron',            fac:'Halfgoden', mp:2, slots:[...W(4,60,'Sterrenpijl'), ...W(2,20,'Snelle Pees'), ...P(2,'poison',1,'Gifpunt'), ...B(4), ...R(4)] },
-  weaver:      { name:'Loki',              fac:'Halfgoden', mp:2, slots:[...W(2,70,'Schijngestalte'), ...G(4,40,'Bedrog'), ...P(4,'confusion',2,'Dwaalbeeld'), ...B(3), ...R(3)] },
-  apprentice:  { name:'Cycloop',           fac:'Smidse',    mp:2, slots:[...W(3,60,'Rotsworp'), ...W(2,30,'Vonkgooi'), ...P(1,'paralysis',1,'Verblindende Slag'), ...B(4), ...R(6)] },
-  runesmith:   { name:'Hephaistos',        fac:'Smidse',    mp:2, slots:[...W(3,60,'Aambeeldslag'), ...W(2,30,'Sintelslag'), ...P(4,'burn',1,'Smeltgloed'), ...B(3), ...R(4)] },
+  scout:       { name:'Hermes',            fac:'Halfgoden', mp:3, slots:[...W(3,30,'Caduceusslag'), ...W(2,10,'Vleugelhiel'), ...P(3,'poison',1,'Slangenbeet'), ...B(2), ...R(6)] },
+  archer:      { name:'Chiron',            fac:'Halfgoden', mp:2, slots:[...W(4,60,'Sterrenpijl'), ...W(2,20,'Snelle Pees'), ...P(2,'poison',1,'Gifpijl'), ...B(4), ...R(4)] },
+  weaver:      { name:'Loki',              fac:'Halfgoden', mp:2, slots:[...W(2,70,'Dolkstoot'), ...G(4,40,'Verraderlijke Steek'), ...P(4,'confusion',2,'Dwaalbeeld'), ...B(3), ...R(3)] },
+  apprentice:  { name:'Cycloop',           fac:'Smidse',    mp:2, slots:[...W(3,60,'Smidshamer'), ...W(2,30,'Vonkgooi'), ...P(1,'paralysis',1,'Aambeeldklap'), ...B(4), ...R(6)] },
+  runesmith:   { name:'Hephaistos',        fac:'Smidse',    mp:2, slots:[...W(3,60,'Vuurhamer'), ...W(2,30,'Sintelslag'), ...P(4,'burn',1,'Smeltgloed'), ...B(3), ...R(4)] },
   warden:      { name:'Talos',             fac:'Smidse',    mp:2, slots:[...W(4,90,'Bronzen Vuist'), ...W(2,50,'Zuilslag'), ...P(3,'paralysis',2,'IJzeren Greep'), ...B(4), ...R(3)] },
   skeleton:    { name:'Draugr',            fac:'Dodenrijk', mp:2, slots:[...W(4,30,'Grafzwaard'), ...W(2,10,'Botstoot'), ...P(2,'confusion',1,'Grafkou'), ...B(2), ...R(6)] },
   ghoul:       { name:'Ghul',              fac:'Dodenrijk', mp:2, slots:[...W(3,50,'Klauwhaal'), ...W(2,20,'Knagende Beet'), ...P(4,'badlypoison',1,'Lijkenwalm'), ...B(3), ...R(4)] },
-  necromancer: { name:'Hel',               fac:'Dodenrijk', mp:2, slots:[...W(2,60,'Dodengreep'), ...G(4,30,'Zielenstorm'), ...P(4,'sleep',2,'Doodsslaap'), ...B(3), ...R(3)] },
+  necromancer: { name:'Hel',               fac:'Dodenrijk', mp:2, slots:[...W(2,60,'Schedelstaf'), ...G(4,30,'Zielenstorm'), ...P(4,'sleep',2,'Doodsslaap'), ...B(3), ...R(3)] },
   boar:        { name:'Calydonische Ever', fac:'Wildernis', mp:2, slots:[...W(5,60,'Stormaanval'), ...W(2,20,'Hoefslag'), ...P(1,'confusion',1,'Slagtandstoot'), ...B(2), ...R(6)] },
   lupine:      { name:'Fenrir',            fac:'Wildernis', mp:3, slots:[...W(4,50,'Kaakklem'), ...W(2,20,'Scheurbeet'), ...P(2,'paralysis',1,'Wolvenhuil'), ...B(3), ...R(5)] },
-  wyrmling:    { name:'Quetzalcoatl',      fac:'Wildernis', mp:2, slots:[...W(3,60,'Veerslag'), ...W(2,30,'Klauwzwiep'), ...G(3,60,'Zonnevuur'), ...P(4,'burn',2,'Asadem'), ...B(2), ...R(2)] },
-  imp:         { name:'Kobold',            fac:'Vuurdiepte',mp:3, slots:[...W(3,30,'Prikpook'), ...W(2,10,'Plaagstoot'), ...P(3,'burn',1,'Vonkenspel'), ...B(2), ...R(6)] },
+  wyrmling:    { name:'Quetzalcoatl',      fac:'Wildernis', mp:2, slots:[...W(3,60,'Veerslag'), ...W(2,30,'Staartzwiep'), ...G(3,60,'Zonnevuur'), ...P(4,'burn',2,'Asadem'), ...B(2), ...R(2)] },
+  imp:         { name:'Kobold',            fac:'Vuurdiepte',mp:3, slots:[...W(3,30,'Drietandprik'), ...W(2,10,'Plaagstoot'), ...P(3,'burn',1,'Vonkenspel'), ...B(2), ...R(6)] },
   hellhound:   { name:'Cerberus',          fac:'Vuurdiepte',mp:3, slots:[...W(4,50,'Drievoudige Beet'), ...W(2,20,'Grauw'), ...P(3,'burn',1,'Helleblaf'), ...B(3), ...R(4)] },
-  pitlord:     { name:'Surtr',             fac:'Vuurdiepte',mp:2, slots:[...W(4,100,'Wereldbrand'), ...W(2,60,'Vuurvuist'), ...G(4,70,'Laaiend Zwaard'), ...P(2,'burn',2,'Zwavelvloek'), ...B(1), ...R(3)] }
+  pitlord:     { name:'Surtr',             fac:'Vuurdiepte',mp:2, slots:[...W(4,100,'Wereldbrand'), ...W(2,60,'Vuurvuist'), ...G(4,70,'Laaiende Klauw'), ...P(2,'burn',2,'Zwavelvloek'), ...B(1), ...R(3)] }
 };
 
 // ==========================================

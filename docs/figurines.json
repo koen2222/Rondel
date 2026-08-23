@@ -36,19 +36,19 @@
       "schijf": {
         "aanvallen": [
           {
-            "naam": "Schildmuur",
+            "naam": "Bijlslag",
             "soort": "aanval",
             "schade": 40,
             "vakken": 4
           },
           {
-            "naam": "Beukstoot",
+            "naam": "Schildstoot",
             "soort": "aanval",
             "schade": 10,
             "vakken": 2
           },
           {
-            "naam": "Speerhaak",
+            "naam": "Schildbeuk",
             "soort": "vloek",
             "status": "paralysis",
             "sterren": 1,
@@ -85,7 +85,7 @@
       "schijf": {
         "aanvallen": [
           {
-            "naam": "Levensroede",
+            "naam": "Lichtstaf",
             "soort": "aanval",
             "schade": 50,
             "vakken": 3
@@ -189,19 +189,19 @@
       "schijf": {
         "aanvallen": [
           {
-            "naam": "Snelle Steek",
+            "naam": "Caduceusslag",
             "soort": "aanval",
             "schade": 30,
             "vakken": 3
           },
           {
-            "naam": "Vluchtige Haal",
+            "naam": "Vleugelhiel",
             "soort": "aanval",
             "schade": 10,
             "vakken": 2
           },
           {
-            "naam": "Slangenstaf",
+            "naam": "Slangenbeet",
             "soort": "vloek",
             "status": "poison",
             "sterren": 1,
@@ -247,7 +247,7 @@
             "vakken": 2
           },
           {
-            "naam": "Gifpunt",
+            "naam": "Gifpijl",
             "soort": "vloek",
             "status": "poison",
             "sterren": 1,
@@ -284,13 +284,13 @@
       "schijf": {
         "aanvallen": [
           {
-            "naam": "Schijngestalte",
+            "naam": "Dolkstoot",
             "soort": "aanval",
             "schade": 70,
             "vakken": 2
           },
           {
-            "naam": "Bedrog",
+            "naam": "Verraderlijke Steek",
             "soort": "doorbraak",
             "schade": 40,
             "vakken": 4
@@ -330,7 +330,7 @@
       "schijf": {
         "aanvallen": [
           {
-            "naam": "Rotsworp",
+            "naam": "Smidshamer",
             "soort": "aanval",
             "schade": 60,
             "vakken": 3
@@ -342,7 +342,7 @@
             "vakken": 2
           },
           {
-            "naam": "Verblindende Slag",
+            "naam": "Aambeeldklap",
             "soort": "vloek",
             "status": "paralysis",
             "sterren": 1,
@@ -379,7 +379,7 @@
       "schijf": {
         "aanvallen": [
           {
-            "naam": "Aambeeldslag",
+            "naam": "Vuurhamer",
             "soort": "aanval",
             "schade": 60,
             "vakken": 3
@@ -572,7 +572,7 @@
       "schijf": {
         "aanvallen": [
           {
-            "naam": "Dodengreep",
+            "naam": "Schedelstaf",
             "soort": "aanval",
             "schade": 60,
             "vakken": 2
@@ -722,7 +722,7 @@
             "vakken": 3
           },
           {
-            "naam": "Klauwzwiep",
+            "naam": "Staartzwiep",
             "soort": "aanval",
             "schade": 30,
             "vakken": 2
@@ -768,7 +768,7 @@
       "schijf": {
         "aanvallen": [
           {
-            "naam": "Prikpook",
+            "naam": "Drietandprik",
             "soort": "aanval",
             "schade": 30,
             "vakken": 3
@@ -878,7 +878,7 @@
             "vakken": 2
           },
           {
-            "naam": "Laaiend Zwaard",
+            "naam": "Laaiende Klauw",
             "soort": "doorbraak",
             "schade": 70,
             "vakken": 4

@@ -48,7 +48,7 @@ Hoe hij eruitziet: jonge gesneuvelde krijger, rond houten schild met ijzeren ran
 Kleurenpalet: staalgrijs, hemelsblauw, zilver.
 Sfeer van zijn factie (Hemelhal): Noordse godenzaal: gehamerd zilver, blauw geemailleerd, raven en runen.
 Rol in het leger: eenvoudige voetsoldaat, niet te opvallend.
-Zijn sterkste aanval heet "Schildmuur (40 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
+Zijn sterkste aanval heet "Bijlslag (40 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
 
 
 Vierkant beeld, transparante achtergrond, geen sokkel, geen schaduw op de grond.
@@ -65,7 +65,7 @@ Hoe hij eruitziet: godin in wit gewaad met gouden randen, geneeskruiden in de en
 Kleurenpalet: ivoorwit, goud, hemelsblauw.
 Sfeer van zijn factie (Hemelhal): Noordse godenzaal: gehamerd zilver, blauw geemailleerd, raven en runen.
 Rol in het leger: ervaren strijder, wat rijker uitgedost.
-Zijn sterkste aanval heet "Levensroede (50 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
+Zijn sterkste aanval heet "Lichtstaf (50 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
 Zijn bijzondere gave: bij inzet: wis status van aangrenzende bondgenoten. Laat daar iets van zien.
 
 Vierkant beeld, transparante achtergrond, geen sokkel, geen schaduw op de grond.
@@ -99,7 +99,7 @@ Hoe hij eruitziet: jonge bode met kleine vleugels aan zijn sandalen en helm, gev
 Kleurenpalet: hemelsblauw, goud, wit.
 Sfeer van zijn factie (Halfgoden): Griekse held-en-bedriegersfeer: goud, marmerwit, gevleugelde details.
 Rol in het leger: eenvoudige voetsoldaat, niet te opvallend.
-Zijn sterkste aanval heet "Snelle Steek (30 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
+Zijn sterkste aanval heet "Caduceusslag (30 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
 Zijn bijzondere gave: beweegt dwars door bezette punten (stopt op leeg). Laat daar iets van zien.
 
 Vierkant beeld, transparante achtergrond, geen sokkel, geen schaduw op de grond.
@@ -133,7 +133,7 @@ Hoe hij eruitziet: slanke bedriegersgod met scheve grijns, groen-zwarte mantel, 
 Kleurenpalet: gifgroen, zwart, koper.
 Sfeer van zijn factie (Halfgoden): Griekse held-en-bedriegersfeer: goud, marmerwit, gevleugelde details.
 Rol in het leger: blikvanger van het leger, duidelijk machtiger dan de rest.
-Zijn sterkste aanval heet "Schijngestalte (70 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
+Zijn sterkste aanval heet "Dolkstoot (70 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
 Zijn bijzondere gave: vijand die ermee vecht raakt confused. Laat daar iets van zien.
 
 Vierkant beeld, transparante achtergrond, geen sokkel, geen schaduw op de grond.
@@ -150,7 +150,7 @@ Hoe hij eruitziet: gedrongen eenogige reus-in-het-klein, leren schort, veel te g
 Kleurenpalet: zandsteen, brons, aardebruin.
 Sfeer van zijn factie (Smidse): gesmeed brons en steen, gloeiend metaal, vonken.
 Rol in het leger: eenvoudige voetsoldaat, niet te opvallend.
-Zijn sterkste aanval heet "Rotsworp (60 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
+Zijn sterkste aanval heet "Smidshamer (60 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
 
 
 Vierkant beeld, transparante achtergrond, geen sokkel, geen schaduw op de grond.
@@ -167,7 +167,7 @@ Hoe hij eruitziet: gespierde smidgod met kreupel been, gevlochten baard, zware h
 Kleurenpalet: ijzergrijs, gloeiend oranje, brons.
 Sfeer van zijn factie (Smidse): gesmeed brons en steen, gloeiend metaal, vonken.
 Rol in het leger: ervaren strijder, wat rijker uitgedost.
-Zijn sterkste aanval heet "Aambeeldslag (60 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
+Zijn sterkste aanval heet "Vuurhamer (60 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
 Zijn bijzondere gave: vijand die ermee vecht raakt burned. Laat daar iets van zien.
 
 Vierkant beeld, transparante achtergrond, geen sokkel, geen schaduw op de grond.
@@ -235,7 +235,7 @@ Hoe hij eruitziet: godin die van voren LEVEND is en van achteren een lijk - een 
 Kleurenpalet: zwartpaars, gifgroen, bot.
 Sfeer van zijn factie (Dodenrijk): grafkoud, botwit en grafgroen, mos en vergane stof.
 Rol in het leger: blikvanger van het leger, duidelijk machtiger dan de rest.
-Zijn sterkste aanval heet "Dodengreep (60 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
+Zijn sterkste aanval heet "Schedelstaf (60 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
 Zijn bijzondere gave: bij inzet: wis wacht-status van je eigen bank. Laat daar iets van zien.
 
 Vierkant beeld, transparante achtergrond, geen sokkel, geen schaduw op de grond.
@@ -303,7 +303,7 @@ Hoe hij eruitziet: klein rood plaaggeestje met puntoren en puntmuts, veel te gro
 Kleurenpalet: scharlaken, zwavelgeel, zwart.
 Sfeer van zijn factie (Vuurdiepte): vulkanisch, gloeiend van binnenuit, gedraaide horens en as.
 Rol in het leger: eenvoudige voetsoldaat, niet te opvallend.
-Zijn sterkste aanval heet "Prikpook (30 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
+Zijn sterkste aanval heet "Drietandprik (30 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
 
 
 Vierkant beeld, transparante achtergrond, geen sokkel, geen schaduw op de grond.
@@ -350,30 +350,8 @@ Vierkant beeld, transparante achtergrond, geen sokkel, geen schaduw op de grond.
 Zet de bestanden in `art/` met exact deze namen (dus `art/squire.png`, `art/wyrmling.png`, enzovoort).
 Meer hoeft er niet te gebeuren: het spel laadt ze automatisch, ook in de collectie, de winkel en de boosterkist.
 
-**Geen sokkel meetekenen.** Het spel tekent zelf de ronde voet in de teamkleur eronder. Staat er ook
-een sokkel in het plaatje, dan krijg je er twee onder elkaar.
-
----
-
-## Witte achtergrond? Die haal je er zo af
-
-Beeldgeneratoren leveren vaak een PNG met een dichte **witte achtergrond**, terwijl het spel
-transparantie nodig heeft. Daar is een gereedschap voor:
-
-```bash
-python3 tools/cutout.py -o art/ ~/Downloads/*.png
-```
-
-Het vult vanaf de randen naar binnen, dus alleen het wit áán de buitenkant verdwijnt. Wit BINNEN de
-figuur — botten, tanden, een wit gewaad, highlights op een helm — blijft staan. Daarna wordt de rand
-een paar pixels zacht gemaakt zodat er geen kartels of witte zoom overblijft, en wordt het plaatje
-bijgesneden op wat er nog over is.
-
-Getest op de bestaande figuren: het skelet houdt 98,5% van zijn witte botten, de Warden 100%.
-Losse onderdelen die er wél bij horen — de zwevende dwaallichtjes van Hel bijvoorbeeld — blijven
-staan, omdat het gereedschap alleen kleurloze of bijna-witte restjes wegpoetst.
-
-Handige opties:
-- `--drempel 40` — losser, als er nog een grijzige zoom overblijft
-- `--drempel 20` — strenger, als er te veel van de figuur af gaat
-- `--hoogte 220` — meteen op dezelfde hoogte schalen als de huidige figuren
+Twee dingen om op te letten:
+- **Echte transparantie.** Sla op als PNG met alfakanaal. `art/warden.png` heeft nu nog een dichte
+  achtergrond — dat is meteen een goede eerste om te vervangen.
+- **Geen sokkel meetekenen.** Het spel tekent zelf de ronde voet in de teamkleur eronder. Staat er ook
+  een sokkel in het plaatje, dan krijg je er twee onder elkaar.

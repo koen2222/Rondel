@@ -141,6 +141,18 @@ Dodenrijk:           Draugr, Ghul, Hel (half levend, half lijk)
 Wildernis:           Calydonische Ever, Fenrir, Quetzalcoatl
 Vuurdiepte:          Kobold, Cerberus, Surtr
 Aanvalsnamen zijn meeveranderd (Gungnir-worp, Ravenzwerm, Wereldbrand, ...).
+NIEUWE ART (sessie 34): Koen leverde alle 18 op één vel met witte achtergrond.
+Automatisch losgeknipt (rij- en kolombanden gedetecteerd, niet op een vast
+raster), wit weggehaald met tools/cutout.py en op hoogte 220 geschaald.
+Daarbij bleek de cutout een tweede pass nodig te hebben voor INGESLOTEN gaten
+(tussen arm en romp): die zijn omsloten door de figuur en bleven dus staan.
+Onderscheid met geschilderd wit: de generator-achtergrond is VLAK 255, een wit
+gewaad heeft verloop. Drempel staat op 252 met max 3 variatie — daarmee gaan de
+gaten weg terwijl het oude skelet 98,5% van z'n botten houdt.
+Aanvalsnamen daarna bijgetrokken naar wat de figuren ECHT dragen: Einherjar
+heeft een bijl (geen speer), Hermes de caduceus (geen dolk), Loki twee dolken,
+Kobold een drietand, Quetzalcoatl geen klauwen maar een staart, en Surtr geen
+zwaard maar brandende klauwen.
 LET OP: disk-data is in sessie 5 herontworpen (v4-data was verloren). Archetypes:
 commons veel Miss / laag damage, rares Gold-slots / weinig Miss. Valideren in speeltest.
 
