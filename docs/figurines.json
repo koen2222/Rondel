@@ -1,0 +1,825 @@
+{
+  "project": "Rondel - fantasy bordspel met Pokemon Duel-mechanics, EIGEN figuren (geen bestaand IP)",
+  "doel": "Deze 18 figuren opnieuw laten tekenen als speelgoed-figuurtjes in de stijl van Pokemon Duel-figures.",
+  "beeld_eisen": {
+    "formaat": "vierkant canvas, minimaal 512x512, PNG met ECHTE transparantie (geen witte of geruite achtergrond)",
+    "aanzicht": "driekwart van schuin boven, camera ongeveer 30 graden omlaag - je kijkt een beetje op het figuurtje neer",
+    "compositie": "figuur staat rechtop en gecentreerd, voeten raken de onderrand, kleine marge links en rechts",
+    "sokkel": "GEEN sokkel of ondergrond tekenen - het spel tekent de ronde voet er zelf onder",
+    "schaduw": "geen slagschaduw op de grond (tekent het spel ook zelf)",
+    "stijl": "glanzend geverfd verzamelfiguurtje, chibi-verhoudingen: groot hoofd, klein lijf, korte dikke ledematen, ongeveer 2,5 hoofd hoog",
+    "licht": "zacht licht van linksboven, warme highlights, zachte schaduw rechtsonder, lichte glans alsof het gelakt plastic is",
+    "afwerking": "schone dikke omtreklijnen, verzadigde kleuren, leesbaar op telefoonformaat (het wordt op ~48x66 px getoond)"
+  },
+  "gebruikt_in_code": "<image width=48 height=66> - staand formaat, iets hoger dan breed",
+  "units": {
+    "squire": {
+      "bestand": "art/squire.png",
+      "naam": "Squire",
+      "factie": "Knights",
+      "factie_sfeer": "heraldiek, geemailleerd blauw-goud metaal, ridderlijk",
+      "zeldzaamheid": "Common",
+      "mp": 2,
+      "ability": null,
+      "uiterlijk": {
+        "kleuren": [
+          "staalgrijs",
+          "hemelsblauw",
+          "zilver"
+        ],
+        "kenmerken": "jonge schildknaap, te groot rond schild, kort zwaard, verenpluim op de helm, dappere maar wat onhandige houding"
+      },
+      "schijf": {
+        "aanvallen": [
+          {
+            "naam": "Schildstoot",
+            "soort": "aanval",
+            "schade": 40,
+            "vakken": 4
+          },
+          {
+            "naam": "Schouderduw",
+            "soort": "aanval",
+            "schade": 10,
+            "vakken": 2
+          },
+          {
+            "naam": "Voetveeg",
+            "soort": "vloek",
+            "status": "paralysis",
+            "sterren": 1,
+            "vakken": 2
+          }
+        ],
+        "mis_vakken": 6,
+        "verdedig_vakken": 2
+      }
+    },
+    "cleric": {
+      "bestand": "art/cleric.png",
+      "naam": "Battle Cleric",
+      "factie": "Knights",
+      "factie_sfeer": "heraldiek, geemailleerd blauw-goud metaal, ridderlijk",
+      "zeldzaamheid": "Uncommon",
+      "mp": 2,
+      "ability": {
+        "naam": "Zegenende Aura",
+        "effect": "Bij inzet: wis status van aangrenzende bondgenoten"
+      },
+      "uiterlijk": {
+        "kleuren": [
+          "ivoorwit",
+          "goud",
+          "hemelsblauw"
+        ],
+        "kenmerken": "strijdpriester met tabberd, gepantserde knots, gloeiend zonnesymbool zwevend boven de open hand"
+      },
+      "schijf": {
+        "aanvallen": [
+          {
+            "naam": "Strijdknots",
+            "soort": "aanval",
+            "schade": 50,
+            "vakken": 3
+          },
+          {
+            "naam": "Vermaning",
+            "soort": "aanval",
+            "schade": 20,
+            "vakken": 2
+          },
+          {
+            "naam": "Slaaphymne",
+            "soort": "vloek",
+            "status": "sleep",
+            "sterren": 1,
+            "vakken": 3
+          }
+        ],
+        "mis_vakken": 5,
+        "verdedig_vakken": 3
+      }
+    },
+    "commander": {
+      "bestand": "art/commander.png",
+      "naam": "Knight Commander",
+      "factie": "Knights",
+      "factie_sfeer": "heraldiek, geemailleerd blauw-goud metaal, ridderlijk",
+      "zeldzaamheid": "Rare",
+      "mp": 2,
+      "ability": {
+        "naam": "Aanvoerder",
+        "effect": "Aangrenzende bondgenoten krijgen +1 MP"
+      },
+      "uiterlijk": {
+        "kleuren": [
+          "koningsblauw",
+          "goud",
+          "staal"
+        ],
+        "kenmerken": "gepluimde helm, wapperende mantel, opgeheven zwaard, banier op de rug, bevelende pose"
+      },
+      "schijf": {
+        "aanvallen": [
+          {
+            "naam": "Banierstorm",
+            "soort": "doorbraak",
+            "schade": 50,
+            "vakken": 3
+          },
+          {
+            "naam": "Zwaardslag",
+            "soort": "aanval",
+            "schade": 70,
+            "vakken": 3
+          },
+          {
+            "naam": "Pareersteek",
+            "soort": "aanval",
+            "schade": 40,
+            "vakken": 2
+          },
+          {
+            "naam": "Bevelschreeuw",
+            "soort": "vloek",
+            "status": "paralysis",
+            "sterren": 2,
+            "vakken": 3
+          }
+        ],
+        "mis_vakken": 3,
+        "verdedig_vakken": 2
+      }
+    },
+    "scout": {
+      "bestand": "art/scout.png",
+      "naam": "Forest Scout",
+      "factie": "Elves",
+      "factie_sfeer": "organische vormen, bladmotieven, licht en sierlijk",
+      "zeldzaamheid": "Common",
+      "mp": 3,
+      "ability": {
+        "naam": "Sluipen",
+        "effect": "Beweegt dwars door bezette punten (stopt op leeg)"
+      },
+      "uiterlijk": {
+        "kleuren": [
+          "mosgroen",
+          "leerbruin"
+        ],
+        "kenmerken": "slanke elfenverkenner, capuchon, twee dolken, door de knieen alsof hij sluipt, bladeren in de mantel"
+      },
+      "schijf": {
+        "aanvallen": [
+          {
+            "naam": "Dolksteek",
+            "soort": "aanval",
+            "schade": 30,
+            "vakken": 3
+          },
+          {
+            "naam": "Schampschot",
+            "soort": "aanval",
+            "schade": 10,
+            "vakken": 2
+          },
+          {
+            "naam": "Gifpijl",
+            "soort": "vloek",
+            "status": "poison",
+            "sterren": 1,
+            "vakken": 3
+          }
+        ],
+        "mis_vakken": 6,
+        "verdedig_vakken": 2
+      }
+    },
+    "archer": {
+      "bestand": "art/archer.png",
+      "naam": "Elven Archer",
+      "factie": "Elves",
+      "factie_sfeer": "organische vormen, bladmotieven, licht en sierlijk",
+      "zeldzaamheid": "Uncommon",
+      "mp": 2,
+      "ability": null,
+      "uiterlijk": {
+        "kleuren": [
+          "bosgroen",
+          "koper",
+          "creme"
+        ],
+        "kenmerken": "elfenboogschutter, lange boog half gespannen, pijlkoker, spitse oren, rustige geconcentreerde blik"
+      },
+      "schijf": {
+        "aanvallen": [
+          {
+            "naam": "Boogschot",
+            "soort": "aanval",
+            "schade": 60,
+            "vakken": 4
+          },
+          {
+            "naam": "Snelschot",
+            "soort": "aanval",
+            "schade": 20,
+            "vakken": 2
+          },
+          {
+            "naam": "Doornpijl",
+            "soort": "vloek",
+            "status": "poison",
+            "sterren": 1,
+            "vakken": 2
+          }
+        ],
+        "mis_vakken": 4,
+        "verdedig_vakken": 4
+      }
+    },
+    "weaver": {
+      "bestand": "art/weaver.png",
+      "naam": "Arcane Weaver",
+      "factie": "Elves",
+      "factie_sfeer": "organische vormen, bladmotieven, licht en sierlijk",
+      "zeldzaamheid": "Rare",
+      "mp": 2,
+      "ability": {
+        "naam": "Betovering",
+        "effect": "Vijand die ermee vecht raakt Confused"
+      },
+      "uiterlijk": {
+        "kleuren": [
+          "amethistpaars",
+          "zilver",
+          "cyaan"
+        ],
+        "kenmerken": "elfenmagier, wapperende sjaals, drie zwevende runenkristallen om de handen, haar zweeft omhoog"
+      },
+      "schijf": {
+        "aanvallen": [
+          {
+            "naam": "Manavlaag",
+            "soort": "aanval",
+            "schade": 70,
+            "vakken": 2
+          },
+          {
+            "naam": "Spreukbreker",
+            "soort": "doorbraak",
+            "schade": 40,
+            "vakken": 4
+          },
+          {
+            "naam": "Warreling",
+            "soort": "vloek",
+            "status": "confusion",
+            "sterren": 2,
+            "vakken": 4
+          }
+        ],
+        "mis_vakken": 3,
+        "verdedig_vakken": 3
+      }
+    },
+    "apprentice": {
+      "bestand": "art/apprentice.png",
+      "naam": "Stone Apprentice",
+      "factie": "Dwarves",
+      "factie_sfeer": "zwaar, hoekig, gesmeed metaal en steen",
+      "zeldzaamheid": "Common",
+      "mp": 2,
+      "ability": null,
+      "uiterlijk": {
+        "kleuren": [
+          "zandsteen",
+          "brons",
+          "aardebruin"
+        ],
+        "kenmerken": "gedrongen dwerg-leerling, veel te grote steenhandschoenen, zwevend rotsblokje, verbaasde uitdrukking"
+      },
+      "schijf": {
+        "aanvallen": [
+          {
+            "naam": "Steenworp",
+            "soort": "aanval",
+            "schade": 60,
+            "vakken": 3
+          },
+          {
+            "naam": "Gruisgooi",
+            "soort": "aanval",
+            "schade": 30,
+            "vakken": 2
+          },
+          {
+            "naam": "Gruisgreep",
+            "soort": "vloek",
+            "status": "paralysis",
+            "sterren": 1,
+            "vakken": 1
+          }
+        ],
+        "mis_vakken": 6,
+        "verdedig_vakken": 4
+      }
+    },
+    "runesmith": {
+      "bestand": "art/runesmith.png",
+      "naam": "Runesmith",
+      "factie": "Dwarves",
+      "factie_sfeer": "zwaar, hoekig, gesmeed metaal en steen",
+      "zeldzaamheid": "Uncommon",
+      "mp": 2,
+      "ability": {
+        "naam": "Vuurrune",
+        "effect": "Vijand die ermee vecht raakt Burned"
+      },
+      "uiterlijk": {
+        "kleuren": [
+          "ijzergrijs",
+          "gloeiend oranje",
+          "brons"
+        ],
+        "kenmerken": "dwergensmid, gevlochten baard, zware hamer met gloeiende runen, vonken, leren schort"
+      },
+      "schijf": {
+        "aanvallen": [
+          {
+            "naam": "Hamerslag",
+            "soort": "aanval",
+            "schade": 60,
+            "vakken": 3
+          },
+          {
+            "naam": "Vonkslag",
+            "soort": "aanval",
+            "schade": 30,
+            "vakken": 2
+          },
+          {
+            "naam": "Gloeirune",
+            "soort": "vloek",
+            "status": "burn",
+            "sterren": 1,
+            "vakken": 4
+          }
+        ],
+        "mis_vakken": 4,
+        "verdedig_vakken": 3
+      }
+    },
+    "warden": {
+      "bestand": "art/warden.png",
+      "naam": "Mountain Warden",
+      "factie": "Dwarves",
+      "factie_sfeer": "zwaar, hoekig, gesmeed metaal en steen",
+      "zeldzaamheid": "Rare",
+      "mp": 2,
+      "ability": {
+        "naam": "Bergvast",
+        "effect": "Bij KO: naar de bank i.p.v. Healing Center"
+      },
+      "uiterlijk": {
+        "kleuren": [
+          "graniet",
+          "diepblauw",
+          "zilver"
+        ],
+        "kenmerken": "zwaarbepantserde dwerg met torenschild bijna zo groot als hijzelf, stevig geplant, onwrikbaar"
+      },
+      "schijf": {
+        "aanvallen": [
+          {
+            "naam": "Bergbeuk",
+            "soort": "aanval",
+            "schade": 90,
+            "vakken": 4
+          },
+          {
+            "naam": "Rotsworp",
+            "soort": "aanval",
+            "schade": 50,
+            "vakken": 2
+          },
+          {
+            "naam": "Rotsgreep",
+            "soort": "vloek",
+            "status": "paralysis",
+            "sterren": 2,
+            "vakken": 3
+          }
+        ],
+        "mis_vakken": 3,
+        "verdedig_vakken": 4
+      }
+    },
+    "skeleton": {
+      "bestand": "art/skeleton.png",
+      "naam": "Restless Skeleton",
+      "factie": "Undead",
+      "factie_sfeer": "grafkoud, botwit en grafgroen, versleten",
+      "zeldzaamheid": "Common",
+      "mp": 2,
+      "ability": null,
+      "uiterlijk": {
+        "kleuren": [
+          "botwit",
+          "roestbruin",
+          "grafgroen"
+        ],
+        "kenmerken": "rammelend skelet, gedeukt schild, roestig kort zwaard, scheve kaak, losjes hangende botten"
+      },
+      "schijf": {
+        "aanvallen": [
+          {
+            "naam": "Botzwaai",
+            "soort": "aanval",
+            "schade": 30,
+            "vakken": 4
+          },
+          {
+            "naam": "Ribbenstoot",
+            "soort": "aanval",
+            "schade": 10,
+            "vakken": 2
+          },
+          {
+            "naam": "Grafkilte",
+            "soort": "vloek",
+            "status": "confusion",
+            "sterren": 1,
+            "vakken": 2
+          }
+        ],
+        "mis_vakken": 6,
+        "verdedig_vakken": 2
+      }
+    },
+    "ghoul": {
+      "bestand": "art/ghoul.png",
+      "naam": "Ghoul",
+      "factie": "Undead",
+      "factie_sfeer": "grafkoud, botwit en grafgroen, versleten",
+      "zeldzaamheid": "Uncommon",
+      "mp": 2,
+      "ability": {
+        "naam": "Rottende Greep",
+        "effect": "Vijand die ermee vecht raakt Poisoned"
+      },
+      "uiterlijk": {
+        "kleuren": [
+          "ziekelijk groengrijs",
+          "donkerpaars"
+        ],
+        "kenmerken": "uitgemergelde lijkeneter, lange klauwen, gebogen rug, druipende groene walm"
+      },
+      "schijf": {
+        "aanvallen": [
+          {
+            "naam": "Klauwhaal",
+            "soort": "aanval",
+            "schade": 50,
+            "vakken": 3
+          },
+          {
+            "naam": "Knagende Beet",
+            "soort": "aanval",
+            "schade": 20,
+            "vakken": 2
+          },
+          {
+            "naam": "Lijkengif",
+            "soort": "vloek",
+            "status": "badlypoison",
+            "sterren": 1,
+            "vakken": 4
+          }
+        ],
+        "mis_vakken": 4,
+        "verdedig_vakken": 3
+      }
+    },
+    "necromancer": {
+      "bestand": "art/necromancer.png",
+      "naam": "Necromancer",
+      "factie": "Undead",
+      "factie_sfeer": "grafkoud, botwit en grafgroen, versleten",
+      "zeldzaamheid": "Rare",
+      "mp": 2,
+      "ability": {
+        "naam": "Zielenoproep",
+        "effect": "Bij inzet: wis Wacht-status van je eigen bank"
+      },
+      "uiterlijk": {
+        "kleuren": [
+          "diep zwartpaars",
+          "gifgroen",
+          "bot"
+        ],
+        "kenmerken": "gehulde dodenbezweerder, schedelstaf, twee groene dwaallichtjes zwevend naast hem, gezicht in schaduw"
+      },
+      "schijf": {
+        "aanvallen": [
+          {
+            "naam": "Schaduwgreep",
+            "soort": "aanval",
+            "schade": 60,
+            "vakken": 2
+          },
+          {
+            "naam": "Zielenvlaag",
+            "soort": "doorbraak",
+            "schade": 30,
+            "vakken": 4
+          },
+          {
+            "naam": "Doodsslaap",
+            "soort": "vloek",
+            "status": "sleep",
+            "sterren": 2,
+            "vakken": 4
+          }
+        ],
+        "mis_vakken": 3,
+        "verdedig_vakken": 3
+      }
+    },
+    "boar": {
+      "bestand": "art/boar.png",
+      "naam": "Boar Brute",
+      "factie": "Beasts",
+      "factie_sfeer": "ruw, dierlijk, vacht en tanden",
+      "zeldzaamheid": "Common",
+      "mp": 2,
+      "ability": null,
+      "uiterlijk": {
+        "kleuren": [
+          "borstelbruin",
+          "vuilgeel",
+          "modder"
+        ],
+        "kenmerken": "gedrongen everzwijn-beest, enorme slagtanden, gespannen schouders alsof hij aanstormt, stoomwolkje uit de neus"
+      },
+      "schijf": {
+        "aanvallen": [
+          {
+            "naam": "Stormram",
+            "soort": "aanval",
+            "schade": 60,
+            "vakken": 5
+          },
+          {
+            "naam": "Hoefslag",
+            "soort": "aanval",
+            "schade": 20,
+            "vakken": 2
+          },
+          {
+            "naam": "Woeste Duw",
+            "soort": "vloek",
+            "status": "confusion",
+            "sterren": 1,
+            "vakken": 1
+          }
+        ],
+        "mis_vakken": 6,
+        "verdedig_vakken": 2
+      }
+    },
+    "lupine": {
+      "bestand": "art/lupine.png",
+      "naam": "Lupine Hunter",
+      "factie": "Beasts",
+      "factie_sfeer": "ruw, dierlijk, vacht en tanden",
+      "zeldzaamheid": "Uncommon",
+      "mp": 3,
+      "ability": {
+        "naam": "Roedel",
+        "effect": "+1 MP zolang er een bondgenoot naast staat"
+      },
+      "uiterlijk": {
+        "kleuren": [
+          "wolfsgrijs",
+          "winterwit",
+          "ijsblauw"
+        ],
+        "kenmerken": "wolfachtige jager op twee poten, gescheurde mantel, speer, oren gespitst, alerte jachthouding"
+      },
+      "schijf": {
+        "aanvallen": [
+          {
+            "naam": "Kaakklem",
+            "soort": "aanval",
+            "schade": 50,
+            "vakken": 4
+          },
+          {
+            "naam": "Scheurbeet",
+            "soort": "aanval",
+            "schade": 20,
+            "vakken": 2
+          },
+          {
+            "naam": "Huilroep",
+            "soort": "vloek",
+            "status": "paralysis",
+            "sterren": 1,
+            "vakken": 2
+          }
+        ],
+        "mis_vakken": 5,
+        "verdedig_vakken": 3
+      }
+    },
+    "wyrmling": {
+      "bestand": "art/wyrmling.png",
+      "naam": "Wyrmling",
+      "factie": "Beasts",
+      "factie_sfeer": "ruw, dierlijk, vacht en tanden",
+      "zeldzaamheid": "Rare",
+      "mp": 2,
+      "ability": {
+        "naam": "Vleugelslag",
+        "effect": "Vliegt over andere units heen (stopt op leeg)"
+      },
+      "uiterlijk": {
+        "kleuren": [
+          "robijnrood",
+          "goud",
+          "oranje"
+        ],
+        "kenmerken": "jong draakje, te grote vleugels, kleine hoorntjes, vlammetje uit de bek, ondeugende blik"
+      },
+      "schijf": {
+        "aanvallen": [
+          {
+            "naam": "Staartzweep",
+            "soort": "aanval",
+            "schade": 60,
+            "vakken": 3
+          },
+          {
+            "naam": "Klauwzwiep",
+            "soort": "aanval",
+            "schade": 30,
+            "vakken": 2
+          },
+          {
+            "naam": "Vuurspuw",
+            "soort": "doorbraak",
+            "schade": 60,
+            "vakken": 3
+          },
+          {
+            "naam": "Asadem",
+            "soort": "vloek",
+            "status": "burn",
+            "sterren": 2,
+            "vakken": 4
+          }
+        ],
+        "mis_vakken": 2,
+        "verdedig_vakken": 2
+      }
+    },
+    "imp": {
+      "bestand": "art/imp.png",
+      "naam": "Imp",
+      "factie": "Inferno",
+      "factie_sfeer": "vulkanisch, gloeiend van binnenuit, gedraaide horens",
+      "zeldzaamheid": "Common",
+      "mp": 3,
+      "ability": null,
+      "uiterlijk": {
+        "kleuren": [
+          "scharlaken",
+          "zwavelgeel",
+          "zwart"
+        ],
+        "kenmerken": "klein duiveltje, vleermuisvleugels, kleine drietand, pijlpuntstaart, grijnzend en pesterig"
+      },
+      "schijf": {
+        "aanvallen": [
+          {
+            "naam": "Prikvork",
+            "soort": "aanval",
+            "schade": 30,
+            "vakken": 3
+          },
+          {
+            "naam": "Plaagstoot",
+            "soort": "aanval",
+            "schade": 10,
+            "vakken": 2
+          },
+          {
+            "naam": "Vonkenregen",
+            "soort": "vloek",
+            "status": "burn",
+            "sterren": 1,
+            "vakken": 3
+          }
+        ],
+        "mis_vakken": 6,
+        "verdedig_vakken": 2
+      }
+    },
+    "hellhound": {
+      "bestand": "art/hellhound.png",
+      "naam": "Hellhound",
+      "factie": "Inferno",
+      "factie_sfeer": "vulkanisch, gloeiend van binnenuit, gedraaide horens",
+      "zeldzaamheid": "Uncommon",
+      "mp": 3,
+      "ability": {
+        "naam": "Helse Jacht",
+        "effect": "Na een gevecht raken deze unit én de vijand Burned"
+      },
+      "uiterlijk": {
+        "kleuren": [
+          "kolenzwart",
+          "gloeiend oranje",
+          "as"
+        ],
+        "kenmerken": "viervoetige helhond, gloeiende scheuren in de vacht als lava, rook uit de bek, laag en dreigend"
+      },
+      "schijf": {
+        "aanvallen": [
+          {
+            "naam": "Vlammenbeet",
+            "soort": "aanval",
+            "schade": 50,
+            "vakken": 4
+          },
+          {
+            "naam": "Snauw",
+            "soort": "aanval",
+            "schade": 20,
+            "vakken": 2
+          },
+          {
+            "naam": "Schroeiblaf",
+            "soort": "vloek",
+            "status": "burn",
+            "sterren": 1,
+            "vakken": 3
+          }
+        ],
+        "mis_vakken": 4,
+        "verdedig_vakken": 3
+      }
+    },
+    "pitlord": {
+      "bestand": "art/pitlord.png",
+      "naam": "Pit Lord",
+      "factie": "Inferno",
+      "factie_sfeer": "vulkanisch, gloeiend van binnenuit, gedraaide horens",
+      "zeldzaamheid": "Rare",
+      "mp": 2,
+      "ability": {
+        "naam": "Onverwoestbaar",
+        "effect": "Overleeft de eerste KO en trekt terug naar de bank"
+      },
+      "uiterlijk": {
+        "kleuren": [
+          "obsidiaan",
+          "magmarood",
+          "gebrand goud"
+        ],
+        "kenmerken": "kolossale demonenheer, gedraaide horens, zware pantserplaten, vlammend zwaard, torenhoge dreigende pose"
+      },
+      "schijf": {
+        "aanvallen": [
+          {
+            "naam": "Verwoester",
+            "soort": "aanval",
+            "schade": 100,
+            "vakken": 4
+          },
+          {
+            "naam": "Zwavelklauw",
+            "soort": "aanval",
+            "schade": 60,
+            "vakken": 2
+          },
+          {
+            "naam": "Hellekling",
+            "soort": "doorbraak",
+            "schade": 70,
+            "vakken": 4
+          },
+          {
+            "naam": "Zwavelvloek",
+            "soort": "vloek",
+            "status": "burn",
+            "sterren": 2,
+            "vakken": 2
+          }
+        ],
+        "mis_vakken": 3,
+        "verdedig_vakken": 1
+      }
+    }
+  }
+}
