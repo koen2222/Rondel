@@ -112,6 +112,14 @@ Beurt-economie (sessie 7: Duel-correct gemaakt na web-verificatie)
   geen zet meer hebt.
 - Kaarten van de TEGENSTANDER liggen zichtbaar maar DICHT linksboven, met een
   teller: je ziet hoeveel hij er nog heeft, niet welke.
+- PASSEN BESTAAT NIET (sessie 31, geverifieerd): in Duel moet je elke beurt een
+  figuur verzetten of inzetten. Koen liep tegen de gevolgen aan: zijn
+  tegenstander had nog één figuur, op zijn eigen doel, en moest er verplicht
+  vanaf stappen. Dat is GEEN bug — het is zugzwang en het werkt in Duel net zo.
+  Bewijs dat Duel deze situatie kent: er bestaan twee plates die ALLEEN voor dit
+  geval zijn gemaakt — Counter Attack ("Gain MP+1 when enemy occupies all entry
+  points") en Force Remove. Counter Attack is nu overgenomen als 'Tegenaanval'.
+  Er komt ook een waarschuwing zodra al je startpunten bezet zijn.
 
 Level-up (Duel-spec, sinds sessie 5 in code)
 - KO scoren = +1 level (max level 4)

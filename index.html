@@ -742,6 +742,9 @@ const PLATES = {
   cape:     { name:'Sluiermantel',  duel:'Invisibility Cape', cost:3, cat:'beweging', desc:'Deze figuur loopt deze beurt dwars door anderen heen', target:'ally', fx:'phase' },
   // — Bijzonder —
   recycle:  { name:'Hergebruik',    duel:'Recycle',        cost:2, cat:'bijzonder',desc:'Al je gebruikte kaarten worden weer bruikbaar', target:'none' },
+  // Duel heeft een kaart die ALLEEN bestaat voor de situatie "de vijand bezet
+  // al mijn startpunten" — het bewijs dat dat een bedoelde spelsituatie is.
+  counter:  { name:'Tegenaanval',   duel:'Counter Attack', cost:1, cat:'bijzonder',desc:'Zolang de vijand ál je startpunten bezet, krijgen je figuren +1 MP', target:'none' },
 };
 function plateCost(keys) { return (keys || []).reduce((a, k) => a + (PLATES[k] ? PLATES[k].cost : 0), 0); }
 // PLATES-END (marker voor headless tests — niet verwijderen)
@@ -1042,7 +1045,7 @@ let currentMode = 'solo';
 
 function initialState() {
   const ms = S('clockMinutes') * 60000;   // 0 = klok uit
-  return { turn:'p1', actionsLeft:1, units:{}, bench:{p1:[],p2:[]}, hc:{p1:[],p2:[]}, selected:null, legalTargets:new Set(), pendingDeploy:null, over:false, mode: currentMode, aiThinking: false, locked: false, plates:{p1:[],p2:[]}, usedPlates:{p1:[],p2:[]}, plateUsed:false, pendingPlate:null, mpBonus:{}, warcry:{p1:false,p2:false}, firstMoveDone:false, animating:null, pendingFX:[], clock: ms ? { p1:ms, p2:ms } : null };
+  return { turn:'p1', actionsLeft:1, units:{}, bench:{p1:[],p2:[]}, hc:{p1:[],p2:[]}, selected:null, legalTargets:new Set(), pendingDeploy:null, over:false, mode: currentMode, aiThinking: false, locked: false, plates:{p1:[],p2:[]}, usedPlates:{p1:[],p2:[]}, counterAttack:{p1:false,p2:false}, plateUsed:false, pendingPlate:null, mpBonus:{}, warcry:{p1:false,p2:false}, firstMoveDone:false, animating:null, pendingFX:[], clock: ms ? { p1:ms, p2:ms } : null };
 }
 
 // ===== Schaakklok (Duel-regel: 5 min per speler; tijd op = verlies) =====
@@ -1611,6 +1614,10 @@ const HELP_SECTIONS = [
     'Een <b>kaart</b> (rechtsonder op tafel) kost géén actie — je mag er één per beurt spelen. Speel hem <b>vóór</b> je zet, want zodra je zet erop zit gaat de beurt vanzelf door.',
     'De kaarten van je tegenstander liggen linksboven met de rug omhoog: je ziet wel hoevéél hij er heeft, niet welke.',
     'De allereerste zet van het potje kost <b>1 MP extra</b>, zodat wie begint geen gratis voorsprong krijgt.' ]},
+  { h:'Je moet elke beurt iets doen', p:[
+    'Passen bestaat niet: elke beurt verplaats je één figuur, of je zet er één in. Kun je helemaal <b>niets</b> meer, dan verlies je.',
+    'Dat kan lelijk uitpakken: staat je laatste figuur op je eigen doel en kun je niemand meer inzetten, dan móét je er toch vanaf stappen. Dat is geen bug — zo werkt het in Duel ook.',
+    'De tegenstander kan dat afdwingen door <b>al je startpunten te bezetten</b>. De kaart <b>Tegenaanval</b> is daar precies voor: zolang dat zo is krijgen je figuren +1 MP om eruit te breken.' ]},
   { h:'Bewegen en inzetten', p:[
     'Elk figuur heeft <b>MP</b> (het gouden getal): zoveel punten mag hij per beurt afleggen.',
     'Inzetten doe je via je eigen <b>entry-punten</b> in de hoeken. Dat kost 1 MP; met je resterende MP mag je meteen doorlopen naar een leeg punt.',
@@ -2124,6 +2131,7 @@ function usePlate(player, idx, targetUid, targetNode) {
   else if (key === 'scoopup') { u.node = null; u.status = u.status.filter(s => s !== 'wait'); state.bench[player].push(u.uid); }
   else if (key === 'swapspot') { const other = state.units[state.pendingPlate.uid]; const a = other.node; other.node = u.node; u.node = a; }
   else if (key === 'hurdle') { state.units[state.pendingPlate.uid].node = targetNode; }
+  else if (key === 'counter') { state.counterAttack[player] = true; }
   else if (key === 'recycle') { state.usedPlates[player] = (state.usedPlates[player] || []); state.plates[player].push(...state.usedPlates[player]); state.usedPlates[player] = []; }
   else if (pl.fx) { u.fx = u.fx || {}; u.fx[pl.fx] = true; }
   // Kaart is op — bewaren zodat Hergebruik hem kan terughalen
@@ -2409,6 +2417,14 @@ function unitHint(u) {
 
 // Ability-MP: +1 als deze unit 'pack' heeft en naast een bondgenoot staat,
 // of naast een bondgenoot met 'command' (Aanvoerder) staat.
+// Zijn ALLE startpunten van deze speler door de tegenstander bezet? Dan kan hij
+// niets meer inzetten — in Duel een erkende (en met kaarten gecounterde) situatie.
+function entriesBlockedBy(player) {
+  const mine = Object.entries(NODES).filter(([, n]) => n.type === 'entry' && n.owner === player);
+  if (!mine.length) return false;
+  return mine.every(([k]) => { const o = unitAt(k); return o && o.owner !== player; });
+}
+
 function abilityMPBonus(u) {
   if (!u.node) return 0;
   const neighbours = [...ADJ[u.node]].map(unitAt).filter(o => o && o.owner === u.owner);
@@ -2419,7 +2435,9 @@ function abilityMPBonus(u) {
 }
 
 function effMP(u) {
-  let mp = Math.min(3, UNIT_DEFS[u.defKey].mp + (state.mpBonus[u.uid] || 0) + (state.warcry[u.owner] ? 1 : 0) + abilityMPBonus(u));
+  // Tegenaanval: extra bewegingsruimte zolang je aanvoer geblokkeerd is
+  const counter = (state.counterAttack && state.counterAttack[u.owner] && entriesBlockedBy(u.owner)) ? 1 : 0;
+  let mp = Math.min(3, UNIT_DEFS[u.defKey].mp + (state.mpBonus[u.uid] || 0) + (state.warcry[u.owner] ? 1 : 0) + abilityMPBonus(u) + counter);
   if (!state.firstMoveDone) mp = Math.max(1, mp - 1); // Duel: allereerste zet van het potje MP-1
   return mp;
 }
@@ -2541,6 +2559,15 @@ function endTurn() {
   for (const uid of state.bench[state.turn]) { const u = state.units[uid]; if (u.status.includes('wait')) u.status = u.status.filter(s => s !== 'wait'); }
   sfx('turn');
   renderAll(); if (!hasAnyAction(state.turn)) { endMatch(state.turn==='p1'?'p2':'p1', 'lockout'); return; }
+  // Waarschuwing zodra je aanvoer is afgesneden: dan kun je niets meer inzetten
+  // en moet je elke beurt met wat er staat blijven schuiven. In Duel is dit een
+  // erkende situatie (er bestaan kaarten die er speciaal tegen zijn).
+  if ((state.mode !== 'solo' || state.turn === 'p1') && entriesBlockedBy(state.turn)) {
+    const own = Object.values(state.units).filter(u => u.owner === state.turn && u.node).length;
+    toast(own <= 1
+      ? 'Al je startpunten zijn bezet én je hebt nog één figuur — je moet wel bewegen!'
+      : 'Al je startpunten zijn bezet: je kunt niemand inzetten. Maak er eerst één vrij.');
+  }
   if (state.mode === 'solo' && state.turn === 'p2') { setTimeout(aiTurn, Math.max(150, 400 * (animScale() || 0.4))); }
 }
 
