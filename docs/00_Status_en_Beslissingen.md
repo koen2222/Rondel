@@ -255,6 +255,30 @@ SESSIE 28 — TAFEL, DECOR EN EEN AGRESSIEVE AI (Koens vier punten)
   vanaf beurt 5; in een ander potje blokkeerde hij een spawn in beurt 3 en won
   in beurt 4.
 
+SESSIE 36 — SCHERMPASSING, INSLAGEN OP HET BORD, AI-CHOKEPUNTEN
+- HET SPEL PAST NU OP HET SCHERM. Het spelscherm is 100dvh hoog met flex; het
+  bord krimpt mee (SVG met width+height 100%, preserveAspectRatio doet de rest)
+  in plaats van te scrollen. Geverifieerd: paginahoogte == schermhoogte.
+- Hemelpoort verkleind (0.95 -> 0.72); overlapte de zijlijnfiguren.
+- ANIMATIES ALTIJD IN HET MIDDEN van het gevechtsscherm (waren soms bij een
+  schijf, soms in het midden).
+- INSLAGEN OP HET BORD (Koens wens: "de donder in het bord zien slaan"):
+  na het gevecht slaat de aanval ook echt in op het punt waar hij landt.
+  Bliksem = donderschicht van bovenaf met schokring; vuur = METEOOR die schuin
+  inkomt, inslaat en vonken werpt; gif = spattende plas; kou = ijsscherven;
+  klauw/snede = krassporen; pijl = inkomende pijl; hamer/schild = schokgolf
+  met puin; magie = draaiende rune.
+  KRATERS: vuur, hamer en bliksem laten een krater achter (opgeworpen rand,
+  donkere kom, barsten die het bord in lopen) die over 14 seconden vervaagt.
+  Ze leven in state.craters en worden bij elke render opnieuw getekend, zodat
+  ze het herbouwen van de SVG overleven.
+- AI-CHOKEPUNTEN: Koen zag dat hij in één keer kon doorlopen zodra de AI een
+  figuur van een startpunt afhaalde. De eigen startpunten van de AI liggen op
+  de buitenroute naar zijn doel; die gelden nu als verdedigingspunt (+170 om
+  te bezetten bij dreiging, -220 om ze op te geven).
+  GEMETEN EFFECT: een beenende speler won 7/8 -> nu 3/6, en de AI wint er zelf
+  3, waarvan twee doordat hij de aanvoer van de speler volledig afsnijdt.
+
 POORTEN EN AANVALSANIMATIES (sessie 35, Koens wensen)
 - De kastelen zijn vervangen door twee heel verschillende poorten, zodat je in
   een oogopslag ziet van wie welke kant is: p1 (jij) krijgt een HEMELPOORT —
