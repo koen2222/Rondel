@@ -14,7 +14,11 @@
   :root { --bg: #050403; --ink: #f4ecd8; --p1: #3b82f6; --p1-glow: rgba(59, 130, 246, 0.6); --p2: #ef4444; --p2-glow: rgba(239, 68, 68, 0.6); --gold: #f59e0b; --gold-glow: rgba(245, 158, 11, 0.6); }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: 'EB Garamond', Georgia, serif; overscroll-behavior: none; user-select: none; min-height: 100vh; }
-  .game { max-width: 500px; margin: 0 auto; padding: 12px 6px; display: flex; flex-direction: column; gap: 10px; }
+  /* Het spelscherm vult precies de hoogte van het toestel; het bord krimpt mee
+     zodat je nooit hoeft te scrollen tijdens een potje. */
+  .game { max-width: 500px; margin: 0 auto; padding: 8px 6px; display: flex; flex-direction: column; gap: 8px;
+    height: 100dvh; max-height: 100dvh; box-sizing: border-box; }
+  .game .turn-banner, .game .plate-strip, .game .action-bar { flex: 0 0 auto; }
   
   .turn-banner { padding: 12px 16px; border-radius: 12px; background: linear-gradient(90deg, #1f1814, #0a0806); border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 15px rgba(0,0,0,0.5); font-family: 'Cinzel', serif; font-size: 0.95rem; letter-spacing: 0.08em; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s ease; }
   .turn-banner.p1 { border-left: 4px solid var(--p1); box-shadow: 0 0 15px var(--p1-glow); }
@@ -41,7 +45,7 @@
      in Duel. De achtergrond zit in CSS (statisch) en niet in de SVG, omdat de
      SVG bij elke zet opnieuw wordt opgebouwd — een filter/textuur daarin zou
      elke render opnieuw berekend worden en op een telefoon gaan haperen. */
-  .board-wrap { position: relative; border-radius: 16px; padding: 0; overflow: hidden;
+  .board-wrap { position: relative; border-radius: 16px; padding: 0; overflow: hidden; flex: 1 1 auto; min-height: 0;
     border: 1px solid rgba(255,170,90,0.28);
     box-shadow: inset 0 0 90px rgba(0,0,0,0.7), 0 10px 34px rgba(0,0,0,0.92); }
   /* De vloer is NIET één kleur: er liggen zachte kleurvlekken overheen, zoals
@@ -87,9 +91,9 @@
 
   /* ===== Aanvalsanimaties ===== */
   #attack-fx { position: absolute; inset: 0; pointer-events: none; z-index: 6; overflow: hidden; }
-  .fx-scene { position: absolute; left: 50%; top: 46%; width: 0; height: 0; }
+  .fx-scene { position: absolute; left: 50%; top: 50%; width: 0; height: 0; }
   .fx-scene i { position: absolute; display: block; }
-  .fx-scene.omhoog { top: 30%; }
+  .fx-scene.omhoog { top: 50%; }   /* ook de verdediger speelt in het midden */
 
   .fx-ring { left: -6px; top: -6px; width: 12px; height: 12px; border-radius: 50%;
     border: 3px solid var(--fxk); animation: fxRing 0.5s ease-out forwards; }
@@ -207,7 +211,7 @@
   .board-wrap::after { content: ''; position: absolute; inset: 0; pointer-events: none;
     background: radial-gradient(ellipse 70% 58% at 50% 46%, transparent 45%, rgba(0,0,0,0.78) 100%); }
 
-  #board { display: block; width: 100%; height: auto; position: relative; z-index: 1; }
+  #board { display: block; width: 100%; height: 100%; position: relative; z-index: 1; }
 
   /* Lichtgevende witte routes en ringpunten (Duel-look). De gloed staat op de
      GROEP, niet per lijn — één filter i.p.v. zestig scheelt enorm op mobiel. */
@@ -266,7 +270,7 @@
   @keyframes clashShake { 0%,100% { transform: translate(0,0); } 15% { transform: translate(-7px,2px); } 30% { transform: translate(6px,-2px); } 45% { transform: translate(-4px,1px); } 60% { transform: translate(3px,-1px); } 80% { transform: translate(-1px,0); } }
   @media (prefers-reduced-motion: reduce) { .disks-row.clash, #clash-flash.go { animation: none; } }
 
-  .plate-strip { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px; }
+  .plate-strip { display: flex; gap: 6px; overflow-x: auto; padding: 2px; max-height: 62px; }
   .plate-chip { flex: 0 0 auto; min-width: 110px; background: linear-gradient(145deg, #2a201a, #14100d); border: 1px solid rgba(245,158,11,0.3); border-radius: 8px; padding: 6px 10px; display: flex; flex-direction: column; gap: 2px; cursor: pointer; transition: transform 0.15s; }
   .plate-chip b { font-family: 'Cinzel', serif; font-size: 0.7rem; color: var(--gold); letter-spacing: 0.05em; }
   .plate-chip span { font-size: 0.6rem; color: #a89f91; }
@@ -301,6 +305,24 @@
   @keyframes fxPoof { 0% { transform: scale(.4); opacity: .75; } 100% { transform: scale(1.7); opacity: 0; } }
   @keyframes fxBurst { 0% { transform: scale(.3); opacity: 1; } 100% { transform: scale(2); opacity: 0; } }
   @keyframes fxGlint { 0%, 35%, 100% { opacity: 0; } 52% { opacity: 1; } }
+  /* Inslagen op het bord */
+  @keyframes fxBolt { 0% { opacity: 0; } 15% { opacity: 1; } 45% { opacity: .35; } 70% { opacity: .9; } 100% { opacity: 0; } }
+  @keyframes fxShock { 0% { transform: scale(.3); opacity: .95; } 100% { transform: scale(5.5); opacity: 0; } }
+  @keyframes fxMeteor { 0% { transform: translate(-132px,-176px) scale(.5); opacity: 0; }
+    18% { opacity: 1; } 88% { transform: translate(0,0) scale(1); opacity: 1; } 100% { opacity: 0; } }
+  @keyframes fxMeteorTrail { 0% { opacity: 0; } 25% { opacity: .9; } 100% { opacity: 0; } }
+  @keyframes fxSplat { 0% { transform: scale(.2); opacity: 0; } 25% { opacity: .95; }
+    100% { transform: scale(2.6) translateY(6px); opacity: 0; } }
+  @keyframes fxPlas { 0% { transform: scale(.2); opacity: 0; } 20% { transform: scale(1); opacity: .8; }
+    100% { transform: scale(1.15); opacity: 0; } }
+  @keyframes fxScherfUit { 0% { transform: scale(.3); opacity: 0; } 30% { opacity: 1; }
+    100% { transform: scale(2.4) translateY(-10px); opacity: 0; } }
+  @keyframes fxKrasUit { 0% { opacity: 0; transform: scale(.4); } 25% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.25); } }
+  @keyframes fxPijlIn { 0% { opacity: 0; transform: translate(-40px,-16px); } 30% { opacity: 1; }
+    100% { opacity: 0; transform: translate(14px,6px); } }
+  @keyframes fxRuneUit { 0% { transform: rotate(0) scale(.3); opacity: 0; } 25% { opacity: 1; }
+    100% { transform: rotate(200deg) scale(3); opacity: 0; } }
   @media (prefers-reduced-motion: reduce) { .fx-anim { animation: none !important; } }
 
   .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: rgba(20, 15, 10, 0.95); color: var(--gold); padding: 12px 24px; border-radius: 8px; font-size: 1rem; font-family: 'Cinzel', serif; border: 1px solid var(--gold); box-shadow: 0 0 20px rgba(245,158,11,0.3); z-index: 50; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
@@ -1155,7 +1177,7 @@ let currentMode = 'solo';
 
 function initialState() {
   const ms = S('clockMinutes') * 60000;   // 0 = klok uit
-  return { turn:'p1', actionsLeft:1, units:{}, bench:{p1:[],p2:[]}, hc:{p1:[],p2:[]}, selected:null, legalTargets:new Set(), pendingDeploy:null, over:false, mode: currentMode, aiThinking: false, locked: false, plates:{p1:[],p2:[]}, usedPlates:{p1:[],p2:[]}, counterAttack:{p1:false,p2:false}, plateUsed:false, pendingPlate:null, mpBonus:{}, warcry:{p1:false,p2:false}, firstMoveDone:false, animating:null, pendingFX:[], clock: ms ? { p1:ms, p2:ms } : null };
+  return { turn:'p1', actionsLeft:1, units:{}, bench:{p1:[],p2:[]}, hc:{p1:[],p2:[]}, selected:null, legalTargets:new Set(), pendingDeploy:null, over:false, mode: currentMode, aiThinking: false, locked: false, plates:{p1:[],p2:[]}, usedPlates:{p1:[],p2:[]}, counterAttack:{p1:false,p2:false}, plateUsed:false, pendingPlate:null, mpBonus:{}, warcry:{p1:false,p2:false}, firstMoveDone:false, animating:null, pendingFX:[], craters:[], clock: ms ? { p1:ms, p2:ms } : null };
 }
 
 // ===== Schaakklok (Duel-regel: 5 min per speler; tijd op = verlies) =====
@@ -1935,6 +1957,9 @@ const BOARD_DEFS = `
   <radialGradient id="gGoalGold" cx="40%" cy="32%" r="80%">
     <stop offset="0%" stop-color="#fde68a"/><stop offset="55%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#92400e"/>
   </radialGradient>
+  <radialGradient id="gMeteor" cx="38%" cy="34%" r="80%">
+    <stop offset="0%" stop-color="#fff8dc"/><stop offset="42%" stop-color="#fb923c"/><stop offset="100%" stop-color="#7c2d12"/>
+  </radialGradient>
   <radialGradient id="gGate" cx="50%" cy="70%" r="70%">
     <stop offset="0%" stop-color="rgba(255,255,255,0.95)"/><stop offset="45%" stop-color="rgba(191,219,254,0.75)"/><stop offset="100%" stop-color="rgba(96,165,250,0.25)"/>
   </radialGradient>
@@ -2020,6 +2045,7 @@ function renderBoard() {
   // GEEN speelplaat meer: het bord is doorzichtig en zweeft boven de arena,
   // net als in Duel. Alleen een warme grondgloed onder de routes.
   el('ellipse', { cx:270, cy:445, rx:255, ry:255, fill:'url(#gArenaGlow)' }, svg);
+  drawCraters(svg);
   // Lichtvlek op de vloer onder elk doel: maakt de doelzones herkenbaar
   for (const [k, n] of Object.entries(NODES)) {
     if (n.type !== 'goal') continue;
@@ -2028,8 +2054,8 @@ function renderBoard() {
   }
   // De burchten waar de figuren vandaan komen: die van jou linksonder, die van
   // je tegenstander rechtsboven — dezelfde plek als het apparaat in Duel.
-  drawSpawn(svg, 78, 788, 0.95, 'p1');
-  drawSpawn(svg, 468, 78, 0.85, 'p2');
+  drawSpawn(svg, 72, 796, 0.72, 'p1');
+  drawSpawn(svg, 470, 76, 0.78, 'p2');
   // Scheidingslijnen tussen de zijlijn en het speelveld (staan ook in Duel)
   for (const y of [190, 700]) {
     el('line', { x1:22, y1:y, x2:518, y2:y, stroke:'rgba(255,255,255,0.75)', 'stroke-width':3, 'stroke-linecap':'round' }, svg);
@@ -2363,11 +2389,127 @@ function applyPlateFx(u, slot) {
 }
 function clearPlateFx(u) { if (u) u.fx = {}; }
 
+// De inslag zelf, getekend in de bord-SVG op het punt waar de klap valt.
+function spawnImpact(svg, x, y, soort) {
+  const g = el('g', {}, svg);
+  const zet = (n, attrs, anim, delay) => {
+    const e = el(n, attrs, g);
+    e.style.transformBox = 'fill-box'; e.style.transformOrigin = 'center';
+    e.style.animation = anim; if (delay) e.style.animationDelay = delay;
+    return e;
+  };
+  const K = { vuur:'#fb923c', bliksem:'#fde047', gif:'#4ade80', kou:'#7dd3fc',
+              klauw:'#f87171', snede:'#f8fafc', hamer:'#cbd5e1', pijl:'#e5e7eb',
+              schild:'#60a5fa', magie:'#c084fc' }[soort] || '#fff';
+
+  if (soort === 'bliksem') {
+    // Donderschicht die van bovenaf het bord in slaat
+    const pad = `M ${x-6} ${y-260} L ${x-16} ${y-120} L ${x+2} ${y-124} L ${x-10} ${y-8} L ${x+18} ${y-140} L ${x-1} ${y-136} L ${x+12} ${y-260}`;
+    zet('path', { d:pad, fill:'none', stroke:K, 'stroke-width':7, 'stroke-linejoin':'round',
+      filter:'drop-shadow(0 0 8px '+K+')' }, 'fxBolt .5s steps(4) forwards');
+    zet('path', { d:pad, fill:'none', stroke:'#fff', 'stroke-width':2.5, 'stroke-linejoin':'round' }, 'fxBolt .5s steps(4) forwards');
+    zet('ellipse', { cx:x, cy:y+4, rx:8, ry:4, fill:'#fff' }, 'fxShock .55s ease-out forwards');
+    zet('ellipse', { cx:x, cy:y+4, rx:8, ry:4, fill:'none', stroke:K, 'stroke-width':3 }, 'fxShock .7s ease-out forwards', '.06s');
+  } else if (soort === 'vuur') {
+    // Meteoor die schuin inkomt en inslaat
+    zet('path', { d:`M ${x-150} ${y-190} L ${x-18} ${y-14} L ${x-38} ${y-38} Z`, fill:'rgba(251,146,60,0.55)' },
+        'fxMeteorTrail .34s ease-in forwards');
+    zet('circle', { cx:x, cy:y, r:11, fill:'url(#gMeteor)' }, 'fxMeteor .34s ease-in forwards');
+    for (let i = 0; i < 10; i++) {
+      const a = (Math.PI * 2 * i) / 10;
+      zet('circle', { cx:x + Math.cos(a)*7, cy:y + Math.sin(a)*4, r:3.4, fill: i%2 ? '#fde047' : K },
+          'fxBurst .6s ease-out forwards', (0.3 + i*0.015) + 's');
+    }
+    zet('ellipse', { cx:x, cy:y+5, rx:10, ry:4.5, fill:'none', stroke:K, 'stroke-width':4 }, 'fxShock .8s ease-out forwards', '.3s');
+  } else if (soort === 'gif') {
+    for (let i = 0; i < 9; i++) {
+      const a = (Math.PI * 2 * i) / 9;
+      zet('ellipse', { cx:x + Math.cos(a)*6, cy:y + Math.sin(a)*4, rx:4.5, ry:6, fill:K, opacity:0.9 },
+          'fxSplat .8s ease-out forwards', (i*0.03) + 's');
+    }
+    zet('ellipse', { cx:x, cy:y+5, rx:16, ry:7, fill:'rgba(74,222,128,0.35)' }, 'fxPlas 1.6s ease-out forwards');
+  } else if (soort === 'kou') {
+    for (let i = 0; i < 7; i++) {
+      const a = (Math.PI * 2 * i) / 7;
+      zet('path', { d:`M ${x} ${y-3} l ${Math.cos(a)*7} ${Math.sin(a)*4-9} l ${Math.cos(a)*5} ${Math.sin(a)*3+9} Z`, fill:K, opacity:0.9 },
+          'fxScherfUit .7s ease-out forwards', (i*0.03) + 's');
+    }
+  } else if (soort === 'klauw' || soort === 'snede') {
+    for (let i = 0; i < 3; i++) {
+      zet('path', { d:`M ${x-26+i*9} ${y-22} L ${x+16+i*9} ${y+16}`, stroke:K, 'stroke-width':4.5,
+        'stroke-linecap':'round', fill:'none' }, 'fxKrasUit .45s ease-out forwards', (i*0.06) + 's');
+    }
+  } else if (soort === 'pijl') {
+    zet('path', { d:`M ${x-120} ${y-46} L ${x-4} ${y-2}`, stroke:K, 'stroke-width':3.5, 'stroke-linecap':'round', fill:'none' },
+        'fxPijlIn .3s ease-out forwards');
+    zet('ellipse', { cx:x, cy:y+3, rx:7, ry:3, fill:'none', stroke:K, 'stroke-width':3 }, 'fxShock .5s ease-out forwards', '.25s');
+  } else if (soort === 'hamer' || soort === 'schild') {
+    zet('ellipse', { cx:x, cy:y+4, rx:9, ry:4, fill:'none', stroke:K, 'stroke-width':5 }, 'fxShock .6s ease-out forwards');
+    zet('ellipse', { cx:x, cy:y+4, rx:9, ry:4, fill:'none', stroke:'#fff', 'stroke-width':2 }, 'fxShock .8s ease-out forwards', '.1s');
+    for (let i = 0; i < 6; i++) {
+      const a = (Math.PI * 2 * i) / 6;
+      zet('rect', { x:x + Math.cos(a)*8, y:y + Math.sin(a)*5, width:5, height:5, fill:'#8a7f6d' },
+          'fxBurst .55s ease-out forwards', (i*0.02) + 's');
+    }
+  } else {
+    // magie en de rest: een oplichtende ring met runenstipjes
+    zet('circle', { cx:x, cy:y, r:10, fill:'none', stroke:K, 'stroke-width':3, 'stroke-dasharray':'6 5' },
+        'fxRuneUit .8s linear forwards');
+    zet('ellipse', { cx:x, cy:y+4, rx:8, ry:4, fill:'none', stroke:K, 'stroke-width':3 }, 'fxShock .7s ease-out forwards');
+  }
+  setTimeout(() => { if (g.parentNode) g.parentNode.removeChild(g); }, 1800);
+}
+
+// ===== Inslagen OP HET BORD =====
+// Naast de animatie bij de draaischijven slaat de aanval ook echt in op het
+// bord, op het punt waar de klap valt: een bliksem die neerkomt, een meteoor
+// die inslaat, een gifplas. Zware inslagen laten een krater achter die pas na
+// een tijdje vervaagt.
+const FX_KRATER = { vuur: true, hamer: true, bliksem: true };
+function boardImpact(node, soort) {
+  if (!node || !soort || animOff() || !NODES[node]) return;
+  const n = NODES[node];
+  queueFX(n.x, n.y, 'inslag:' + soort);
+  if (FX_KRATER[soort]) {
+    state.craters = state.craters || [];
+    state.craters.push({ x: n.x, y: n.y, soort, born: performance.now() });
+    if (state.craters.length > 8) state.craters.shift();
+  }
+}
+
+// Kraters worden bij elke render opnieuw getekend en vervagen met de tijd.
+function drawCraters(svg) {
+  const lijst = state.craters || [];
+  if (!lijst.length) return;
+  const nu = performance.now();
+  state.craters = lijst.filter(c => nu - c.born < 14000);
+  for (const c of state.craters) {
+    const leeftijd = (nu - c.born) / 14000;
+    const op = Math.max(0, 0.75 * (1 - leeftijd));
+    const g = el('g', { opacity: op.toFixed(2) }, svg);
+    // opgeworpen rand, dan de donkere kom
+    el('ellipse', { cx:c.x, cy:c.y + 8, rx:34, ry:15, fill:'rgba(120,72,40,0.55)' }, g);
+    el('ellipse', { cx:c.x, cy:c.y + 8, rx:29, ry:12.5, fill:'rgba(16,7,3,0.92)' }, g);
+    el('ellipse', { cx:c.x, cy:c.y + 6.5, rx:20, ry:8, fill:'rgba(48,20,8,0.95)' }, g);
+    if (c.soort === 'vuur') {
+      el('ellipse', { cx:c.x, cy:c.y + 7, rx:11, ry:4.4, fill:`rgba(251,146,60,${(0.7*(1-leeftijd)).toFixed(2)})` }, g);
+      el('ellipse', { cx:c.x, cy:c.y + 7, rx:5, ry:2, fill:`rgba(254,215,170,${(0.8*(1-leeftijd)).toFixed(2)})` }, g);
+    }
+    // barsten die uit de krater het bord in lopen
+    for (const a of [8, 62, 118, 176, 232, 298]) {
+      const r = (a * Math.PI) / 180;
+      el('path', { d:`M ${c.x + Math.cos(r)*20} ${c.y + 8 + Math.sin(r)*9} L ${c.x + Math.cos(r)*40} ${c.y + 8 + Math.sin(r)*18}`,
+        stroke:'rgba(14,6,3,0.85)', 'stroke-width':2.6, 'stroke-linecap':'round' }, g);
+    }
+  }
+}
+
 function queueFX(x, y, kind) { (state.pendingFX = state.pendingFX || []).push({ x, y, kind }); }
 function flushFX() { const list = state.pendingFX || []; state.pendingFX = []; for (const f of list) spawnFX(f.x, f.y, f.kind); }
 function spawnFX(x, y, kind) {
   if (animOff()) return;
   const svg = document.getElementById('board');
+  if (kind.startsWith('inslag:')) { spawnImpact(svg, x, y, kind.slice(7)); return; }
   const g = el('g', {}, svg);
   const n = kind === 'poof' ? 4 : 7;
   for (let i = 0; i < n; i++) {
@@ -3103,6 +3245,14 @@ async function runCombat(att, def) {
   const btn = document.getElementById('btn-combat-continue'); btn.style.display = ''; setTimeout(() => btn.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
   await new Promise(res => { btn.onclick = res; }); ov.classList.remove('active');
 
+  // De aanval slaat nu ook echt IN op het bord, op het punt waar hij landt.
+  // Dat gebeurt na het sluiten van het gevechtsscherm, zodat je het ziet.
+  {
+    const fxA = attackFx(aSlot), fxD = attackFx(dSlot);
+    if (fxA) boardImpact(defInitialNode, fxA);   // wat de aanvaller doet, landt op de verdediger
+    if (fxD) boardImpact(attInitialNode, fxD);   // en andersom
+  }
+
   att.node = attNextNode;
   def.node = defNextNode;
   if (attToBench) { koUnit(att); queueFX(NODES[attInitialNode].x, NODES[attInitialNode].y, 'burst'); }
@@ -3310,6 +3460,10 @@ const GOAL_ZONE = ['G2','T2','T3'];
 // een bezet entry-punt kan de tegenstander niets meer inzetten. Bovendien liggen
 // ze diep in vijandelijk gebied, dus het is meteen terreinwinst.
 const ENEMY_ENTRIES = ['E1_BL', 'E1_BR'];
+// De EIGEN startpunten van de AI liggen op de buitenroute naar zijn doel. Ze
+// vrijgeven opent een laan waar de speler zo doorheen loopt — precies wat Koen
+// zag gebeuren. Ze tellen daarom mee als verdedigingspunt.
+const OWN_ENTRIES = ['E2_TL', 'E2_TR'];
 
 function aiTurn() {
   if (state.over || state.turn !== AI || state.mode !== 'solo' || state.locked) return; state.aiThinking = true; renderAll();
@@ -3344,6 +3498,8 @@ function aiTurn() {
       const urgent = danger && threat.turns <= 2;
       const needDefenders = urgent && zoneUnits.length < 2;
       if (needDefenders) s += Math.max(0, 300 - distTo(t, 'G2') * 90) * cfg.keeper;
+      // Een eigen startpunt bezet houden sluit de buitenroute af
+      if (danger && OWN_ENTRIES.includes(t) && !unitAt(t)) s += 170 * cfg.keeper;
       if (GOAL_ZONE.includes(t)) {
         if (needDefenders) s += 300 * cfg.keeper;
         if (t === 'G2') {
@@ -3392,6 +3548,8 @@ function aiTurn() {
           // lopen. Zonder deze regel wisselde hij elke beurt tussen G2 en T2 —
           // hij moet immers iets doen — en liep de rusher door het gat.
           if (u.node === 'G2' && danger) s -= 700 * cfg.keeper;
+          // ...en ook een bezet eigen startpunt geef je bij dreiging niet zomaar op
+          if (danger && OWN_ENTRIES.includes(u.node) && !OWN_ENTRIES.includes(t)) s -= 220 * cfg.keeper;
           if (u.uid === lastDefender && !GOAL_ZONE.includes(t)) s -= 500;       // laatste verdediger blijft ALTIJD
           else if (inZone && danger && !GOAL_ZONE.includes(t)) s -= 150;        // bij dreiging blijft iedereen liever
           actions.push({ type:'move', uid:u.uid, target:t, score: s + Math.random() * cfg.jitter });
