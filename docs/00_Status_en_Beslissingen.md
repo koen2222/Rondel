@@ -126,13 +126,21 @@ Level-up (Duel-spec, sinds sessie 5 in code)
 - Per level: sterkste White/Gold-slot wordt 1 wedge groter, 1 Miss-wedge verdwijnt
 - Levels blijven behouden na eigen KO; level-badge zichtbaar op het bord
 
-ROSTER (18 units — ALLEMAAL in code, elk 16-slot)
-Knights & Humans: Squire, Battle Cleric, Knight Commander
-Elves & Sylvan: Forest Scout, Elven Archer, Arcane Weaver
-Dwarves & Forge: Stone Apprentice, Runesmith, Mountain Warden
-Undead & Necropolis: Restless Skeleton, Ghoul, Necromancer
-Beasts & Wilds: Boar Brute, Lupine Hunter, Wyrmling
-Inferno & Demonic: Imp, Hellhound, Pit Lord
+ROSTER (18 units — sessie 32 omgedoopt naar MYTHOLOGIE op Koens wens)
+Alle figuren zijn nu goden, helden en monsters uit ECHTE mythologie — allemaal
+publiek domein, dus juridisch veilig. Koen noemde Voldemort/Luke/Chewbacca als
+sfeerbeeld; die zijn beschermd, maar hun archetypes bestaan al in de mythe
+(dodengodin, jonge held, trouw beest). De code-sleutels zijn ONGEWIJZIGD
+gebleven (squire, cleric, ...) zodat art-bestanden en opgeslagen profielen
+blijven werken. Ook alle getallen — MP, schade, aantal vakken, abilities —
+zijn EXACT hetzelfde gebleven: dit is puur een herdoping, geen balanswijziging.
+Hemelhal (Noors):    Einherjar, Eir, Odin
+Halfgoden (Grieks):  Hermes, Chiron (centaur), Loki
+Smidse (Grieks):     Cycloop, Hephaistos, Talos (bronzen automaat)
+Dodenrijk:           Draugr, Ghul, Hel (half levend, half lijk)
+Wildernis:           Calydonische Ever, Fenrir, Quetzalcoatl
+Vuurdiepte:          Kobold, Cerberus, Surtr
+Aanvalsnamen zijn meeveranderd (Gungnir-worp, Ravenzwerm, Wereldbrand, ...).
 LET OP: disk-data is in sessie 5 herontworpen (v4-data was verloren). Archetypes:
 commons veel Miss / laag damage, rares Gold-slots / weinig Miss. Valideren in speeltest.
 

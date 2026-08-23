@@ -155,7 +155,7 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
 
   // 5b. Ability zichtbaar in collectie-detail
   await page.click('#tile-collection');
-  await page.locator('#coll-grid .coll-card', { hasText: 'Forest Scout' }).click();
+  await page.locator('#coll-grid .coll-card', { hasText: 'Hermes' }).click();
   await page.waitForSelector('#detail-overlay.active');
   ok('Ability getoond in unit-detail', /Sluipen/.test(await page.locator('#detail-slots').innerText()));
   await page.click('#btn-detail-close');
