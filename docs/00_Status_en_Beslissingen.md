@@ -153,6 +153,26 @@ HUIDIGE DELIVERABLE
   - Symmetrische Duel-resolutie (headless getest: 14/14 spec-checks OK)
   - Bord-topologie headless getest: 12/12 checks OK
 
+SPEEL-SIMULATIE (nieuw in sessie 25): test/simulate.js speelt N volledige
+potjes headless. De testspeler doet ofwel willekeurige legale zetten ("random",
+test of de regels blijven werken) ofwel beent zo hard mogelijk naar het doel
+("rush", test de keeper-logica en of de rush-exploit dood blijft).
+Draai: python3 -m http.server 8123 & node test/simulate.js 8 moeilijk rush
+
+RUSH-METING (sessie 25, na de bord-ombouw) — BELANGRIJK OPEN PUNT
+Een beenende speler won eerst 8/8 in 2 beurten tegen de ZWAARSTE AI. Onderzocht
+en vier echte AI-bugs gevonden en gefixt (zie sessie 25 hieronder). Daarna:
+7/8 in gemiddeld 11 beurten, en de AI wint er soms zelf een.
+De rush blijft dus STERK. Dat is nu een balans-/ontwerpvraag voor Koen, geen
+bug meer. Opties, in oplopende ingrijpendheid:
+  a) niets doen — in Duel is rushen ook een legitieme, sterke strategie
+  b) AI verder tunen (meer onderscheppen; gemeten poging hielp niet aantoonbaar)
+  c) bord: entry->doel van 7 naar 8-9 stappen, of een derde toegang schrappen
+  d) regel: figuur die op een doel staat kan niet worden aangevallen zolang er
+     een bondgenoot naast staat (verzonnen regel — WIJKT AF van Duel)
+LET OP bij (c)/(d): het bord komt nu exact overeen met het echte Duel-bord
+(26 punten + 2 doelen). Elke wijziging daaraan is een bewuste afwijking.
+
 GEDAAN IN SESSIE 25 (22 aug 2026) — BORD GELIJKGETROKKEN MET DUEL
 Koen: "het bord klopt nog niet met Pokémon Duel, die heeft nog een lijn na het
 een-na-laatste puntje naar het startpunt toe — zoek maar even op en zorg dat het
@@ -181,8 +201,33 @@ de hele mechaniek."
 - Deploy-regel nagelopen op Koens vraag ("kunnen ze lopen als je ze inzet"):
   klopt al met Duel — inzetten via een vrij eigen entry kost 1 MP en met de
   resterende MP mag de figuur meteen doorlopen naar lege punten.
+- AI-BUGS gevonden met de nieuwe speel-simulatie (alle vier echt, geen tuning):
+  1. De verdedigingsbonus zat achter `onBoard >= 1`, dus bij zijn EERSTE inzet
+     kreeg de AI geen enkele prikkel om het doel te bemannen — precies wanneer
+     een rusher moet worden opgevangen. Gate verwijderd.
+  2. De keeper liep elke beurt van G2 af (er is geen "sta stil"-actie, dus met
+     één figuur op het bord moet hij die wel verplaatsen). Nu -700 op van het
+     doel af lopen zolang er dreiging is.
+  3. De AI voerde geen versterking aan tijdens het verdedigen, waardoor hij
+     die ene keeper wel MOEST bewegen. Nu extra inzet-prikkel bij dreiging.
+  4. De AI stond permanent in paniekstand (een rusher is bijna altijd binnen
+     de horizon) en viel dáárdoor nooit aan, terwijl dit een race is. Nu een
+     VERDEDIGERS-QUOTUM: maximaal 2 figuren verdedigen, de rest gaat aanvallen.
+  Effect: rusher won 8/8 in 2 beurten -> 7/8 in gemiddeld 11 beurten.
+  Een zwaarder gewogen onderschepping is geprobeerd en WEER TERUGGEDRAAID:
+  meetbaar niet beter, dus niet geshipt.
+- 'advance'-knop toegevoegd aan de moeilijkheidsgraden. Zonder die knop maakte
+  "Licht" het spel juist KORTER (9 beurten) i.p.v. makkelijker: minder
+  verdedigen betekende alleen ongehinderd doorrennen. Nu 14 beurten, gelijk aan
+  Normaal. LET OP: dat "Licht" ook echt makkelijker VOELT is niet bewezen —
+  de simulatiespeler verliest tegen elke moeilijkheidsgraad. Speeltest nodig.
+- Einde-melding gefixt: de reden wordt nu vanuit de kijkende speler
+  geformuleerd. Voorheen kon er "VERSLAGEN — DOEL BEREIKT!" staan als de AI
+  JOUW doel innam. Zes aanroepplekken gebruiken nu redencodes (goal/lockout/
+  time) i.p.v. losse zinnen; ook de Engelse "Lockout!" is weg.
 - Tests: 98 → 102 headless (bord 28/26/32, MP-bereik), rooktest 34 (bord-check
-  nu exact 28 punten i.p.v. een losse ondergrens). SW-cache v35.
+  nu exact 28 punten i.p.v. een losse ondergrens), plus de nieuwe
+  speel-simulatie. SW-cache v36.
 
 GEDAAN IN SESSIE 24 (22 aug 2026) — "MAAK HET AF ZOALS BEDOELD"
 Koens opdracht: het spel afmaken zoals oorspronkelijk bedoeld, zo dicht mogelijk

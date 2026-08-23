@@ -947,7 +947,7 @@ function tickClock() {
   if (cEl) { cEl.textContent = '⏱ ' + fmtClock(state.clock[state.turn]); cEl.style.color = state.clock[state.turn] < 30000 ? '#f87171' : ''; }
   // Laatste 5 seconden: één tik per seconde, alleen in je eigen beurt
   if (state.clock[state.turn] < 5000 && Math.ceil(before / 1000) !== Math.ceil(state.clock[state.turn] / 1000)) sfx('tick');
-  if (state.clock[state.turn] <= 0) { state.clock[state.turn] = 0; endMatch(state.turn === 'p1' ? 'p2' : 'p1', 'De tijd is om!'); }
+  if (state.clock[state.turn] <= 0) { state.clock[state.turn] = 0; endMatch(state.turn === 'p1' ? 'p2' : 'p1', 'time'); }
 }
 
 // Duel-regel: KO → Healing Center (max 2 plekken). Een derde KO duwt de oudste
@@ -1159,8 +1159,31 @@ function startGame() {
   renderAll();
 }
 
-function endMatch(winner, msg) {
+// Reden-tekst bij het einde van een potje. Vroeger gaf elke aanroepplek z'n
+// eigen zin mee, wat rare combinaties opleverde ("VERSLAGEN — DOEL BEREIKT!"
+// als de AI JOUW doel innam). Nu geven de aanroepplekken alleen een CODE en
+// formuleert deze functie het vanuit de speler die kijkt.
+function endReasonText(winner, kind) {
+  const solo = state.mode === 'solo';
+  const jij = winner === 'p1';
+  if (kind === 'goal') {
+    if (!solo) return `Speler ${jij ? 1 : 2} bereikte het doel van de tegenstander`;
+    return jij ? 'Je figuur bereikte hun doel!' : 'De tegenstander bereikte jouw doel';
+  }
+  if (kind === 'lockout') {
+    if (!solo) return `Speler ${jij ? 2 : 1} kon geen zet meer doen`;
+    return jij ? 'De tegenstander kon geen zet meer doen' : 'Je kon geen zet meer doen';
+  }
+  if (kind === 'time') {
+    if (!solo) return `De bedenktijd van speler ${jij ? 2 : 1} is op`;
+    return jij ? 'De bedenktijd van de tegenstander is op' : 'Je bedenktijd is op';
+  }
+  return kind;   // vrije tekst blijft mogelijk
+}
+
+function endMatch(winner, kind) {
   if (state.over) return;   // dubbele triggers (klok + zet) afvangen
+  const msg = endReasonText(winner, kind);
   state.over = true; stopClock(); clearSpinTicks();
   let gain = 0;
   if (state.mode === 'solo') {
@@ -1838,7 +1861,7 @@ function onNodeTap(nodeKey) {
     }
 
     moveUnit(u, nodeKey).then(() => { 
-      const goal = NODES[nodeKey]; if (goal.type==='goal' && goal.owner !== u.owner) { endMatch(u.owner, 'DOEL BEREIKT!'); return; } 
+      const goal = NODES[nodeKey]; if (goal.type==='goal' && goal.owner !== u.owner) { endMatch(u.owner, 'goal'); return; } 
       state.selected = null; state.legalTargets = new Set(); state.actionsLeft--; state.locked = false; afterAction(); 
     });
   }
@@ -2085,7 +2108,7 @@ function checkSurround() {
 function afterAction() {
   state.firstMoveDone = true;
   checkSurround();
-  if (state.actionsLeft<=0 && !hasAnyAction(state.turn)) { endMatch(state.turn==='p1'?'p2':'p1', 'Lockout!'); return; }
+  if (state.actionsLeft<=0 && !hasAnyAction(state.turn)) { endMatch(state.turn==='p1'?'p2':'p1', 'lockout'); return; }
   renderAll(); if (state.mode === 'solo' && state.turn === 'p2' && state.actionsLeft <= 0 && !state.over) { setTimeout(endTurn, 600); }
 }
 
@@ -2103,7 +2126,7 @@ function endTurn() {
   state.plateUsed = false; state.pendingPlate = null; state.mpBonus = {}; state.warcry = { p1:false, p2:false };
   for (const uid of state.bench[state.turn]) { const u = state.units[uid]; if (u.status.includes('wait')) u.status = u.status.filter(s => s !== 'wait'); }
   sfx('turn');
-  renderAll(); if (!hasAnyAction(state.turn)) { endMatch(state.turn==='p1'?'p2':'p1', 'Vastgelopen — geen zet meer mogelijk!'); return; }
+  renderAll(); if (!hasAnyAction(state.turn)) { endMatch(state.turn==='p1'?'p2':'p1', 'lockout'); return; }
   if (state.mode === 'solo' && state.turn === 'p2') { setTimeout(aiTurn, Math.max(150, 400 * (animScale() || 0.4))); }
 }
 
@@ -2405,7 +2428,7 @@ async function runCombat(att, def) {
   if (r.attKO && !r.defKO) levelUp(def);
 
   if (r.defKO && !r.attKO && att.node) {
-    if (NODES[att.node].type==='goal' && NODES[att.node].owner !== att.owner) { endMatch(att.owner, 'DOEL BEREIKT!'); return; }
+    if (NODES[att.node].type==='goal' && NODES[att.node].owner !== att.owner) { endMatch(att.owner, 'goal'); return; }
   }
   state.locked = false;
   afterAction();
@@ -2481,10 +2504,14 @@ const AI = 'p2';
 // Moeilijkheidsgraad (sessie 24). 'jitter' = hoeveel toeval er op elke score zit,
 // 'slip' = kans dat de AI niet z'n beste maar z'n op-één-na-beste zet kiest,
 // 'horizon' = hoeveel beurten vooruit een rush als dreiging telt.
+// 'advance' schaalt hoe hard de AI naar JOUW doel toewerkt. Zonder die knop
+// maakte 'makkelijk' het spel juist korter i.p.v. makkelijker: minder verdedigen
+// betekende alleen dat hij ongehinderd doorrende. Een winnende zet pakt hij
+// altijd (goal-bereik blijft 1000) — hij zoekt er alleen minder actief naar.
 const AI_LEVELS = {
-  makkelijk: { jitter: 45, slip: 0.35, horizon: 1, keeper: 0.5, abilityWeight: 0.3, think: 500 },
-  normaal:   { jitter: 5,  slip: 0.08, horizon: 3, keeper: 1.0, abilityWeight: 1.0, think: 800 },
-  moeilijk:  { jitter: 2,  slip: 0,    horizon: 4, keeper: 1.3, abilityWeight: 1.4, think: 650 },
+  makkelijk: { jitter: 45, slip: 0.35, horizon: 1, keeper: 0.5, abilityWeight: 0.3, advance: 0.35, think: 500 },
+  normaal:   { jitter: 5,  slip: 0.08, horizon: 3, keeper: 1.0, abilityWeight: 1.0, advance: 1.0,  think: 800 },
+  moeilijk:  { jitter: 2,  slip: 0,    horizon: 4, keeper: 1.3, abilityWeight: 1.4, advance: 1.3,  think: 650 },
 };
 function aiCfg() { return AI_LEVELS[S('difficulty')] || AI_LEVELS.normaal; }
 
@@ -2593,20 +2620,30 @@ function aiTurn() {
 
     const g2Empty = !unitAt('G2');
     const posScore = (t, dNow, u) => {
-      let s = (dNow - distTo(t, 'G1')) * 25;
-      if (NODES[t].type === 'goal' && NODES[t].owner === 'p1') s = 1000;
+      let s = (dNow - distTo(t, 'G1')) * 25 * cfg.advance;
+      if (NODES[t].type === 'goal' && NODES[t].owner === 'p1') s = 1000;   // winnende zet: altijd pakken
+      // Verdedigingsgradiënt: bij dreiging telt ELKE stap dichter bij het eigen
+      // doel. Zonder dit kreeg de AI pas een defensieve prikkel als hij al op
+      // T2/T3/G2 stond — en bij zijn EERSTE inzet (onBoard 0) helemaal niet,
+      // precies wanneer een rusher moet worden opgevangen.
+      // Verdedigen is voor een BEPERKT aantal figuren. Zonder quotum stond de
+      // AI permanent in paniekstand (een rusher is bijna altijd binnen de
+      // horizon), verdedigde hij met alles en viel hij nooit aan — terwijl dit
+      // een race is: wie het eerst bij het doel van de ander is, wint.
+      const needDefenders = danger && zoneUnits.length < 2;
+      if (needDefenders) s += Math.max(0, 300 - distTo(t, 'G2') * 90) * cfg.keeper;
       if (GOAL_ZONE.includes(t)) {
-        if (zoneEmpty && onBoard >= 1) s += (danger ? 400 : 150) * cfg.keeper; // zone altijd hermannen, niet alleen bij paniek
+        if (needDefenders) s += 300 * cfg.keeper;
         if (t === 'G2') {
           s += 60;
           // In de zone staan blokkeert niets — alleen een keeper OP het doel blokkeert.
           // Bij dreiging moet G2 zelf bezetten daarom (bijna) alles overtroeven.
-          if (danger && g2Empty) s += (threat.turns <= 2 ? 600 : 250) * cfg.keeper;
+          if (danger && g2Empty) s += (threat.turns <= 2 ? 700 : 300) * cfg.keeper;
         }
       }
       if (u) s += abilityPosBonus(u, t);
       // Phasers zijn onze béste aanvallers: die mogen juist wél oprukken
-      if (u && canPhase(u) && !GOAL_ZONE.includes(t)) s += (dNow - distTo(t, 'G1')) * 15 * cfg.abilityWeight;
+      if (u && canPhase(u) && !GOAL_ZONE.includes(t)) s += (dNow - distTo(t, 'G1')) * 15 * cfg.abilityWeight * cfg.advance;
       return s;
     };
 
@@ -2617,6 +2654,9 @@ function aiTurn() {
         ? state.bench[AI].filter(x => state.units[x].status.includes('wait')).length * 40 * cfg.abilityWeight : 0;
       for (const t of deployTargets(u)) {
         let s = 25 + Math.max(0, 4 - onBoard) * 15 + posScore(t, distTo(t, 'G1') + 2, u) * 0.6 + raiseBonus;
+        // Bij dreiging is versterking aanvoeren belangrijk: met te weinig
+        // figuren op het bord moet de keeper elke beurt zelf zetten doen.
+        if (danger && onBoard < 3) s += (140 - onBoard * 35) * cfg.keeper;   // versterking aanvoeren
         actions.push({ type:'deploy', uid, target:t, score: s + Math.random() * cfg.jitter });
       }
     }
@@ -2635,6 +2675,10 @@ function aiTurn() {
           actions.push({ type:'attack', uid:u.uid, target:t, defenderUid:occ.uid, score: s + Math.random() * cfg.jitter });
         } else {
           let s = posScore(t, dNow, u);
+          // Een keeper die ÓP het doel staat mag daar bij dreiging niet vanaf
+          // lopen. Zonder deze regel wisselde hij elke beurt tussen G2 en T2 —
+          // hij moet immers iets doen — en liep de rusher door het gat.
+          if (u.node === 'G2' && danger) s -= 700 * cfg.keeper;
           if (u.uid === lastDefender && !GOAL_ZONE.includes(t)) s -= 500;       // laatste verdediger blijft ALTIJD
           else if (inZone && danger && !GOAL_ZONE.includes(t)) s -= 150;        // bij dreiging blijft iedereen liever
           actions.push({ type:'move', uid:u.uid, target:t, score: s + Math.random() * cfg.jitter });
@@ -2648,7 +2692,7 @@ function aiTurn() {
     if (cfg.slip && actions.length > 1 && Math.random() < cfg.slip) pick = 1 + Math.floor(Math.random() * Math.min(2, actions.length - 1));
     const best = actions[pick];
     if (best.type === 'deploy') { state.locked = true; doDeploy(state.units[best.uid], best.target).then(() => { state.actionsLeft--; state.locked = false; afterAction(); }); }
-    else if (best.type === 'move') { state.locked = true; moveUnit(state.units[best.uid], best.target).then(()=>{ const g = NODES[best.target]; if (g.type==='goal' && g.owner !== AI) { endMatch(AI, 'AI BEREIKT JE DOEL!'); return; } state.actionsLeft--; state.locked = false; afterAction(); }); }
+    else if (best.type === 'move') { state.locked = true; moveUnit(state.units[best.uid], best.target).then(()=>{ const g = NODES[best.target]; if (g.type==='goal' && g.owner !== AI) { endMatch(AI, 'goal'); return; } state.actionsLeft--; state.locked = false; afterAction(); }); }
     else if (best.type === 'attack') { 
         state.locked = true; const u = state.units[best.uid]; const path = bfs(u.node, best.target);
         if (path && path.length > 1) {
