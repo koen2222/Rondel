@@ -169,12 +169,12 @@ section('=== BOARD TOPOLOGIE (13 checks) ===');
 const nodeKeys = Object.keys(NODES);
 check('28 nodes (Duel: 26 punten + 2 doelen)', nodeKeys.length, 28);
 check('26 gewone punten, exact zoals Duel', nodeKeys.filter(k => NODES[k].type !== 'goal').length, 26);
-check('32 edges (buitenring 20 + binnenring 8 + 4 hoekdiagonalen)', ROUTES.length, 32);
+check('34 edges (ring 20 + binnenring 8 + 4 hoek- + 2 doeldiagonalen)', ROUTES.length, 34);
 
 // ADJ: Set → count undirected edges
 let edgeSum = 0;
 for (const k of nodeKeys) edgeSum += ADJ[k].size;
-check('ADJ-som = 64 (32×2)', edgeSum, 64);
+check('ADJ-som = 68 (34×2)', edgeSum, 68);
 
 // BFS volledig verbonden
 {
@@ -221,9 +221,9 @@ check('G2 aanwezig en type=goal',  NODES['G2']?.type, 'goal');
   const bfsD = (s, g) => { const q=[[s,0]], seen=new Set([s]);
     while(q.length){const [n,d]=q.shift(); if(n===g) return d;
       for(const nx of ADJ[n]) if(!seen.has(nx)){seen.add(nx);q.push([nx,d+1]);}} return -1; };
-  check('E1_BL → G2 = 7 stappen (snelweg dicht)', bfsD('E1_BL','G2'), 7);
-  check('E1_BR → G2 = 7 stappen (symmetrisch)',   bfsD('E1_BR','G2'), 7);
-  check('E2_TR → G1 = 7 stappen (180°-spiegel)',  bfsD('E2_TR','G1'), 7);
+  check('E1_BL → G2 = 6 stappen (Duel-afstand)', bfsD('E1_BL','G2'), 6);
+  check('E1_BR → G2 = 6 stappen (symmetrisch)',   bfsD('E1_BR','G2'), 6);
+  check('E2_TR → G1 = 6 stappen (180°-spiegel)',  bfsD('E2_TR','G1'), 6);
 }
 
 // ─── 3b. DISK-LAYOUTS (permutatie-garantie: kansen exact gelijk) ──────────────

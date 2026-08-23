@@ -57,12 +57,19 @@ Bord (DEFINITIEF — sessie 25: gelijkgetrokken met het ECHTE Duel-bord, 28 posi
   het als "a 7x5 measurement on the outer square and an even 3x3 inner square,
   with the corners of both squares connecting".
 - Doelen G1/G2 in het midden van onder- en bovenrand; 4 entries op de hoeken.
-- Routes (32): buitenring 20 + binnenring 8 + 4 hoekdiagonalen (elke entry naar
-  de dichtstbijzijnde hoek van het binnenvierkant). MEER verbindingen tussen
-  binnen en buiten zijn er NIET.
+- Routes (34): buitenring 20 + binnenring 8 + 4 hoekdiagonalen (elke entry naar
+  de dichtstbijzijnde hoek van het binnenvierkant) + 2 DOEL-DIAGONALEN.
+- DOEL-DIAGONALEN (sessie 26, AFGELEZEN VAN EEN ECHTE DUEL-SCREENSHOT die Koen
+  stuurde): vanaf het midden van het binnenvierkant loopt één schuine lijn naar
+  een flank van het doel — bovenin naar links (T2-IT2), onderin naar rechts
+  (B3-IB2), dus 180° gespiegeld. Dit is exact wat Koen in sessie 3 al had
+  beschreven ("G2->IT2 diagonaal linksaf, G1->IB4 180°-spiegel rechtsaf") en
+  wat in sessie 17 als rush-fix was GESCHRAPT. Dat schrappen week af van Duel
+  en is nu teruggedraaid: Duel wint (meta-principe).
 - Geverifieerd: volledig verbonden, 180°-rotatiesymmetrisch, entry→vijandelijk
-  doel = 7 stappen vanaf ALLE vier de entries, en elk doel houdt precies 2
-  toegangen. De rush-fix van sessie 17 blijft dus intact.
+  doel = 6 stappen vanaf ALLE vier de entries, elk doel houdt precies 2
+  toegangen. LET OP: 6 i.p.v. 7 stappen maakt rushen sterker; zie het
+  RUSH-punt hieronder.
 - VERVALLEN: de 32-node layout met 5x3 binnenrechthoek (sessie 6/17). Die had
   4 punten te veel t.o.v. het echte Duel-bord.
 - Weergave: sinds sessie 17 in PERSPECTIEF (trapezoïde, schuin zoals een echte
@@ -152,6 +159,20 @@ HUIDIGE DELIVERABLE
     level-up, alle statussen functioneel
   - Symmetrische Duel-resolutie (headless getest: 14/14 spec-checks OK)
   - Bord-topologie headless getest: 12/12 checks OK
+
+VISUELE TAAL (sessie 26, afgelezen van Koens Duel-screenshot)
+- Het bord is DOORZICHTIG: geen speelplaat, je kijkt op een gloeiende arenavloer.
+  Achtergrond in CSS (statisch, want de SVG wordt elke zet herbouwd — een filter
+  daarin zou elke render opnieuw rekenen en op mobiel haperen).
+- Routes: witte kern + warme halo, gloed op de GROEP (één filter i.p.v. zestig).
+- Punten: witte ring met donker hart. Startpunt: concentrische ringen als een
+  schietschijf. Doel: grote gloeiende ring met pijl naar binnen.
+- Figuren: fors t.o.v. hun sokkel (48x66 op een schijf van 40 breed), dikke
+  sokkel met felle teamrand en gekleurde grondgloed, MP-cijfer op de sokkelrand
+  (alleen op het bord — aan de zijlijn heeft renderBench al een badge).
+- Geselecteerde figuur krijgt gele wijzers links en rechts, zoals in Duel.
+- ARENA-KEUZE als instelling: vuur (standaard) / kristal (de oude paarse look) /
+  woud.
 
 SPEEL-SIMULATIE (nieuw in sessie 25): test/simulate.js speelt N volledige
 potjes headless. De testspeler doet ofwel willekeurige legale zetten ("random",
