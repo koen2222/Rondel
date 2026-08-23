@@ -44,18 +44,35 @@
   .board-wrap { position: relative; border-radius: 16px; padding: 0; overflow: hidden;
     border: 1px solid rgba(255,170,90,0.28);
     box-shadow: inset 0 0 90px rgba(0,0,0,0.7), 0 10px 34px rgba(0,0,0,0.92); }
+  /* De vloer is NIET één kleur: er liggen zachte kleurvlekken overheen, zoals
+     het parelmoerachtige oppervlak in Duel. Elke arena heeft z'n eigen palet. */
   .board-wrap[data-arena="vuur"] {
     background:
-      radial-gradient(ellipse 62% 34% at 50% 36%, rgba(253,186,116,0.40), transparent 72%),
+      radial-gradient(ellipse 34% 20% at 22% 24%, rgba(250,204,21,0.30), transparent 70%),
+      radial-gradient(ellipse 30% 18% at 78% 30%, rgba(244,63,94,0.28), transparent 70%),
+      radial-gradient(ellipse 32% 20% at 30% 74%, rgba(217,70,239,0.20), transparent 70%),
+      radial-gradient(ellipse 36% 22% at 74% 78%, rgba(251,146,60,0.32), transparent 72%),
+      radial-gradient(ellipse 62% 34% at 50% 36%, rgba(253,186,116,0.34), transparent 72%),
       radial-gradient(ellipse 85% 62% at 50% 44%, #8a3410 0%, #4a1408 52%, #1a0705 100%); }
   .board-wrap[data-arena="kristal"] {
     background:
-      radial-gradient(ellipse 62% 34% at 50% 36%, rgba(147,197,253,0.28), transparent 72%),
+      radial-gradient(ellipse 34% 20% at 24% 26%, rgba(103,232,249,0.26), transparent 70%),
+      radial-gradient(ellipse 30% 18% at 76% 30%, rgba(244,114,182,0.22), transparent 70%),
+      radial-gradient(ellipse 32% 20% at 28% 76%, rgba(167,139,250,0.26), transparent 70%),
+      radial-gradient(ellipse 36% 22% at 74% 74%, rgba(147,197,253,0.24), transparent 72%),
       linear-gradient(180deg, #5b4a82 0%, #423463 32%, #302750 62%, #1a1530 100%); }
   .board-wrap[data-arena="woud"] {
     background:
-      radial-gradient(ellipse 62% 34% at 50% 36%, rgba(190,242,100,0.26), transparent 72%),
+      radial-gradient(ellipse 34% 20% at 22% 26%, rgba(190,242,100,0.26), transparent 70%),
+      radial-gradient(ellipse 30% 18% at 78% 30%, rgba(45,212,191,0.24), transparent 70%),
+      radial-gradient(ellipse 32% 20% at 30% 74%, rgba(250,204,21,0.18), transparent 70%),
+      radial-gradient(ellipse 36% 22% at 72% 78%, rgba(132,204,22,0.26), transparent 72%),
       radial-gradient(ellipse 85% 62% at 50% 44%, #1f4023 0%, #12281a 52%, #060f0a 100%); }
+
+  /* Plate-kaarten die op tafel liggen */
+  .plate-card { transition: transform 0.15s; }
+  .plate-card.spent { opacity: 0.4; }
+  .plate-card.sel { filter: drop-shadow(0 0 10px rgba(253,224,71,0.9)); }
   /* Rots-/nevelstructuur: één statische SVG-ruis als achtergrondlaag */
   .board-wrap::before { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0.5;
     mix-blend-mode: overlay;
@@ -1705,10 +1722,44 @@ const BOARD_DEFS = `
   <radialGradient id="gGoalGold" cx="40%" cy="32%" r="80%">
     <stop offset="0%" stop-color="#fde68a"/><stop offset="55%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#92400e"/>
   </radialGradient>
+  <linearGradient id="gCardFace" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#fdf6e3"/><stop offset="55%" stop-color="#e8d9b5"/><stop offset="100%" stop-color="#c9b189"/>
+  </linearGradient>
   <radialGradient id="gGoalBlue" cx="40%" cy="32%" r="80%">
     <stop offset="0%" stop-color="#93c5fd"/><stop offset="55%" stop-color="#2563eb"/><stop offset="100%" stop-color="#1e3a8a"/>
   </radialGradient>
 </defs>`;
+
+// Klein kasteelpoortje: twee torens met kantelen, een donkere doorgang en een
+// vlag in de teamkleur. Puur decor — het maakt zichtbaar wáár je leger vandaan
+// komt, zoals het apparaat linksonder in Duel.
+function drawCastle(svg, cx, cy, scale, owner) {
+  const g = el('g', { transform:`translate(${cx},${cy}) scale(${scale})`, class:'castle' }, svg);
+  const flag = owner === 'p1' ? '#3b82f6' : '#ef4444';
+  const stone = '#8d8272', dark = '#5b5346', light = '#b3a893';
+  // Grondschaduw
+  el('ellipse', { cx:0, cy:26, rx:46, ry:11, fill:'rgba(0,0,0,0.45)' }, g);
+  // Muur tussen de torens
+  el('rect', { x:-26, y:-6, width:52, height:32, fill:stone, stroke:dark, 'stroke-width':1.5 }, g);
+  el('rect', { x:-26, y:-6, width:52, height:7, fill:light, opacity:0.45 }, g);
+  // Poortopening
+  el('path', { d:'M -11 26 L -11 8 A 11 11 0 0 1 11 8 L 11 26 Z', fill:'#1b1410', stroke:dark, 'stroke-width':1.5 }, g);
+  el('path', { d:'M -11 26 L -11 8 A 11 11 0 0 1 11 8 L 11 26', fill:'none', stroke:'rgba(255,220,150,0.35)', 'stroke-width':2 }, g);
+  // Twee torens
+  for (const sx of [-34, 34]) {
+    el('rect', { x:sx-11, y:-22, width:22, height:48, fill:stone, stroke:dark, 'stroke-width':1.5 }, g);
+    el('rect', { x:sx-11, y:-22, width:22, height:7, fill:light, opacity:0.45 }, g);
+    // Kantelen
+    for (const k of [-9, -2, 5]) el('rect', { x:sx+k, y:-29, width:5, height:8, fill:stone, stroke:dark, 'stroke-width':1 }, g);
+    // Schietgat
+    el('rect', { x:sx-2.5, y:-10, width:5, height:9, rx:2.5, fill:'#241b14' }, g);
+  }
+  // Kantelen op de muur
+  for (const k of [-24, -15, -6, 3, 12, 19]) el('rect', { x:k, y:-12, width:6, height:7, fill:stone, stroke:dark, 'stroke-width':1 }, g);
+  // Vlag in de teamkleur
+  el('line', { x1:0, y1:-13, x2:0, y2:-40, stroke:'#6b5b45', 'stroke-width':2.4 }, g);
+  el('path', { d:'M 1 -39 L 20 -33 L 1 -27 Z', fill:flag, stroke:'rgba(0,0,0,0.5)', 'stroke-width':1 }, g);
+}
 
 function renderBoard() {
   const svg = document.getElementById('board'); svg.innerHTML = BOARD_DEFS;
@@ -1717,6 +1768,10 @@ function renderBoard() {
   // GEEN speelplaat meer: het bord is doorzichtig en zweeft boven de arena,
   // net als in Duel. Alleen een warme grondgloed onder de routes.
   el('ellipse', { cx:270, cy:445, rx:255, ry:255, fill:'url(#gArenaGlow)' }, svg);
+  // De burchten waar de figuren vandaan komen: die van jou linksonder, die van
+  // je tegenstander rechtsboven — dezelfde plek als het apparaat in Duel.
+  drawCastle(svg, 62, 800, 1.0, 'p1');
+  drawCastle(svg, 478, 62, 0.8, 'p2');
   // Scheidingslijnen tussen de zijlijn en het speelveld (staan ook in Duel)
   for (const y of [190, 700]) {
     el('line', { x1:22, y1:y, x2:518, y2:y, stroke:'rgba(255,255,255,0.75)', 'stroke-width':3, 'stroke-linecap':'round' }, svg);
@@ -1795,9 +1850,42 @@ function benchSlot(player, i) {
   const y = rows[isP2 ? row : (1 - row)];
   const scale = (isP2 ? 0.74 : 0.92) * (row === 0 ? 0.94 : 1);
   // Rijen half verspringend, zodat ze elkaar niet overlappen
-  const spacing = 118, offset = (row % 2) ? 58 : 0;
+  const spacing = 112, offset = (row % 2) ? 54 : 0;
   const x = BOARD_CX + (col - (BENCH_PER_ROW - 1) / 2) * spacing + (isP2 ? offset : -offset);
   return { x, y, scale };
+}
+
+// ===== Plates als KAARTEN op tafel (Duel-look) =====
+// In Duel liggen je support-kaarten rechtsonder naast het veld. Hier tekenen we
+// ze in de bord-SVG zelf, licht gewaaierd, met het icoon en de naam erop.
+function renderPlateCards() {
+  const svg = document.getElementById('board');
+  const player = (state.mode === 'solo') ? 'p1' : state.turn;
+  const plates = state.plates[player] || [];
+  const g = el('g', { class:'plate-cards' }, svg);
+  const CW = 46, CH = 64, BX = 424, BY = 790;
+  plates.forEach((key, i) => {
+    const p = PLATES[key];
+    const sel = state.pendingPlate && state.pendingPlate.idx === i;
+    // Ruim uitgewaaierd, zodat alle drie de namen leesbaar blijven
+    const rot = -11 + i * 11, dx = i * 40, dy = (i === 1 ? -8 : 0);
+    const card = el('g', {
+      class: 'plate-card' + (sel ? ' sel' : '') + (state.plateUsed ? ' spent' : ''),
+      transform: `translate(${BX + dx},${BY + dy}) rotate(${rot})`,
+      style: 'cursor:pointer;'
+    }, g);
+    el('rect', { x:-CW/2+2, y:-CH/2+4, width:CW, height:CH, rx:7, fill:'rgba(0,0,0,0.45)' }, card);
+    el('rect', { x:-CW/2, y:-CH/2, width:CW, height:CH, rx:7, fill:'url(#gCardFace)', stroke: sel ? '#fde047' : 'rgba(255,220,170,0.85)', 'stroke-width': sel ? 3 : 1.8 }, card);
+    el('rect', { x:-CW/2+3.5, y:-CH/2+3.5, width:CW-7, height:CH-7, rx:5, fill:'none', stroke:'rgba(255,255,255,0.22)', 'stroke-width':1 }, card);
+    // Icoon van de plate, midden op de kaart
+    const ico = document.createElementNS(SVG_NS, 'g');
+    ico.setAttribute('transform', 'translate(-11,-25)');
+    ico.innerHTML = plateIcon(key, 22);
+    card.appendChild(ico);
+    const t = el('text', { x:0, y:20, 'font-size':7.2, 'text-anchor':'middle', fill:'#3b2a12', 'font-family':"'Cinzel', serif", 'font-weight':'700' }, card);
+    t.textContent = p.name.length > 9 ? p.name.slice(0, 8) + '.' : p.name;
+    card.addEventListener('click', (e) => { e.stopPropagation(); onPlateTap(i); });
+  });
 }
 
 function renderBench() {
@@ -1912,7 +2000,7 @@ function spawnFX(x, y, kind) {
   setTimeout(() => { if (g.parentNode) g.parentNode.removeChild(g); }, 800);
 }
 
-function renderAll() { renderBoard(); renderBench(); renderTurnBanner(); renderPlates(); flushFX(); }
+function renderAll() { renderBoard(); renderBench(); renderPlateCards(); renderTurnBanner(); renderPlates(); flushFX(); }
 
 // Tik = actie, vasthouden (450 ms) = figuur-info. Werkt met muis én aanraking;
 // bewegen tijdens het vasthouden annuleert, zodat scrollen niet per ongeluk de
@@ -2724,8 +2812,12 @@ function rushThreat() {
   return best;
 }
 
-const G2_ADJ = ['T2','T3'];              // sessie 17: IT2 grenst niet meer aan G2
+const G2_ADJ = ['T2','T3'];
 const GOAL_ZONE = ['G2','T2','T3'];
+// De startpunten van de SPELER. Ze bezetten is in Duel een echte tactiek: door
+// een bezet entry-punt kan de tegenstander niets meer inzetten. Bovendien liggen
+// ze diep in vijandelijk gebied, dus het is meteen terreinwinst.
+const ENEMY_ENTRIES = ['E1_BL', 'E1_BR'];
 
 function aiTurn() {
   if (state.over || state.turn !== AI || state.mode !== 'solo' || state.locked) return; state.aiThinking = true; renderAll();
@@ -2749,11 +2841,16 @@ function aiTurn() {
       // doel. Zonder dit kreeg de AI pas een defensieve prikkel als hij al op
       // T2/T3/G2 stond — en bij zijn EERSTE inzet (onBoard 0) helemaal niet,
       // precies wanneer een rusher moet worden opgevangen.
-      // Verdedigen is voor een BEPERKT aantal figuren. Zonder quotum stond de
-      // AI permanent in paniekstand (een rusher is bijna altijd binnen de
-      // horizon), verdedigde hij met alles en viel hij nooit aan — terwijl dit
-      // een race is: wie het eerst bij het doel van de ander is, wint.
-      const needDefenders = danger && zoneUnits.length < 2;
+      // SPAWN-BLOKKADE: op een startpunt van de speler gaan staan legt zijn
+      // aanvoer stil én is diep terreinwinst. Dit is de zet die de AI eerder
+      // volledig links liet liggen.
+      if (ENEMY_ENTRIES.includes(t)) s += 300 * cfg.advance;
+
+      // Verdedigen is voor een BEPERKT aantal figuren, en pas als het echt
+      // dringend is. Anders bleef de AI bij z'n eigen doel hangen in plaats van
+      // uit te zwermen — dit is een race, geen belegering.
+      const urgent = danger && threat.turns <= 2;
+      const needDefenders = urgent && zoneUnits.length < 2;
       if (needDefenders) s += Math.max(0, 300 - distTo(t, 'G2') * 90) * cfg.keeper;
       if (GOAL_ZONE.includes(t)) {
         if (needDefenders) s += 300 * cfg.keeper;
@@ -2776,9 +2873,10 @@ function aiTurn() {
       const raiseBonus = abilityOf(u) === 'raise'
         ? state.bench[AI].filter(x => state.units[x].status.includes('wait')).length * 40 * cfg.abilityWeight : 0;
       for (const t of deployTargets(u)) {
-        let s = 25 + Math.max(0, 4 - onBoard) * 15 + posScore(t, distTo(t, 'G1') + 2, u) * 0.6 + raiseBonus;
-        // Bij dreiging is versterking aanvoeren belangrijk: met te weinig
-        // figuren op het bord moet de keeper elke beurt zelf zetten doen.
+        // Zoveel mogelijk figuren zo snel mogelijk het veld op: met een leeg
+        // bord is inzetten veruit de beste zet. De bonus zakt naarmate er meer
+        // staan, zodat hij daarna weer gaat spelen i.p.v. blijven storten.
+        let s = 25 + Math.max(0, 5 - onBoard) * 60 + posScore(t, distTo(t, 'G1') + 2, u) * 0.6 + raiseBonus;
         if (danger && onBoard < 3) s += (140 - onBoard * 35) * cfg.keeper;   // versterking aanvoeren
         actions.push({ type:'deploy', uid, target:t, score: s + Math.random() * cfg.jitter });
       }

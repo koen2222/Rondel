@@ -182,6 +182,31 @@ VISUELE TAAL (sessie 26, afgelezen van Koens Duel-screenshot)
 - ARENA-KEUZE als instelling: vuur (standaard) / kristal (de oude paarse look) /
   woud.
 
+SESSIE 28 — TAFEL, DECOR EN EEN AGRESSIEVE AI (Koens vier punten)
+- PLATES ALS KAARTEN OP TAFEL: de HTML-chipstrip is aangevuld met echte
+  kaarten die rechtsonder in de bord-SVG liggen, licht uitgewaaierd, met icoon
+  en naam. Aantikken doet hetzelfde als de chip (onPlateTap).
+- VLOER IS NIET MEER ÉÉN KLEUR: over elke arena liggen nu vier zachte
+  kleurvlekken in wisselende tinten (Duel heeft zo'n parelmoerachtig oppervlak).
+  Per arena een eigen palet.
+- BURCHTEN: linksonder jouw kasteel, rechtsboven dat van de tegenstander, met
+  poort, kantelen, torens en een vlag in de teamkleur. Puur decor: het maakt
+  zichtbaar waar je leger vandaan komt (Koens wens i.p.v. de pokéball in Duel).
+- AI OMGEGOOID op Koens kritiek ("hij verdedigt z'n eigen doel terwijl hij zo
+  snel mogelijk zoveel mogelijk poppetjes het veld op moet krijgen en mijn
+  spawnpunten moet afdekken"):
+  * SPAWN-BLOKKADE: op een startpunt van de speler gaan staan is nu +300 waard.
+    Dit is een ECHTE Duel-tactiek — pokemon.com: "You won't be able to send out
+    Pokémon through a blocked entry point". De AI liet dit volledig liggen.
+  * UITZWERMEN: de inzet-bonus ging van (4-onBoard)*15 naar (5-onBoard)*60, dus
+    met een leeg bord is inzetten veruit de beste zet.
+  * MINDER TURTELEN: de defensieve gradiënt geldt nu alleen als de dreiging
+    ECHT dringend is (threat.turns <= 2), niet zodra er ergens een vijand
+    binnen de horizon staat. Daardoor hing hij eerder bij z'n eigen doel.
+  Gemeten: de AI bouwt nu op naar 5 figuren op het bord en bezet een spawnpunt
+  vanaf beurt 5; in een ander potje blokkeerde hij een spawn in beurt 3 en won
+  in beurt 4.
+
 SPEEL-SIMULATIE (nieuw in sessie 25): test/simulate.js speelt N volledige
 potjes headless. De testspeler doet ofwel willekeurige legale zetten ("random",
 test of de regels blijven werken) ofwel beent zo hard mogelijk naar het doel
