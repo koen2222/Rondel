@@ -121,13 +121,26 @@ Inferno & Demonic: Imp, Hellhound, Pit Lord
 LET OP: disk-data is in sessie 5 herontworpen (v4-data was verloren). Archetypes:
 commons veel Miss / laag damage, rares Gold-slots / weinig Miss. Valideren in speeltest.
 
-PLATES (10, in code met targeting-UI)
-Rally (+1 MP 1 unit), War Cry (+1 MP alle units), Cleanse (status wissen),
-Hex (confusion), Ensnare (paralysis), Scorch (burn), Venom (poison),
-Bulwark (volgende combat Red→Blue, eenmalig), Blink (teleport naar leeg buurpunt,
-bewust NIET naar goal — anti-instawin), Recall (terug naar bench).
-- AI: status-plates defensief (op vijand ≤2 stappen van eigen goal), Cleanse op eigen
-  unit met status. Blink/Recall laat AI links liggen.
+KAARTEN / PLATES (15, sessie 29 herontworpen naar de ECHTE Duel-plates)
+Bron: serebii.net/duel/plates.shtml. Twee structuurpunten die wij misten:
+- elke plate heeft een KOSTPRIJS (1/2/3) en je deck mag samen niet boven de 8
+- elke plate werkt één keer per potje
+Ook: Duel-plates richten zich NOOIT op een vijandelijke figuur. Onze oude
+Hex/Ensnare/Scorch/Venom bestonden daar dus niet en zijn VERVALLEN.
+De 15 kaarten, met hun Duel-origineel:
+- Herstel:   Genezing (Full Heal, 1), Herrijzenis (Max Revive, 2)
+- Draaien:   Tweede Kans (Double Chance, 1), Verblinding (Bright Powder, 1),
+             Scherpschutter (X Accuracy, 1)
+- Gevecht:   Krachtstoot (X Attack, 1), Schildwacht (X Defend, 1),
+             Voorrang (X Speed, 1), Vervloeking (X Sp. Atk, 1),
+             Laatste Adem (Focus Band, 2)
+- Beweging:  Terugroepen (Scoop Up, 1), Stellingwissel (Swap Spot, 1),
+             Sprong (Hurdle Jump, 2), Sluiermantel (Invisibility Cape, 3)
+- Bijzonder: Hergebruik (Recycle, 2)
+Gevechtseffecten grijpen in runCombat aan via u.fx (respin, xaccuracy, xspeed,
+xattack, xspatk, xdefend, focus) en worden bij de beurtwissel gewist.
+- AI: kiest naar situatie — gevechtskaart als een eigen figuur naast een vijand
+  staat, Genezing bij status, Herrijzenis bij weinig volk op het bord.
 
 DECK-SELECTIE (sinds sessie 5)
 - Pre-game scherm: kies exact 6 units + 3 plates, of knop Random
