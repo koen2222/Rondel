@@ -830,6 +830,7 @@ const SETTING_DEFS = {
   difficulty:  { def: 'normaal',type:'enum',   opts: ['makkelijk','normaal','moeilijk'] },
   confirmExit: { def: true,     type:'bool' },
   showHints:   { def: true,     type:'bool' },
+  autoEndTurn: { def: true,     type:'bool' },
 };
 function freshSettings() { const s = {}; for (const [k, d] of Object.entries(SETTING_DEFS)) s[k] = d.def; return s; }
 // Valideert elke sleutel apart: onbekende/ongeldige waarden vallen terug op de default.
@@ -1516,6 +1517,7 @@ const SETTINGS_UI = [
     { key:'animSpeed', kind:'seg', t:'Animatiesnelheid', d:'Sneller speelt vlotter; uit slaat animaties over',
       opts:[['normaal','Normaal'],['snel','Snel'],['uit','Uit']] },
     { key:'showHints', kind:'toggle', t:'Hints tonen', d:'Korte tips tijdens je beurt (bv. waarom een zet niet mag)' },
+    { key:'autoEndTurn', kind:'toggle', t:'Beurt vanzelf beëindigen', d:'Zodra je zet erop zit gaat de beurt door, zoals in Duel. Speel je kaart dus vóór je zet.' },
   ]},
   { group: 'Duel-regels', rows: [
     { key:'clockMinutes', kind:'seg', t:'Bedenktijd', d:'Tijd per speler; op = verloren (Duel-regel: 5 min)',
@@ -1606,7 +1608,8 @@ const HELP_SECTIONS = [
     'Je wint <b>niet</b> door alle vijanden te verslaan. Verslagen figuren komen namelijk gewoon terug.' ]},
   { h:'Je beurt: één actie', p:[
     'Per beurt doe je <b>precies één ding</b>: een figuur verplaatsen, een figuur inzetten vanaf de zijkant, of met een figuur aanvallen.',
-    'Een <b>kaart</b> (rechtsonder op tafel) kost géén actie — je mag er één per beurt spelen, bovenop je zet.',
+    'Een <b>kaart</b> (rechtsonder op tafel) kost géén actie — je mag er één per beurt spelen. Speel hem <b>vóór</b> je zet, want zodra je zet erop zit gaat de beurt vanzelf door.',
+    'De kaarten van je tegenstander liggen linksboven met de rug omhoog: je ziet wel hoevéél hij er heeft, niet welke.',
     'De allereerste zet van het potje kost <b>1 MP extra</b>, zodat wie begint geen gratis voorsprong krijgt.' ]},
   { h:'Bewegen en inzetten', p:[
     'Elk figuur heeft <b>MP</b> (het gouden getal): zoveel punten mag hij per beurt afleggen.',
@@ -1815,6 +1818,9 @@ const BOARD_DEFS = `
   <radialGradient id="gGoalGold" cx="40%" cy="32%" r="80%">
     <stop offset="0%" stop-color="#fde68a"/><stop offset="55%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#92400e"/>
   </radialGradient>
+  <linearGradient id="gCardBack" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#7f1d1d"/><stop offset="55%" stop-color="#5b1414"/><stop offset="100%" stop-color="#380c0c"/>
+  </linearGradient>
   <linearGradient id="gCardFace" x1="0" y1="0" x2="0" y2="1">
     <stop offset="0%" stop-color="#fdf6e3"/><stop offset="55%" stop-color="#e8d9b5"/><stop offset="100%" stop-color="#c9b189"/>
   </linearGradient>
@@ -1948,10 +1954,34 @@ function benchSlot(player, i) {
   const rows = isP2 ? [58, 140] : [740, 818];
   const y = rows[isP2 ? row : (1 - row)];
   const scale = (isP2 ? 0.74 : 0.92) * (row === 0 ? 0.94 : 1);
-  // Rijen half verspringend, zodat ze elkaar niet overlappen
-  const spacing = 112, offset = (row % 2) ? 54 : 0;
-  const x = BOARD_CX + (col - (BENCH_PER_ROW - 1) / 2) * spacing + (isP2 ? offset : -offset);
+  // De rijen verspringen half, en het geheel staat iets uit het midden zodat de
+  // kaarten (rechtsonder) en de burchten hun eigen hoek houden.
+  const spacing = 92, offset = (row % 2) ? 44 : 0;
+  const centre = isP2 ? 282 : 258;
+  const x = centre + (col - (BENCH_PER_ROW - 1) / 2) * spacing + (isP2 ? offset : -offset);
   return { x, y, scale };
+}
+
+// De kaarten van je tegenstander liggen met de rug omhoog linksboven — je ziet
+// dus WEL hoeveel hij er nog heeft, maar niet welke. Precies zoals in Duel.
+function renderFoeCards(svg, n) {
+  if (!n) return;
+  const g = el('g', { class:'foe-cards' }, svg);
+  const CW = 34, CH = 48, BY = 72;
+  const step = n <= 1 ? 0 : Math.min(24, 90 / (n - 1));
+  const BX = 96 - ((n - 1) * step) / 2;
+  for (let i = 0; i < n; i++) {
+    const rot = n <= 1 ? 0 : 11 - (22 * i) / (n - 1);
+    const card = el('g', { transform:`translate(${BX + i * step},${BY}) rotate(${rot})` }, g);
+    el('rect', { x:-CW/2+2, y:-CH/2+3, width:CW, height:CH, rx:5, fill:'rgba(0,0,0,0.45)' }, card);
+    el('rect', { x:-CW/2, y:-CH/2, width:CW, height:CH, rx:5, fill:'url(#gCardBack)', stroke:'rgba(255,180,180,0.7)', 'stroke-width':1.5 }, card);
+    el('rect', { x:-CW/2+3, y:-CH/2+3, width:CW-6, height:CH-6, rx:3.5, fill:'none', stroke:'rgba(255,255,255,0.16)', 'stroke-width':1 }, card);
+    // Sober ruggetje: een ruit met een streep, geen informatie
+    el('path', { d:'M 0 -9 L 7 0 L 0 9 L -7 0 Z', fill:'none', stroke:'rgba(255,255,255,0.35)', 'stroke-width':1.4 }, card);
+    el('circle', { cx:0, cy:0, r:2.2, fill:'rgba(255,255,255,0.30)' }, card);
+  }
+  const t = el('text', { x:96, y:114, 'font-size':9, 'text-anchor':'middle', fill:'rgba(255,220,220,0.75)', 'font-family':"'Cinzel', serif" }, g);
+  t.textContent = `${n} kaart${n === 1 ? '' : 'en'}`;
 }
 
 // ===== Plates als KAARTEN op tafel (Duel-look) =====
@@ -1960,6 +1990,8 @@ function benchSlot(player, i) {
 function renderPlateCards() {
   const svg = document.getElementById('board');
   const player = (state.mode === 'solo') ? 'p1' : state.turn;
+  const foe = player === 'p1' ? 'p2' : 'p1';
+  renderFoeCards(svg, (state.plates[foe] || []).length);
   const plates = state.plates[player] || [];
   const g = el('g', { class:'plate-cards' }, svg);
   const n = plates.length;
@@ -2476,8 +2508,21 @@ function checkSurround() {
 function afterAction() {
   state.firstMoveDone = true;
   checkSurround();
+  maybeAutoEndTurn();
   if (state.actionsLeft<=0 && !hasAnyAction(state.turn)) { endMatch(state.turn==='p1'?'p2':'p1', 'lockout'); return; }
   renderAll(); if (state.mode === 'solo' && state.turn === 'p2' && state.actionsLeft <= 0 && !state.over) { setTimeout(endTurn, 600); }
+}
+
+// In Duel is er geen End Turn-knop: zodra je je zet hebt gedaan, gaat de beurt
+// door. Je kaart speel je dus VOOR je zet. Uit te zetten bij Instellingen.
+function maybeAutoEndTurn() {
+  if (!S('autoEndTurn')) return;
+  if (state.over || state.actionsLeft > 0 || state.pendingPlate) return;
+  if (state.mode === 'solo' && state.turn !== 'p1') return;   // AI regelt z'n eigen beurt al
+  setTimeout(() => {
+    if (state.over || state.locked || state.actionsLeft > 0 || state.pendingPlate) return;
+    endTurn();
+  }, Math.max(300, 900 * (animScale() || 0.4)));
 }
 
 function hasAnyAction(player) {

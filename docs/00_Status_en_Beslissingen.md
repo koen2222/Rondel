@@ -105,6 +105,13 @@ Beurt-economie (sessie 7: Duel-correct gemaakt na web-verificatie)
   Statussen genezen in het HC; level blijft behouden. De oude regel (KO → direct
   bench + wait) was te mild en is VERVALLEN.
 - Maximaal 1 Plate per beurt, kost géén actie, eenmalig gebruik
+- BEURT EINDIGT VANZELF (sessie 30): in Duel bestaat er geen End Turn-knop —
+  zie Koens screenshot: alleen Forfeit, Activate Ability en de AI-knop. Zodra je
+  zet erop zit gaat de beurt door; je kaart speel je dus VOOR je zet. Instelbaar
+  (autoEndTurn, standaard aan); de End Turn-knop blijft als terugval voor als je
+  geen zet meer hebt.
+- Kaarten van de TEGENSTANDER liggen zichtbaar maar DICHT linksboven, met een
+  teller: je ziet hoeveel hij er nog heeft, niet welke.
 
 Level-up (Duel-spec, sinds sessie 5 in code)
 - KO scoren = +1 level (max level 4)
