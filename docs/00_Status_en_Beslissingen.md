@@ -255,6 +255,25 @@ SESSIE 28 — TAFEL, DECOR EN EEN AGRESSIEVE AI (Koens vier punten)
   vanaf beurt 5; in een ander potje blokkeerde hij een spawn in beurt 3 en won
   in beurt 4.
 
+POORTEN EN AANVALSANIMATIES (sessie 35, Koens wensen)
+- De kastelen zijn vervangen door twee heel verschillende poorten, zodat je in
+  een oogopslag ziet van wie welke kant is: p1 (jij) krijgt een HEMELPOORT —
+  lichtende boog met zuilen, wolken, lichtstralen en een fonkelende ster; p2
+  krijgt een PUT — donker gat met gekartelde rotsrand, gloed uit de diepte,
+  twee glurende ogen en klauwsporen op de rand.
+- AANVALSANIMATIES: elke aanval toont nu iets dat bij z'n NAAM past. De
+  koppeling gaat op trefwoord (FX_TREFWOORDEN), met de vakkleur en het
+  status-effect als terugval, zodat een nieuwe aanval automatisch iets
+  passends krijgt. Tien animaties: hamer, gif (giftanden + druppels), vuur,
+  bliksem, pijl, kou (ijsscherven), klauw, snede, schild, magie (rune).
+  Slangenbeet -> gif, Smidshamer -> hamer, Vonkenspel -> vuur, Sterrenpijl ->
+  pijl, Grafkou -> kou, Kaakklem -> klauw, Dwaalbeeld -> magie. Een Miss of
+  een blok geeft GEEN animatie. Alles staat uit bij prefers-reduced-motion en
+  bij animatiesnelheid 'uit'.
+  Let op de volgorde van de trefwoorden: 'schild' moet vóór 'beuk' staan
+  (anders wordt Schildbeuk een hamer) en 'graf' mag niet in de kou-regel
+  (anders wordt Grafzwaard ijs in plaats van een snede).
+
 ART-GEREEDSCHAP (sessie 33): tools/cutout.py haalt een witte achtergrond van
 gegenereerde figuur-PNG's af. Beeldgeneratoren leveren vaak geen transparantie.
 Het vult vanaf de RANDEN naar binnen, zodat wit BINNEN de figuur (botten,
