@@ -11,7 +11,7 @@ hoe mooi een los figuurtje is, want ze staan straks naast elkaar op hetzelfde bo
 ## MASTER-PROMPT (eerst plakken)
 
 ```
-Je maakt speelgoedfiguurtjes voor een fantasy-bordspel. Alles is eigen ontwerp — gebruik geen bestaande personages, namen of merken.
+Je maakt speelgoedfiguurtjes voor een bordspel over MYTHOLOGIE. Elk figuurtje is een god, held of monster uit een echte mythologie (Noors, Grieks, Azteeks, folklore) — allemaal publiek domein. Gebruik geen personages uit films, boeken of games.
 
 STIJL (voor elk figuurtje identiek, dit is het belangrijkste):
 Een glanzend, geverfd verzamelfiguurtje van hard plastic, zoals de figuurtjes bij een tactisch bordspel. Chibi-verhoudingen: groot hoofd, klein lijf, korte dikke armen en benen, ongeveer tweeëneenhalf hoofd hoog. Duidelijke, dikke omtreklijnen en verzadigde kleuren. Het oppervlak heeft een lichte lak-glans met zachte highlights, alsof het met de hand is geverfd.
@@ -37,175 +37,186 @@ BELANGRIJK: het plaatje wordt in het spel heel klein getoond (ongeveer 48 bij 66
 
 ## De achttien figuren
 
-### Squire  ·  `art/squire.png`
-*Knights · Common · 2 MP · ability: geen*
+### Einherjar  ·  `art/squire.png`
+*Hemelhal · Common · 2 MP · ability: geen*
 
 ```
-Maak het figuurtje "Squire" in de stijl uit de master-prompt.
+Maak het figuurtje "Einherjar" in de stijl uit de master-prompt.
 
-Wat het is: jonge schildknaap, te groot rond schild, kort zwaard, verenpluim op de helm, dappere maar wat onhandige houding.
+Wie het is: Einherjar - een gevallen krijger die in Walhalla verder vecht (uit de Noorse mythologie).
+Hoe hij eruitziet: jonge gesneuvelde krijger, rond houten schild met ijzeren rand, korte speer, gevleugelde helm, spookachtig blauw randlicht alsof hij half uit deze wereld is.
 Kleurenpalet: staalgrijs, hemelsblauw, zilver.
-Sfeer van zijn factie (Knights): heraldiek, geemailleerd blauw-goud metaal, ridderlijk.
+Sfeer van zijn factie (Hemelhal): Noordse godenzaal: gehamerd zilver, blauw geemailleerd, raven en runen.
 Rol in het leger: eenvoudige voetsoldaat, niet te opvallend.
-Zijn sterkste aanval heet "Schildstoot (40 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
+Zijn sterkste aanval heet "Schildmuur (40 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
 
 
 Vierkant beeld, transparante achtergrond, geen sokkel, geen schaduw op de grond.
 ```
 
-### Battle Cleric  ·  `art/cleric.png`
-*Knights · Uncommon · 2 MP · ability: Zegenende Aura — Bij inzet: wis status van aangrenzende bondgenoten*
+### Eir  ·  `art/cleric.png`
+*Hemelhal · Uncommon · 2 MP · ability: Zegenende Aura — Bij inzet: wis status van aangrenzende bondgenoten*
 
 ```
-Maak het figuurtje "Battle Cleric" in de stijl uit de master-prompt.
+Maak het figuurtje "Eir" in de stijl uit de master-prompt.
 
-Wat het is: strijdpriester met tabberd, gepantserde knots, gloeiend zonnesymbool zwevend boven de open hand.
+Wie het is: Eir - godin van genezing en heelkunst (uit de Noorse mythologie).
+Hoe hij eruitziet: godin in wit gewaad met gouden randen, geneeskruiden in de ene hand, zacht gouden licht in de andere, kalme gesloten ogen.
 Kleurenpalet: ivoorwit, goud, hemelsblauw.
-Sfeer van zijn factie (Knights): heraldiek, geemailleerd blauw-goud metaal, ridderlijk.
+Sfeer van zijn factie (Hemelhal): Noordse godenzaal: gehamerd zilver, blauw geemailleerd, raven en runen.
 Rol in het leger: ervaren strijder, wat rijker uitgedost.
-Zijn sterkste aanval heet "Strijdknots (50 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
+Zijn sterkste aanval heet "Levensroede (50 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
 Zijn bijzondere gave: bij inzet: wis status van aangrenzende bondgenoten. Laat daar iets van zien.
 
 Vierkant beeld, transparante achtergrond, geen sokkel, geen schaduw op de grond.
 ```
 
-### Knight Commander  ·  `art/commander.png`
-*Knights · Rare · 2 MP · ability: Aanvoerder — Aangrenzende bondgenoten krijgen +1 MP*
+### Odin  ·  `art/commander.png`
+*Hemelhal · Rare · 2 MP · ability: Aanvoerder — Aangrenzende bondgenoten krijgen +1 MP*
 
 ```
-Maak het figuurtje "Knight Commander" in de stijl uit de master-prompt.
+Maak het figuurtje "Odin" in de stijl uit de master-prompt.
 
-Wat het is: gepluimde helm, wapperende mantel, opgeheven zwaard, banier op de rug, bevelende pose.
+Wie het is: Odin - de Alvader (uit de Noorse mythologie).
+Hoe hij eruitziet: eenogige godenkoning, breedgerande hoed of gevleugelde helm, wapperende blauwe mantel, speer Gungnir opgeheven, twee zwarte raven op zijn schouders.
 Kleurenpalet: koningsblauw, goud, staal.
-Sfeer van zijn factie (Knights): heraldiek, geemailleerd blauw-goud metaal, ridderlijk.
+Sfeer van zijn factie (Hemelhal): Noordse godenzaal: gehamerd zilver, blauw geemailleerd, raven en runen.
 Rol in het leger: blikvanger van het leger, duidelijk machtiger dan de rest.
-Zijn sterkste aanval heet "Zwaardslag (70 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
+Zijn sterkste aanval heet "Gungnir-worp (70 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
 Zijn bijzondere gave: aangrenzende bondgenoten krijgen +1 mp. Laat daar iets van zien.
 
 Vierkant beeld, transparante achtergrond, geen sokkel, geen schaduw op de grond.
 ```
 
-### Forest Scout  ·  `art/scout.png`
-*Elves · Common · 3 MP · ability: Sluipen — Beweegt dwars door bezette punten (stopt op leeg)*
+### Hermes  ·  `art/scout.png`
+*Halfgoden · Common · 3 MP · ability: Sluipen — Beweegt dwars door bezette punten (stopt op leeg)*
 
 ```
-Maak het figuurtje "Forest Scout" in de stijl uit de master-prompt.
+Maak het figuurtje "Hermes" in de stijl uit de master-prompt.
 
-Wat het is: slanke elfenverkenner, capuchon, twee dolken, door de knieen alsof hij sluipt, bladeren in de mantel.
-Kleurenpalet: mosgroen, leerbruin.
-Sfeer van zijn factie (Elves): organische vormen, bladmotieven, licht en sierlijk.
+Wie het is: Hermes - bode van de goden (uit de Griekse mythologie).
+Hoe hij eruitziet: jonge bode met kleine vleugels aan zijn sandalen en helm, gevleugelde staf met twee slangen, halverwege een stap alsof hij net de grond raakt.
+Kleurenpalet: hemelsblauw, goud, wit.
+Sfeer van zijn factie (Halfgoden): Griekse held-en-bedriegersfeer: goud, marmerwit, gevleugelde details.
 Rol in het leger: eenvoudige voetsoldaat, niet te opvallend.
-Zijn sterkste aanval heet "Dolksteek (30 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
+Zijn sterkste aanval heet "Snelle Steek (30 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
 Zijn bijzondere gave: beweegt dwars door bezette punten (stopt op leeg). Laat daar iets van zien.
 
 Vierkant beeld, transparante achtergrond, geen sokkel, geen schaduw op de grond.
 ```
 
-### Elven Archer  ·  `art/archer.png`
-*Elves · Uncommon · 2 MP · ability: geen*
+### Chiron  ·  `art/archer.png`
+*Halfgoden · Uncommon · 2 MP · ability: geen*
 
 ```
-Maak het figuurtje "Elven Archer" in de stijl uit de master-prompt.
+Maak het figuurtje "Chiron" in de stijl uit de master-prompt.
 
-Wat het is: elfenboogschutter, lange boog half gespannen, pijlkoker, spitse oren, rustige geconcentreerde blik.
-Kleurenpalet: bosgroen, koper, creme.
-Sfeer van zijn factie (Elves): organische vormen, bladmotieven, licht en sierlijk.
+Wie het is: Chiron - de wijze centaur (uit de Griekse mythologie).
+Hoe hij eruitziet: CENTAUR: bovenlijf van een bebaarde man, onderlijf van een paard, lange boog half gespannen, pijlkoker op de rug, rustige wijze blik.
+Kleurenpalet: kastanjebruin, bosgroen, brons.
+Sfeer van zijn factie (Halfgoden): Griekse held-en-bedriegersfeer: goud, marmerwit, gevleugelde details.
 Rol in het leger: ervaren strijder, wat rijker uitgedost.
-Zijn sterkste aanval heet "Boogschot (60 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
+Zijn sterkste aanval heet "Sterrenpijl (60 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
 
 
 Vierkant beeld, transparante achtergrond, geen sokkel, geen schaduw op de grond.
 ```
 
-### Arcane Weaver  ·  `art/weaver.png`
-*Elves · Rare · 2 MP · ability: Betovering — Vijand die ermee vecht raakt Confused*
+### Loki  ·  `art/weaver.png`
+*Halfgoden · Rare · 2 MP · ability: Betovering — Vijand die ermee vecht raakt Confused*
 
 ```
-Maak het figuurtje "Arcane Weaver" in de stijl uit de master-prompt.
+Maak het figuurtje "Loki" in de stijl uit de master-prompt.
 
-Wat het is: elfenmagier, wapperende sjaals, drie zwevende runenkristallen om de handen, haar zweeft omhoog.
-Kleurenpalet: amethistpaars, zilver, cyaan.
-Sfeer van zijn factie (Elves): organische vormen, bladmotieven, licht en sierlijk.
+Wie het is: Loki - de bedrieger (uit de Noorse mythologie).
+Hoe hij eruitziet: slanke bedriegersgod met scheve grijns, groen-zwarte mantel, gebogen hoorns, zijn eigen spiegelbeeld vervaagt half naast hem alsof je niet weet welke de echte is.
+Kleurenpalet: gifgroen, zwart, koper.
+Sfeer van zijn factie (Halfgoden): Griekse held-en-bedriegersfeer: goud, marmerwit, gevleugelde details.
 Rol in het leger: blikvanger van het leger, duidelijk machtiger dan de rest.
-Zijn sterkste aanval heet "Manavlaag (70 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
+Zijn sterkste aanval heet "Schijngestalte (70 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
 Zijn bijzondere gave: vijand die ermee vecht raakt confused. Laat daar iets van zien.
 
 Vierkant beeld, transparante achtergrond, geen sokkel, geen schaduw op de grond.
 ```
 
-### Stone Apprentice  ·  `art/apprentice.png`
-*Dwarves · Common · 2 MP · ability: geen*
+### Cycloop  ·  `art/apprentice.png`
+*Smidse · Common · 2 MP · ability: geen*
 
 ```
-Maak het figuurtje "Stone Apprentice" in de stijl uit de master-prompt.
+Maak het figuurtje "Cycloop" in de stijl uit de master-prompt.
 
-Wat het is: gedrongen dwerg-leerling, veel te grote steenhandschoenen, zwevend rotsblokje, verbaasde uitdrukking.
+Wie het is: Cycloop - eenogige smid uit Hephaistos' werkplaats (uit de Griekse mythologie).
+Hoe hij eruitziet: gedrongen eenogige reus-in-het-klein, leren schort, veel te grote smidshandschoenen, gloeiend brok metaal in de tang, verbaasde blik.
 Kleurenpalet: zandsteen, brons, aardebruin.
-Sfeer van zijn factie (Dwarves): zwaar, hoekig, gesmeed metaal en steen.
+Sfeer van zijn factie (Smidse): gesmeed brons en steen, gloeiend metaal, vonken.
 Rol in het leger: eenvoudige voetsoldaat, niet te opvallend.
-Zijn sterkste aanval heet "Steenworp (60 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
+Zijn sterkste aanval heet "Rotsworp (60 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
 
 
 Vierkant beeld, transparante achtergrond, geen sokkel, geen schaduw op de grond.
 ```
 
-### Runesmith  ·  `art/runesmith.png`
-*Dwarves · Uncommon · 2 MP · ability: Vuurrune — Vijand die ermee vecht raakt Burned*
+### Hephaistos  ·  `art/runesmith.png`
+*Smidse · Uncommon · 2 MP · ability: Vuurrune — Vijand die ermee vecht raakt Burned*
 
 ```
-Maak het figuurtje "Runesmith" in de stijl uit de master-prompt.
+Maak het figuurtje "Hephaistos" in de stijl uit de master-prompt.
 
-Wat het is: dwergensmid, gevlochten baard, zware hamer met gloeiende runen, vonken, leren schort.
+Wie het is: Hephaistos - smidgod (uit de Griekse mythologie).
+Hoe hij eruitziet: gespierde smidgod met kreupel been, gevlochten baard, zware hamer met gloeiende inslag, vonken om hem heen, leren schort.
 Kleurenpalet: ijzergrijs, gloeiend oranje, brons.
-Sfeer van zijn factie (Dwarves): zwaar, hoekig, gesmeed metaal en steen.
+Sfeer van zijn factie (Smidse): gesmeed brons en steen, gloeiend metaal, vonken.
 Rol in het leger: ervaren strijder, wat rijker uitgedost.
-Zijn sterkste aanval heet "Hamerslag (60 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
+Zijn sterkste aanval heet "Aambeeldslag (60 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
 Zijn bijzondere gave: vijand die ermee vecht raakt burned. Laat daar iets van zien.
 
 Vierkant beeld, transparante achtergrond, geen sokkel, geen schaduw op de grond.
 ```
 
-### Mountain Warden  ·  `art/warden.png`
-*Dwarves · Rare · 2 MP · ability: Bergvast — Bij KO: naar de bank i.p.v. Healing Center*
+### Talos  ·  `art/warden.png`
+*Smidse · Rare · 2 MP · ability: Bergvast — Bij KO: naar de bank i.p.v. Healing Center*
 
 ```
-Maak het figuurtje "Mountain Warden" in de stijl uit de master-prompt.
+Maak het figuurtje "Talos" in de stijl uit de master-prompt.
 
-Wat het is: zwaarbepantserde dwerg met torenschild bijna zo groot als hijzelf, stevig geplant, onwrikbaar.
-Kleurenpalet: graniet, diepblauw, zilver.
-Sfeer van zijn factie (Dwarves): zwaar, hoekig, gesmeed metaal en steen.
+Wie het is: Talos - de bronzen reus die Kreta bewaakte (uit de Griekse mythologie).
+Hoe hij eruitziet: AUTOMAAT van brons: geen mens maar een standbeeld dat leeft, naden en klinknagels zichtbaar, torenschild, gloeiende ader met vloeibaar vuur in zijn been, onwrikbaar geplant.
+Kleurenpalet: gepatineerd brons, diepblauw, goudgroen.
+Sfeer van zijn factie (Smidse): gesmeed brons en steen, gloeiend metaal, vonken.
 Rol in het leger: blikvanger van het leger, duidelijk machtiger dan de rest.
-Zijn sterkste aanval heet "Bergbeuk (90 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
+Zijn sterkste aanval heet "Bronzen Vuist (90 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
 Zijn bijzondere gave: bij ko: naar de bank i.p.v. healing center. Laat daar iets van zien.
 
 Vierkant beeld, transparante achtergrond, geen sokkel, geen schaduw op de grond.
 ```
 
-### Restless Skeleton  ·  `art/skeleton.png`
-*Undead · Common · 2 MP · ability: geen*
+### Draugr  ·  `art/skeleton.png`
+*Dodenrijk · Common · 2 MP · ability: geen*
 
 ```
-Maak het figuurtje "Restless Skeleton" in de stijl uit de master-prompt.
+Maak het figuurtje "Draugr" in de stijl uit de master-prompt.
 
-Wat het is: rammelend skelet, gedeukt schild, roestig kort zwaard, scheve kaak, losjes hangende botten.
+Wie het is: Draugr - grafwachter uit een Noorse grafheuvel (uit de Noorse mythologie).
+Hoe hij eruitziet: opgestane grafbewoner, half vergaan gezicht, gedeukt schild, roestig zwaard, mos en aarde aan zijn maliën, groene lichtjes in de oogkassen.
 Kleurenpalet: botwit, roestbruin, grafgroen.
-Sfeer van zijn factie (Undead): grafkoud, botwit en grafgroen, versleten.
+Sfeer van zijn factie (Dodenrijk): grafkoud, botwit en grafgroen, mos en vergane stof.
 Rol in het leger: eenvoudige voetsoldaat, niet te opvallend.
-Zijn sterkste aanval heet "Botzwaai (30 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
+Zijn sterkste aanval heet "Grafzwaard (30 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
 
 
 Vierkant beeld, transparante achtergrond, geen sokkel, geen schaduw op de grond.
 ```
 
-### Ghoul  ·  `art/ghoul.png`
-*Undead · Uncommon · 2 MP · ability: Rottende Greep — Vijand die ermee vecht raakt Poisoned*
+### Ghul  ·  `art/ghoul.png`
+*Dodenrijk · Uncommon · 2 MP · ability: Rottende Greep — Vijand die ermee vecht raakt Poisoned*
 
 ```
-Maak het figuurtje "Ghoul" in de stijl uit de master-prompt.
+Maak het figuurtje "Ghul" in de stijl uit de master-prompt.
 
-Wat het is: uitgemergelde lijkeneter, lange klauwen, gebogen rug, druipende groene walm.
-Kleurenpalet: ziekelijk groengrijs, donkerpaars.
-Sfeer van zijn factie (Undead): grafkoud, botwit en grafgroen, versleten.
+Wie het is: Ghul - lijkeneter uit de woestijnfolklore (uit de Arabische mythologie).
+Hoe hij eruitziet: uitgemergelde grafrover, veel te lange klauwen, gebogen rug, gescheurde lijkwade, groene walm om de handen.
+Kleurenpalet: ziekelijk groengrijs, donkerpaars, zandbruin.
+Sfeer van zijn factie (Dodenrijk): grafkoud, botwit en grafgroen, mos en vergane stof.
 Rol in het leger: ervaren strijder, wat rijker uitgedost.
 Zijn sterkste aanval heet "Klauwhaal (50 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
 Zijn bijzondere gave: vijand die ermee vecht raakt poisoned. Laat daar iets van zien.
@@ -213,47 +224,50 @@ Zijn bijzondere gave: vijand die ermee vecht raakt poisoned. Laat daar iets van 
 Vierkant beeld, transparante achtergrond, geen sokkel, geen schaduw op de grond.
 ```
 
-### Necromancer  ·  `art/necromancer.png`
-*Undead · Rare · 2 MP · ability: Zielenoproep — Bij inzet: wis Wacht-status van je eigen bank*
+### Hel  ·  `art/necromancer.png`
+*Dodenrijk · Rare · 2 MP · ability: Zielenoproep — Bij inzet: wis Wacht-status van je eigen bank*
 
 ```
-Maak het figuurtje "Necromancer" in de stijl uit de master-prompt.
+Maak het figuurtje "Hel" in de stijl uit de master-prompt.
 
-Wat het is: gehulde dodenbezweerder, schedelstaf, twee groene dwaallichtjes zwevend naast hem, gezicht in schaduw.
-Kleurenpalet: diep zwartpaars, gifgroen, bot.
-Sfeer van zijn factie (Undead): grafkoud, botwit en grafgroen, versleten.
+Wie het is: Hel - godin van de doden (uit de Noorse mythologie).
+Hoe hij eruitziet: godin die van voren LEVEND is en van achteren een lijk - een gezicht half schoon, half schedel; zwart gewaad, staf met schedel, twee groene dwaallichtjes zwevend naast haar.
+Kleurenpalet: zwartpaars, gifgroen, bot.
+Sfeer van zijn factie (Dodenrijk): grafkoud, botwit en grafgroen, mos en vergane stof.
 Rol in het leger: blikvanger van het leger, duidelijk machtiger dan de rest.
-Zijn sterkste aanval heet "Schaduwgreep (60 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
+Zijn sterkste aanval heet "Dodengreep (60 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
 Zijn bijzondere gave: bij inzet: wis wacht-status van je eigen bank. Laat daar iets van zien.
 
 Vierkant beeld, transparante achtergrond, geen sokkel, geen schaduw op de grond.
 ```
 
-### Boar Brute  ·  `art/boar.png`
-*Beasts · Common · 2 MP · ability: geen*
+### Calydonische Ever  ·  `art/boar.png`
+*Wildernis · Common · 2 MP · ability: geen*
 
 ```
-Maak het figuurtje "Boar Brute" in de stijl uit de master-prompt.
+Maak het figuurtje "Calydonische Ever" in de stijl uit de master-prompt.
 
-Wat het is: gedrongen everzwijn-beest, enorme slagtanden, gespannen schouders alsof hij aanstormt, stoomwolkje uit de neus.
+Wie het is: De Calydonische Ever - het monsterzwijn dat een heel koninkrijk verwoestte (uit de Griekse mythologie).
+Hoe hij eruitziet: kolossaal everzwijn op vier poten, enorme kromme slagtanden, borstelige nekkam overeind, gespannen schouders alsof hij aanstormt, stoom uit de neus.
 Kleurenpalet: borstelbruin, vuilgeel, modder.
-Sfeer van zijn factie (Beasts): ruw, dierlijk, vacht en tanden.
+Sfeer van zijn factie (Wildernis): ruwe natuur, vacht, veren, slagtanden en klauwen.
 Rol in het leger: eenvoudige voetsoldaat, niet te opvallend.
-Zijn sterkste aanval heet "Stormram (60 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
+Zijn sterkste aanval heet "Stormaanval (60 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
 
 
 Vierkant beeld, transparante achtergrond, geen sokkel, geen schaduw op de grond.
 ```
 
-### Lupine Hunter  ·  `art/lupine.png`
-*Beasts · Uncommon · 3 MP · ability: Roedel — +1 MP zolang er een bondgenoot naast staat*
+### Fenrir  ·  `art/lupine.png`
+*Wildernis · Uncommon · 3 MP · ability: Roedel — +1 MP zolang er een bondgenoot naast staat*
 
 ```
-Maak het figuurtje "Lupine Hunter" in de stijl uit de master-prompt.
+Maak het figuurtje "Fenrir" in de stijl uit de master-prompt.
 
-Wat het is: wolfachtige jager op twee poten, gescheurde mantel, speer, oren gespitst, alerte jachthouding.
+Wie het is: Fenrir - de grote wolf (uit de Noorse mythologie).
+Hoe hij eruitziet: reusachtige wolf, half rechtop op zijn achterpoten, gebroken ketting nog om een poot, ijzige adem, ogen als koud vuur.
 Kleurenpalet: wolfsgrijs, winterwit, ijsblauw.
-Sfeer van zijn factie (Beasts): ruw, dierlijk, vacht en tanden.
+Sfeer van zijn factie (Wildernis): ruwe natuur, vacht, veren, slagtanden en klauwen.
 Rol in het leger: ervaren strijder, wat rijker uitgedost.
 Zijn sterkste aanval heet "Kaakklem (50 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
 Zijn bijzondere gave: +1 mp zolang er een bondgenoot naast staat. Laat daar iets van zien.
@@ -261,65 +275,69 @@ Zijn bijzondere gave: +1 mp zolang er een bondgenoot naast staat. Laat daar iets
 Vierkant beeld, transparante achtergrond, geen sokkel, geen schaduw op de grond.
 ```
 
-### Wyrmling  ·  `art/wyrmling.png`
-*Beasts · Rare · 2 MP · ability: Vleugelslag — Vliegt over andere units heen (stopt op leeg)*
+### Quetzalcoatl  ·  `art/wyrmling.png`
+*Wildernis · Rare · 2 MP · ability: Vleugelslag — Vliegt over andere units heen (stopt op leeg)*
 
 ```
-Maak het figuurtje "Wyrmling" in de stijl uit de master-prompt.
+Maak het figuurtje "Quetzalcoatl" in de stijl uit de master-prompt.
 
-Wat het is: jong draakje, te grote vleugels, kleine hoorntjes, vlammetje uit de bek, ondeugende blik.
-Kleurenpalet: robijnrood, goud, oranje.
-Sfeer van zijn factie (Beasts): ruw, dierlijk, vacht en tanden.
+Wie het is: Quetzalcoatl - de gevederde slang (uit de Azteekse mythologie).
+Hoe hij eruitziet: gevederde slangdraak, kraag van groenblauwe veren, gouden ogen, opgerold en half in de lucht zwevend, zonnegloed om de kop.
+Kleurenpalet: jadegroen, turkoois, goud.
+Sfeer van zijn factie (Wildernis): ruwe natuur, vacht, veren, slagtanden en klauwen.
 Rol in het leger: blikvanger van het leger, duidelijk machtiger dan de rest.
-Zijn sterkste aanval heet "Staartzweep (60 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
+Zijn sterkste aanval heet "Veerslag (60 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
 Zijn bijzondere gave: vliegt over andere units heen (stopt op leeg). Laat daar iets van zien.
 
 Vierkant beeld, transparante achtergrond, geen sokkel, geen schaduw op de grond.
 ```
 
-### Imp  ·  `art/imp.png`
-*Inferno · Common · 3 MP · ability: geen*
+### Kobold  ·  `art/imp.png`
+*Vuurdiepte · Common · 3 MP · ability: geen*
 
 ```
-Maak het figuurtje "Imp" in de stijl uit de master-prompt.
+Maak het figuurtje "Kobold" in de stijl uit de master-prompt.
 
-Wat het is: klein duiveltje, vleermuisvleugels, kleine drietand, pijlpuntstaart, grijnzend en pesterig.
+Wie het is: Kobold - huisgeest en plaaggeest (uit de Germaanse mythologie).
+Hoe hij eruitziet: klein rood plaaggeestje met puntoren en puntmuts, veel te grote pook in zijn handjes, staart met pijlpunt, brutale grijns.
 Kleurenpalet: scharlaken, zwavelgeel, zwart.
-Sfeer van zijn factie (Inferno): vulkanisch, gloeiend van binnenuit, gedraaide horens.
+Sfeer van zijn factie (Vuurdiepte): vulkanisch, gloeiend van binnenuit, gedraaide horens en as.
 Rol in het leger: eenvoudige voetsoldaat, niet te opvallend.
-Zijn sterkste aanval heet "Prikvork (30 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
+Zijn sterkste aanval heet "Prikpook (30 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
 
 
 Vierkant beeld, transparante achtergrond, geen sokkel, geen schaduw op de grond.
 ```
 
-### Hellhound  ·  `art/hellhound.png`
-*Inferno · Uncommon · 3 MP · ability: Helse Jacht — Na een gevecht raken deze unit én de vijand Burned*
+### Cerberus  ·  `art/hellhound.png`
+*Vuurdiepte · Uncommon · 3 MP · ability: Helse Jacht — Na een gevecht raken deze unit én de vijand Burned*
 
 ```
-Maak het figuurtje "Hellhound" in de stijl uit de master-prompt.
+Maak het figuurtje "Cerberus" in de stijl uit de master-prompt.
 
-Wat het is: viervoetige helhond, gloeiende scheuren in de vacht als lava, rook uit de bek, laag en dreigend.
+Wie het is: Cerberus - de driekoppige hond van de onderwereld (uit de Griekse mythologie).
+Hoe hij eruitziet: DRIE koppen op een zware zwarte hond, gloeiende scheuren in de vacht als lava, slangenstaart, rook uit alle drie de bekken, laag en dreigend.
 Kleurenpalet: kolenzwart, gloeiend oranje, as.
-Sfeer van zijn factie (Inferno): vulkanisch, gloeiend van binnenuit, gedraaide horens.
+Sfeer van zijn factie (Vuurdiepte): vulkanisch, gloeiend van binnenuit, gedraaide horens en as.
 Rol in het leger: ervaren strijder, wat rijker uitgedost.
-Zijn sterkste aanval heet "Vlammenbeet (50 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
+Zijn sterkste aanval heet "Drievoudige Beet (50 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
 Zijn bijzondere gave: na een gevecht raken deze unit én de vijand burned. Laat daar iets van zien.
 
 Vierkant beeld, transparante achtergrond, geen sokkel, geen schaduw op de grond.
 ```
 
-### Pit Lord  ·  `art/pitlord.png`
-*Inferno · Rare · 2 MP · ability: Onverwoestbaar — Overleeft de eerste KO en trekt terug naar de bank*
+### Surtr  ·  `art/pitlord.png`
+*Vuurdiepte · Rare · 2 MP · ability: Onverwoestbaar — Overleeft de eerste KO en trekt terug naar de bank*
 
 ```
-Maak het figuurtje "Pit Lord" in de stijl uit de master-prompt.
+Maak het figuurtje "Surtr" in de stijl uit de master-prompt.
 
-Wat het is: kolossale demonenheer, gedraaide horens, zware pantserplaten, vlammend zwaard, torenhoge dreigende pose.
+Wie het is: Surtr - de vuurreus die bij Ragnarok de wereld verbrandt (uit de Noorse mythologie).
+Hoe hij eruitziet: kolossale vuurreus, huid als gebarsten obsidiaan met magma in de scheuren, gedraaide horens, vlammend zwaard dat feller brandt dan de zon, torenhoge dreigende pose.
 Kleurenpalet: obsidiaan, magmarood, gebrand goud.
-Sfeer van zijn factie (Inferno): vulkanisch, gloeiend van binnenuit, gedraaide horens.
+Sfeer van zijn factie (Vuurdiepte): vulkanisch, gloeiend van binnenuit, gedraaide horens en as.
 Rol in het leger: blikvanger van het leger, duidelijk machtiger dan de rest.
-Zijn sterkste aanval heet "Verwoester (100 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
+Zijn sterkste aanval heet "Wereldbrand (100 schade)" — laat die kracht terugkomen in zijn houding of in wat hij vasthoudt.
 Zijn bijzondere gave: overleeft de eerste ko en trekt terug naar de bank. Laat daar iets van zien.
 
 Vierkant beeld, transparante achtergrond, geen sokkel, geen schaduw op de grond.

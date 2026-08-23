@@ -1,6 +1,6 @@
 {
-  "project": "Rondel - fantasy bordspel met Pokemon Duel-mechanics, EIGEN figuren (geen bestaand IP)",
-  "doel": "Deze 18 figuren opnieuw laten tekenen als speelgoed-figuurtjes in de stijl van Pokemon Duel-figures.",
+  "project": "Rondel - bordspel met Pokemon Duel-mechanics. Figuren zijn MYTHOLOGISCHE goden en wezens uit publiek domein (Noors, Grieks, Azteeks, folklore) - geen bestaand beschermd IP.",
+  "doel": "Deze 18 mythologische figuren laten tekenen als speelgoed-figuurtjes in de stijl van Pokemon Duel-figures.",
   "beeld_eisen": {
     "formaat": "vierkant canvas, minimaal 512x512, PNG met ECHTE transparantie (geen witte of geruite achtergrond)",
     "aanzicht": "driekwart van schuin boven, camera ongeveer 30 graden omlaag - je kijkt een beetje op het figuurtje neer",
@@ -15,36 +15,40 @@
   "units": {
     "squire": {
       "bestand": "art/squire.png",
-      "naam": "Squire",
-      "factie": "Knights",
-      "factie_sfeer": "heraldiek, geemailleerd blauw-goud metaal, ridderlijk",
+      "naam": "Einherjar",
+      "factie": "Hemelhal",
+      "factie_sfeer": "Noordse godenzaal: gehamerd zilver, blauw geemailleerd, raven en runen",
       "zeldzaamheid": "Common",
       "mp": 2,
       "ability": null,
       "uiterlijk": {
+        "mythe": "Noors",
+        "wie": "Einherjar - een gevallen krijger die in Walhalla verder vecht",
         "kleuren": [
           "staalgrijs",
           "hemelsblauw",
           "zilver"
         ],
-        "kenmerken": "jonge schildknaap, te groot rond schild, kort zwaard, verenpluim op de helm, dappere maar wat onhandige houding"
+        "kenmerken": "jonge gesneuvelde krijger, rond houten schild met ijzeren rand, korte speer, gevleugelde helm, spookachtig blauw randlicht alsof hij half uit deze wereld is"
       },
+      "mythologie": "Noors",
+      "wie_is_het": "Einherjar - een gevallen krijger die in Walhalla verder vecht",
       "schijf": {
         "aanvallen": [
           {
-            "naam": "Schildstoot",
+            "naam": "Schildmuur",
             "soort": "aanval",
             "schade": 40,
             "vakken": 4
           },
           {
-            "naam": "Schouderduw",
+            "naam": "Beukstoot",
             "soort": "aanval",
             "schade": 10,
             "vakken": 2
           },
           {
-            "naam": "Voetveeg",
+            "naam": "Speerhaak",
             "soort": "vloek",
             "status": "paralysis",
             "sterren": 1,
@@ -57,9 +61,9 @@
     },
     "cleric": {
       "bestand": "art/cleric.png",
-      "naam": "Battle Cleric",
-      "factie": "Knights",
-      "factie_sfeer": "heraldiek, geemailleerd blauw-goud metaal, ridderlijk",
+      "naam": "Eir",
+      "factie": "Hemelhal",
+      "factie_sfeer": "Noordse godenzaal: gehamerd zilver, blauw geemailleerd, raven en runen",
       "zeldzaamheid": "Uncommon",
       "mp": 2,
       "ability": {
@@ -67,29 +71,33 @@
         "effect": "Bij inzet: wis status van aangrenzende bondgenoten"
       },
       "uiterlijk": {
+        "mythe": "Noors",
+        "wie": "Eir - godin van genezing en heelkunst",
         "kleuren": [
           "ivoorwit",
           "goud",
           "hemelsblauw"
         ],
-        "kenmerken": "strijdpriester met tabberd, gepantserde knots, gloeiend zonnesymbool zwevend boven de open hand"
+        "kenmerken": "godin in wit gewaad met gouden randen, geneeskruiden in de ene hand, zacht gouden licht in de andere, kalme gesloten ogen"
       },
+      "mythologie": "Noors",
+      "wie_is_het": "Eir - godin van genezing en heelkunst",
       "schijf": {
         "aanvallen": [
           {
-            "naam": "Strijdknots",
+            "naam": "Levensroede",
             "soort": "aanval",
             "schade": 50,
             "vakken": 3
           },
           {
-            "naam": "Vermaning",
+            "naam": "Kalmerend Woord",
             "soort": "aanval",
             "schade": 20,
             "vakken": 2
           },
           {
-            "naam": "Slaaphymne",
+            "naam": "Slaaplied",
             "soort": "vloek",
             "status": "sleep",
             "sterren": 1,
@@ -102,9 +110,9 @@
     },
     "commander": {
       "bestand": "art/commander.png",
-      "naam": "Knight Commander",
-      "factie": "Knights",
-      "factie_sfeer": "heraldiek, geemailleerd blauw-goud metaal, ridderlijk",
+      "naam": "Odin",
+      "factie": "Hemelhal",
+      "factie_sfeer": "Noordse godenzaal: gehamerd zilver, blauw geemailleerd, raven en runen",
       "zeldzaamheid": "Rare",
       "mp": 2,
       "ability": {
@@ -112,35 +120,39 @@
         "effect": "Aangrenzende bondgenoten krijgen +1 MP"
       },
       "uiterlijk": {
+        "mythe": "Noors",
+        "wie": "Odin - de Alvader",
         "kleuren": [
           "koningsblauw",
           "goud",
           "staal"
         ],
-        "kenmerken": "gepluimde helm, wapperende mantel, opgeheven zwaard, banier op de rug, bevelende pose"
+        "kenmerken": "eenogige godenkoning, breedgerande hoed of gevleugelde helm, wapperende blauwe mantel, speer Gungnir opgeheven, twee zwarte raven op zijn schouders"
       },
+      "mythologie": "Noors",
+      "wie_is_het": "Odin - de Alvader",
       "schijf": {
         "aanvallen": [
           {
-            "naam": "Banierstorm",
+            "naam": "Ravenzwerm",
             "soort": "doorbraak",
             "schade": 50,
             "vakken": 3
           },
           {
-            "naam": "Zwaardslag",
+            "naam": "Gungnir-worp",
             "soort": "aanval",
             "schade": 70,
             "vakken": 3
           },
           {
-            "naam": "Pareersteek",
+            "naam": "Speerwering",
             "soort": "aanval",
             "schade": 40,
             "vakken": 2
           },
           {
-            "naam": "Bevelschreeuw",
+            "naam": "Alvaderbevel",
             "soort": "vloek",
             "status": "paralysis",
             "sterren": 2,
@@ -153,9 +165,9 @@
     },
     "scout": {
       "bestand": "art/scout.png",
-      "naam": "Forest Scout",
-      "factie": "Elves",
-      "factie_sfeer": "organische vormen, bladmotieven, licht en sierlijk",
+      "naam": "Hermes",
+      "factie": "Halfgoden",
+      "factie_sfeer": "Griekse held-en-bedriegersfeer: goud, marmerwit, gevleugelde details",
       "zeldzaamheid": "Common",
       "mp": 3,
       "ability": {
@@ -163,28 +175,33 @@
         "effect": "Beweegt dwars door bezette punten (stopt op leeg)"
       },
       "uiterlijk": {
+        "mythe": "Grieks",
+        "wie": "Hermes - bode van de goden",
         "kleuren": [
-          "mosgroen",
-          "leerbruin"
+          "hemelsblauw",
+          "goud",
+          "wit"
         ],
-        "kenmerken": "slanke elfenverkenner, capuchon, twee dolken, door de knieen alsof hij sluipt, bladeren in de mantel"
+        "kenmerken": "jonge bode met kleine vleugels aan zijn sandalen en helm, gevleugelde staf met twee slangen, halverwege een stap alsof hij net de grond raakt"
       },
+      "mythologie": "Grieks",
+      "wie_is_het": "Hermes - bode van de goden",
       "schijf": {
         "aanvallen": [
           {
-            "naam": "Dolksteek",
+            "naam": "Snelle Steek",
             "soort": "aanval",
             "schade": 30,
             "vakken": 3
           },
           {
-            "naam": "Schampschot",
+            "naam": "Vluchtige Haal",
             "soort": "aanval",
             "schade": 10,
             "vakken": 2
           },
           {
-            "naam": "Gifpijl",
+            "naam": "Slangenstaf",
             "soort": "vloek",
             "status": "poison",
             "sterren": 1,
@@ -197,36 +214,40 @@
     },
     "archer": {
       "bestand": "art/archer.png",
-      "naam": "Elven Archer",
-      "factie": "Elves",
-      "factie_sfeer": "organische vormen, bladmotieven, licht en sierlijk",
+      "naam": "Chiron",
+      "factie": "Halfgoden",
+      "factie_sfeer": "Griekse held-en-bedriegersfeer: goud, marmerwit, gevleugelde details",
       "zeldzaamheid": "Uncommon",
       "mp": 2,
       "ability": null,
       "uiterlijk": {
+        "mythe": "Grieks",
+        "wie": "Chiron - de wijze centaur",
         "kleuren": [
+          "kastanjebruin",
           "bosgroen",
-          "koper",
-          "creme"
+          "brons"
         ],
-        "kenmerken": "elfenboogschutter, lange boog half gespannen, pijlkoker, spitse oren, rustige geconcentreerde blik"
+        "kenmerken": "CENTAUR: bovenlijf van een bebaarde man, onderlijf van een paard, lange boog half gespannen, pijlkoker op de rug, rustige wijze blik"
       },
+      "mythologie": "Grieks",
+      "wie_is_het": "Chiron - de wijze centaur",
       "schijf": {
         "aanvallen": [
           {
-            "naam": "Boogschot",
+            "naam": "Sterrenpijl",
             "soort": "aanval",
             "schade": 60,
             "vakken": 4
           },
           {
-            "naam": "Snelschot",
+            "naam": "Snelle Pees",
             "soort": "aanval",
             "schade": 20,
             "vakken": 2
           },
           {
-            "naam": "Doornpijl",
+            "naam": "Gifpunt",
             "soort": "vloek",
             "status": "poison",
             "sterren": 1,
@@ -239,9 +260,9 @@
     },
     "weaver": {
       "bestand": "art/weaver.png",
-      "naam": "Arcane Weaver",
-      "factie": "Elves",
-      "factie_sfeer": "organische vormen, bladmotieven, licht en sierlijk",
+      "naam": "Loki",
+      "factie": "Halfgoden",
+      "factie_sfeer": "Griekse held-en-bedriegersfeer: goud, marmerwit, gevleugelde details",
       "zeldzaamheid": "Rare",
       "mp": 2,
       "ability": {
@@ -249,29 +270,33 @@
         "effect": "Vijand die ermee vecht raakt Confused"
       },
       "uiterlijk": {
+        "mythe": "Noors",
+        "wie": "Loki - de bedrieger",
         "kleuren": [
-          "amethistpaars",
-          "zilver",
-          "cyaan"
+          "gifgroen",
+          "zwart",
+          "koper"
         ],
-        "kenmerken": "elfenmagier, wapperende sjaals, drie zwevende runenkristallen om de handen, haar zweeft omhoog"
+        "kenmerken": "slanke bedriegersgod met scheve grijns, groen-zwarte mantel, gebogen hoorns, zijn eigen spiegelbeeld vervaagt half naast hem alsof je niet weet welke de echte is"
       },
+      "mythologie": "Noors",
+      "wie_is_het": "Loki - de bedrieger",
       "schijf": {
         "aanvallen": [
           {
-            "naam": "Manavlaag",
+            "naam": "Schijngestalte",
             "soort": "aanval",
             "schade": 70,
             "vakken": 2
           },
           {
-            "naam": "Spreukbreker",
+            "naam": "Bedrog",
             "soort": "doorbraak",
             "schade": 40,
             "vakken": 4
           },
           {
-            "naam": "Warreling",
+            "naam": "Dwaalbeeld",
             "soort": "vloek",
             "status": "confusion",
             "sterren": 2,
@@ -284,36 +309,40 @@
     },
     "apprentice": {
       "bestand": "art/apprentice.png",
-      "naam": "Stone Apprentice",
-      "factie": "Dwarves",
-      "factie_sfeer": "zwaar, hoekig, gesmeed metaal en steen",
+      "naam": "Cycloop",
+      "factie": "Smidse",
+      "factie_sfeer": "gesmeed brons en steen, gloeiend metaal, vonken",
       "zeldzaamheid": "Common",
       "mp": 2,
       "ability": null,
       "uiterlijk": {
+        "mythe": "Grieks",
+        "wie": "Cycloop - eenogige smid uit Hephaistos' werkplaats",
         "kleuren": [
           "zandsteen",
           "brons",
           "aardebruin"
         ],
-        "kenmerken": "gedrongen dwerg-leerling, veel te grote steenhandschoenen, zwevend rotsblokje, verbaasde uitdrukking"
+        "kenmerken": "gedrongen eenogige reus-in-het-klein, leren schort, veel te grote smidshandschoenen, gloeiend brok metaal in de tang, verbaasde blik"
       },
+      "mythologie": "Grieks",
+      "wie_is_het": "Cycloop - eenogige smid uit Hephaistos' werkplaats",
       "schijf": {
         "aanvallen": [
           {
-            "naam": "Steenworp",
+            "naam": "Rotsworp",
             "soort": "aanval",
             "schade": 60,
             "vakken": 3
           },
           {
-            "naam": "Gruisgooi",
+            "naam": "Vonkgooi",
             "soort": "aanval",
             "schade": 30,
             "vakken": 2
           },
           {
-            "naam": "Gruisgreep",
+            "naam": "Verblindende Slag",
             "soort": "vloek",
             "status": "paralysis",
             "sterren": 1,
@@ -326,9 +355,9 @@
     },
     "runesmith": {
       "bestand": "art/runesmith.png",
-      "naam": "Runesmith",
-      "factie": "Dwarves",
-      "factie_sfeer": "zwaar, hoekig, gesmeed metaal en steen",
+      "naam": "Hephaistos",
+      "factie": "Smidse",
+      "factie_sfeer": "gesmeed brons en steen, gloeiend metaal, vonken",
       "zeldzaamheid": "Uncommon",
       "mp": 2,
       "ability": {
@@ -336,29 +365,33 @@
         "effect": "Vijand die ermee vecht raakt Burned"
       },
       "uiterlijk": {
+        "mythe": "Grieks",
+        "wie": "Hephaistos - smidgod",
         "kleuren": [
           "ijzergrijs",
           "gloeiend oranje",
           "brons"
         ],
-        "kenmerken": "dwergensmid, gevlochten baard, zware hamer met gloeiende runen, vonken, leren schort"
+        "kenmerken": "gespierde smidgod met kreupel been, gevlochten baard, zware hamer met gloeiende inslag, vonken om hem heen, leren schort"
       },
+      "mythologie": "Grieks",
+      "wie_is_het": "Hephaistos - smidgod",
       "schijf": {
         "aanvallen": [
           {
-            "naam": "Hamerslag",
+            "naam": "Aambeeldslag",
             "soort": "aanval",
             "schade": 60,
             "vakken": 3
           },
           {
-            "naam": "Vonkslag",
+            "naam": "Sintelslag",
             "soort": "aanval",
             "schade": 30,
             "vakken": 2
           },
           {
-            "naam": "Gloeirune",
+            "naam": "Smeltgloed",
             "soort": "vloek",
             "status": "burn",
             "sterren": 1,
@@ -371,9 +404,9 @@
     },
     "warden": {
       "bestand": "art/warden.png",
-      "naam": "Mountain Warden",
-      "factie": "Dwarves",
-      "factie_sfeer": "zwaar, hoekig, gesmeed metaal en steen",
+      "naam": "Talos",
+      "factie": "Smidse",
+      "factie_sfeer": "gesmeed brons en steen, gloeiend metaal, vonken",
       "zeldzaamheid": "Rare",
       "mp": 2,
       "ability": {
@@ -381,29 +414,33 @@
         "effect": "Bij KO: naar de bank i.p.v. Healing Center"
       },
       "uiterlijk": {
+        "mythe": "Grieks",
+        "wie": "Talos - de bronzen reus die Kreta bewaakte",
         "kleuren": [
-          "graniet",
+          "gepatineerd brons",
           "diepblauw",
-          "zilver"
+          "goudgroen"
         ],
-        "kenmerken": "zwaarbepantserde dwerg met torenschild bijna zo groot als hijzelf, stevig geplant, onwrikbaar"
+        "kenmerken": "AUTOMAAT van brons: geen mens maar een standbeeld dat leeft, naden en klinknagels zichtbaar, torenschild, gloeiende ader met vloeibaar vuur in zijn been, onwrikbaar geplant"
       },
+      "mythologie": "Grieks",
+      "wie_is_het": "Talos - de bronzen reus die Kreta bewaakte",
       "schijf": {
         "aanvallen": [
           {
-            "naam": "Bergbeuk",
+            "naam": "Bronzen Vuist",
             "soort": "aanval",
             "schade": 90,
             "vakken": 4
           },
           {
-            "naam": "Rotsworp",
+            "naam": "Zuilslag",
             "soort": "aanval",
             "schade": 50,
             "vakken": 2
           },
           {
-            "naam": "Rotsgreep",
+            "naam": "IJzeren Greep",
             "soort": "vloek",
             "status": "paralysis",
             "sterren": 2,
@@ -416,36 +453,40 @@
     },
     "skeleton": {
       "bestand": "art/skeleton.png",
-      "naam": "Restless Skeleton",
-      "factie": "Undead",
-      "factie_sfeer": "grafkoud, botwit en grafgroen, versleten",
+      "naam": "Draugr",
+      "factie": "Dodenrijk",
+      "factie_sfeer": "grafkoud, botwit en grafgroen, mos en vergane stof",
       "zeldzaamheid": "Common",
       "mp": 2,
       "ability": null,
       "uiterlijk": {
+        "mythe": "Noors",
+        "wie": "Draugr - grafwachter uit een Noorse grafheuvel",
         "kleuren": [
           "botwit",
           "roestbruin",
           "grafgroen"
         ],
-        "kenmerken": "rammelend skelet, gedeukt schild, roestig kort zwaard, scheve kaak, losjes hangende botten"
+        "kenmerken": "opgestane grafbewoner, half vergaan gezicht, gedeukt schild, roestig zwaard, mos en aarde aan zijn maliën, groene lichtjes in de oogkassen"
       },
+      "mythologie": "Noors",
+      "wie_is_het": "Draugr - grafwachter uit een Noorse grafheuvel",
       "schijf": {
         "aanvallen": [
           {
-            "naam": "Botzwaai",
+            "naam": "Grafzwaard",
             "soort": "aanval",
             "schade": 30,
             "vakken": 4
           },
           {
-            "naam": "Ribbenstoot",
+            "naam": "Botstoot",
             "soort": "aanval",
             "schade": 10,
             "vakken": 2
           },
           {
-            "naam": "Grafkilte",
+            "naam": "Grafkou",
             "soort": "vloek",
             "status": "confusion",
             "sterren": 1,
@@ -458,9 +499,9 @@
     },
     "ghoul": {
       "bestand": "art/ghoul.png",
-      "naam": "Ghoul",
-      "factie": "Undead",
-      "factie_sfeer": "grafkoud, botwit en grafgroen, versleten",
+      "naam": "Ghul",
+      "factie": "Dodenrijk",
+      "factie_sfeer": "grafkoud, botwit en grafgroen, mos en vergane stof",
       "zeldzaamheid": "Uncommon",
       "mp": 2,
       "ability": {
@@ -468,12 +509,17 @@
         "effect": "Vijand die ermee vecht raakt Poisoned"
       },
       "uiterlijk": {
+        "mythe": "Arabisch",
+        "wie": "Ghul - lijkeneter uit de woestijnfolklore",
         "kleuren": [
           "ziekelijk groengrijs",
-          "donkerpaars"
+          "donkerpaars",
+          "zandbruin"
         ],
-        "kenmerken": "uitgemergelde lijkeneter, lange klauwen, gebogen rug, druipende groene walm"
+        "kenmerken": "uitgemergelde grafrover, veel te lange klauwen, gebogen rug, gescheurde lijkwade, groene walm om de handen"
       },
+      "mythologie": "Arabisch",
+      "wie_is_het": "Ghul - lijkeneter uit de woestijnfolklore",
       "schijf": {
         "aanvallen": [
           {
@@ -489,7 +535,7 @@
             "vakken": 2
           },
           {
-            "naam": "Lijkengif",
+            "naam": "Lijkenwalm",
             "soort": "vloek",
             "status": "badlypoison",
             "sterren": 1,
@@ -502,9 +548,9 @@
     },
     "necromancer": {
       "bestand": "art/necromancer.png",
-      "naam": "Necromancer",
-      "factie": "Undead",
-      "factie_sfeer": "grafkoud, botwit en grafgroen, versleten",
+      "naam": "Hel",
+      "factie": "Dodenrijk",
+      "factie_sfeer": "grafkoud, botwit en grafgroen, mos en vergane stof",
       "zeldzaamheid": "Rare",
       "mp": 2,
       "ability": {
@@ -512,23 +558,27 @@
         "effect": "Bij inzet: wis Wacht-status van je eigen bank"
       },
       "uiterlijk": {
+        "mythe": "Noors",
+        "wie": "Hel - godin van de doden",
         "kleuren": [
-          "diep zwartpaars",
+          "zwartpaars",
           "gifgroen",
           "bot"
         ],
-        "kenmerken": "gehulde dodenbezweerder, schedelstaf, twee groene dwaallichtjes zwevend naast hem, gezicht in schaduw"
+        "kenmerken": "godin die van voren LEVEND is en van achteren een lijk - een gezicht half schoon, half schedel; zwart gewaad, staf met schedel, twee groene dwaallichtjes zwevend naast haar"
       },
+      "mythologie": "Noors",
+      "wie_is_het": "Hel - godin van de doden",
       "schijf": {
         "aanvallen": [
           {
-            "naam": "Schaduwgreep",
+            "naam": "Dodengreep",
             "soort": "aanval",
             "schade": 60,
             "vakken": 2
           },
           {
-            "naam": "Zielenvlaag",
+            "naam": "Zielenstorm",
             "soort": "doorbraak",
             "schade": 30,
             "vakken": 4
@@ -547,24 +597,28 @@
     },
     "boar": {
       "bestand": "art/boar.png",
-      "naam": "Boar Brute",
-      "factie": "Beasts",
-      "factie_sfeer": "ruw, dierlijk, vacht en tanden",
+      "naam": "Calydonische Ever",
+      "factie": "Wildernis",
+      "factie_sfeer": "ruwe natuur, vacht, veren, slagtanden en klauwen",
       "zeldzaamheid": "Common",
       "mp": 2,
       "ability": null,
       "uiterlijk": {
+        "mythe": "Grieks",
+        "wie": "De Calydonische Ever - het monsterzwijn dat een heel koninkrijk verwoestte",
         "kleuren": [
           "borstelbruin",
           "vuilgeel",
           "modder"
         ],
-        "kenmerken": "gedrongen everzwijn-beest, enorme slagtanden, gespannen schouders alsof hij aanstormt, stoomwolkje uit de neus"
+        "kenmerken": "kolossaal everzwijn op vier poten, enorme kromme slagtanden, borstelige nekkam overeind, gespannen schouders alsof hij aanstormt, stoom uit de neus"
       },
+      "mythologie": "Grieks",
+      "wie_is_het": "De Calydonische Ever - het monsterzwijn dat een heel koninkrijk verwoestte",
       "schijf": {
         "aanvallen": [
           {
-            "naam": "Stormram",
+            "naam": "Stormaanval",
             "soort": "aanval",
             "schade": 60,
             "vakken": 5
@@ -576,7 +630,7 @@
             "vakken": 2
           },
           {
-            "naam": "Woeste Duw",
+            "naam": "Slagtandstoot",
             "soort": "vloek",
             "status": "confusion",
             "sterren": 1,
@@ -589,9 +643,9 @@
     },
     "lupine": {
       "bestand": "art/lupine.png",
-      "naam": "Lupine Hunter",
-      "factie": "Beasts",
-      "factie_sfeer": "ruw, dierlijk, vacht en tanden",
+      "naam": "Fenrir",
+      "factie": "Wildernis",
+      "factie_sfeer": "ruwe natuur, vacht, veren, slagtanden en klauwen",
       "zeldzaamheid": "Uncommon",
       "mp": 3,
       "ability": {
@@ -599,13 +653,17 @@
         "effect": "+1 MP zolang er een bondgenoot naast staat"
       },
       "uiterlijk": {
+        "mythe": "Noors",
+        "wie": "Fenrir - de grote wolf",
         "kleuren": [
           "wolfsgrijs",
           "winterwit",
           "ijsblauw"
         ],
-        "kenmerken": "wolfachtige jager op twee poten, gescheurde mantel, speer, oren gespitst, alerte jachthouding"
+        "kenmerken": "reusachtige wolf, half rechtop op zijn achterpoten, gebroken ketting nog om een poot, ijzige adem, ogen als koud vuur"
       },
+      "mythologie": "Noors",
+      "wie_is_het": "Fenrir - de grote wolf",
       "schijf": {
         "aanvallen": [
           {
@@ -621,7 +679,7 @@
             "vakken": 2
           },
           {
-            "naam": "Huilroep",
+            "naam": "Wolvenhuil",
             "soort": "vloek",
             "status": "paralysis",
             "sterren": 1,
@@ -634,9 +692,9 @@
     },
     "wyrmling": {
       "bestand": "art/wyrmling.png",
-      "naam": "Wyrmling",
-      "factie": "Beasts",
-      "factie_sfeer": "ruw, dierlijk, vacht en tanden",
+      "naam": "Quetzalcoatl",
+      "factie": "Wildernis",
+      "factie_sfeer": "ruwe natuur, vacht, veren, slagtanden en klauwen",
       "zeldzaamheid": "Rare",
       "mp": 2,
       "ability": {
@@ -644,17 +702,21 @@
         "effect": "Vliegt over andere units heen (stopt op leeg)"
       },
       "uiterlijk": {
+        "mythe": "Azteeks",
+        "wie": "Quetzalcoatl - de gevederde slang",
         "kleuren": [
-          "robijnrood",
-          "goud",
-          "oranje"
+          "jadegroen",
+          "turkoois",
+          "goud"
         ],
-        "kenmerken": "jong draakje, te grote vleugels, kleine hoorntjes, vlammetje uit de bek, ondeugende blik"
+        "kenmerken": "gevederde slangdraak, kraag van groenblauwe veren, gouden ogen, opgerold en half in de lucht zwevend, zonnegloed om de kop"
       },
+      "mythologie": "Azteeks",
+      "wie_is_het": "Quetzalcoatl - de gevederde slang",
       "schijf": {
         "aanvallen": [
           {
-            "naam": "Staartzweep",
+            "naam": "Veerslag",
             "soort": "aanval",
             "schade": 60,
             "vakken": 3
@@ -666,7 +728,7 @@
             "vakken": 2
           },
           {
-            "naam": "Vuurspuw",
+            "naam": "Zonnevuur",
             "soort": "doorbraak",
             "schade": 60,
             "vakken": 3
@@ -685,24 +747,28 @@
     },
     "imp": {
       "bestand": "art/imp.png",
-      "naam": "Imp",
-      "factie": "Inferno",
-      "factie_sfeer": "vulkanisch, gloeiend van binnenuit, gedraaide horens",
+      "naam": "Kobold",
+      "factie": "Vuurdiepte",
+      "factie_sfeer": "vulkanisch, gloeiend van binnenuit, gedraaide horens en as",
       "zeldzaamheid": "Common",
       "mp": 3,
       "ability": null,
       "uiterlijk": {
+        "mythe": "Germaans",
+        "wie": "Kobold - huisgeest en plaaggeest",
         "kleuren": [
           "scharlaken",
           "zwavelgeel",
           "zwart"
         ],
-        "kenmerken": "klein duiveltje, vleermuisvleugels, kleine drietand, pijlpuntstaart, grijnzend en pesterig"
+        "kenmerken": "klein rood plaaggeestje met puntoren en puntmuts, veel te grote pook in zijn handjes, staart met pijlpunt, brutale grijns"
       },
+      "mythologie": "Germaans",
+      "wie_is_het": "Kobold - huisgeest en plaaggeest",
       "schijf": {
         "aanvallen": [
           {
-            "naam": "Prikvork",
+            "naam": "Prikpook",
             "soort": "aanval",
             "schade": 30,
             "vakken": 3
@@ -714,7 +780,7 @@
             "vakken": 2
           },
           {
-            "naam": "Vonkenregen",
+            "naam": "Vonkenspel",
             "soort": "vloek",
             "status": "burn",
             "sterren": 1,
@@ -727,9 +793,9 @@
     },
     "hellhound": {
       "bestand": "art/hellhound.png",
-      "naam": "Hellhound",
-      "factie": "Inferno",
-      "factie_sfeer": "vulkanisch, gloeiend van binnenuit, gedraaide horens",
+      "naam": "Cerberus",
+      "factie": "Vuurdiepte",
+      "factie_sfeer": "vulkanisch, gloeiend van binnenuit, gedraaide horens en as",
       "zeldzaamheid": "Uncommon",
       "mp": 3,
       "ability": {
@@ -737,29 +803,33 @@
         "effect": "Na een gevecht raken deze unit én de vijand Burned"
       },
       "uiterlijk": {
+        "mythe": "Grieks",
+        "wie": "Cerberus - de driekoppige hond van de onderwereld",
         "kleuren": [
           "kolenzwart",
           "gloeiend oranje",
           "as"
         ],
-        "kenmerken": "viervoetige helhond, gloeiende scheuren in de vacht als lava, rook uit de bek, laag en dreigend"
+        "kenmerken": "DRIE koppen op een zware zwarte hond, gloeiende scheuren in de vacht als lava, slangenstaart, rook uit alle drie de bekken, laag en dreigend"
       },
+      "mythologie": "Grieks",
+      "wie_is_het": "Cerberus - de driekoppige hond van de onderwereld",
       "schijf": {
         "aanvallen": [
           {
-            "naam": "Vlammenbeet",
+            "naam": "Drievoudige Beet",
             "soort": "aanval",
             "schade": 50,
             "vakken": 4
           },
           {
-            "naam": "Snauw",
+            "naam": "Grauw",
             "soort": "aanval",
             "schade": 20,
             "vakken": 2
           },
           {
-            "naam": "Schroeiblaf",
+            "naam": "Helleblaf",
             "soort": "vloek",
             "status": "burn",
             "sterren": 1,
@@ -772,9 +842,9 @@
     },
     "pitlord": {
       "bestand": "art/pitlord.png",
-      "naam": "Pit Lord",
-      "factie": "Inferno",
-      "factie_sfeer": "vulkanisch, gloeiend van binnenuit, gedraaide horens",
+      "naam": "Surtr",
+      "factie": "Vuurdiepte",
+      "factie_sfeer": "vulkanisch, gloeiend van binnenuit, gedraaide horens en as",
       "zeldzaamheid": "Rare",
       "mp": 2,
       "ability": {
@@ -782,29 +852,33 @@
         "effect": "Overleeft de eerste KO en trekt terug naar de bank"
       },
       "uiterlijk": {
+        "mythe": "Noors",
+        "wie": "Surtr - de vuurreus die bij Ragnarok de wereld verbrandt",
         "kleuren": [
           "obsidiaan",
           "magmarood",
           "gebrand goud"
         ],
-        "kenmerken": "kolossale demonenheer, gedraaide horens, zware pantserplaten, vlammend zwaard, torenhoge dreigende pose"
+        "kenmerken": "kolossale vuurreus, huid als gebarsten obsidiaan met magma in de scheuren, gedraaide horens, vlammend zwaard dat feller brandt dan de zon, torenhoge dreigende pose"
       },
+      "mythologie": "Noors",
+      "wie_is_het": "Surtr - de vuurreus die bij Ragnarok de wereld verbrandt",
       "schijf": {
         "aanvallen": [
           {
-            "naam": "Verwoester",
+            "naam": "Wereldbrand",
             "soort": "aanval",
             "schade": 100,
             "vakken": 4
           },
           {
-            "naam": "Zwavelklauw",
+            "naam": "Vuurvuist",
             "soort": "aanval",
             "schade": 60,
             "vakken": 2
           },
           {
-            "naam": "Hellekling",
+            "naam": "Laaiend Zwaard",
             "soort": "doorbraak",
             "schade": 70,
             "vakken": 4
