@@ -59,6 +59,9 @@ const applyMatch   = html.match(/\nfunction applyStatus\([\s\S]*?\n\}/);
 const koMatch      = html.match(/\nfunction koUnit\([\s\S]*?\n\}/);
 const condMatch    = html.match(/\nfunction applyCondition\([\s\S]*?\n\}/);
 const platesSection = html.slice(html.indexOf('const PLATE_BUDGET ='), html.indexOf('// PLATES-END'));
+// Evolutie: ketens + bonus (Duel-regels)
+const evoSection = html.slice(html.indexOf('const EVOLUTIE ='), html.indexOf('// EVO-END'));
+if (!evoSection) throw new Error('EVO-blok niet gevonden');
 // Aanvalsanimaties: trefwoord→soort (FX) en soort→projectiel (DUELFX)
 const fxSection = html.slice(html.indexOf('const FX_TREFWOORDEN ='), html.indexOf('// FX-END'));
 const duelFxSection = html.slice(html.indexOf('const FX_PROJECTIEL ='), html.indexOf('// DUELFX-END'));
@@ -88,10 +91,11 @@ const evalCode = [
   condMatch[0],
   platesSection,
   decksMatch[0],
+  evoSection,
   fxSection,
   kleurMatch[0],
   duelFxSection,
-  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster, FX_TREFWOORDEN, attackFx, FX_KLEUR, FX_PROJECTIEL, projectielVoor };',
+  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster, FX_TREFWOORDEN, attackFx, FX_KLEUR, FX_PROJECTIEL, projectielVoor, EVOLUTIE, evolutieVan, evolutieKeten, evolutieBonus };',
 ].join('\n');
 
 // Schrijf tijdelijk evalueerbaar bestand (vermijdt new Function-beperkingen)
@@ -104,7 +108,7 @@ try {
   fs.unlinkSync(tmpPath);
 }
 
-const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster, FX_TREFWOORDEN, attackFx, FX_KLEUR, FX_PROJECTIEL, projectielVoor } = extracted;
+const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster, FX_TREFWOORDEN, attackFx, FX_KLEUR, FX_PROJECTIEL, projectielVoor, EVOLUTIE, evolutieVan, evolutieKeten, evolutieBonus } = extracted;
 
 // ─── Test harness ──────────────────────────────────────────────────────────────
 let pass = 0, fail = 0;
@@ -516,6 +520,37 @@ section('=== AANVALSANIMATIES (17 checks) ===');
   const sfxBlok = html.slice(html.indexOf('const SFX = {'), html.indexOf('function sfx('));
   const zonderKlank = [...soorten].filter(s => !new RegExp('\\bfx' + s + '\\s*:').test(sfxBlok));
   check('Elke soort heeft een eigen geluid', zonderKlank, []);
+}
+
+// ─── 4g1b. EVOLUTIE (sessie 39, Duel-regels) ──────────────────────────────────
+section('=== EVOLUTIE (10 checks) ===');
+{
+  // Zes facties, elk precies één keten van drie: common -> uncommon -> rare
+  const ketens = [...new Set(Object.keys(UNIT_DEFS).map(k => evolutieKeten(k).join('>')))].sort();
+  check('Zes evolutieketens, één per factie', ketens.length, 6);
+  check('Elke keten is precies drie lang', ketens.map(k => k.split('>').length), [3,3,3,3,3,3]);
+  // Een keten blijft binnen z'n eigen factie
+  const gemengd = ketens.filter(k => new Set(k.split('>').map(u => UNIT_DEFS[u].fac)).size !== 1);
+  check('Een keten blijft binnen één factie', gemengd, []);
+  // Volgorde: C -> U -> R
+  const RANG = { C:0, U:1, R:2 };
+  const RAR_ = html.match(/\nconst RARITY = \{[\s\S]*?\};/)[0];
+  const rar = {}; for (const m of RAR_.matchAll(/(\w+):'([CUR])'/g)) rar[m[1]] = m[2];
+  const fout = ketens.filter(k => { const r = k.split('>').map(u => RANG[rar[u]]); return !(r[0] < r[1] && r[1] < r[2]); });
+  check('Elke keten loopt van Common via Uncommon naar Rare', fout, []);
+  // Alle 18 units zitten in precies één keten
+  const alle = ketens.flatMap(k => k.split('>'));
+  check('Alle 18 units zitten in een keten', alle.length, Object.keys(UNIT_DEFS).length);
+  check('Geen unit zit in twee ketens', new Set(alle).size, alle.length);
+  // Eindvormen evolueren nergens meer heen
+  check('Een rare is de eindvorm', ketens.map(k => evolutieVan(k.split('>')[2])), [null,null,null,null,null,null]);
+
+  // De bonus van Duel: +10 op wit en goud, +1 ster op paars, rest onaangeroerd
+  const voor = [{k:'white',v:30},{k:'gold',v:60},{k:'purple',effect:'burn',stars:1},{k:'blue'},{k:'red'}];
+  const na = evolutieBonus(voor);
+  check('Evolutiebonus: +10 op wit en goud', [na[0].v, na[1].v], [40, 70]);
+  check('Evolutiebonus: +1 ster op paars', na[2].stars, 2);
+  check('Evolutiebonus laat blauw en rood met rust', [na[3].k, na[4].k, na[3].v, na[4].v], ['blue','red',undefined,undefined]);
 }
 
 // ─── 4g2. PRESTATIE-VALKUILEN (sessie 38) ─────────────────────────────────────

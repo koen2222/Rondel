@@ -337,6 +337,84 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
     ok('Nieuw potje start weer op na het eindscherm', true);
   }
 
+  // 5a2e. EVOLUTIE (Duel-regels): evolutie aanhangen in het team, en tijdens
+  // een gevecht winnen zodat het keuzescherm komt.
+  {
+    await page.evaluate(() => {
+      for (const k of Object.keys(UNIT_DEFS)) profile.owned[k] = profile.owned[k] || 1;
+      saveProfile();
+    });
+    // Terug naar de deck-selectie via een nieuw potje
+    if (await page.locator('#result-overlay.active').count()) { await page.click('#btn-result-menu'); await page.waitForTimeout(300); }
+    if (await page.locator('#screen-game.active').count()) { await page.click('#btn-menu'); await page.waitForTimeout(300); }
+    await page.click('#tile-solo');
+    await page.waitForSelector('#deck-overlay.active');
+    await page.locator('#deck-units .deck-card', { hasText: 'Einherjar' }).first().click();
+    await page.waitForTimeout(150);
+    ok('Evolutiesleuf verschijnt onder een gekozen figuur',
+      await page.locator('#deck-units .deck-card .evo-sleuf').count() === 1);
+    await page.locator('#deck-units .deck-card .evo-sleuf').first().click();
+    await page.waitForTimeout(150);
+    ok('Evolutie aanhangen werkt', await page.evaluate(() => deckSel.evos.squire) === 'cleric');
+    ok('Aangehangen evolutie krijgt een blauw stipje',
+      await page.locator('#deck-units .deck-card.evo-klaar').count() === 1);
+
+    await page.evaluate(() => {
+      deckSel.units = ['squire','scout','apprentice','skeleton','boar','imp'];
+      deckSel.evos = { squire: 'cleric' };
+      deckSel.plates = ['fullheal'];
+      renderDeckSelect();
+    });
+    await page.click('#btn-deck-start');
+    await page.waitForSelector('#screen-game.active');
+    ok('Evolutie reist mee naar het bord', await page.evaluate(() =>
+      Object.values(state.units).some(u => u.owner === 'p1' && u.defKey === 'squire' && u.evoKey === 'cleric')));
+
+    // Gevecht forceren waarin p1 wint
+    await page.evaluate(() => {
+      const mine = Object.values(state.units).find(u => u.owner === 'p1' && u.defKey === 'squire');
+      const foe = Object.values(state.units).find(u => u.owner === 'p2');
+      mine.node = 'B2'; foe.node = 'B3'; mine.status = []; foe.status = [];
+      state.bench.p1 = state.bench.p1.filter(x => x !== mine.uid);
+      state.bench.p2 = state.bench.p2.filter(x => x !== foe.uid);
+      state.locked = false; state.over = false;
+      const aS = applyStatus(mine.slots, []), dS = applyStatus(foe.slots, []);
+      const gouden = aS.findIndex(s => s.k === 'gold');
+      const raak = gouden >= 0 ? gouden : aS.findIndex(s => s.k === 'white');
+      const rood = dS.findIndex(s => s.k === 'red');
+      window.spin = (id) => new Promise(r => setTimeout(() => r(id === 'disk-bottom' ? raak : rood), 120));
+      window.__evoU = mine;
+      runCombat(mine, foe);
+    });
+    await page.waitForSelector('#btn-combat-continue:visible', { timeout: 12000 });
+    await page.click('#btn-combat-continue');
+    await page.waitForSelector('#evo-overlay.active', { timeout: 6000 });
+    ok('Winnen biedt de evolutie aan', true);
+    ok('Het keuzescherm noemt beide vormen',
+      /Einherjar/.test(await page.locator('#evo-van-naam').innerText()) &&
+      /Eir/.test(await page.locator('#evo-naar-naam').innerText()));
+    await page.click('#btn-evo-ja');
+    await page.waitForTimeout(300);
+    const ev = await page.evaluate(() => {
+      const u = window.__evoU;
+      const basis = UNIT_DEFS.cleric.slots;
+      return {
+        key: u.defKey, evolved: u.evolved, evoKey: u.evoKey,
+        witBonus: u.slots.filter(s => s.k === 'white').every(s =>
+          basis.some(b => b.k === 'white' && b.v + 10 === s.v)),
+        sterBonus: u.slots.filter(s => s.k === 'purple').every(s =>
+          basis.some(b => b.k === 'purple' && (b.stars || 1) + 1 === s.stars)),
+        fx: document.querySelectorAll('#board g.evofx').length,
+      };
+    });
+    ok('Figuur is echt geëvolueerd', !!ev && ev.key === 'cleric' && ev.evolved === true);
+    ok('Evolutie kan daarna niet nog eens', !!ev && ev.evoKey === null);
+    ok('Duel-bonus: +10 op wit', !!ev && ev.witBonus);
+    ok('Duel-bonus: +1 ster op paars', !!ev && ev.sterBonus);
+    ok('Evolutie barst open op het bord', !!ev && ev.fx === 1);
+    await page.waitForTimeout(1400);
+  }
+
   // 5a3. Instellingen: geluid uitzetten en controleren dat het bewaard blijft.
   // Het geforceerde potje hierboven kan zijn afgelopen; het eindscherm komt met
   // 900ms vertraging, dus even wachten en wegklikken voor we verder navigeren.
