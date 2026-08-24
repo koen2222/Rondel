@@ -223,6 +223,32 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
     ok('Kaartanimatie ruimt zichzelf op', await page.locator('#kaart-fx .kaart-vlucht').count() === 0);
   }
 
+  // 5a2d. Het doel bereiken barst open met stralen en de tekst DOEL!
+  {
+    const doel = await page.evaluate(() => {
+      const u = Object.values(state.units).find(x => x.owner === 'p1');
+      if (!u) return null;
+      u.node = 'G2'; state.bench.p1 = state.bench.p1.filter(x => x !== u.uid);
+      state.over = false;
+      endMatch('p1', 'goal');
+      const g = document.querySelector('#board g.goalfx');
+      return { er: !!g, tekst: g ? (g.querySelector('text') || {}).textContent : '',
+               stralen: g ? g.querySelectorAll('.goal-straal').length : 0 };
+    });
+    ok('Doelpunt barst open op het bord', !!doel && doel.er && doel.stralen >= 10);
+    ok('Doelpunt roept DOEL!', !!doel && /DOEL/.test(doel.tekst));
+    await page.waitForSelector('#result-overlay.active', { timeout: 4000 });
+    ok('Eindscherm verschijnt na het doelpunt', true);
+    await page.click('#btn-result-menu');
+    await page.waitForTimeout(300);
+    await page.click('#tile-solo');
+    await page.waitForSelector('#deck-overlay.active');
+    await page.click('#btn-deck-random');
+    await page.click('#btn-deck-start');
+    await page.waitForSelector('#screen-game.active');
+    ok('Nieuw potje start weer op na het eindscherm', true);
+  }
+
   // 5a3. Instellingen: geluid uitzetten en controleren dat het bewaard blijft.
   // Het geforceerde potje hierboven kan zijn afgelopen; het eindscherm komt met
   // 900ms vertraging, dus even wachten en wegklikken voor we verder navigeren.

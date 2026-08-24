@@ -345,6 +345,21 @@
     22% { transform: translateY(0) scale(1.2); opacity: 1; } 40% { transform: translateY(0) scale(1); }
     100% { transform: translateY(-20px) scale(1); opacity: 0; } }
   @media (prefers-reduced-motion: reduce) { .lvlfx { display: none; } }
+
+  /* Het doel bereiken — het moment waar het potje om draait */
+  .goalfx circle, .goalfx text { transform-box: fill-box; transform-origin: center; }
+  .goalfx .goal-straal { transform-box: fill-box; transform-origin: 50% 100%; }
+  @keyframes goalFlits { 0% { transform: scale(0.2); opacity: 1; } 100% { transform: scale(4.5); opacity: 0; } }
+  @keyframes goalStraal { 0% { transform: scaleY(0.1); opacity: 0; }
+    18% { opacity: 0.9; } 100% { transform: scaleY(1.15); opacity: 0; } }
+  @keyframes goalRing { 0% { transform: scale(0.2); opacity: 1; } 100% { transform: scale(3.4); opacity: 0; } }
+  @keyframes goalVonk { 0% { transform: rotate(var(--a)) translateX(8px) scale(0.4); opacity: 0; }
+    20% { opacity: 1; } 100% { transform: rotate(var(--a)) translateX(126px) scale(1.2); opacity: 0; } }
+  @keyframes goalTekst { 0% { transform: translateY(24px) scale(0.3); opacity: 0; }
+    18% { transform: translateY(0) scale(1.25); opacity: 1; } 32% { transform: translateY(0) scale(1); }
+    78% { transform: translateY(-6px) scale(1); opacity: 1; }
+    100% { transform: translateY(-26px) scale(1.05); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .goalfx { display: none; } }
   .portal ellipse, .portal circle, .portal path { transform-box: fill-box; transform-origin: center; }
   .portal-p1 path { transform-origin: 50% 100%; }
   @media (prefers-reduced-motion: reduce) { .portal { display: none; } }
@@ -551,6 +566,18 @@
   .slot-summary { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 10px 0; }
   .slot-pill { font-size: 0.68rem; font-family: 'Cinzel', serif; border-radius: 10px; padding: 3px 10px; border: 1px solid rgba(255,255,255,0.2); }
   .result-panel { background: linear-gradient(170deg, #1c1528, #0b0912); border: 1px solid rgba(245,158,11,0.4); border-radius: 18px; padding: 30px 26px; max-width: 340px; width: 90%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.9); }
+  /* Het eindscherm komt binnenvallen in plaats van er ineens te staan */
+  #result-overlay.active .result-panel { animation: resultIn 0.5s cubic-bezier(.2,-0.2,.3,1.5); }
+  @keyframes resultIn { 0% { transform: translateY(38px) scale(0.86); opacity: 0; }
+    60% { transform: translateY(0) scale(1.03); opacity: 1; } 100% { transform: translateY(0) scale(1); } }
+  #result-overlay.active .result-title { animation: resultTitel 0.7s ease-out 0.18s backwards; }
+  @keyframes resultTitel { 0% { letter-spacing: 0.8em; opacity: 0; filter: blur(6px); }
+    100% { letter-spacing: 0.1em; opacity: 1; filter: blur(0); } }
+  #result-overlay.active .result-reward { animation: resultBeloning 0.5s ease-out 0.5s backwards; }
+  @keyframes resultBeloning { 0% { transform: scale(0.4); opacity: 0; } 65% { transform: scale(1.18); opacity: 1; } 100% { transform: scale(1); } }
+  @media (prefers-reduced-motion: reduce) {
+    #result-overlay.active .result-panel, #result-overlay.active .result-title,
+    #result-overlay.active .result-reward { animation: none; } }
   .result-title { font-family: 'Cinzel', serif; font-weight: 900; font-size: 2rem; letter-spacing: 0.1em; }
   .result-title.win { color: var(--gold); text-shadow: 0 0 25px var(--gold-glow); }
   .result-title.lose { color: #f87171; text-shadow: 0 0 25px rgba(239,68,68,0.5); }
@@ -1689,6 +1716,12 @@ function endMatch(winner, kind) {
     saveProfile();
   }
   const won = winner === 'p1';
+  // Het doel bereiken is HET moment: laat het doel openbarsten voor het
+  // eindscherm eroverheen komt.
+  if (kind === 'goal') {
+    const doel = Object.values(NODES).find(n => n.type === 'goal' && n.owner !== winner);
+    if (doel) queueFX(doel.x, doel.y, 'goal:' + winner);
+  }
   document.getElementById('result-title').textContent = state.mode === 'solo' ? (won ? 'OVERWINNING' : 'VERSLAGEN') : (won ? 'SPELER 1 WINT' : 'SPELER 2 WINT');
   document.getElementById('result-title').className = 'result-title ' + (state.mode !== 'solo' || won ? 'win' : 'lose');
   document.getElementById('result-reason').textContent = msg;
@@ -1701,7 +1734,7 @@ function endMatch(winner, kind) {
     if (!document.getElementById('screen-game').classList.contains('active')) return;
     sfx(state.mode !== 'solo' || won ? 'win' : 'lose');
     document.getElementById('result-overlay').classList.add('active');
-  }, 900);
+  }, kind === 'goal' && !animOff() ? 1700 : 900);
 }
 
 // ===== Collectie: bekijken + upgraden (met disk-preview) =====
@@ -3012,11 +3045,45 @@ function spawnLevelUp(svg, x, y, lvl) {
   setTimeout(() => { if (g.parentNode) g.parentNode.removeChild(g); }, 1500);
 }
 
+// Het doel bereiken is HET moment van het potje. Dat mag je zien: het doel
+// barst open met stralen, ringen en een regen van vonken.
+function spawnGoal(svg, x, y, winner) {
+  const g = el('g', { class:'goalfx', transform:`translate(${x},${y})` }, svg);
+  const kleur = winner === 'p1' ? '#93c5fd' : '#fca5a5';
+  const zet = (e, naam, duur, delay) => { e.style.animation = `${naam} ${duur}ms ease-out ${delay || 0}ms forwards`; return e; };
+  zet(el('circle', { cx:0, cy:0, r:30, fill:'#fff' }, g), 'goalFlits', 700);
+  for (let i = 0; i < 14; i++) {
+    const a = i * (360 / 14);
+    // De draaiing zit in een wrapper-<g>; de straal zelf schaalt alleen uit
+    // z'n voet omhoog. Zo hoeft de CSS geen transform-origin in bord-
+    // coördinaten te raden (die verwijst bij SVG naar de viewBox, niet naar
+    // het punt waar de groep staat).
+    const wrap = el('g', { transform:`rotate(${a})` }, g);
+    zet(el('path', { class:'goal-straal', d:'M -5 0 L 0 -120 L 5 0 Z', fill:kleur, opacity:0.85 }, wrap), 'goalStraal', 1100, i * 22);
+  }
+  for (let i = 0; i < 4; i++) {
+    zet(el('circle', { cx:0, cy:0, r:26, fill:'none', stroke:'#fde047', 'stroke-width':5 }, g), 'goalRing', 1200, i * 170);
+  }
+  for (let i = 0; i < 16; i++) {
+    const a = i * 22.5;
+    const v = el('circle', { cx:0, cy:0, r:4, fill: i % 2 ? '#fde047' : '#fff' }, g);
+    v.style.setProperty('--a', a + 'deg');
+    zet(v, 'goalVonk', 1000, 120 + i * 25);
+  }
+  const t = el('text', { x:0, y:-58, 'font-size':34, 'text-anchor':'middle', fill:'#fde047',
+    'font-family':"'Cinzel', serif", 'font-weight':'900', stroke:'#2a1a06', 'stroke-width':2,
+    'paint-order':'stroke' }, g);
+  t.textContent = 'DOEL!';
+  zet(t, 'goalTekst', 1600, 200);
+  setTimeout(() => { if (g.parentNode) g.parentNode.removeChild(g); }, 1900);
+}
+
 function spawnFX(x, y, kind) {
   if (animOff()) return;
   const svg = document.getElementById('board');
   if (kind.startsWith('inslag:')) { spawnImpact(svg, x, y, kind.slice(7)); return; }
   if (kind.startsWith('level:')) { spawnLevelUp(svg, x, y, kind.slice(6)); return; }
+  if (kind.startsWith('goal:')) { spawnGoal(svg, x, y, kind.slice(5)); return; }
   const g = el('g', {}, svg);
   const n = kind === 'poof' ? 4 : 7;
   for (let i = 0; i < n; i++) {
