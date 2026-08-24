@@ -344,8 +344,16 @@ waar het spel nog stil bleef.
 - BUGS onderweg: moveUnit/riseUnit deden svg.removeChild op een ghost die er
   niet meer was zodra de SVG tussendoor herbouwd werd; het eindscherm plofte
   over het menu heen als het potje afliep nadat je al was weggelopen.
-- TESTS: headless 119, smoke 41 -> 53 checks. Simulatie: 6/6 potjes lopen
-  normaal af (gemiddeld 31 beurten, geen JS-fouten).
+- PRESTATIE: het gevechtsscherm liep op 36 fps in plaats van 60. Oorzaak
+  gemeten en niet gegokt: backdrop-filter: blur(10px) op een SCHERMVULLENDE
+  overlay. Zolang er iets achter beweegt (de sintels) moet de browser die
+  achtergrond elke frame opnieuw vervagen. Bij 97,5% dekking zie je er toch
+  niets van, dus het filter is eruit en de dekking iets omhoog. Gemeten na
+  afloop: 60 fps in elke fase van een gevecht, renderAll() 5,2 ms bij een vol
+  bord met statussen. Vastgelegd met een headless-check, want dit is precies
+  het soort ding dat je zonder meten weer terugzet.
+- TESTS: headless 119 -> 122, smoke 41 -> 53 checks. Simulatie: 6/6 potjes
+  lopen normaal af (gemiddeld 31 beurten, geen JS-fouten).
 
 SESSIE 36 — SCHERMPASSING, INSLAGEN OP HET BORD, AI-CHOKEPUNTEN
 - HET SPEL PAST NU OP HET SCHERM. Het spelscherm is 100dvh hoog met flex; het

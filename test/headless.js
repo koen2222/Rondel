@@ -503,6 +503,23 @@ section('=== AANVALSANIMATIES (9 checks) ===');
   check('Elk projectiel is ook echt getekend in de CSS', zonderVorm, []);
 }
 
+// ─── 4g2. PRESTATIE-VALKUILEN (sessie 38) ─────────────────────────────────────
+// Twee dingen die gemeten de beeldsnelheid halveerden. Ze zijn makkelijk terug
+// te zetten zonder het te merken, dus ze staan hier vast.
+section('=== PRESTATIE (3 checks) ===');
+{
+  const css = html.slice(html.indexOf('<style'), html.indexOf('</style>'));
+  // 1. backdrop-filter over een schermvullende overlay: 36 i.p.v. 60 fps
+  const regels = css.split('\n').filter(l => /backdrop-filter\s*:/.test(l) && !/^\s*(\/\*|\*)/.test(l));
+  check('Geen backdrop-filter (kostte de helft van de fps)', regels.map(r => r.trim()), []);
+  // 2. De arena-achtergrond hoort in CSS te staan, niet in de SVG: die wordt
+  //    bij elke zet herbouwd en zou het filter elke keer opnieuw berekenen.
+  const arenas = ['vuur', 'kristal', 'woud'].filter(a => new RegExp(`\\.board-wrap\\[data-arena="${a}"\\]`).test(css));
+  check('Alle drie de arena-achtergronden staan in CSS op .board-wrap', arenas, ['vuur', 'kristal', 'woud']);
+  // 3. Sintels zijn losse CSS-elementen, niet per render getekende SVG-nodes
+  check('Sintels zijn een statische CSS-laag', /#arena-fx i \{/.test(css), true);
+}
+
 // ─── 4h. UITLEG KLOPT MET DE CODE (sessie 24) ──────────────────────────────────
 // Het "Hoe speel je"-scherm beschrijft de regels. Deze checks verankeren de
 // belangrijkste getallen aan de echte code, zodat de uitleg niet stilletjes

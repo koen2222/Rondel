@@ -431,7 +431,11 @@
   .btn:active { transform: translateY(2px); box-shadow: 0 1px 2px rgba(0,0,0,0.6); }
   .btn.primary { background: linear-gradient(180deg, #fbbf24, #b45309); color: #000; border: none; box-shadow: 0 4px 15px var(--gold-glow); }
 
-  .overlay { position: fixed; inset: 0; background: rgba(5, 4, 3, 0.95); backdrop-filter: blur(10px); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 100; padding: 20px; overflow-y: auto; }
+  /* GEEN backdrop-filter. Gemeten: blur(10px) over een schermvullende overlay
+     kostte de helft van de beeldsnelheid (36 i.p.v. 60 fps) omdat de browser de
+     achtergrond elke frame opnieuw moet vervagen zolang daar iets beweegt — en
+     bij 96% dekking zie je er toch niets van. */
+  .overlay { position: fixed; inset: 0; background: rgba(5, 4, 3, 0.975); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 100; padding: 20px; overflow-y: auto; }
   .overlay.active { display: flex; }
   .combat-vs { font-family: 'Cinzel', serif; color: var(--gold); font-size: 1.5rem; letter-spacing: 0.3em; margin-bottom: 20px; text-shadow: 0 0 15px var(--gold-glow); }
   .disks-row { display: flex; flex-direction: column; gap: 20px; align-items: center; width: 100%; }
