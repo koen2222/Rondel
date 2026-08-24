@@ -139,6 +139,7 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
       state.locked = false; state.over = false;
       const wit = applyStatus(state.units[mine].slots, []).findIndex(s => s.k === 'white' || s.k === 'gold');
       const blauw = applyStatus(state.units[foe].slots, []).findIndex(s => s.k === 'blue');
+      window.__wit = wit; window.__blauw = blauw;
       window.spin = (id) => new Promise(r => setTimeout(() => r(id === 'disk-bottom' ? wit : blauw), 200));
       runCombat(state.units[mine], state.units[foe]);
       return true;
@@ -159,8 +160,67 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
     ok('Er vliegt een aanval van de één naar de ander', zagVlucht);
     ok('Een blok toont een schild-icoon', zagSchild);
     await page.waitForSelector('#btn-combat-continue:visible', { timeout: 8000 });
+    // Het gedraaide vak licht op — en wel precies het vak waar de wijzer staat
+    const mark = await page.evaluate(() => {
+      const uit = [];
+      for (const [id, idx] of [['disk-top', window.__blauw], ['disk-bottom', window.__wit]]) {
+        const svg = document.getElementById(id);
+        const waas = svg.querySelector('.slot-mark-waas');
+        const rand = svg.querySelector('.slot-mark');
+        if (!waas || !rand) { uit.push(false); continue; }
+        const w = [...svg.querySelectorAll('path[data-start]')].find(p => p.getAttribute('d') === waas.getAttribute('d'));
+        uit.push(!!w && idx >= +w.dataset.start && idx < +w.dataset.end);
+      }
+      return uit;
+    });
+    ok('Het gedraaide vak licht op onder de wijzer', mark.length === 2 && mark.every(Boolean));
     await page.click('#btn-combat-continue');
     await page.waitForTimeout(300);
+  }
+
+  // 5a2b2. Inzetpoort: op het startpunt scheurt een poort open waar het figuur
+  // uit klimt (hemelpoort bij p1, duistere put bij p2).
+  {
+    const gestart = await page.evaluate(() => {
+      const uid = state.bench.p1[0]; if (!uid) return false;
+      // state.over stopt de AI-beurtketen, anders tekent die het bord tussendoor
+      // opnieuw en veegt hij de animatie die we willen meten weg.
+      state.turn = 'p1'; state.locked = false; state.over = true;
+      doDeploy(state.units[uid], 'E2_TL');
+      return true;
+    });
+    ok('Inzet kon geforceerd worden', gestart);
+    await page.waitForTimeout(120);
+    ok('Poort gaat open op het startpunt', await page.locator('#board g.portal').count() >= 1);
+    await page.waitForTimeout(1400);
+    // De poort dooft uit (CSS met fill:forwards); het lege groepje verdwijnt
+    // vanzelf bij de eerstvolgende render van het bord.
+    const dof = await page.evaluate(() => {
+      const g = document.querySelector('#board g.portal');
+      if (!g) return true;
+      return [...g.children].every(c => parseFloat(getComputedStyle(c).opacity) < 0.05);
+    });
+    ok('Poort dooft weer uit', dof);
+  }
+
+  // 5a2b3. Level-up: gouden ringen en het nieuwe levelcijfer op het bord.
+  // We lezen de FX in DEZELFDE evaluate uit: een render van de AI-beurt zou de
+  // SVG anders tussendoor kunnen herbouwen en de meting onbetrouwbaar maken.
+  {
+    const lv = await page.evaluate(() => {
+      const u = Object.values(state.units).find(x => x.owner === 'p1');
+      if (!u) return null;
+      u.node = 'IT2'; u.level = 1;
+      state.bench.p1 = state.bench.p1.filter(x => x !== u.uid);
+      levelUp(u); renderAll();
+      const g = document.querySelector('#board g.lvlfx');
+      return { aantal: document.querySelectorAll('#board g.lvlfx').length,
+               tekst: g ? (g.querySelector('text') || {}).textContent : '',
+               ringen: g ? g.querySelectorAll('ellipse').length : 0 };
+    });
+    ok('Level-up toont een flourish op het bord', !!lv && lv.aantal === 1 && lv.ringen >= 4);
+    ok('Level-up noemt het nieuwe level', !!lv && /LV 2/.test(lv.tekst));
+    await page.waitForTimeout(1500);
   }
 
   // 5a2c. Kaartanimatie: de gespeelde kaart vliegt groot in beeld
@@ -176,6 +236,32 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
     ok('De kaart toont z\'n eigen naam', /Krachtstoot/.test(await page.locator('#kaart-fx .kv-naam').innerText().catch(()=>'')));
     await page.waitForTimeout(1200);
     ok('Kaartanimatie ruimt zichzelf op', await page.locator('#kaart-fx .kaart-vlucht').count() === 0);
+  }
+
+  // 5a2d. Het doel bereiken barst open met stralen en de tekst DOEL!
+  {
+    const doel = await page.evaluate(() => {
+      const u = Object.values(state.units).find(x => x.owner === 'p1');
+      if (!u) return null;
+      u.node = 'G2'; state.bench.p1 = state.bench.p1.filter(x => x !== u.uid);
+      state.over = false;
+      endMatch('p1', 'goal');
+      const g = document.querySelector('#board g.goalfx');
+      return { er: !!g, tekst: g ? (g.querySelector('text') || {}).textContent : '',
+               stralen: g ? g.querySelectorAll('.goal-straal').length : 0 };
+    });
+    ok('Doelpunt barst open op het bord', !!doel && doel.er && doel.stralen >= 10);
+    ok('Doelpunt roept DOEL!', !!doel && /DOEL/.test(doel.tekst));
+    await page.waitForSelector('#result-overlay.active', { timeout: 4000 });
+    ok('Eindscherm verschijnt na het doelpunt', true);
+    await page.click('#btn-result-menu');
+    await page.waitForTimeout(300);
+    await page.click('#tile-solo');
+    await page.waitForSelector('#deck-overlay.active');
+    await page.click('#btn-deck-random');
+    await page.click('#btn-deck-start');
+    await page.waitForSelector('#screen-game.active');
+    ok('Nieuw potje start weer op na het eindscherm', true);
   }
 
   // 5a3. Instellingen: geluid uitzetten en controleren dat het bewaard blijft.

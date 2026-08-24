@@ -23,6 +23,16 @@
   .turn-banner { padding: 12px 16px; height: 52px; box-sizing: border-box; border-radius: 12px; background: linear-gradient(90deg, #1f1814, #0a0806); border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 15px rgba(0,0,0,0.5); font-family: 'Cinzel', serif; font-size: 0.95rem; letter-spacing: 0.08em; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s ease; }
   .turn-banner.p1 { border-left: 4px solid var(--p1); box-shadow: 0 0 15px var(--p1-glow); }
   .turn-banner.p2 { border-left: 4px solid var(--p2); box-shadow: 0 0 15px var(--p2-glow); }
+  /* Bij een beurtwissel loopt er licht in de teamkleur door de balk, zodat je
+     ziet dat het schakelde zonder dat er iets van formaat verandert. */
+  .turn-banner { position: relative; overflow: hidden; }
+  .turn-banner.wissel::after { content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(90deg, transparent, var(--wisselk, rgba(255,255,255,0.28)), transparent);
+    animation: beurtVeeg 0.6s ease-out; }
+  .turn-banner.p1 { --wisselk: rgba(96,165,250,0.35); }
+  .turn-banner.p2 { --wisselk: rgba(248,113,113,0.35); }
+  @keyframes beurtVeeg { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+  @media (prefers-reduced-motion: reduce) { .turn-banner.wissel::after { animation: none; opacity: 0; } }
 
   .bench { display: flex; gap: 8px; padding: 8px; background: rgba(255,255,255,0.03); border-radius: 12px; min-height: 70px; overflow-x: auto; border: 1px solid rgba(255,255,255,0.05); }
   .bench.dim { opacity: 0.3; pointer-events: none; }
@@ -315,6 +325,55 @@
     100% { transform: rotate(var(--a)) translateX(76px) scale(0.3); opacity: 0; } }
   @media (prefers-reduced-motion: reduce) { #kaart-fx { display: none; } }
 
+  /* De poort die opengaat waar een figuur wordt ingezet */
+  @keyframes portalPlas { 0% { transform: scale(0.15, 0.4); opacity: 0; }
+    18% { transform: scale(1.08, 1.08); opacity: 1; } 45% { transform: scale(1, 1); opacity: 1; }
+    100% { transform: scale(0.7, 0.7); opacity: 0; } }
+  @keyframes portalZuil { 0% { transform: scaleY(0.05); opacity: 0; }
+    22% { transform: scaleY(1); opacity: 0.95; } 55% { opacity: 0.8; }
+    100% { transform: scaleY(1.15); opacity: 0; } }
+  @keyframes portalVonk { 0% { transform: translateY(4px) scale(0.4); opacity: 0; }
+    25% { opacity: 1; } 100% { transform: translateY(-64px) scale(0.2); opacity: 0; } }
+  @keyframes portalGloed { 0% { transform: scale(0.2); opacity: 0; }
+    25% { transform: scale(1); opacity: 0.85; } 100% { transform: scale(0.6); opacity: 0; } }
+  @keyframes portalWalm { 0% { transform: translateY(2px) scale(0.3); opacity: 0; }
+    30% { opacity: 0.8; } 100% { transform: translateY(-48px) scale(1.9); opacity: 0; } }
+  @keyframes portalKlauw { 0% { transform: scale(0.2); opacity: 0; }
+    35% { transform: scale(1); opacity: 0.9; } 100% { transform: scale(1.1); opacity: 0; } }
+  @keyframes portalGolf { 0% { transform: scale(0.2); opacity: 1; }
+    100% { transform: scale(2.6); opacity: 0; } }
+
+  /* Opklimmen naar een hoger level */
+  .lvlfx ellipse, .lvlfx path, .lvlfx text { transform-box: fill-box; transform-origin: center; }
+  @keyframes lvlPlas { 0% { transform: scale(0.2); opacity: 0; } 30% { opacity: 1; }
+    100% { transform: scale(1.6); opacity: 0; } }
+  @keyframes lvlRing { 0% { transform: translateY(8px) scale(0.3); opacity: 0; }
+    25% { opacity: 1; } 100% { transform: translateY(-58px) scale(1.6); opacity: 0; } }
+  @keyframes lvlSter { 0% { transform: rotate(var(--a)) translateX(0) scale(0.3); opacity: 0; }
+    25% { opacity: 1; } 100% { transform: rotate(var(--a)) translateX(58px) scale(1.15); opacity: 0; } }
+  @keyframes lvlTekst { 0% { transform: translateY(14px) scale(0.4); opacity: 0; }
+    22% { transform: translateY(0) scale(1.2); opacity: 1; } 40% { transform: translateY(0) scale(1); }
+    100% { transform: translateY(-20px) scale(1); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .lvlfx { display: none; } }
+
+  /* Het doel bereiken — het moment waar het potje om draait */
+  .goalfx circle, .goalfx text { transform-box: fill-box; transform-origin: center; }
+  .goalfx .goal-straal { transform-box: fill-box; transform-origin: 50% 100%; }
+  @keyframes goalFlits { 0% { transform: scale(0.2); opacity: 1; } 100% { transform: scale(4.5); opacity: 0; } }
+  @keyframes goalStraal { 0% { transform: scaleY(0.1); opacity: 0; }
+    18% { opacity: 0.9; } 100% { transform: scaleY(1.15); opacity: 0; } }
+  @keyframes goalRing { 0% { transform: scale(0.2); opacity: 1; } 100% { transform: scale(3.4); opacity: 0; } }
+  @keyframes goalVonk { 0% { transform: rotate(var(--a)) translateX(8px) scale(0.4); opacity: 0; }
+    20% { opacity: 1; } 100% { transform: rotate(var(--a)) translateX(126px) scale(1.2); opacity: 0; } }
+  @keyframes goalTekst { 0% { transform: translateY(24px) scale(0.3); opacity: 0; }
+    18% { transform: translateY(0) scale(1.25); opacity: 1; } 32% { transform: translateY(0) scale(1); }
+    78% { transform: translateY(-6px) scale(1); opacity: 1; }
+    100% { transform: translateY(-26px) scale(1.05); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .goalfx { display: none; } }
+  .portal ellipse, .portal circle, .portal path { transform-box: fill-box; transform-origin: center; }
+  .portal-p1 path { transform-origin: 50% 100%; }
+  @media (prefers-reduced-motion: reduce) { .portal { display: none; } }
+
   /* Poorten waar de legers uit komen */
   .spawn-glow { animation: spawnPulse 3.2s ease-in-out infinite; }
   .spawn-twinkle { animation: spawnTwinkle 2.1s ease-in-out infinite; }
@@ -379,12 +438,19 @@
   .disk-cell { display: flex; flex-direction: column; align-items: center; gap: 6px; }
   /* De twee kemphanen staan naast hun schijf, zodat de aanval er tussendoor kan */
   .fight-row { display: flex; align-items: center; gap: 6px; }
-  .fighter { position: relative; width: 84px; height: 104px; flex: 0 0 84px;
+  .fighter { position: relative; width: 96px; height: 122px; flex: 0 0 96px;
     display: flex; align-items: flex-end; justify-content: center; }
+  /* Kleine ademhaling zodat de twee kemphanen niet als plaatjes staan te wachten */
+  .fighter img, .fighter svg { animation: fighterAdem 3.4s ease-in-out infinite; }
+  .fighter.p2 img, .fighter.p2 svg { animation-delay: -1.7s; }
+  @keyframes fighterAdem { 0%,100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-3px) scale(1.02); } }
+  .fighter.raakt img, .fighter.valt img, .fighter.raakt svg, .fighter.valt svg { animation: none; }
+  @media (prefers-reduced-motion: reduce) { .fighter img, .fighter svg { animation: none; } }
   .fighter img { max-width: 100%; max-height: 100%; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.8)); }
   .fighter svg { width: 100%; height: 100%; }
   .fighter::after { content: ''; position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%);
-    width: 62px; height: 16px; border-radius: 50%; }
+    width: 70px; height: 18px; border-radius: 50%; }
   .fighter.p1::after { background: radial-gradient(ellipse, rgba(59,130,246,0.6), transparent 70%); }
   .fighter.p2::after { background: radial-gradient(ellipse, rgba(239,68,68,0.6), transparent 70%); }
   .fighter.raakt { animation: fighterHit 0.5s ease-out; }
@@ -397,15 +463,30 @@
     100% { transform: rotate(74deg) translateY(46px); opacity: 0; } }
   .disk-wrap { flex: 0 0 auto; }
   .disk-cell .who { font-family: 'Cinzel', serif; font-size: 0.9rem; letter-spacing: 0.1em; text-transform: uppercase; }
-  .disk-wrap { position: relative; width: 196px; height: 196px; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.8)); }
+  .disk-wrap { position: relative; width: 184px; height: 184px; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.8)); }
   .disk-pointer { position: absolute; top: -6px; left: 50%; transform: translateX(-50%); width: 18px; height: 26px; background: linear-gradient(180deg, #ef4444, #991b1b); border: 2px solid #fff; clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); z-index: 5; box-shadow: 0 0 10px rgba(255,0,0,0.8); }
   .disk-svg { width: 100%; height: 100%; transition: transform 3s cubic-bezier(0.2, 0.8, 0.1, 1); }
+  /* Het vak waar de wijzer op stilstaat licht op */
+  .disk-svg .slot-mark { filter: drop-shadow(0 0 9px #fff) drop-shadow(0 0 18px rgba(255,236,180,0.85));
+    animation: slotMarkIn 0.42s ease-out backwards, slotMarkPuls 1.5s ease-in-out 0.42s infinite; }
+  .disk-svg .slot-mark-waas { animation: slotWaas 1.5s ease-in-out infinite; }
+  @keyframes slotMarkIn { 0% { opacity: 0; stroke-width: 18; } 100% { opacity: 1; stroke-width: 7; } }
+  @keyframes slotMarkPuls { 0%,100% { opacity: 1; stroke-width: 7; } 50% { opacity: 0.8; stroke-width: 5; } }
+  @keyframes slotWaas { 0%,100% { opacity: 1; } 50% { opacity: 0.45; } }
+  @media (prefers-reduced-motion: reduce) { .disk-svg .slot-mark, .disk-svg .slot-mark-waas { animation: none; } }
   .combat-result { margin-top: 24px; font-family: 'Cinzel', serif; font-size: 1.1rem; text-align: center; min-height: 50px; line-height: 1.5; }
   .combat-result .ko { color: var(--p2-soft); font-weight: 900; font-size: 1.3rem; text-shadow: 0 0 10px rgba(239,68,68,0.5); }
   .combat-result .status { color: var(--gold); font-style: italic; }
   .clash-moves { display: flex; justify-content: center; align-items: center; gap: 10px; font-family: 'Cinzel', serif; font-weight: 700; font-size: 0.95rem; margin-bottom: 8px; }
   .clash-moves .mv-att { color: #fca5a5; } .clash-moves .mv-def { color: #93c5fd; }
   .clash-moves .vs { color: var(--gold); font-size: 1.1rem; }
+  /* Arena-sfeer achter het gevecht: warme gloed in het midden, rood boven de
+     tegenstander en blauw onder jou — je ziet in één oogopslag wie waar staat. */
+  #combat-overlay::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(ellipse 62% 20% at 50% 26%, rgba(239,68,68,0.16), transparent 72%),
+      radial-gradient(ellipse 62% 20% at 50% 70%, rgba(59,130,246,0.16), transparent 72%),
+      radial-gradient(ellipse 88% 58% at 50% 48%, rgba(146,64,14,0.34), transparent 74%); }
   #clash-flash { position: absolute; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(circle at 50% 42%, rgba(255,255,255,0.9) 0%, rgba(255,235,180,0.4) 30%, transparent 65%); }
   #clash-flash.go { animation: clashFlash 0.45s ease-out; }
   @keyframes clashFlash { 0% { opacity: 0.9; } 100% { opacity: 0; } }
@@ -413,7 +494,14 @@
   @keyframes clashShake { 0%,100% { transform: translate(0,0); } 15% { transform: translate(-7px,2px); } 30% { transform: translate(6px,-2px); } 45% { transform: translate(-4px,1px); } 60% { transform: translate(3px,-1px); } 80% { transform: translate(-1px,0); } }
   @media (prefers-reduced-motion: reduce) { .disks-row.clash, #clash-flash.go { animation: none; } }
 
-  .plate-strip { display: flex; gap: 6px; overflow-x: auto; padding: 2px; height: 62px; min-height: 62px; flex: 0 0 62px; }
+  /* Meer kaarten dan er passen? Dan loopt de strip aan de rand weg in het
+     donker, zodat een half zichtbare kaart als 'scroll verder' leest en niet
+     als een afgeknipte kaart. */
+  .plate-strip { display: flex; gap: 6px; overflow-x: auto; padding: 2px; height: 62px; min-height: 62px; flex: 0 0 62px;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 26px), transparent 100%);
+    mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 26px), transparent 100%); }
+  .plate-strip::-webkit-scrollbar { display: none; }
   .plate-chip { flex: 0 0 auto; min-width: 110px; background: linear-gradient(145deg, #2a201a, #14100d); border: 1px solid rgba(245,158,11,0.3); border-radius: 8px; padding: 6px 10px; display: flex; flex-direction: column; gap: 2px; cursor: pointer; transition: transform 0.15s; }
   .plate-chip b { font-family: 'Cinzel', serif; font-size: 0.7rem; color: var(--gold); letter-spacing: 0.05em; }
   .plate-chip span { font-size: 0.6rem; color: #a89f91; }
@@ -475,8 +563,26 @@
   .screen { display: none; }
   .screen.active { display: block; }
 
-  .home { min-height: 100vh; max-width: 500px; margin: 0 auto; padding: 40px 18px 30px; display: flex; flex-direction: column; gap: 18px; background: radial-gradient(ellipse at 50% 20%, #1b1530 0%, #0d0a18 55%, #050409 100%); }
-  .home-title { text-align: center; font-family: 'Cinzel', serif; font-weight: 900; font-size: 3rem; letter-spacing: 0.18em; color: var(--gold); text-shadow: 0 0 25px var(--gold-glow), 0 4px 8px rgba(0,0,0,0.8); margin-top: 12px; }
+  /* Het menu ademt dezelfde arena-sfeer als het bord: warme gloed van onderen,
+     opstijgende sintels en een donkere hemel erboven. Alles in CSS, want dit is
+     een statische laag die niets hoeft te herberekenen. */
+  .home { position: relative; min-height: 100vh; max-width: 500px; margin: 0 auto; padding: 40px 18px 30px; display: flex; flex-direction: column; gap: 18px;
+    background:
+      radial-gradient(ellipse 60% 30% at 50% 104%, rgba(251,146,60,0.30), transparent 70%),
+      radial-gradient(ellipse 40% 24% at 12% 88%, rgba(244,63,94,0.16), transparent 72%),
+      radial-gradient(ellipse 40% 24% at 88% 84%, rgba(250,204,21,0.14), transparent 72%),
+      radial-gradient(ellipse 70% 40% at 50% 16%, #22193a 0%, #120e21 55%, #060410 100%); }
+  #home-fx { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+  #home-fx i { position: absolute; display: block; width: 4px; height: 4px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,236,190,0.9), rgba(255,170,90,0) 70%);
+    animation: emberRise linear infinite; }
+  .home > *:not(#home-fx) { position: relative; z-index: 1; }
+  @media (prefers-reduced-motion: reduce) { #home-fx { display: none; } }
+  .home-title { text-align: center; font-family: 'Cinzel', serif; font-weight: 900; font-size: 3rem; letter-spacing: 0.18em; color: var(--gold); text-shadow: 0 0 25px var(--gold-glow), 0 4px 8px rgba(0,0,0,0.8); margin-top: 12px;
+    animation: titelGloed 5s ease-in-out infinite; }
+  @keyframes titelGloed { 0%,100% { text-shadow: 0 0 25px var(--gold-glow), 0 4px 8px rgba(0,0,0,0.8); }
+    50% { text-shadow: 0 0 42px var(--gold-glow), 0 0 12px rgba(253,224,71,0.5), 0 4px 8px rgba(0,0,0,0.8); } }
+  @media (prefers-reduced-motion: reduce) { .home-title { animation: none; } }
   .home-sub { text-align: center; font-style: italic; color: #a89f91; font-size: 0.95rem; margin-top: -12px; }
   .profile-bar { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
   .profile-chip { background: linear-gradient(145deg, #2a201a, #14100d); border: 1px solid rgba(245,158,11,0.3); border-radius: 20px; padding: 6px 16px; font-family: 'Cinzel', serif; font-size: 0.8rem; color: var(--ink); }
@@ -486,7 +592,27 @@
   .home-tile::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 45%; background: linear-gradient(180deg, rgba(255,255,255,0.06), transparent); pointer-events: none; }
   .home-tile:active { transform: scale(0.97); }
   .home-tile.big { grid-column: 1 / -1; padding: 26px 12px; border-color: rgba(245,158,11,0.45); box-shadow: 0 0 18px rgba(245,158,11,0.12); }
-  .home-tile .ico { font-size: 2rem; display: block; margin-bottom: 8px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.7)); }
+  /* Gouden veeg die traag over de duel-tegel loopt */
+  .home-tile.big::after { content: ''; position: absolute; top: -50%; left: -70%; width: 45%; height: 200%;
+    background: linear-gradient(90deg, transparent, rgba(253,224,71,0.16), transparent);
+    transform: rotate(16deg); animation: tegelVeeg 6s ease-in-out infinite; pointer-events: none; }
+  @keyframes tegelVeeg { 0%, 62% { left: -70%; } 100% { left: 130%; } }
+  .home-tile .ico { display: block; margin: 0 auto 8px; width: 38px; height: 38px;
+    color: #cbd5e1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.7)); }
+  .home-tile.big .ico { width: 46px; height: 46px; color: var(--gold);
+    filter: drop-shadow(0 0 10px var(--gold-glow)) drop-shadow(0 2px 4px rgba(0,0,0,0.7)); }
+  /* De tegels komen één voor één binnen als je het menu opent */
+  #screen-home.active .home-tile { animation: tegelIn 0.42s cubic-bezier(.2,.7,.3,1.2) backwards; }
+  #screen-home.active .home-tile:nth-child(1) { animation-delay: 0.02s; }
+  #screen-home.active .home-tile:nth-child(2) { animation-delay: 0.07s; }
+  #screen-home.active .home-tile:nth-child(3) { animation-delay: 0.12s; }
+  #screen-home.active .home-tile:nth-child(4) { animation-delay: 0.17s; }
+  #screen-home.active .home-tile:nth-child(5) { animation-delay: 0.22s; }
+  #screen-home.active .home-tile:nth-child(6) { animation-delay: 0.27s; }
+  @keyframes tegelIn { 0% { transform: translateY(16px) scale(0.96); opacity: 0; }
+    100% { transform: translateY(0) scale(1); opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) {
+    #screen-home.active .home-tile { animation: none; } .home-tile.big::after { animation: none; opacity: 0; } }
   .home-tile .tname { font-family: 'Cinzel', serif; font-weight: 700; font-size: 1rem; color: var(--ink); letter-spacing: 0.08em; }
   .home-tile.big .tname { font-size: 1.3rem; color: var(--gold); }
   .home-tile .tdesc { font-size: 0.72rem; color: #a89f91; margin-top: 4px; }
@@ -517,6 +643,18 @@
   .slot-summary { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 10px 0; }
   .slot-pill { font-size: 0.68rem; font-family: 'Cinzel', serif; border-radius: 10px; padding: 3px 10px; border: 1px solid rgba(255,255,255,0.2); }
   .result-panel { background: linear-gradient(170deg, #1c1528, #0b0912); border: 1px solid rgba(245,158,11,0.4); border-radius: 18px; padding: 30px 26px; max-width: 340px; width: 90%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.9); }
+  /* Het eindscherm komt binnenvallen in plaats van er ineens te staan */
+  #result-overlay.active .result-panel { animation: resultIn 0.5s cubic-bezier(.2,-0.2,.3,1.5); }
+  @keyframes resultIn { 0% { transform: translateY(38px) scale(0.86); opacity: 0; }
+    60% { transform: translateY(0) scale(1.03); opacity: 1; } 100% { transform: translateY(0) scale(1); } }
+  #result-overlay.active .result-title { animation: resultTitel 0.7s ease-out 0.18s backwards; }
+  @keyframes resultTitel { 0% { letter-spacing: 0.8em; opacity: 0; filter: blur(6px); }
+    100% { letter-spacing: 0.1em; opacity: 1; filter: blur(0); } }
+  #result-overlay.active .result-reward { animation: resultBeloning 0.5s ease-out 0.5s backwards; }
+  @keyframes resultBeloning { 0% { transform: scale(0.4); opacity: 0; } 65% { transform: scale(1.18); opacity: 1; } 100% { transform: scale(1); } }
+  @media (prefers-reduced-motion: reduce) {
+    #result-overlay.active .result-panel, #result-overlay.active .result-title,
+    #result-overlay.active .result-reward { animation: none; } }
   .result-title { font-family: 'Cinzel', serif; font-weight: 900; font-size: 2rem; letter-spacing: 0.1em; }
   .result-title.win { color: var(--gold); text-shadow: 0 0 25px var(--gold-glow); }
   .result-title.lose { color: #f87171; text-shadow: 0 0 25px rgba(239,68,68,0.5); }
@@ -592,6 +730,7 @@
 <!-- ===== HOME ===== -->
 <div id="screen-home" class="screen">
   <div class="home">
+    <div id="home-fx"></div>
     <div class="home-title">RONDEL</div>
     <div class="home-sub">Tactisch duel op het bord der legenden</div>
     <div class="profile-bar">
@@ -600,12 +739,47 @@
       <div class="profile-chip">W <b id="home-wins">0</b> · V <b id="home-losses">0</b></div>
     </div>
     <div class="home-tiles">
-      <div class="home-tile big" id="tile-solo"><span class="ico">⚔️</span><div class="tname">DUEL</div><div class="tdesc">Solo tegen het AI-systeem — verdien credits</div></div>
-      <div class="home-tile" id="tile-hotseat"><span class="ico">🤝</span><div class="tname">HOTSEAT</div><div class="tdesc">2 spelers, één toestel</div></div>
-      <div class="home-tile" id="tile-collection"><span class="ico">🛡️</span><div class="tname">COLLECTIE</div><div class="tdesc">Bekijk &amp; verbeter je units</div></div>
-      <div class="home-tile" id="tile-store"><span class="ico">◈</span><div class="tname">WINKEL</div><div class="tdesc">Nieuwe units kopen met credits</div></div>
-      <div class="home-tile" id="tile-help"><span class="ico">📖</span><div class="tname">HOE SPEEL JE</div><div class="tdesc">Alle regels kort uitgelegd</div></div>
-      <div class="home-tile" id="tile-settings" style="grid-column: 1 / -1;"><span class="ico">⚙️</span><div class="tname">INSTELLINGEN</div><div class="tdesc">Geluid, tempo, klok en meer</div></div>
+      <!-- Getekende iconen in dezelfde lijnstijl als de kaart-iconen; emoji
+           vielen uit de toon naast de Cinzel-letters en zien er op elk toestel
+           anders uit. -->
+      <div class="home-tile big" id="tile-solo">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3.4 2.8 L14 15.4 L17.3 19.3" stroke-width="2"/>
+          <path d="M11.6 17.4 L16.4 13.5" stroke-width="1.8"/><circle cx="18.2" cy="20.4" r="1.5"/>
+          <path d="M20.6 2.8 L10 15.4 L6.7 19.3" stroke-width="2"/>
+          <path d="M12.4 17.4 L7.6 13.5" stroke-width="1.8"/><circle cx="5.8" cy="20.4" r="1.5"/>
+        </svg>
+        <div class="tname">DUEL</div><div class="tdesc">Solo tegen het AI-systeem — verdien credits</div></div>
+      <div class="home-tile" id="tile-hotseat">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="7.5" cy="7" r="3"/><path d="M2.5 20 v-2.5 a5 5 0 0 1 10 0 V20"/>
+          <circle cx="16.5" cy="7" r="3"/><path d="M11.5 20 v-2.5 a5 5 0 0 1 10 0 V20"/>
+        </svg>
+        <div class="tname">HOTSEAT</div><div class="tdesc">2 spelers, één toestel</div></div>
+      <div class="home-tile" id="tile-collection">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2.5 L20 5.5 V12 q0 6.5 -8 9.5 Q4 18.5 4 12 V5.5 Z"/>
+          <path d="M12 8 l1.9 3.9 L18 12.5 l-3 2.9 0.8 4.1 L12 17.6 L8.2 19.5 L9 15.4 L6 12.5 l4.1 -0.6 Z"/>
+        </svg>
+        <div class="tname">COLLECTIE</div><div class="tdesc">Bekijk &amp; verbeter je units</div></div>
+      <div class="home-tile" id="tile-store">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2.5 L20 12 L12 21.5 L4 12 Z"/><path d="M7.5 12 L12 6.6 L16.5 12 L12 17.4 Z"/>
+        </svg>
+        <div class="tname">WINKEL</div><div class="tdesc">Nieuwe units kopen met credits</div></div>
+      <div class="home-tile" id="tile-help">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 6.2 Q8.5 3.5 3 4.4 V18.6 Q8.5 17.7 12 20.4 Q15.5 17.7 21 18.6 V4.4 Q15.5 3.5 12 6.2 Z"/>
+          <path d="M12 6.2 V20.4"/>
+        </svg>
+        <div class="tname">HOE SPEEL JE</div><div class="tdesc">Alle regels kort uitgelegd</div></div>
+      <div class="home-tile" id="tile-settings" style="grid-column: 1 / -1;">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3.2"/>
+          <path d="M12 2.2 l1.5 2.6 h-3 Z M12 21.8 l-1.5 -2.6 h3 Z M2.2 12 l2.6 -1.5 v3 Z M21.8 12 l-2.6 1.5 v-3 Z M5.1 5.1 l3 0.4 -2.1 2.1 Z M18.9 18.9 l-3 -0.4 2.1 -2.1 Z M18.9 5.1 l-0.4 3 -2.1 -2.1 Z M5.1 18.9 l0.4 -3 2.1 2.1 Z"/>
+          <circle cx="12" cy="12" r="7.4" stroke-dasharray="2.4 3"/>
+        </svg>
+        <div class="tname">INSTELLINGEN</div><div class="tdesc">Geluid, tempo, klok en meer</div></div>
     </div>
     <div class="home-foot">Rondel-prototype · fase 1.5 · mechanics naar Duel-model</div>
   </div>
@@ -1349,7 +1523,7 @@ let currentMode = 'solo';
 
 function initialState() {
   const ms = S('clockMinutes') * 60000;   // 0 = klok uit
-  return { turn:'p1', actionsLeft:1, units:{}, bench:{p1:[],p2:[]}, hc:{p1:[],p2:[]}, selected:null, legalTargets:new Set(), pendingDeploy:null, over:false, mode: currentMode, aiThinking: false, locked: false, plates:{p1:[],p2:[]}, usedPlates:{p1:[],p2:[]}, counterAttack:{p1:false,p2:false}, plateUsed:false, pendingPlate:null, mpBonus:{}, warcry:{p1:false,p2:false}, firstMoveDone:false, animating:null, pendingFX:[], craters:[], clock: ms ? { p1:ms, p2:ms } : null };
+  return { turn:'p1', actionsLeft:1, units:{}, bench:{p1:[],p2:[]}, hc:{p1:[],p2:[]}, selected:null, legalTargets:new Set(), pendingDeploy:null, over:false, mode: currentMode, aiThinking: false, locked: false, plates:{p1:[],p2:[]}, usedPlates:{p1:[],p2:[]}, counterAttack:{p1:false,p2:false}, plateUsed:false, pendingPlate:null, mpBonus:{}, warcry:{p1:false,p2:false}, firstMoveDone:false, animating:null, pendingFX:[], craters:[], portals:[], clock: ms ? { p1:ms, p2:ms } : null };
 }
 
 // ===== Schaakklok (Duel-regel: 5 min per speler; tijd op = verlies) =====
@@ -1429,6 +1603,7 @@ function renderHome() {
   document.getElementById('home-owned').textContent = Object.keys(profile.owned).length;
   document.getElementById('home-wins').textContent = profile.stats.wins;
   document.getElementById('home-losses').textContent = profile.stats.losses;
+  buildHomeFx();
 }
 
 function goHome() {
@@ -1577,6 +1752,23 @@ function aiDeck() {
 
 // Sintels één keer aanmaken; ze leven in de HTML-laag en overleven het
 // opnieuw opbouwen van de bord-SVG.
+// Sintels in het menu, dezelfde laag als in de arena maar wat rustiger.
+function buildHomeFx() {
+  const box = document.getElementById('home-fx');
+  if (!box || box.childElementCount || animOff()) return;
+  for (let i = 0; i < 16; i++) {
+    const e = document.createElement('i');
+    e.style.left = (2 + Math.random() * 96) + '%';
+    e.style.bottom = (-6 + Math.random() * 26) + '%';
+    e.style.animationDuration = (9 + Math.random() * 9).toFixed(1) + 's';
+    e.style.animationDelay = (-Math.random() * 16).toFixed(1) + 's';
+    e.style.opacity = (0.3 + Math.random() * 0.6).toFixed(2);
+    const sc = (0.6 + Math.random() * 1.4).toFixed(2);
+    e.style.width = e.style.height = (3 * sc).toFixed(1) + 'px';
+    box.appendChild(e);
+  }
+}
+
 function buildArenaFx() {
   const box = document.getElementById('arena-fx');
   if (!box || box.childElementCount || animOff()) return;
@@ -1655,12 +1847,25 @@ function endMatch(winner, kind) {
     saveProfile();
   }
   const won = winner === 'p1';
+  // Het doel bereiken is HET moment: laat het doel openbarsten voor het
+  // eindscherm eroverheen komt.
+  if (kind === 'goal') {
+    const doel = Object.values(NODES).find(n => n.type === 'goal' && n.owner !== winner);
+    if (doel) queueFX(doel.x, doel.y, 'goal:' + winner);
+  }
   document.getElementById('result-title').textContent = state.mode === 'solo' ? (won ? 'OVERWINNING' : 'VERSLAGEN') : (won ? 'SPELER 1 WINT' : 'SPELER 2 WINT');
   document.getElementById('result-title').className = 'result-title ' + (state.mode !== 'solo' || won ? 'win' : 'lose');
   document.getElementById('result-reason').textContent = msg;
   document.getElementById('result-reward').textContent = state.mode === 'solo' ? `+${gain} credits` : '';
   renderAll();
-  setTimeout(() => { sfx(state.mode !== 'solo' || won ? 'win' : 'lose'); document.getElementById('result-overlay').classList.add('active'); }, 900);
+  // Het eindscherm komt met een tel vertraging, zodat je de laatste zet nog
+  // ziet. Ben je intussen naar het menu gelopen, dan hoort het er niet meer
+  // overheen te ploffen.
+  setTimeout(() => {
+    if (!document.getElementById('screen-game').classList.contains('active')) return;
+    sfx(state.mode !== 'solo' || won ? 'win' : 'lose');
+    document.getElementById('result-overlay').classList.add('active');
+  }, kind === 'goal' && !animOff() ? 1700 : 900);
 }
 
 // ===== Collectie: bekijken + upgraden (met disk-preview) =====
@@ -2132,6 +2337,9 @@ const BOARD_DEFS = `
   <radialGradient id="gMeteor" cx="38%" cy="34%" r="80%">
     <stop offset="0%" stop-color="#fff8dc"/><stop offset="42%" stop-color="#fb923c"/><stop offset="100%" stop-color="#7c2d12"/>
   </radialGradient>
+  <linearGradient id="gPortalLicht" x1="0" y1="1" x2="0" y2="0">
+    <stop offset="0%" stop-color="rgba(219,234,254,0.85)"/><stop offset="45%" stop-color="rgba(147,197,253,0.35)"/><stop offset="100%" stop-color="rgba(147,197,253,0)"/>
+  </linearGradient>
   <radialGradient id="gGate" cx="50%" cy="70%" r="70%">
     <stop offset="0%" stop-color="rgba(255,255,255,0.95)"/><stop offset="45%" stop-color="rgba(191,219,254,0.75)"/><stop offset="100%" stop-color="rgba(96,165,250,0.25)"/>
   </radialGradient>
@@ -2218,6 +2426,7 @@ function renderBoard() {
   // net als in Duel. Alleen een warme grondgloed onder de routes.
   el('ellipse', { cx:270, cy:445, rx:255, ry:255, fill:'url(#gArenaGlow)' }, svg);
   drawCraters(svg);
+  drawPortals(svg);
   // Lichtvlek op de vloer onder elk doel: maakt de doelzones herkenbaar
   for (const [k, n] of Object.entries(NODES)) {
     if (n.type !== 'goal') continue;
@@ -2866,12 +3075,146 @@ function drawCraters(svg) {
   }
 }
 
+// ==========================================
+// INZETPOORT (sessie 38)
+// Koen wilde een duistere put "waar die monsters uit gekropen komen" en een
+// hemelpoort. Die stonden als decor aan de zijkant, maar een figuur verscheen
+// gewoon uit het niets op z'n startpunt. Nu scheurt de poort daar open: bij
+// jou een lichtzuil met vonken, bij de tegenstander een zwart gat met walm en
+// klauwsporen. Het figuur klimt er zichtbaar uit.
+// Poorten leven in state.portals en worden bij elke render opnieuw getekend,
+// zodat ze het herbouwen van de SVG overleven — net als de kraters.
+// ==========================================
+function addPortal(node, owner) {
+  if (animOff() || !NODES[node]) return;
+  state.portals = state.portals || [];
+  state.portals.push({ x: NODES[node].x, y: NODES[node].y, owner, born: performance.now() });
+  if (state.portals.length > 4) state.portals.shift();
+}
+const PORTAL_DUUR = 1300;
+function drawPortals(svg) {
+  const lijst = state.portals || [];
+  if (!lijst.length) return;
+  const nu = performance.now();
+  state.portals = lijst.filter(p => nu - p.born < PORTAL_DUUR);
+  for (const p of state.portals) {
+    // De poort loopt op CSS-animaties, niet op een teken-lus: de SVG wordt bij
+    // elke zet herbouwd en dan zou hij stilstaan. Met een NEGATIEVE vertraging
+    // ter grootte van z'n leeftijd pikt hij de animatie op waar hij was.
+    const oud = nu - p.born;
+    const g = el('g', { class: 'portal portal-' + p.owner, transform: `translate(${p.x},${p.y + 7})` }, svg);
+    const anim = (e, naam, duur, delay) => { e.style.animation = `${naam} ${duur}ms ease-out ${(delay || 0) - oud}ms forwards`; return e; };
+    const ring = p.owner === 'p1' ? 'rgba(191,219,254,0.95)' : 'rgba(217,70,70,0.9)';
+    anim(el('ellipse', { cx:0, cy:0, rx:34, ry:14, fill:'none', stroke:ring, 'stroke-width':4 }, g), 'portalGolf', 900);
+    anim(el('ellipse', { cx:0, cy:0, rx:52, ry:21, fill: p.owner === 'p1' ? 'rgba(147,197,253,0.45)' : 'rgba(88,28,135,0.6)' }, g), 'portalPlas', PORTAL_DUUR);
+    anim(el('ellipse', { cx:0, cy:0, rx:36, ry:15, fill: p.owner === 'p1' ? 'rgba(219,234,254,0.9)' : '#08040a' }, g), 'portalPlas', PORTAL_DUUR);
+    if (p.owner === 'p1') {
+      anim(el('path', { d:'M -38 0 L -22 -96 L 22 -96 L 38 0 Z', fill:'url(#gPortalLicht)' }, g), 'portalZuil', PORTAL_DUUR);
+      for (let i = 0; i < 10; i++) {
+        const a = (i * 36) * Math.PI / 180;
+        anim(el('circle', { cx:Math.cos(a) * 30, cy:0, r:3, fill:'#fff' }, g), 'portalVonk', 900, i * 72);
+      }
+    } else {
+      anim(el('ellipse', { cx:0, cy:1, rx:18, ry:7, fill:'#ef4444' }, g), 'portalGloed', PORTAL_DUUR);
+      for (let i = 0; i < 6; i++) {
+        const a = (i * 61 + 15) * Math.PI / 180;
+        anim(el('circle', { cx:Math.cos(a) * 22, cy:0, r:9, fill:'rgba(52,26,66,0.75)' }, g), 'portalWalm', 1100, i * 110);
+      }
+      for (const dx of [-1, 1]) {
+        anim(el('path', { d:`M ${dx * 19} -4 l ${dx * 10} -13`, stroke:'#be3c3c', 'stroke-width':2.6, 'stroke-linecap':'round' }, g), 'portalKlauw', 700, 90);
+      }
+    }
+  }
+}
+
+// Het figuur klimt uit de poort omhoog in plaats van er te verschijnen.
+function riseUnit(u) {
+  return new Promise(res => {
+    if (animOff() || !u.node) { res(); return; }
+    state.animating = u.uid;
+    renderAll();                       // poort tekenen, statisch figuur verbergen
+    const svg = document.getElementById('board');
+    const n = NODES[u.node];
+    const ghost = unitGroup(u, false); ghost.style.transition = 'none'; svg.appendChild(ghost);
+    const dur = 480 * (animScale() || 1), t0 = performance.now();
+    const ds = depthScale(n.y);
+    const frame = (now) => {
+      const t = Math.min(1, (now - t0) / dur);
+      const e = 1 - Math.pow(1 - t, 3);
+      const lift = (1 - e) * 30;
+      ghost.setAttribute('transform', `translate(${n.x},${n.y + lift}) scale(${ds.toFixed(3)},${(ds * (0.3 + 0.7 * e)).toFixed(3)})`);
+      ghost.setAttribute('opacity', Math.min(1, e * 1.8).toFixed(2));
+      if (t < 1) requestAnimationFrame(frame);
+      // De SVG kan tussendoor herbouwd zijn (klok, AI); dan is de ghost al weg
+      else { if (ghost.parentNode) ghost.parentNode.removeChild(ghost); state.animating = null; renderAll(); res(); }
+    };
+    requestAnimationFrame(frame);
+  });
+}
+
 function queueFX(x, y, kind) { (state.pendingFX = state.pendingFX || []).push({ x, y, kind }); }
 function flushFX() { const list = state.pendingFX || []; state.pendingFX = []; for (const f of list) spawnFX(f.x, f.y, f.kind); }
+// Een figuur dat opklimt verdient meer dan een regeltje tekst: gouden ringen
+// die opstijgen, sterren die wegspatten en het nieuwe levelcijfer dat opbloeit.
+function spawnLevelUp(svg, x, y, lvl) {
+  const g = el('g', { class:'lvlfx', transform:`translate(${x},${y})` }, svg);
+  const zet = (e, naam, duur, delay) => { e.style.animation = `${naam} ${duur}ms ease-out ${delay || 0}ms forwards`; return e; };
+  zet(el('ellipse', { cx:0, cy:8, rx:40, ry:17, fill:'rgba(253,224,71,0.28)' }, g), 'lvlPlas', 700);
+  for (let i = 0; i < 4; i++) {
+    zet(el('ellipse', { cx:0, cy:8, rx:36, ry:15, fill:'none', stroke:'#fde047', 'stroke-width':4 }, g), 'lvlRing', 950, i * 150);
+  }
+  for (let i = 0; i < 10; i++) {
+    const a = (i * 36) * Math.PI / 180;
+    zet(el('path', { d:'M 0 -11 L 3 -3 L 11 0 L 3 3 L 0 11 L -3 3 L -11 0 L -3 -3 Z', fill:'#fff7d6' }, g), 'lvlSter', 850, i * 40);
+    g.lastChild.style.setProperty('--a', (i * 36) + 'deg');
+  }
+  const t = el('text', { x:0, y:-52, 'font-size':28, 'text-anchor':'middle', fill:'#fde047',
+    'font-family':"'Cinzel', serif", 'font-weight':'900', stroke:'#3b2a12', 'stroke-width':1.6,
+    'paint-order':'stroke' }, g);
+  t.textContent = 'LV ' + lvl;
+  zet(t, 'lvlTekst', 1300, 120);
+  setTimeout(() => { if (g.parentNode) g.parentNode.removeChild(g); }, 1500);
+}
+
+// Het doel bereiken is HET moment van het potje. Dat mag je zien: het doel
+// barst open met stralen, ringen en een regen van vonken.
+function spawnGoal(svg, x, y, winner) {
+  const g = el('g', { class:'goalfx', transform:`translate(${x},${y})` }, svg);
+  const kleur = winner === 'p1' ? '#93c5fd' : '#fca5a5';
+  const zet = (e, naam, duur, delay) => { e.style.animation = `${naam} ${duur}ms ease-out ${delay || 0}ms forwards`; return e; };
+  zet(el('circle', { cx:0, cy:0, r:30, fill:'#fff' }, g), 'goalFlits', 700);
+  for (let i = 0; i < 14; i++) {
+    const a = i * (360 / 14);
+    // De draaiing zit in een wrapper-<g>; de straal zelf schaalt alleen uit
+    // z'n voet omhoog. Zo hoeft de CSS geen transform-origin in bord-
+    // coördinaten te raden (die verwijst bij SVG naar de viewBox, niet naar
+    // het punt waar de groep staat).
+    const wrap = el('g', { transform:`rotate(${a})` }, g);
+    zet(el('path', { class:'goal-straal', d:'M -5 0 L 0 -120 L 5 0 Z', fill:kleur, opacity:0.85 }, wrap), 'goalStraal', 1100, i * 22);
+  }
+  for (let i = 0; i < 4; i++) {
+    zet(el('circle', { cx:0, cy:0, r:26, fill:'none', stroke:'#fde047', 'stroke-width':5 }, g), 'goalRing', 1200, i * 170);
+  }
+  for (let i = 0; i < 16; i++) {
+    const a = i * 22.5;
+    const v = el('circle', { cx:0, cy:0, r:4, fill: i % 2 ? '#fde047' : '#fff' }, g);
+    v.style.setProperty('--a', a + 'deg');
+    zet(v, 'goalVonk', 1000, 120 + i * 25);
+  }
+  const t = el('text', { x:0, y:-58, 'font-size':34, 'text-anchor':'middle', fill:'#fde047',
+    'font-family':"'Cinzel', serif", 'font-weight':'900', stroke:'#2a1a06', 'stroke-width':2,
+    'paint-order':'stroke' }, g);
+  t.textContent = 'DOEL!';
+  zet(t, 'goalTekst', 1600, 200);
+  setTimeout(() => { if (g.parentNode) g.parentNode.removeChild(g); }, 1900);
+}
+
 function spawnFX(x, y, kind) {
   if (animOff()) return;
   const svg = document.getElementById('board');
   if (kind.startsWith('inslag:')) { spawnImpact(svg, x, y, kind.slice(7)); return; }
+  if (kind.startsWith('level:')) { spawnLevelUp(svg, x, y, kind.slice(6)); return; }
+  if (kind.startsWith('goal:')) { spawnGoal(svg, x, y, kind.slice(5)); return; }
   const g = el('g', {}, svg);
   const n = kind === 'poof' ? 4 : 7;
   for (let i = 0; i < n; i++) {
@@ -2998,7 +3341,12 @@ function moveUnit(u, end) {
           spawnFX(B.x, B.y + 9, 'poof');
           u.node = path[seg + 1]; seg++;
           if (seg < path.length - 1) hopOne();
-          else { svg.removeChild(ghost); svg.removeChild(shadow); state.animating = null; renderAll(); res(); }
+          else {
+            // Ook hier kan de SVG tussendoor herbouwd zijn
+            if (ghost.parentNode) ghost.parentNode.removeChild(ghost);
+            if (shadow.parentNode) shadow.parentNode.removeChild(shadow);
+            state.animating = null; renderAll(); res();
+          }
         }
       };
       requestAnimationFrame(frame);
@@ -3177,8 +3525,13 @@ function doDeploy(u, target) {
   u.node = entry;
   state.bench[u.owner] = state.bench[u.owner].filter(x => x !== u.uid);
   sfx('deploy');
-  if (target === entry || !entry) { onDeployComplete(u); renderAll(); return Promise.resolve(); }
-  return moveUnit(u, target).then(() => onDeployComplete(u));
+  // De poort scheurt open op het startpunt en het figuur klimt eruit
+  addPortal(entry, u.owner);
+  const verder = () => {
+    if (target === entry || !entry) { onDeployComplete(u); renderAll(); return Promise.resolve(); }
+    return moveUnit(u, target).then(() => onDeployComplete(u));
+  };
+  return riseUnit(u).then(verder);
 }
 
 // Inzet-abilities (triggeren zodra de unit op het veld staat)
@@ -3270,7 +3623,9 @@ function endTurn() {
   for (const u of Object.values(state.units)) u.fx = {};   // plate-effecten gelden 'deze beurt'
   for (const uid of state.bench[state.turn]) { const u = state.units[uid]; if (u.status.includes('wait')) u.status = u.status.filter(s => s !== 'wait'); }
   sfx('turn');
-  renderAll(); if (!hasAnyAction(state.turn)) { endMatch(state.turn==='p1'?'p2':'p1', 'lockout'); return; }
+  renderAll();
+  beweegKlasse(document.getElementById('turn-banner'), 'wissel', 700);
+  if (!hasAnyAction(state.turn)) { endMatch(state.turn==='p1'?'p2':'p1', 'lockout'); return; }
   // Waarschuwing zodra je aanvoer is afgesneden: dan kun je niets meer inzetten
   // en moet je elke beurt met wat er staat blijven schuiven. In Duel is dit een
   // erkende situatie (er bestaan kaarten die er speciaal tegen zijn).
@@ -3378,7 +3733,9 @@ function renderDisk(svgId, slots, defKey) {
     const sA = (m.start*SLOT_DEG - 90)*Math.PI/180, eA = (m.end*SLOT_DEG - 90)*Math.PI/180, mA = (sA+eA)/2;
     const large = (m.end-m.start)*SLOT_DEG > 180 ? 1 : 0;
     // Basiskleur + subtiele diepte: lichte gloss aan de buitenkant, schaduw bij de naaf
-    el('path', { d: seg(R, IR, sA, eA, large), fill: COLORS[m.slot.k], stroke:'rgba(0,0,0,0.55)', 'stroke-width':1.6 }, svg);
+    // data-start/data-end: zo weet markeerSlot() welk vak de wijzer aanwijst
+    el('path', { d: seg(R, IR, sA, eA, large), fill: COLORS[m.slot.k], stroke:'rgba(0,0,0,0.55)', 'stroke-width':1.6,
+      'data-start': m.start, 'data-end': m.end }, svg);
     el('path', { d: seg(R-1.5, R-13, sA, eA, large), fill:'rgba(255,255,255,0.22)', stroke:'none' }, svg);
     el('path', { d: seg(IR+11, IR, sA, eA, large), fill:'rgba(0,0,0,0.22)', stroke:'none' }, svg);
     const wedgeSlots = m.end - m.start;
@@ -3413,6 +3770,29 @@ function renderDisk(svgId, slots, defKey) {
   el('circle', { cx, cy, r: IR, fill:`url(#dHub${uq})`, stroke:'#fbbf24', 'stroke-width':2.5 }, svg);
   el('ellipse', { cx:cx-6, cy:cy-8, rx:10, ry:6, fill:'rgba(255,255,255,0.20)' }, svg);
   el('circle', { cx, cy, r:4, fill:'#fbbf24', opacity:0.85 }, svg);
+}
+
+// Welk vak wijst de wijzer aan? Zonder markering moet je zelf uitzoeken waar
+// hij stilstaat; nu licht het gedraaide vak op zolang de uitslag in beeld is.
+function markeerSlot(svgId, idx) {
+  if (animOff()) return;
+  const svg = document.getElementById(svgId); if (!svg) return;
+  svg.querySelectorAll('.slot-mark').forEach(e => e.remove());
+  const wedge = [...svg.querySelectorAll('path[data-start]')]
+    .find(p => idx >= +p.dataset.start && idx < +p.dataset.end);
+  if (!wedge) return;
+  // Twee lagen: een lichte waas over het hele vak zodat je het van een afstand
+  // ziet, en een dikke rand eromheen zodat je precies weet welk vak het is.
+  const waas = wedge.cloneNode(false);
+  waas.setAttribute('class', 'slot-mark-waas');
+  waas.setAttribute('fill', 'rgba(255,255,255,0.30)');
+  waas.setAttribute('stroke', 'none');
+  const mark = wedge.cloneNode(false);
+  mark.setAttribute('class', 'slot-mark');
+  mark.setAttribute('fill', 'none');
+  mark.setAttribute('stroke', '#ffffff');
+  mark.setAttribute('stroke-width', '7');
+  for (const e of [waas, mark]) { e.removeAttribute('data-start'); e.removeAttribute('data-end'); svg.appendChild(e); }
 }
 
 function spin(svgId, ms) {
@@ -3497,8 +3877,8 @@ async function runCombat(att, def) {
   // aanval straks van de een naar de ander vliegen.
   const attFig = document.getElementById(att.owner === 'p2' ? 'fighter-top' : 'fighter-bottom');
   const defFig = document.getElementById(def.owner === 'p2' ? 'fighter-top' : 'fighter-bottom');
-  attFig.className = 'fighter ' + att.owner; attFig.innerHTML = unitVisual(att.defKey, att.owner, 100);
-  defFig.className = 'fighter ' + def.owner; defFig.innerHTML = unitVisual(def.defKey, def.owner, 100);
+  attFig.className = 'fighter ' + att.owner; attFig.innerHTML = unitVisual(att.defKey, att.owner, 118);
+  defFig.className = 'fighter ' + def.owner; defFig.innerHTML = unitVisual(def.defKey, def.owner, 118);
   const fxLaag = document.getElementById('attack-fx'); if (fxLaag) fxLaag.innerHTML = '';
 
   const aSlots = applyStatus(att.slots, att.status), dSlots = applyStatus(def.slots, def.status);
@@ -3539,6 +3919,10 @@ async function runCombat(att, def) {
   // Scherpschutter (X Accuracy): een Miss schuift door naar het vak ernaast
   if (aFx.xaccuracy && aSlots[finalAIdx].k === 'red') finalAIdx = (finalAIdx + 1) % 16;
   if (dFx.xaccuracy && dSlots[finalDIdx].k === 'red') finalDIdx = (finalDIdx + 1) % 16;
+
+  // Laat zien WELK vak je hebt gedraaid — inclusief het doorgeschoven vak bij
+  // Verwarring of Scherpschutter, want dan wijst de wijzer zelf ernaast.
+  markeerSlot(attDiskId, finalAIdx); markeerSlot(defDiskId, finalDIdx);
 
   const attWasFrozen = att.status.includes('frozen'), defWasFrozen = def.status.includes('frozen');
   let aSlot = attWasFrozen ? {k:'red'} : aSlots[finalAIdx];
@@ -3694,6 +4078,7 @@ function levelUp(u) {
   if (u.level >= 4) return; u.level++;
   levelSlotBoost(u);
   sfx('levelup');
+  if (u.node && NODES[u.node]) queueFX(NODES[u.node].x, NODES[u.node].y, 'level:' + u.level);
   toast(`${UNIT_DEFS[u.defKey].name} → Level ${u.level}!`);
 }
 

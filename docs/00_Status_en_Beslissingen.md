@@ -1,5 +1,5 @@
 RONDEL — STATUS EN BESLISSINGEN
-Laatste update: 23 augustus 2026 (sessie 37)
+Laatste update: 24 augustus 2026 (sessie 38)
 
 KERNCONCEPT
 - Tabletop-first fantasy bordspel, einddoel = digitale app
@@ -304,6 +304,48 @@ kaarten."
   benoemde aanval heeft een animatie, elke soort heeft een kleur, elk
   projectiel staat ook echt in de CSS). Smoke +7 checks voor de bordhoogte, de
   twee vechters, het vliegende projectiel, het schild-icoon en de kaartvlucht.
+
+SESSIE 38 — DE REST VAN HET SPEL KRIJGT OOK EEN MOMENT
+Koen: "ik wil dat het er allemaal verschrikkelijk goed uitziet, alles moet een
+soort animatie hebben — ga gewoon door op eigen inzicht." Doorgewerkt op de plek
+waar het spel nog stil bleef.
+
+- INZETPOORT. De hemelpoort en de duistere put stonden als decor aan de zijkant,
+  maar een figuur verscheen uit het niets op z'n startpunt. Nu scheurt de poort
+  daar open — lichtzuil met vonken bij p1, zwart gat met walm en klauwsporen bij
+  p2 — en klimt het figuur er zichtbaar uit (riseUnit).
+  De poorten leven in state.portals en draaien op CSS-animaties met een
+  NEGATIEVE vertraging ter grootte van hun leeftijd, zodat ze het herbouwen van
+  de SVG bij elke zet overleven in plaats van stil te staan. Zelfde truc als de
+  kraters, maar dan zonder teken-lus.
+- LEVEL-UP. Gouden ringen die opstijgen, tien sterren die wegspatten en het
+  nieuwe levelcijfer dat opbloeit boven het figuur.
+- DOELPUNT. Het moment waar het potje om draait gebeurde zonder dat er iets te
+  zien was. Nu barst het doel open met veertien lichtstralen, vier ringen, een
+  regen van vonken en DOEL! in het goud. Het eindscherm wacht daarop (1700ms
+  i.p.v. 900ms) en valt daarna zelf binnen: paneel veert omhoog, titel trekt
+  zich samen uit een wijde letterafstand, credits ploppen erachteraan.
+- HET GEDRAAIDE VAK LICHT OP. Je moest zelf uitzoeken waar de wijzer stilstond.
+  Nu krijgt het gedraaide vak een lichte waas plus een dikke witte rand, met een
+  rustige pulse zolang de uitslag in beeld staat. Werkt ook bij Verwarring en
+  Scherpschutter, waar de wijzer zélf naast het geldende vak staat.
+- BEURTWISSEL. Er loopt licht in de teamkleur door de beurtbalk, zodat je de
+  wissel ziet zonder dat er iets van formaat verandert.
+- MENU. Stond op vlak donkerblauw met emoji-iconen terwijl het bord een warme
+  arena is. Nu gloeit er vuur onder het menu, stijgen er sintels op, pulseert de
+  titel en komen de tegels een voor een binnen. De emoji zijn vervangen door
+  getekende iconen in dezelfde lijnstijl als de kaart-iconen.
+- GEVECHTSSCHERM. Verhouding omgedraaid: figuren van 104 naar 122px, schijven
+  van 196 naar 184px. De vechters ademen zachtjes zolang de wielen draaien, en
+  achter het gevecht ligt arena-gloed met rood boven de tegenstander en blauw
+  onder jou.
+- KAARTENSTRIP loopt aan de rand weg in het donker (mask), zodat een half
+  zichtbare kaart als "scroll verder" leest en niet als een afgeknipte kaart.
+- BUGS onderweg: moveUnit/riseUnit deden svg.removeChild op een ghost die er
+  niet meer was zodra de SVG tussendoor herbouwd werd; het eindscherm plofte
+  over het menu heen als het potje afliep nadat je al was weggelopen.
+- TESTS: headless 119, smoke 41 -> 53 checks. Simulatie: 6/6 potjes lopen
+  normaal af (gemiddeld 31 beurten, geen JS-fouten).
 
 SESSIE 36 — SCHERMPASSING, INSLAGEN OP HET BORD, AI-CHOKEPUNTEN
 - HET SPEL PAST NU OP HET SCHERM. Het spelscherm is 100dvh hoog met flex; het
