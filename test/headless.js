@@ -527,6 +527,21 @@ section('=== PRESTATIE (3 checks) ===');
   check('Sintels zijn een statische CSS-laag', /#arena-fx i \{/.test(css), true);
 }
 
+// ─── 4g3. ART EN OFFLINE-CACHE LOPEN GELIJK (sessie 38) ───────────────────────
+// Een hernoemd plaatje dat niet in sw.js staat werkt online prima en is offline
+// stuk. Dat merk je pas op een telefoon zonder bereik, dus hier vastgezet.
+section('=== ART & CACHE (3 checks) ===');
+{
+  const sw = fs.readFileSync(path.join(__dirname, '../sw.js'), 'utf8');
+  const opSchijf = fs.readdirSync(path.join(__dirname, '../art')).filter(f => f.endsWith('.png')).sort();
+  const inSw = (sw.match(/art\/[a-z0-9_-]+\.png/gi) || []).map(s => s.slice(4)).sort();
+  const artMatch = html.match(/const UNIT_ART = \{[\s\S]*?\};/);
+  const inCode = artMatch ? (artMatch[0].match(/art\/[a-z0-9_-]+\.png/gi) || []).map(s => s.slice(4)).sort() : [];
+  check('Elk plaatje in art/ staat ook in de offline-cache', inSw, opSchijf);
+  check('De code verwijst naar precies die plaatjes', inCode, opSchijf);
+  check('Alle 18 units hebben een plaatje', inCode.length, Object.keys(UNIT_DEFS).length);
+}
+
 // ─── 4h. UITLEG KLOPT MET DE CODE (sessie 24) ──────────────────────────────────
 // Het "Hoe speel je"-scherm beschrijft de regels. Deze checks verankeren de
 // belangrijkste getallen aan de echte code, zodat de uitleg niet stilletjes

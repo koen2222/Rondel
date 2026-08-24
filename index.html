@@ -434,7 +434,12 @@
   @media (prefers-reduced-motion: reduce) { .goal-halo { animation: none; opacity: 0.7; } }
   
   .node-glow { fill: rgba(245, 158, 11, 0.25); stroke: var(--gold); stroke-width: 2; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
-  .node-glow.active { opacity: 1; filter: drop-shadow(0 0 8px var(--gold)); }
+  /* Een geldig doelwit klopt rustig, zodat je ziet waar je mag tikken.
+     Alleen opacity animeren: dat gaat via de compositor en kost geen frames. */
+  .node-glow.active { opacity: 1; filter: drop-shadow(0 0 8px var(--gold));
+    animation: doelKlop 1.4s ease-in-out infinite; }
+  @keyframes doelKlop { 0%,100% { opacity: 1; } 50% { opacity: 0.45; } }
+  @media (prefers-reduced-motion: reduce) { .node-glow.active { animation: none; } }
   
   .unit-fig { cursor: pointer; }
   .unit-fig.selected .fig-base { stroke: var(--gold); stroke-width: 3; filter: drop-shadow(0 0 12px var(--gold)); }
