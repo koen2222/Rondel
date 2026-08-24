@@ -208,6 +208,9 @@
   .fx-vlieg { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 8;
     animation: fxVlieg var(--fxt, 380ms) cubic-bezier(.3,.02,.35,1) forwards; }
   .fx-vlieg i { position: absolute; display: block; }
+  /* Een zwaard, pijl of scherf richt zich naar z'n baan; een schild en een
+     kaak horen rechtop te blijven staan, anders vliegen ze op hun kant. */
+  .fx-vlieg .pr-schild, .fx-vlieg .pr-tand { transform: rotate(calc(-1 * var(--rot))); }
   @keyframes fxVlieg {
     0%   { transform: translate(var(--x0), var(--y0)) rotate(var(--rot)) scale(0.45); opacity: 0; }
     16%  { opacity: 1; }
@@ -236,9 +239,11 @@
     clip-path: polygon(20% 0, 80% 0, 80% 44%, 58% 44%, 58% 100%, 42% 100%, 42% 44%, 20% 44%);
     filter: drop-shadow(0 0 8px var(--fxk)); animation: prTol .35s linear infinite; }
   @keyframes prTol { 0% { transform: rotate(0); } 100% { transform: rotate(360deg); } }
-  .pr-tand { left: -26px; top: -22px; width: 52px; height: 44px;
-    background: var(--fxk); filter: drop-shadow(0 0 9px var(--fxk));
-    clip-path: polygon(0 34%, 26% 34%, 34% 100%, 44% 34%, 56% 34%, 66% 100%, 74% 34%, 100% 34%, 100% 60%, 0 60%); }
+  /* Giftanden: een kaak met twee slagtanden die naar beneden happen */
+  .pr-tand { left: -25px; top: -20px; width: 50px; height: 42px;
+    background: linear-gradient(180deg, #f8fafc 0 42%, var(--fxk) 42%);
+    filter: drop-shadow(0 0 9px var(--fxk));
+    clip-path: polygon(4% 0, 96% 0, 96% 40%, 80% 40%, 68% 100%, 56% 40%, 44% 40%, 32% 100%, 20% 40%, 4% 40%); }
   .pr-flits { left: -34px; top: -20px; width: 68px; height: 40px; background: var(--fxk);
     clip-path: polygon(0 44%, 52% 0, 40% 40%, 100% 30%, 44% 100%, 56% 56%, 6% 62%);
     filter: drop-shadow(0 0 12px var(--fxk)); animation: prKnipper .12s steps(2) infinite; }

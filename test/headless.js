@@ -471,7 +471,7 @@ section('=== BOOSTERKIST (7 checks) ===');
 // Koen wil dat ELKE aanval een belevenis is. Deze checks bewaken dat er geen
 // aanval bestaat zonder animatie, en dat elke animatie ook echt getekend kan
 // worden: een soort zonder projectiel-CSS of kleur zou onzichtbaar blijven.
-section('=== AANVALSANIMATIES (9 checks) ===');
+section('=== AANVALSANIMATIES (11 checks) ===');
 {
   const soorten = new Set(FX_TREFWOORDEN.map(([, s]) => s));
   for (const s of Object.keys(FX_PROJECTIEL)) soorten.add(s);
@@ -501,6 +501,13 @@ section('=== AANVALSANIMATIES (9 checks) ===');
   check('Elke soort heeft een kleur', zonderKleur, []);
   const zonderVorm = [...soorten].filter(s => !new RegExp('\\.' + projectielVoor(s) + '\\b').test(html));
   check('Elk projectiel is ook echt getekend in de CSS', zonderVorm, []);
+  // Elke soort moet z'n eigen vorm hebben, anders zien twee aanvallen er hetzelfde uit
+  const vormen = [...soorten].map(projectielVoor);
+  check('Geen twee soorten delen hetzelfde projectiel', vormen.length, new Set(vormen).size);
+  // ...en z'n eigen klank, anders klinkt vuur als bliksem
+  const sfxBlok = html.slice(html.indexOf('const SFX = {'), html.indexOf('function sfx('));
+  const zonderKlank = [...soorten].filter(s => !new RegExp('\\bfx' + s + '\\s*:').test(sfxBlok));
+  check('Elke soort heeft een eigen geluid', zonderKlank, []);
 }
 
 // ─── 4g2. PRESTATIE-VALKUILEN (sessie 38) ─────────────────────────────────────
