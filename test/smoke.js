@@ -238,6 +238,23 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
     ok('Kaartanimatie ruimt zichzelf op', await page.locator('#kaart-fx .kaart-vlucht').count() === 0);
   }
 
+  // 5a2c2. Een verslagen figuur zweeft als ziel naar het Healing Center
+  {
+    const ziel = await page.evaluate(() => {
+      const u = Object.values(state.units).find(x => x.owner === 'p2');
+      if (!u) return null;
+      u.node = 'IT2'; state.bench.p2 = state.bench.p2.filter(x => x !== u.uid);
+      const vanaf = u.node;
+      koUnit(u); zielNaarHC(u, vanaf); renderAll();
+      const g = document.querySelector('#board g.zielfx');
+      return { er: !!g, inHC: state.hc.p2.includes(u.uid),
+               doel: g ? g.style.getPropertyValue('--x1') : '' };
+    });
+    ok('Verslagen figuur zweeft naar het Healing Center', !!ziel && ziel.er && ziel.inHC);
+    ok('De ziel heeft een echte bestemming', !!ziel && /px$/.test(ziel.doel));
+    await page.waitForTimeout(1200);
+  }
+
   // 5a2d. Het doel bereiken barst open met stralen en de tekst DOEL!
   {
     const doel = await page.evaluate(() => {

@@ -344,6 +344,13 @@ waar het spel nog stil bleef.
 - BUGS onderweg: moveUnit/riseUnit deden svg.removeChild op een ghost die er
   niet meer was zodra de SVG tussendoor herbouwd werd; het eindscherm plofte
   over het menu heen als het potje afliep nadat je al was weggelopen.
+- ZIEL NAAR HET HEALING CENTER. Een verslagen figuur verdween met een knal en
+  stond ineens aan de zijlijn. Nu zweeft z'n ziel in een boog naar de plek in
+  het Healing Center waar hij terechtkomt, met sliertjes die achterblijven.
+  Geldt ook voor de omsingelings-KO.
+- SCHERMMATEN gemeten op 360x640, 390x844 en 430x932: het spelscherm scrollt op
+  geen enkele maat, het gevechtsscherm past overal en de Voltooien-knop staat
+  altijd in beeld (op de kleinste maat scrollt de overlay zelf een stukje).
 - PRESTATIE: het gevechtsscherm liep op 36 fps in plaats van 60. Oorzaak
   gemeten en niet gegokt: backdrop-filter: blur(10px) op een SCHERMVULLENDE
   overlay. Zolang er iets achter beweegt (de sintels) moet de browser die
@@ -352,7 +359,7 @@ waar het spel nog stil bleef.
   afloop: 60 fps in elke fase van een gevecht, renderAll() 5,2 ms bij een vol
   bord met statussen. Vastgelegd met een headless-check, want dit is precies
   het soort ding dat je zonder meten weer terugzet.
-- TESTS: headless 119 -> 122, smoke 41 -> 53 checks. Simulatie: 6/6 potjes
+- TESTS: headless 119 -> 122, smoke 41 -> 55 checks. Simulatie: 6/6 potjes
   lopen normaal af (gemiddeld 31 beurten, geen JS-fouten).
 
 SESSIE 36 — SCHERMPASSING, INSLAGEN OP HET BORD, AI-CHOKEPUNTEN

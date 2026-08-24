@@ -356,6 +356,20 @@
     100% { transform: translateY(-20px) scale(1); opacity: 0; } }
   @media (prefers-reduced-motion: reduce) { .lvlfx { display: none; } }
 
+  /* De ziel van een verslagen figuur zweeft naar het Healing Center.
+     Pure verplaatsing plus schaal; bij SVG staat transform-origin standaard op
+     0 0, dus de schaal gebeurt rond het punt waar de vormen getekend zijn. */
+  .zielfx { animation: zielVlucht 1.05s cubic-bezier(.35,.05,.4,1) forwards; }
+  @keyframes zielVlucht {
+    0%   { transform: translate(var(--x0), var(--y0)) scale(0.4); opacity: 0; }
+    14%  { opacity: 1; }
+    55%  { transform: translate(var(--xm), var(--ym)) scale(1.15); opacity: 1; }
+    100% { transform: translate(var(--x1), var(--y1)) scale(0.3); opacity: 0; }
+  }
+  @keyframes zielSliert { 0% { transform: translate(0,0); opacity: 0.5; }
+    100% { transform: translate(0, 26px); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .zielfx { display: none; } }
+
   /* Het doel bereiken — het moment waar het potje om draait */
   .goalfx circle, .goalfx text { transform-box: fill-box; transform-origin: center; }
   .goalfx .goal-straal { transform-box: fill-box; transform-origin: 50% 100%; }
@@ -3156,8 +3170,39 @@ function riseUnit(u) {
   });
 }
 
-function queueFX(x, y, kind) { (state.pendingFX = state.pendingFX || []).push({ x, y, kind }); }
-function flushFX() { const list = state.pendingFX || []; state.pendingFX = []; for (const f of list) spawnFX(f.x, f.y, f.kind); }
+function queueFX(x, y, kind, extra) { (state.pendingFX = state.pendingFX || []).push({ x, y, kind, extra }); }
+function flushFX() { const list = state.pendingFX || []; state.pendingFX = []; for (const f of list) spawnFX(f.x, f.y, f.kind, f.extra); }
+
+// Een verslagen figuur verdween met een knal en stond ineens aan de zijlijn.
+// Nu zie je z'n ziel in een boog naar het Healing Center zweven, zodat je
+// begrijpt WAAR hij heen is en dat hij terugkomt.
+function zielNaarHC(u, vanNode) {
+  if (animOff() || !NODES[vanNode]) return;
+  const lijst = [...state.bench[u.owner], ...state.hc[u.owner]];
+  const i = lijst.indexOf(u.uid);
+  if (i < 0) return;
+  const s = benchSlot(u.owner, i);
+  queueFX(NODES[vanNode].x, NODES[vanNode].y, 'ziel', { tx: s.x, ty: s.y, owner: u.owner });
+}
+
+function spawnZiel(svg, x, y, opt) {
+  if (!opt) return;
+  const kleur = opt.owner === 'p1' ? '#93c5fd' : '#fca5a5';
+  const g = el('g', { class:'zielfx' }, svg);
+  // Boogje: halverwege een stuk boven de rechte lijn langs
+  const mx = (x + opt.tx) / 2, my = Math.min(y, opt.ty) - 70;
+  for (const [k, v] of [['--x0', x], ['--y0', y - 18], ['--xm', mx], ['--ym', my], ['--x1', opt.tx], ['--y1', opt.ty - 10]])
+    g.style.setProperty(k, v.toFixed(1) + 'px');
+  el('circle', { cx:0, cy:0, r:16, fill:kleur, opacity:0.22 }, g);
+  el('circle', { cx:0, cy:0, r:8, fill:kleur, opacity:0.55 }, g);
+  el('circle', { cx:0, cy:0, r:4, fill:'#fff' }, g);
+  // Sliertjes die achterblijven
+  for (let i = 0; i < 3; i++) {
+    const s = el('circle', { cx:0, cy:0, r:3.4 - i * 0.8, fill:kleur, opacity:0.5 }, g);
+    s.style.animation = `zielSliert 1.05s ease-in-out ${i * 70}ms forwards`;
+  }
+  setTimeout(() => { if (g.parentNode) g.parentNode.removeChild(g); }, 1300);
+}
 // Een figuur dat opklimt verdient meer dan een regeltje tekst: gouden ringen
 // die opstijgen, sterren die wegspatten en het nieuwe levelcijfer dat opbloeit.
 function spawnLevelUp(svg, x, y, lvl) {
@@ -3213,12 +3258,13 @@ function spawnGoal(svg, x, y, winner) {
   setTimeout(() => { if (g.parentNode) g.parentNode.removeChild(g); }, 1900);
 }
 
-function spawnFX(x, y, kind) {
+function spawnFX(x, y, kind, extra) {
   if (animOff()) return;
   const svg = document.getElementById('board');
   if (kind.startsWith('inslag:')) { spawnImpact(svg, x, y, kind.slice(7)); return; }
   if (kind.startsWith('level:')) { spawnLevelUp(svg, x, y, kind.slice(6)); return; }
   if (kind.startsWith('goal:')) { spawnGoal(svg, x, y, kind.slice(5)); return; }
+  if (kind === 'ziel') { spawnZiel(svg, x, y, extra); return; }
   const g = el('g', {}, svg);
   const n = kind === 'poof' ? 4 : 7;
   for (let i = 0; i < n; i++) {
@@ -3586,8 +3632,10 @@ function checkSurround() {
     const adj = [...ADJ[u.node]];
     if (adj.some(n => !unitAt(n))) continue;
     if (!adj.some(n => { const o = unitAt(n); return o && o.owner !== u.owner; })) continue;
-    queueFX(NODES[u.node].x, NODES[u.node].y, 'burst');
+    const vanaf = u.node;
+    queueFX(NODES[vanaf].x, NODES[vanaf].y, 'burst');
     koUnit(u);
+    zielNaarHC(u, vanaf);
     toast(`${UNIT_DEFS[u.defKey].name} omsingeld — KO!`);
   }
 }
@@ -4034,8 +4082,8 @@ async function runCombat(att, def) {
 
   att.node = attNextNode;
   def.node = defNextNode;
-  if (attToBench) { koUnit(att); queueFX(NODES[attInitialNode].x, NODES[attInitialNode].y, 'burst'); }
-  if (defToBench) { koUnit(def); queueFX(NODES[defInitialNode].x, NODES[defInitialNode].y, 'burst'); }
+  if (attToBench) { koUnit(att); queueFX(NODES[attInitialNode].x, NODES[attInitialNode].y, 'burst'); zielNaarHC(att, attInitialNode); }
+  if (defToBench) { koUnit(def); queueFX(NODES[defInitialNode].x, NODES[defInitialNode].y, 'burst'); zielNaarHC(def, defInitialNode); }
   // Onverwoestbaar-terugtocht: statussen behouden (geen HC-genezing), wél 'wait'
   if (attRetreat) { att.status.push('wait'); state.bench[att.owner].push(att.uid); queueFX(NODES[attInitialNode].x, NODES[attInitialNode].y, 'poof'); }
   if (defRetreat) { def.status.push('wait'); state.bench[def.owner].push(def.uid); queueFX(NODES[defInitialNode].x, NODES[defInitialNode].y, 'poof'); }
