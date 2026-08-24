@@ -255,6 +255,62 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
     await page.waitForTimeout(1200);
   }
 
+  // 5a2c3. Statuseffecten zijn echte animaties, geen losse stipjes
+  {
+    const st = await page.evaluate(() => {
+      const uits = {};
+      const soorten = ['burn', 'poison', 'badlypoison', 'paralysis'];
+      const punten = ['L1', 'L2', 'L3', 'R1'];
+      const units = Object.values(state.units).slice(0, 4);
+      units.forEach((u, i) => {
+        u.node = punten[i]; u.status = [soorten[i]];
+        state.bench[u.owner] = state.bench[u.owner].filter(x => x !== u.uid);
+      });
+      renderAll();
+      // tel per figuur hoeveel bewegende onderdelen er omheen zitten
+      const figs = [...document.querySelectorAll('#board g.unit-fig')];
+      units.forEach((u, i) => {
+        const g = figs.find(f => f.getAttribute('transform') &&
+          f.getAttribute('transform').includes(`${NODES[punten[i]].x},`));
+        uits[soorten[i]] = g ? g.querySelectorAll('.fx-anim, path, ellipse, circle').length : 0;
+      });
+      return uits;
+    });
+    ok('Brand is een vuur, geen paar sliertjes', (st.burn || 0) >= 14);
+    ok('Vergiftigd heeft bellen en een plas', (st.poison || 0) >= 10);
+    ok('Zwaar vergiftigd is nog voller dan gewoon gif', (st.badlypoison || 0) >= (st.poison || 0));
+    ok('Verlamd knettert', (st.paralysis || 0) >= 10);
+  }
+
+  // 5a2c4. Omsingeld klapt van acht kanten dicht
+  {
+    const om = await page.evaluate(() => {
+      const u = Object.values(state.units).find(x => x.node);
+      if (!u) return null;
+      queueFX(NODES[u.node].x, NODES[u.node].y, 'omsingeld');
+      renderAll();
+      const g = document.querySelector('#board g.omfx');
+      return { er: !!g, punten: g ? g.querySelectorAll('.om-punt').length : 0 };
+    });
+    ok('Omsingeling klapt van acht kanten dicht', !!om && om.er && om.punten === 8);
+    await page.waitForTimeout(1200);
+  }
+
+  // 5a2c5. Tijdnood: de klok klopt en de balk alarmeert
+  {
+    // over/locked staan uit eerdere blokken nog aan; de klok tikt dan niet
+    await page.evaluate(() => { state.over = false; state.locked = false; state.turn = 'p1'; state.clock = state.clock || { p1: 0, p2: 0 }; state.clock.p1 = 8200; startClock(); });
+    await page.waitForTimeout(500);
+    const t = await page.evaluate(() => ({
+      klok: document.getElementById('turn-clock').className,
+      balk: document.getElementById('turn-banner').className,
+    }));
+    ok('Klok klopt onder de dertig seconden', /klok-krap/.test(t.klok));
+    ok('Balk alarmeert onder de tien seconden', /tijdnood/.test(t.balk));
+    await page.evaluate(() => { state.clock.p1 = 240000; });
+    await page.waitForTimeout(400);
+  }
+
   // 5a2d. Het doel bereiken barst open met stralen en de tekst DOEL!
   {
     const doel = await page.evaluate(() => {

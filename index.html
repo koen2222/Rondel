@@ -41,6 +41,18 @@
   .turn-banner.p1 { --wisselk: rgba(96,165,250,0.35); }
   .turn-banner.p2 { --wisselk: rgba(248,113,113,0.35); }
   @keyframes beurtVeeg { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+  /* Tijdnood: eerst klopt alleen de klok, onder de tien seconden alarmeert de
+     hele balk mee. Zo hoef je niet naar het cijfer te blijven kijken. */
+  .klok-krap { display: inline-block; animation: klokKlop 1s ease-in-out infinite; }
+  .klok-paniek { animation: klokKlop 0.42s ease-in-out infinite; }
+  @keyframes klokKlop { 0%,100% { transform: scale(1); } 45% { transform: scale(1.16); } }
+  .turn-banner.tijdnood { animation: tijdnoodGloed 0.84s ease-in-out infinite; }
+  @keyframes tijdnoodGloed {
+    0%,100% { box-shadow: 0 0 15px rgba(239,68,68,0.35); }
+    50%     { box-shadow: 0 0 26px 4px rgba(239,68,68,0.85); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .klok-krap, .klok-paniek, .turn-banner.tijdnood { animation: none; } }
   @media (prefers-reduced-motion: reduce) { .turn-banner.wissel::after { animation: none; opacity: 0; } }
 
   .bench { display: flex; gap: 8px; padding: 8px; background: rgba(255,255,255,0.03); border-radius: 12px; min-height: 70px; overflow-x: auto; border: 1px solid rgba(255,255,255,0.05); }
@@ -384,6 +396,18 @@
     100% { transform: translate(0, 26px); opacity: 0; } }
   @media (prefers-reduced-motion: reduce) { .zielfx { display: none; } }
 
+  /* Omsingeld: alles klapt van buiten naar binnen dicht */
+  .omfx circle { transform-box: fill-box; transform-origin: center; }
+  .omfx .om-punt { transform-box: fill-box; transform-origin: 50% 100%; }
+  @keyframes omRing { 0% { transform: scale(1.25) rotate(0deg); opacity: 0; }
+    20% { opacity: 1; } 100% { transform: scale(0.18) rotate(70deg); opacity: 0; } }
+  @keyframes omPunt { 0% { transform: translateY(-14px) scale(0.6); opacity: 0; }
+    25% { opacity: 1; } 100% { transform: translateY(40px) scale(1.1); opacity: 0.9; } }
+  @keyframes omKlap { 0% { transform: scale(0.2); opacity: 0; }
+    22% { transform: scale(1.6); opacity: 1; } 100% { transform: scale(3.4); opacity: 0; } }
+  @keyframes omGolf { 0% { transform: scale(0.3); opacity: 1; } 100% { transform: scale(4.2); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .omfx { display: none; } }
+
   /* Het doel bereiken — het moment waar het potje om draait */
   .goalfx circle, .goalfx text { transform-box: fill-box; transform-origin: center; }
   .goalfx .goal-straal { transform-box: fill-box; transform-origin: 50% 100%; }
@@ -594,6 +618,10 @@
   }
   @keyframes gifDrup { 0% { transform: translate(0,0) scale(0.5); opacity: 0; }
     22% { opacity: 0.9; } 100% { transform: translate(0, 24px) scale(0.95); opacity: 0; } }
+  /* Verlamd: stroom loopt rond, en af en toe slaat er een volle stoot door */
+  @keyframes stroomRing { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @keyframes stroomStoot { 0%, 88%, 100% { opacity: 0; } 90% { opacity: 0.75; }
+    92% { opacity: 0; } 94% { opacity: 0.55; } 96% { opacity: 0; } }
   /* Inslagen op het bord */
   @keyframes fxBolt { 0% { opacity: 0; } 15% { opacity: 1; } 45% { opacity: .35; } 70% { opacity: .9; } 100% { opacity: 0; } }
   @keyframes fxShock { 0% { transform: scale(.3); opacity: .95; } 100% { transform: scale(5.5); opacity: 0; } }
@@ -1628,7 +1656,18 @@ function tickClock() {
   const before = state.clock[state.turn];
   state.clock[state.turn] -= dt;
   const cEl = document.getElementById('turn-clock');
-  if (cEl) { cEl.textContent = '⏱ ' + fmtClock(state.clock[state.turn]); cEl.style.color = state.clock[state.turn] < 30000 ? '#f87171' : ''; }
+  // Onder de 30 seconden klopt de klok rood mee, onder de 10 gaat de hele
+  // beurtbalk mee alarmeren. Je hoeft dan niet meer naar het cijfer te kijken
+  // om te weten dat het bijna op is.
+  const rest = state.clock[state.turn];
+  if (cEl) {
+    cEl.textContent = '⏱ ' + fmtClock(rest);
+    cEl.style.color = rest < 30000 ? '#f87171' : '';
+    cEl.classList.toggle('klok-krap', rest < 30000 && rest > 0 && !animOff());
+    cEl.classList.toggle('klok-paniek', rest < 10000 && rest > 0 && !animOff());
+  }
+  const bEl = document.getElementById('turn-banner');
+  if (bEl) bEl.classList.toggle('tijdnood', rest < 10000 && rest > 0 && !animOff());
   // Laatste 5 seconden: één tik per seconde, alleen in je eigen beurt
   if (state.clock[state.turn] < 5000 && Math.ceil(before / 1000) !== Math.ceil(state.clock[state.turn] / 1000)) sfx('tick');
   if (state.clock[state.turn] <= 0) { state.clock[state.turn] = 0; endMatch(state.turn === 'p1' ? 'p2' : 'p1', 'time'); }
@@ -2358,10 +2397,25 @@ function statusFX(g, u) {
       });
 
     } else if (st === 'paralysis') {
-      // Elektrische bogen dwars over het lichaam
-      [['-19,-38 -10,-30 -16,-24 -8,-16','0s'],['18,-42 9,-34 15,-27 7,-19','.28s'],['-15,-16 -5,-10 -12,-4 -3,3','.14s'],['16,-22 8,-15 14,-8 6,-1','.42s']].forEach(([pts,d]) => {
-        mk('polyline', { points:pts, fill:'none', stroke:'#fde047', 'stroke-width':2.2, 'stroke-linecap':'round', 'stroke-linejoin':'round' }, 'fxFlicker .45s linear infinite', d);
+      // VERLAMD (sessie 39). Was vier flikkerende boogjes. Nu knettert het er
+      // omheen: gloed op de grond, een ring van stroom die rondloopt, bogen
+      // over het lijf én af en toe een volle stroomstoot die het figuur wit
+      // laat oplichten — dan zie je waarom hij niet kan aanvallen.
+      el('ellipse', { cx:0, cy:8, rx:22, ry:8.5, fill:'rgba(253,224,71,0.30)' }, g);
+      const ring = el('ellipse', { cx:0, cy:-24, rx:21, ry:30, fill:'none', stroke:'#fde047',
+        'stroke-width':2, 'stroke-dasharray':'5 7', opacity:0.75 }, g);
+      ring.style.transformBox = 'fill-box'; ring.style.transformOrigin = 'center';
+      ring.style.animation = 'stroomRing 1.1s linear infinite';
+      ring.classList.add('fx-anim');
+      [['-19,-38 -10,-30 -16,-24 -8,-16','0s'],['18,-42 9,-34 15,-27 7,-19','-.28s'],
+       ['-15,-16 -5,-10 -12,-4 -3,3','-.14s'],['16,-22 8,-15 14,-8 6,-1','-.42s'],
+       ['-8,-52 0,-46 -6,-40 2,-34','-.2s'],['9,-54 2,-48 8,-42 1,-36','-.36s']].forEach(([pts,d]) => {
+        mk('polyline', { points:pts, fill:'none', stroke:'#fef08a', 'stroke-width':2.4, 'stroke-linecap':'round', 'stroke-linejoin':'round' }, 'fxFlicker .45s linear infinite', d);
       });
+      // volle stroomstoot: het hele figuur licht kort op
+      const stoot = el('rect', { x:-20, y:-56, width:40, height:64, rx:6, fill:'#fef9c3', opacity:0 }, g);
+      stoot.style.animation = 'stroomStoot 2.4s steps(1,end) infinite';
+      stoot.classList.add('fx-anim');
 
     } else if (st === 'confusion') {
       // Draaiende roze sterren rondom het hoofd
@@ -3450,9 +3504,34 @@ function spawnGoal(svg, x, y, winner) {
   setTimeout(() => { if (g.parentNode) g.parentNode.removeChild(g); }, 1900);
 }
 
+// Omsingeld: geen vrij buurpunt meer én een vijand ernaast, dus direct KO —
+// zonder gevecht, zonder draaischijf. Dat is de meest eigenzinnige regel van
+// Duel en die verdient z'n eigen beeld: acht punten die van alle kanten naar
+// binnen schieten en dichtklappen, met een ring die meekrimpt.
+function spawnOmsingeld(svg, x, y) {
+  // Iets omhoog: het figuur staat mét z'n voeten op het punt, dus het
+  // midden van z'n lijf ligt hoger dan de knoop zelf.
+  const g = el('g', { class:'omfx', transform:`translate(${x},${y - 22})` }, svg);
+  const zet = (e, naam, duur, delay) => { e.style.animation = `${naam} ${duur}ms cubic-bezier(.55,0,.35,1) ${delay || 0}ms forwards`; return e; };
+  // Ring die dichtklapt
+  zet(el('circle', { cx:0, cy:0, r:42, fill:'none', stroke:'#fca5a5', 'stroke-width':4, 'stroke-dasharray':'7 6' }, g), 'omRing', 520);
+  // Punten die van alle kanten naar binnen schieten
+  for (let i = 0; i < 8; i++) {
+    const a = i * 45;
+    const wrap = el('g', { transform:`rotate(${a})` }, g);
+    const p = el('path', { class:'om-punt', d:'M 0 -54 L 5.5 -72 L -5.5 -72 Z', fill:'#ef4444' }, wrap);
+    zet(p, 'omPunt', 460, i * 18);
+  }
+  // Klap op het moment dat alles samenkomt
+  zet(el('circle', { cx:0, cy:0, r:9, fill:'#fff' }, g), 'omKlap', 420, 430);
+  zet(el('circle', { cx:0, cy:0, r:16, fill:'none', stroke:'#fecaca', 'stroke-width':5 }, g), 'omGolf', 500, 470);
+  setTimeout(() => { if (g.parentNode) g.parentNode.removeChild(g); }, 1100);
+}
+
 function spawnFX(x, y, kind, extra) {
   if (animOff()) return;
   const svg = document.getElementById('board');
+  if (kind === 'omsingeld') { spawnOmsingeld(svg, x, y); return; }
   if (kind.startsWith('inslag:')) { spawnImpact(svg, x, y, kind.slice(7)); return; }
   if (kind.startsWith('level:')) { spawnLevelUp(svg, x, y, kind.slice(6)); return; }
   if (kind.startsWith('goal:')) { spawnGoal(svg, x, y, kind.slice(5)); return; }
@@ -3825,7 +3904,7 @@ function checkSurround() {
     if (adj.some(n => !unitAt(n))) continue;
     if (!adj.some(n => { const o = unitAt(n); return o && o.owner !== u.owner; })) continue;
     const vanaf = u.node;
-    queueFX(NODES[vanaf].x, NODES[vanaf].y, 'burst');
+    queueFX(NODES[vanaf].x, NODES[vanaf].y, 'omsingeld');
     koUnit(u);
     zielNaarHC(u, vanaf);
     toast(`${UNIT_DEFS[u.defKey].name} omsingeld — KO!`);
