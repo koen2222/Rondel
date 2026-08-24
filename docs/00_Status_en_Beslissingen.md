@@ -394,6 +394,15 @@ waar het spel nog stil bleef.
   CONTROLE, tegen een willekeurig spelende speler (8 potjes, normaal):
     vóór de fix 0/6 in 31 beurten, ná de fix 0/8 in 26 beurten — de AI is dus
     niet zwakker geworden in normaal spel, alleen sneller.
+  PER MOEILIJKHEID nagemeten tegen een rusher, NA de fix:
+    Licht   7/8  in gemiddeld 4 beurten
+    Normaal 7/10 in gemiddeld 9 beurten
+    Zwaar   7/8  in gemiddeld 7 beurten
+  LET OP bij die tabel: 8-10 potjes is een kleine steekproef, dus het verschil
+  tussen Normaal en Zwaar (7/10 om 7/8) zegt weinig. Wat er wél uit komt is dat
+  Licht een rusher er in vier beurten doorheen laat en de zwaardere standen hem
+  minstens dubbel zo lang ophouden. Zwaar verdedigt niet alleen beter, hij valt
+  ook harder aan (advance 1.3), dus die ruilt verdediging deels in voor tempo.
   De AI zet nu een keeper op G2 in beurt 2 in plaats van op z'n entries te
   blijven staan. Dat de speler nog steeds vaker wint klopt: rushen is in Duel
   ook een legitieme strategie — maar het potje is niet meer voorbij voor het
