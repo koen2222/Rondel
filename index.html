@@ -396,6 +396,13 @@
     100% { transform: translate(0, 26px); opacity: 0; } }
   @media (prefers-reduced-motion: reduce) { .zielfx { display: none; } }
 
+  /* Ability die afgaat: een golf die van het punt af rolt */
+  @keyframes auraGolf { 0% { transform: scale(0.25); opacity: 1; } 100% { transform: scale(2.6); opacity: 0; } }
+  @keyframes auraSter { 0% { transform: scale(0.2) rotate(0deg); opacity: 0; }
+    25% { transform: scale(1.3) rotate(90deg); opacity: 1; }
+    100% { transform: scale(0.9) rotate(220deg); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .aurafx { display: none; } }
+
   /* Evolueren: licht uit de grond, ringen omhoog, sterren eruit */
   .evofx ellipse, .evofx circle, .evofx path { transform-box: fill-box; transform-origin: center; }
   .evofx .evo-kolom { transform-origin: 50% 100%; }
@@ -652,6 +659,16 @@
   }
   @keyframes gifDrup { 0% { transform: translate(0,0) scale(0.5); opacity: 0; }
     22% { opacity: 0.9; } 100% { transform: translate(0, 24px) scale(0.95); opacity: 0; } }
+  /* Slapend: de droomwolk ademt, de z'jes drijven traag weg */
+  @keyframes slaapAdem { 0%,100% { transform: scale(1) translateY(0); opacity: 0.85; }
+    50% { transform: scale(1.12) translateY(-2px); opacity: 1; } }
+  @keyframes slaapZ { 0% { transform: translate(0,0) scale(0.5) rotate(-8deg); opacity: 0; }
+    18% { opacity: 1; } 100% { transform: translate(11px,-26px) scale(1.25) rotate(12deg); opacity: 0; } }
+  /* Schildwal: het scherm ademt, een lichtveeg trekt eroverheen */
+  @keyframes walAdem { 0%,100% { transform: scale(1); opacity: 0.7; }
+    50% { transform: scale(1.05); opacity: 1; } }
+  @keyframes walVeeg { 0%, 62%, 100% { transform: translate(0,26px); opacity: 0; }
+    70% { opacity: 0.9; } 96% { transform: translate(0,-30px); opacity: 0; } }
   /* Verlamd: stroom loopt rond, en af en toe slaat er een volle stoot door */
   @keyframes stroomRing { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
   @keyframes stroomStoot { 0%, 88%, 100% { opacity: 0; } 90% { opacity: 0.75; }
@@ -2626,11 +2643,23 @@ function statusFX(g, u) {
       [[-14,-44,3.2,'#f472b6'],[14,-44,2.6,'#fbcfe8'],[-8,-54,2.6,'#e879f9'],[8,-54,2.2,'#f472b6'],[0,-57,3,'#fbcfe8']].forEach(([cx,cy,r,fill]) => el('circle', { cx, cy, r, fill }, orb));
 
     } else if (st === 'sleep') {
-      // Donkerblauw waas + drijvende z'jes
-      el('rect', { x:-20, y:-53, width:40, height:62, rx:4, fill:'rgba(10,25,65,0.40)' }, g);
-      [[10,-38,12,'0s'],[17,-48,9,'.8s'],[5,-55,7,'1.5s']].forEach(([x,y,fs,d]) => {
-        const t = mk('text', { x, y, 'font-size':fs, fill:'#93c5fd', 'font-weight':'700', 'font-family':'Georgia,serif' }, 'fxRise 2s ease-out infinite', d);
+      // SLAAP (sessie 39). Nachtwaas over het lijf, een droomwolk die zacht
+      // ademt en z'jes die traag wegdrijven en groter worden — je ziet dat er
+      // hier niets gaat gebeuren deze beurt.
+      el('rect', { x:-20, y:-53, width:40, height:62, rx:6, fill:'rgba(10,25,65,0.42)' }, g);
+      el('ellipse', { cx:0, cy:8, rx:22, ry:8, fill:'rgba(59,130,246,0.22)' }, g);
+      const wolk = el('g', {}, g);
+      [[-9,-50,7],[0,-55,9],[9,-50,7],[0,-47,8]].forEach(([cx,cy,r]) =>
+        el('circle', { cx, cy, r, fill:'rgba(147,197,253,0.30)' }, wolk));
+      wolk.style.transformBox = 'fill-box'; wolk.style.transformOrigin = 'center';
+      wolk.style.animation = 'slaapAdem 3.2s ease-in-out infinite';
+      wolk.classList.add('fx-anim');
+      [[9,-44,11,'0s'],[15,-52,9,'-1.1s'],[4,-58,7,'-2.2s']].forEach(([x,y,fs,d]) => {
+        const t = el('text', { x, y, 'font-size':fs, fill:'#bfdbfe', 'font-weight':'700', 'font-family':'Georgia,serif' }, g);
         t.textContent = 'z';
+        t.style.transformBox = 'fill-box'; t.style.transformOrigin = 'center';
+        t.style.animation = `slaapZ 3.3s ease-out ${d} infinite`;
+        t.classList.add('fx-anim');
       });
 
     } else if (st === 'poison' || st === 'badlypoison' || st === 'curse') {
@@ -2672,7 +2701,20 @@ function statusFX(g, u) {
         });
 
     } else if (st === 'bulwark') {
-      mk('path', { d:'M -14 -30 A 16 10 0 0 1 14 -30', fill:'none', stroke:'#fbbf24', 'stroke-width':2.5, 'stroke-linecap':'round' }, 'fxFlicker 1.6s ease-in-out infinite');
+      // SCHILDWAL (sessie 39). Was één boogje. Nu een zeshoekig schild om het
+      // figuur heen dat langzaam glanst, met een lichtveeg die eroverheen loopt
+      // — je ziet dat er iets tussen hem en de klap staat.
+      const scherm = el('path', { d:'M 0 -60 L 20 -49 L 20 -6 L 0 5 L -20 -6 L -20 -49 Z',
+        fill:'rgba(251,191,36,0.13)', stroke:'#fbbf24', 'stroke-width':2, opacity:0.85 }, g);
+      scherm.style.transformBox = 'fill-box'; scherm.style.transformOrigin = 'center';
+      scherm.style.animation = 'walAdem 2.2s ease-in-out infinite';
+      scherm.classList.add('fx-anim');
+      // lichtveeg die over het scherm trekt
+      const veeg = el('path', { d:'M -20 -20 L 20 -40', stroke:'rgba(255,250,220,0.9)', 'stroke-width':3.5,
+        'stroke-linecap':'round', fill:'none' }, g);
+      veeg.style.transformBox = 'fill-box'; veeg.style.transformOrigin = 'center';
+      veeg.style.animation = 'walVeeg 2.6s ease-in-out infinite';
+      veeg.classList.add('fx-anim');
     }
   }
 }
@@ -3755,11 +3797,29 @@ function spawnEvolutie(svg, x, y, owner) {
   setTimeout(() => { if (g.parentNode) g.parentNode.removeChild(g); }, 1500);
 }
 
+// Een ability die afgaat: een gekleurde golf die van het punt af rolt. Kort en
+// klein, want dit gebeurt vaak — het mag opvallen zonder in de weg te zitten.
+function spawnAura(svg, x, y, soort) {
+  const kleur = soort === 'raise' ? '#a78bfa' : '#7dd3fc';
+  const g = el('g', { class:'aurafx', transform:`translate(${x},${y})` }, svg);
+  for (let i = 0; i < 3; i++) {
+    const r = el('ellipse', { cx:0, cy:6, rx:20, ry:8, fill:'none', stroke:kleur, 'stroke-width':3 }, g);
+    r.style.animation = `auraGolf 780ms ease-out ${i * 150}ms forwards`;
+    r.style.transformBox = 'fill-box'; r.style.transformOrigin = 'center';
+  }
+  const ster = el('path', { d:'M 0 -10 L 3 -3 L 10 0 L 3 3 L 0 10 L -3 3 L -10 0 L -3 -3 Z', fill:kleur }, g);
+  ster.style.transformBox = 'fill-box'; ster.style.transformOrigin = 'center';
+  ster.setAttribute('transform', 'translate(0,-34)');
+  ster.style.animation = 'auraSter 900ms ease-out forwards';
+  setTimeout(() => { if (g.parentNode) g.parentNode.removeChild(g); }, 1200);
+}
+
 function spawnFX(x, y, kind, extra) {
   if (animOff()) return;
   const svg = document.getElementById('board');
   if (kind === 'omsingeld') { spawnOmsingeld(svg, x, y); return; }
   if (kind.startsWith('evolutie:')) { spawnEvolutie(svg, x, y, kind.slice(9)); return; }
+  if (kind.startsWith('aura:')) { spawnAura(svg, x, y, kind.slice(5)); return; }
   if (kind.startsWith('inslag:')) { spawnImpact(svg, x, y, kind.slice(7)); return; }
   if (kind.startsWith('level:')) { spawnLevelUp(svg, x, y, kind.slice(6)); return; }
   if (kind.startsWith('goal:')) { spawnGoal(svg, x, y, kind.slice(5)); return; }
@@ -4087,13 +4147,29 @@ function doDeploy(u, target) {
 function onDeployComplete(u) {
   const ab = abilityOf(u);
   if (ab === 'blessing' && u.node) {
-    // Zegenende Aura: wis status van aangrenzende bondgenoten
-    for (const n of ADJ[u.node]) { const o = unitAt(n); if (o && o.owner === u.owner) o.status = o.status.filter(s => s === 'wait' || s === 'bulwark'); }
+    // Zegenende Aura: wis status van aangrenzende bondgenoten. Je zag alleen een
+    // regeltje tekst; nu golft er een ring van de bron naar elke bondgenoot die
+    // er iets aan heeft, zodat je ZIET wie er geraakt wordt.
+    queueFX(NODES[u.node].x, NODES[u.node].y, 'aura:blessing');
+    for (const n of ADJ[u.node]) {
+      const o = unitAt(n);
+      if (o && o.owner === u.owner) {
+        const had = o.status.some(s => s !== 'wait' && s !== 'bulwark');
+        o.status = o.status.filter(s => s === 'wait' || s === 'bulwark');
+        if (had) queueFX(NODES[n].x, NODES[n].y, 'aura:blessing');
+      }
+    }
     toast(`${UNIT_DEFS[u.defKey].name}: Zegenende Aura`);
   } else if (ab === 'raise') {
     // Zielenoproep: wis Wacht-status van je eigen bank (sneller herinzetten)
-    for (const uid of state.bench[u.owner]) { const o = state.units[uid]; o.status = o.status.filter(s => s !== 'wait'); }
-    toast(`${UNIT_DEFS[u.defKey].name}: Zielenoproep`);
+    let geraakt = 0;
+    for (const uid of state.bench[u.owner]) {
+      const o = state.units[uid];
+      if (o.status.includes('wait')) geraakt++;
+      o.status = o.status.filter(s => s !== 'wait');
+    }
+    if (u.node) queueFX(NODES[u.node].x, NODES[u.node].y, 'aura:raise');
+    toast(`${UNIT_DEFS[u.defKey].name}: Zielenoproep${geraakt ? ` — ${geraakt} figuur${geraakt === 1 ? '' : 'en'} weer inzetbaar` : ''}`);
   }
 }
 
@@ -4662,8 +4738,11 @@ function kanEvolueren(u) {
 function doeEvolutie(u) {
   const naar = u.evoKey; if (!UNIT_DEFS[naar]) return;
   const van = UNIT_DEFS[u.defKey].name;
-  // De schijf van de evolutie, op het level dat je van hem bezit, plus de bonus
-  const lvl = (profile && profile.owned && profile.owned[naar]) || 1;
+  // De schijf van de evolutie plus de bonus. Voor jouw figuren geldt het level
+  // dat je van die evolutie in je collectie hebt; de AI heeft geen collectie,
+  // dus die houdt het level van z'n eigen deck aan.
+  const uitCollectie = !(state.mode === 'solo' && u.owner === 'p2');
+  const lvl = uitCollectie ? ((profile && profile.owned && profile.owned[naar]) || 1) : (u.level || 1);
   const tmp = { slots: JSON.parse(JSON.stringify(UNIT_DEFS[naar].slots)) };
   for (let i = 1; i < lvl; i++) levelSlotBoost(tmp);
   u.defKey = naar;
