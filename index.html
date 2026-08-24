@@ -2632,18 +2632,28 @@ function renderFoeCards(svg, n) {
 // zodat een nieuwe aanval automatisch iets passends krijgt.
 // ==========================================
 // FX-START (marker voor headless tests — niet verwijderen)
+// VOLGORDE IS DE HELE TRUC: de eerste regel die past wint. Drie vallen die er
+// al ingelopen zijn, en die deze volgorde nu afvangt:
+//   'schild' moet vóór 'beuk'   — anders wordt Schildbeuk een hamer
+//   'graf'   mag niet in 'kou'  — anders wordt Grafzwaard ijs
+//   'slag'   is zó gewoon dat het alles opslokt (Caduceusslag, Veerslag);
+//            daarom staan de specifieke woorden allemaal vóór de snede-regel
+//   'tand'   zit óók in 'drietand'; een drietand is een steekwapen, geen kaak
 const FX_TREFWOORDEN = [
   [/schild|muur|wering/i,                                'schild'],
-  [/hamer|aambeeld|smids|beuk|vuist|zuil|brons/i,        'hamer'],
+  [/hamer|aambeeld|smids|beuk|vuist|zuil|brons|hoef|staart|stamp/i, 'hamer'],
   [/slangen|gif|venijn|walm|lijken|zwavel/i,             'gif'],
   [/vuur|vlam|brand|laaiend|vonk|zonne|as|gloed|sintel/i,'vuur'],
   [/bliksem|verlam|bevel|huil|storm|raven|ziel/i,        'bliksem'],
   [/pijl|boog|pees|schot/i,                              'pijl'],
   [/kou|vries|ijs|rijp/i,                                'kou'],
+  // Toverij vóór de snede-regel, anders slokt 'slag' Caduceusslag en Veerslag op
+  [/caduceus|kalmerend|woord|vleugel|veer|dwaal|schijn|bedrog|licht|staf|slaap|zegen/i, 'magie'],
+  // Steekwapens met een eigen naam, vóór de klauw-regel ('tand' in 'drietand')
+  [/drietand|speer|lans|gungnir|werp|worp/i,             'snede'],
   [/beet|klauw|kaak|tand|scheur|slagtand|grauw|blaf/i,   'klauw'],
-  [/dolk|zwaard|steek|bijl|slag|haal|snee|prik|drietand/i,'snede'],
+  [/dolk|zwaard|steek|bijl|slag|haal|snee|prik/i,        'snede'],
   [/greep|klem/i,                                        'schild'],
-  [/dwaal|schijn|bedrog|licht|staf|caduceus|veer|slaap/i,'magie'],
 ];
 function attackFx(slot) {
   if (!slot) return null;

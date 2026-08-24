@@ -471,7 +471,7 @@ section('=== BOOSTERKIST (7 checks) ===');
 // Koen wil dat ELKE aanval een belevenis is. Deze checks bewaken dat er geen
 // aanval bestaat zonder animatie, en dat elke animatie ook echt getekend kan
 // worden: een soort zonder projectiel-CSS of kleur zou onzichtbaar blijven.
-section('=== AANVALSANIMATIES (11 checks) ===');
+section('=== AANVALSANIMATIES (17 checks) ===');
 {
   const soorten = new Set(FX_TREFWOORDEN.map(([, s]) => s));
   for (const s of Object.keys(FX_PROJECTIEL)) soorten.add(s);
@@ -489,6 +489,14 @@ section('=== AANVALSANIMATIES (11 checks) ===');
   // Trefwoorden komen op volgorde: 'Schildbeuk' is een schild, geen hamer
   check('Schildbeuk → schild (niet hamer)', attackFx({ k:'blue', name:'Schildbeuk' }) || attackFx({ k:'white', v:20, name:'Schildbeuk' }), 'schild');
   check('Grafzwaard → snede (niet kou)', attackFx({ k:'white', v:40, name:'Grafzwaard' }), 'snede');
+  // 'slag' is zó gewoon dat het alles opslokt als het te vroeg staat
+  check('Caduceusslag → magie (niet snede via "slag")', attackFx({ k:'white', v:30, name:'Caduceusslag' }), 'magie');
+  check('Veerslag → magie (niet snede via "slag")', attackFx({ k:'white', v:20, name:'Veerslag' }), 'magie');
+  // 'tand' zit óók in 'drietand'; een drietand is een steekwapen
+  check('Drietandprik → snede (niet klauw via "tand")', attackFx({ k:'white', v:30, name:'Drietandprik' }), 'snede');
+  check('Speerwering → schild (niet snede via "speer")', attackFx({ k:'blue', name:'Speerwering' }) || attackFx({ k:'white', v:40, name:'Speerwering' }), 'schild');
+  check('Kalmerend Woord → magie (had geen trefwoord)', attackFx({ k:'purple', effect:'sleep', name:'Kalmerend Woord' }), 'magie');
+  check('Hoefslag → hamer (stomp, geen zwaard)', attackFx({ k:'white', v:30, name:'Hoefslag' }), 'hamer');
   check('Mis (rood) heeft geen aanvalsanimatie', attackFx({ k:'red' }), null);
   check('Blok (blauw) heeft geen aanvalsanimatie', attackFx({ k:'blue' }), null);
 
