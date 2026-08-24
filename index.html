@@ -2453,6 +2453,7 @@ function renderBoard() {
   // GEEN speelplaat meer: het bord is doorzichtig en zweeft boven de arena,
   // net als in Duel. Alleen een warme grondgloed onder de routes.
   el('ellipse', { cx:270, cy:445, rx:255, ry:255, fill:'url(#gArenaGlow)' }, svg);
+  drawRondel(svg);
   drawCraters(svg);
   drawPortals(svg);
   // Lichtvlek op de vloer onder elk doel: maakt de doelzones herkenbaar
@@ -3101,6 +3102,30 @@ function drawCraters(svg) {
         stroke:'rgba(14,6,3,0.85)', 'stroke-width':2.6, 'stroke-linecap':'round' }, g);
     }
   }
+}
+
+// Het hart van het binnenvierkant was leeg. Daar ligt nu het teken waar het
+// spel naar heet: een rondel — concentrische ringen met spaken en een kern.
+// Ingebrand in de arenavloer, dus heel licht: het mag de figuren niet
+// wegdrukken. Een handvol elementen, dus het kost niets per render.
+function drawRondel(svg) {
+  const cx = 270, cy = 445;
+  const g = el('g', { class:'rondel-teken', opacity:0.22 }, svg);
+  for (const [r, w] of [[112, 3], [86, 1.6], [58, 2.4], [26, 1.4]])
+    el('circle', { cx, cy, r, fill:'none', stroke:'#ffe9c2', 'stroke-width':w }, g);
+  for (let i = 0; i < 8; i++) {
+    const a = (i * 45 - 90) * Math.PI / 180;
+    el('line', { x1:cx + Math.cos(a) * 60, y1:cy + Math.sin(a) * 60,
+      x2:cx + Math.cos(a) * 110, y2:cy + Math.sin(a) * 110,
+      stroke:'#ffe9c2', 'stroke-width': i % 2 ? 1.4 : 2.6, 'stroke-linecap':'round' }, g);
+  }
+  // Vier ruitjes op de assen, als de merktekens op een echte rondel
+  for (let i = 0; i < 4; i++) {
+    const a = (i * 90 - 90) * Math.PI / 180;
+    const x = cx + Math.cos(a) * 86, y = cy + Math.sin(a) * 86;
+    el('path', { d:`M ${x} ${y-9} L ${x+7} ${y} L ${x} ${y+9} L ${x-7} ${y} Z`, fill:'#ffe9c2' }, g);
+  }
+  el('circle', { cx, cy, r:11, fill:'#ffe9c2', opacity:0.55 }, g);
 }
 
 // ==========================================
