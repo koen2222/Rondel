@@ -14,6 +14,15 @@
   :root { --bg: #050403; --ink: #f4ecd8; --p1: #3b82f6; --p1-glow: rgba(59, 130, 246, 0.6); --p2: #ef4444; --p2-glow: rgba(239, 68, 68, 0.6); --gold: #f59e0b; --gold-glow: rgba(245, 158, 11, 0.6); }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: 'EB Garamond', Georgia, serif; overscroll-behavior: none; user-select: none; min-height: 100vh; }
+  /* Op een breed scherm staat het spel in een telefoonkolom. Zonder achtergrond
+     zweeft het in een zwart gat; met een warme gloed staat het op een tafel. */
+  @media (min-width: 720px) {
+    body { background:
+      radial-gradient(ellipse 40% 55% at 50% 50%, rgba(146,64,14,0.30), transparent 68%),
+      radial-gradient(ellipse 70% 60% at 50% 108%, rgba(251,146,60,0.14), transparent 70%),
+      radial-gradient(ellipse 90% 80% at 50% 40%, #17110e 0%, #0a0705 55%, #040302 100%); }
+    .game { box-shadow: 0 0 60px 20px rgba(0,0,0,0.55); }
+  }
   /* Het spelscherm vult precies de hoogte van het toestel; het bord krimpt mee
      zodat je nooit hoeft te scrollen tijdens een potje. */
   .game { max-width: 500px; margin: 0 auto; padding: 8px 6px; display: flex; flex-direction: column; gap: 8px;
@@ -434,7 +443,12 @@
   @media (prefers-reduced-motion: reduce) { .goal-halo { animation: none; opacity: 0.7; } }
   
   .node-glow { fill: rgba(245, 158, 11, 0.25); stroke: var(--gold); stroke-width: 2; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
-  .node-glow.active { opacity: 1; filter: drop-shadow(0 0 8px var(--gold)); }
+  /* Een geldig doelwit klopt rustig, zodat je ziet waar je mag tikken.
+     Alleen opacity animeren: dat gaat via de compositor en kost geen frames. */
+  .node-glow.active { opacity: 1; filter: drop-shadow(0 0 8px var(--gold));
+    animation: doelKlop 1.4s ease-in-out infinite; }
+  @keyframes doelKlop { 0%,100% { opacity: 1; } 50% { opacity: 0.45; } }
+  @media (prefers-reduced-motion: reduce) { .node-glow.active { animation: none; } }
   
   .unit-fig { cursor: pointer; }
   .unit-fig.selected .fig-base { stroke: var(--gold); stroke-width: 3; filter: drop-shadow(0 0 12px var(--gold)); }
@@ -693,13 +707,22 @@
   .booster-card { display: flex; align-items: center; gap: 12px; background: linear-gradient(145deg, #33240f, #1a1208); border: 1px solid rgba(245,158,11,0.5); border-radius: 14px; padding: 12px 14px; cursor: pointer; box-shadow: 0 0 20px rgba(245,158,11,0.12); }
   .booster-card:active { transform: scale(0.98); }
   .booster-card.broke { opacity: 0.5; }
-  .booster-chest { font-size: 2.2rem; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.7)); }
+  .booster-chest { flex: 0 0 auto; display: flex; align-items: center; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.7)); }
   .booster-txt { flex: 1; min-width: 0; }
   .bt-name { font-family: 'Cinzel', serif; font-weight: 700; color: var(--gold); letter-spacing: 0.1em; font-size: 0.9rem; }
   .bt-desc { font-size: 0.68rem; color: #b8ab97; margin-top: 3px; line-height: 1.35; }
   .booster-price { font-family: 'Cinzel', serif; color: var(--gold); font-size: 0.95rem; white-space: nowrap; }
-  .booster-reveal-chest { font-size: 4.5rem; text-align: center; }
+  .booster-reveal-chest { text-align: center; }
+  .booster-reveal-chest svg { display: block; margin: 0 auto; filter: drop-shadow(0 6px 10px rgba(0,0,0,0.7)); }
   .booster-reveal-chest.shake { animation: chestShake 1.1s ease-in-out; }
+  /* Stralenkrans achter de onthulde unit, in de kleur van z'n zeldzaamheid */
+  #booster-stralen { position: absolute; left: 50%; top: 50%; width: 0; height: 0; pointer-events: none; }
+  #booster-stralen i { position: absolute; left: -6px; top: -164px; width: 12px; height: 164px;
+    background: linear-gradient(180deg, transparent, var(--bsk, #fbbf24));
+    transform-origin: 50% 100%; opacity: 0; animation: bsStraal 1.5s ease-out forwards; }
+  @keyframes bsStraal { 0% { transform: rotate(var(--a)) scaleY(0.08); opacity: 0; }
+    22% { opacity: 0.72; } 100% { transform: rotate(var(--a)) scaleY(1); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { #booster-stralen { display: none; } }
   @keyframes chestShake { 0%,100% { transform: rotate(0) scale(1); } 15% { transform: rotate(-11deg) scale(1.05); } 30% { transform: rotate(10deg) scale(1.05); } 45% { transform: rotate(-8deg) scale(1.1); } 60% { transform: rotate(8deg) scale(1.1); } 80% { transform: rotate(-4deg) scale(1.2); } 92% { transform: scale(1.35); } }
   @media (prefers-reduced-motion: reduce) { .booster-reveal-chest.shake { animation: none; } }
 
@@ -829,7 +852,16 @@
       <div class="subscreen-credits" id="store-credits"></div>
     </div>
     <div class="booster-card" id="booster-card">
-      <div class="booster-chest">🎁</div>
+      <div class="booster-chest">
+        <svg viewBox="0 0 64 56" width="44" height="38" aria-hidden="true">
+          <path d="M6 24 h52 v26 a3 3 0 0 1 -3 3 H9 a3 3 0 0 1 -3 -3 Z" fill="#7c4a1e" stroke="#3d230d" stroke-width="2"/>
+          <path d="M6 24 a26 14 0 0 1 52 0 Z" fill="#95591f" stroke="#3d230d" stroke-width="2"/>
+          <rect x="4" y="21" width="56" height="7" rx="2.5" fill="#c8912f" stroke="#5c3a10" stroke-width="1.6"/>
+          <rect x="27" y="18" width="10" height="16" rx="2" fill="#f3c969" stroke="#5c3a10" stroke-width="1.6"/>
+          <circle cx="32" cy="26" r="2.4" fill="#3d230d"/>
+          <path d="M14 27 v25 M50 27 v25" stroke="#c8912f" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div>
       <div class="booster-txt">
         <div class="bt-name">BOOSTERKIST</div>
         <div class="bt-desc">Eén willekeurige unit. Kleine kans op een Rare. Dubbel? Credits terug.</div>
@@ -892,9 +924,20 @@
 <!-- ===== BOOSTERKIST-ONTHULLING ===== -->
 <div id="booster-overlay" class="overlay">
   <div class="result-panel">
-    <div class="booster-reveal-chest" id="booster-anim">🎁</div>
+    <div class="booster-reveal-chest" id="booster-anim">
+      <!-- Getekende kist in plaats van een emoji: die zag er op elk toestel
+           anders uit en paste niet bij de rest. -->
+      <svg viewBox="0 0 64 56" width="112" height="98" aria-hidden="true">
+        <path d="M6 24 h52 v26 a3 3 0 0 1 -3 3 H9 a3 3 0 0 1 -3 -3 Z" fill="#7c4a1e" stroke="#3d230d" stroke-width="2"/>
+        <path d="M6 24 a26 14 0 0 1 52 0 Z" fill="#95591f" stroke="#3d230d" stroke-width="2"/>
+        <rect x="4" y="21" width="56" height="7" rx="2.5" fill="#c8912f" stroke="#5c3a10" stroke-width="1.6"/>
+        <rect x="27" y="18" width="10" height="16" rx="2" fill="#f3c969" stroke="#5c3a10" stroke-width="1.6"/>
+        <circle cx="32" cy="26" r="2.4" fill="#3d230d"/>
+        <path d="M14 27 v25 M50 27 v25" stroke="#c8912f" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+    </div>
     <div id="booster-result" style="display:none;">
-      <div id="booster-art" style="margin: 4px 0 8px;"></div>
+      <div id="booster-art" style="position:relative; margin: 4px 0 8px;"><div id="booster-stralen"></div></div>
       <div class="result-title win" id="booster-name" style="font-size:1.3rem;"></div>
       <div class="result-reason" id="booster-sub"></div>
       <div class="result-reward" id="booster-bonus"></div>
@@ -2009,7 +2052,14 @@ function openBooster() {
   if (!animOff()) { chest.classList.remove('shake'); void chest.offsetWidth; chest.classList.add('shake'); }
   setTimeout(() => {
     chest.style.display = 'none'; res.style.display = '';
-    document.getElementById('booster-art').innerHTML = unitVisual(roll.key, 'p1', 84);
+    // Stralenkrans in de kleur van de zeldzaamheid, dan pas het figuur erover
+    const kleur = roll.duplicate ? '#94a3b8'
+      : (roll.rarity === 'R' ? '#fbbf24' : roll.rarity === 'U' ? '#7dd3fc' : '#cbd5e1');
+    const stralen = animOff() ? ''
+      : `<div id="booster-stralen" style="--bsk:${kleur}">` +
+        Array.from({ length: 12 }, (_, i) => `<i style="--a:${i * 30}deg; animation-delay:${i * 45}ms"></i>`).join('') +
+        '</div>';
+    document.getElementById('booster-art').innerHTML = stralen + unitVisual(roll.key, 'p1', 84);
     document.getElementById('booster-name').textContent = def.name;
     const rarLabel = roll.rarity === 'C' ? 'Common' : roll.rarity === 'U' ? 'Uncommon' : 'Rare';
     document.getElementById('booster-sub').textContent = `${def.fac} · ${def.mp} MP · ${rarLabel}`;
@@ -2158,6 +2208,12 @@ const HELP_SECTIONS = [
     'Loop je op een vijand af, dan draaien <b>beide schijven</b>. Waar de pijl landt, bepaalt wat er gebeurt.',
     'De grootte van een vak is precies de kans erop — een groot wit vak betekent dus vaak raak.',
     'Wil je een schijf van tevoren zien? <b>Houd een figuur even vast</b> op het bord — ook die van je tegenstander. Je ziet dan de schijf zoals hij nú draait, inclusief het effect van een status.' ]},
+  { h:'Wat je ziet tijdens een gevecht', p:[
+    'Zodra beide wielen stilstaan <b>licht het vak op dat telt</b>. Meestal is dat het vak onder de pijl — maar met <b>Verwarring</b> of <b>Scherpschutter</b> schuift het geldende vak een plek op, en dan licht het vak op dat écht meedoet.',
+    'Daarna vliegt er iets van de aanvaller naar de verdediger: een zwaard, een pijl, een vuurbol, bliksem — wat er vliegt hangt af van de <b>naam</b> van de aanval die je draaide.',
+    'Blokkeer je met blauw, dan vangt een <b>schild</b> de klap op. Draai je rood, dan blijft er <b>MIS</b> boven je hoofd hangen. Wie het niet overleeft licht wit op en valt om.',
+    'Na afloop slaat de klap ook nog in <b>op het bord</b>, op het punt waar hij landt. Vuur, hamer en bliksem laten een krater achter die langzaam vervaagt.',
+    'Hoeft dit allemaal niet? Zet de <b>animatiesnelheid</b> in de instellingen op snel of uit.' ]},
   { h:'De vijf kleuren', swatches:[
     ['#e5e7eb','<b>Wit — aanval.</b> Het getal is de kracht. Hoogste getal wint; gelijk = niemand valt.'],
     ['#fbbf24','<b>Goud — doorbraak.</b> Slaat dwars door paars, blauw én mis heen. Alleen een sterkere aanval stopt hem.'],
@@ -2448,6 +2504,7 @@ function renderBoard() {
   // GEEN speelplaat meer: het bord is doorzichtig en zweeft boven de arena,
   // net als in Duel. Alleen een warme grondgloed onder de routes.
   el('ellipse', { cx:270, cy:445, rx:255, ry:255, fill:'url(#gArenaGlow)' }, svg);
+  drawRondel(svg);
   drawCraters(svg);
   drawPortals(svg);
   // Lichtvlek op de vloer onder elk doel: maakt de doelzones herkenbaar
@@ -3096,6 +3153,30 @@ function drawCraters(svg) {
         stroke:'rgba(14,6,3,0.85)', 'stroke-width':2.6, 'stroke-linecap':'round' }, g);
     }
   }
+}
+
+// Het hart van het binnenvierkant was leeg. Daar ligt nu het teken waar het
+// spel naar heet: een rondel — concentrische ringen met spaken en een kern.
+// Ingebrand in de arenavloer, dus heel licht: het mag de figuren niet
+// wegdrukken. Een handvol elementen, dus het kost niets per render.
+function drawRondel(svg) {
+  const cx = 270, cy = 445;
+  const g = el('g', { class:'rondel-teken', opacity:0.22 }, svg);
+  for (const [r, w] of [[112, 3], [86, 1.6], [58, 2.4], [26, 1.4]])
+    el('circle', { cx, cy, r, fill:'none', stroke:'#ffe9c2', 'stroke-width':w }, g);
+  for (let i = 0; i < 8; i++) {
+    const a = (i * 45 - 90) * Math.PI / 180;
+    el('line', { x1:cx + Math.cos(a) * 60, y1:cy + Math.sin(a) * 60,
+      x2:cx + Math.cos(a) * 110, y2:cy + Math.sin(a) * 110,
+      stroke:'#ffe9c2', 'stroke-width': i % 2 ? 1.4 : 2.6, 'stroke-linecap':'round' }, g);
+  }
+  // Vier ruitjes op de assen, als de merktekens op een echte rondel
+  for (let i = 0; i < 4; i++) {
+    const a = (i * 90 - 90) * Math.PI / 180;
+    const x = cx + Math.cos(a) * 86, y = cy + Math.sin(a) * 86;
+    el('path', { d:`M ${x} ${y-9} L ${x+7} ${y} L ${x} ${y+9} L ${x-7} ${y} Z`, fill:'#ffe9c2' }, g);
+  }
+  el('circle', { cx, cy, r:11, fill:'#ffe9c2', opacity:0.55 }, g);
 }
 
 // ==========================================
@@ -4313,6 +4394,16 @@ function aiTurn() {
     const actions = [];
 
     const g2Empty = !unitAt('G2');
+    // Een EIGEN startpunt verdedigen heeft alleen zin als de dreiging er ook
+    // echt langs moet. Zonder die voorwaarde parkeerde de AI zijn eerste twee
+    // figuren op E2_TL en E2_TR en bleef daar staan, terwijl de speler dwars
+    // door het midden naar het doel liep. Gemeten: 10/10 verloren in gemiddeld
+    // 3 beurten tegen een rusher.
+    const dreiger = threat ? state.units[threat.uid] : null;
+    const opDreigroute = (n) => {
+      if (!dreiger || !dreiger.node) return false;
+      return distTo(dreiger.node, n) + distTo(n, 'G2') === distTo(dreiger.node, 'G2');
+    };
     const posScore = (t, dNow, u) => {
       let s = (dNow - distTo(t, 'G1')) * 25 * cfg.advance;
       if (NODES[t].type === 'goal' && NODES[t].owner === 'p1') s = 1000;   // winnende zet: altijd pakken
@@ -4332,7 +4423,7 @@ function aiTurn() {
       const needDefenders = urgent && zoneUnits.length < 2;
       if (needDefenders) s += Math.max(0, 300 - distTo(t, 'G2') * 90) * cfg.keeper;
       // Een eigen startpunt bezet houden sluit de buitenroute af
-      if (danger && OWN_ENTRIES.includes(t) && !unitAt(t)) s += 170 * cfg.keeper;
+      if (danger && OWN_ENTRIES.includes(t) && !unitAt(t) && opDreigroute(t)) s += 170 * cfg.keeper;
       if (GOAL_ZONE.includes(t)) {
         if (needDefenders) s += 300 * cfg.keeper;
         if (t === 'G2') {
@@ -4382,7 +4473,7 @@ function aiTurn() {
           // hij moet immers iets doen — en liep de rusher door het gat.
           if (u.node === 'G2' && danger) s -= 700 * cfg.keeper;
           // ...en ook een bezet eigen startpunt geef je bij dreiging niet zomaar op
-          if (danger && OWN_ENTRIES.includes(u.node) && !OWN_ENTRIES.includes(t)) s -= 220 * cfg.keeper;
+          if (danger && OWN_ENTRIES.includes(u.node) && !OWN_ENTRIES.includes(t) && opDreigroute(u.node)) s -= 220 * cfg.keeper;
           if (u.uid === lastDefender && !GOAL_ZONE.includes(t)) s -= 500;       // laatste verdediger blijft ALTIJD
           else if (inZone && danger && !GOAL_ZONE.includes(t)) s -= 150;        // bij dreiging blijft iedereen liever
           actions.push({ type:'move', uid:u.uid, target:t, score: s + Math.random() * cfg.jitter });

@@ -527,11 +527,26 @@ section('=== PRESTATIE (3 checks) ===');
   check('Sintels zijn een statische CSS-laag', /#arena-fx i \{/.test(css), true);
 }
 
+// ─── 4g3. ART EN OFFLINE-CACHE LOPEN GELIJK (sessie 38) ───────────────────────
+// Een hernoemd plaatje dat niet in sw.js staat werkt online prima en is offline
+// stuk. Dat merk je pas op een telefoon zonder bereik, dus hier vastgezet.
+section('=== ART & CACHE (3 checks) ===');
+{
+  const sw = fs.readFileSync(path.join(__dirname, '../sw.js'), 'utf8');
+  const opSchijf = fs.readdirSync(path.join(__dirname, '../art')).filter(f => f.endsWith('.png')).sort();
+  const inSw = (sw.match(/art\/[a-z0-9_-]+\.png/gi) || []).map(s => s.slice(4)).sort();
+  const artMatch = html.match(/const UNIT_ART = \{[\s\S]*?\};/);
+  const inCode = artMatch ? (artMatch[0].match(/art\/[a-z0-9_-]+\.png/gi) || []).map(s => s.slice(4)).sort() : [];
+  check('Elk plaatje in art/ staat ook in de offline-cache', inSw, opSchijf);
+  check('De code verwijst naar precies die plaatjes', inCode, opSchijf);
+  check('Alle 18 units hebben een plaatje', inCode.length, Object.keys(UNIT_DEFS).length);
+}
+
 // ─── 4h. UITLEG KLOPT MET DE CODE (sessie 24) ──────────────────────────────────
 // Het "Hoe speel je"-scherm beschrijft de regels. Deze checks verankeren de
 // belangrijkste getallen aan de echte code, zodat de uitleg niet stilletjes
 // kan gaan liegen als we later iets balanceren.
-section('=== UITLEG vs CODE (8 checks) ===');
+section('=== UITLEG vs CODE (9 checks) ===');
 {
   const help = html.slice(html.indexOf('const HELP_SECTIONS'), html.indexOf('function renderHelp'));
   if (!help) throw new Error('HELP_SECTIONS niet gevonden');
@@ -550,6 +565,11 @@ section('=== UITLEG vs CODE (8 checks) ===');
     /kost géén actie/.test(help) && /state\.plateUsed = true/.test(html), true);
   check('Uitleg noemt de eerste-zet-regel die effMP afdwingt',
     /1 MP extra/.test(help) && /allereerste zet van het potje MP-1/.test(html), true);
+  // De uitleg belooft dat het GELDENDE vak oplicht, ook als Verwarring of
+  // Scherpschutter de wijzer verschuift. Dat moet de code ook echt doen.
+  check('Uitleg over het oplichtende vak klopt met markeerSlot',
+    /licht het vak op dat telt/.test(help) &&
+    /markeerSlot\(attDiskId, finalAIdx\); markeerSlot\(defDiskId, finalDIdx\);/.test(html), true);
   // De vijf kleurstalen in de uitleg moeten exact de disk-kleuren zijn
   const swatch = [...help.matchAll(/\['(#[0-9a-fA-F]{6})',/g)].map(m => m[1].toLowerCase());
   const diskColors = ['#e5e7eb', '#fbbf24', '#3b82f6', '#8b5cf6', '#ef4444'];
