@@ -407,9 +407,22 @@ waar het spel nog stil bleef.
   blijven staan. Dat de speler nog steeds vaker wint klopt: rushen is in Duel
   ook een legitieme strategie — maar het potje is niet meer voorbij voor het
   begonnen is.
+- ALLE 74 AANVALSNAMEN NAGELOPEN, niet alleen "heeft er één" maar "heeft de
+  JUISTE". Een tabel per unit uitgedraaid en er zeven fouten uit gehaald:
+  * 'slag' is zó gewoon dat het alles opslokte: Caduceusslag en Veerslag werden
+    een zwaardhouw in plaats van toverij. De specifieke woorden staan nu vóór
+    de snede-regel.
+  * 'tand' zit óók in 'drietand': Drietandprik werd een kaakbeet. Een drietand
+    is nu een steekwapen, met een eigen regel vóór klauw.
+  * Kalmerend Woord had helemaal geen trefwoord en viel terug op een zwaard.
+  * Hoefslag en Staartzwiep waren zwaardhouwen; dat zijn stompe klappen.
+  Verdeling nu: snede 8, magie 9, hamer 8, klauw 8, vuur 8, bliksem 5, gif 4,
+  schild 4, pijl 2, kou 1. Elke naam levert iets op dat bij die naam past.
+  Alle zeven gevallen staan vast in headless-checks, inclusief de valstrikken
+  zelf ('schild' vóór 'beuk', geen 'graf' in de kou-regel).
 - BREED SCHERM: op een laptop zweefde het spel in een zwart gat. Nu ligt er een
   warme gloed achter de kolom en een zachte schaduw eromheen.
-- TESTS: headless 119 -> 128, smoke 41 -> 55 checks. Simulatie: alle potjes
+- TESTS: headless 119 -> 134, smoke 41 -> 55 checks. Simulatie: alle potjes
   lopen normaal af, geen JS-fouten.
 
 SESSIE 36 — SCHERMPASSING, INSLAGEN OP HET BORD, AI-CHOKEPUNTEN
