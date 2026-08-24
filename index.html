@@ -703,8 +703,17 @@
   .bt-name { font-family: 'Cinzel', serif; font-weight: 700; color: var(--gold); letter-spacing: 0.1em; font-size: 0.9rem; }
   .bt-desc { font-size: 0.68rem; color: #b8ab97; margin-top: 3px; line-height: 1.35; }
   .booster-price { font-family: 'Cinzel', serif; color: var(--gold); font-size: 0.95rem; white-space: nowrap; }
-  .booster-reveal-chest { font-size: 4.5rem; text-align: center; }
+  .booster-reveal-chest { text-align: center; }
+  .booster-reveal-chest svg { display: block; margin: 0 auto; filter: drop-shadow(0 6px 10px rgba(0,0,0,0.7)); }
   .booster-reveal-chest.shake { animation: chestShake 1.1s ease-in-out; }
+  /* Stralenkrans achter de onthulde unit, in de kleur van z'n zeldzaamheid */
+  #booster-stralen { position: absolute; left: 50%; top: 50%; width: 0; height: 0; pointer-events: none; }
+  #booster-stralen i { position: absolute; left: -6px; top: -164px; width: 12px; height: 164px;
+    background: linear-gradient(180deg, transparent, var(--bsk, #fbbf24));
+    transform-origin: 50% 100%; opacity: 0; animation: bsStraal 1.5s ease-out forwards; }
+  @keyframes bsStraal { 0% { transform: rotate(var(--a)) scaleY(0.08); opacity: 0; }
+    22% { opacity: 0.72; } 100% { transform: rotate(var(--a)) scaleY(1); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { #booster-stralen { display: none; } }
   @keyframes chestShake { 0%,100% { transform: rotate(0) scale(1); } 15% { transform: rotate(-11deg) scale(1.05); } 30% { transform: rotate(10deg) scale(1.05); } 45% { transform: rotate(-8deg) scale(1.1); } 60% { transform: rotate(8deg) scale(1.1); } 80% { transform: rotate(-4deg) scale(1.2); } 92% { transform: scale(1.35); } }
   @media (prefers-reduced-motion: reduce) { .booster-reveal-chest.shake { animation: none; } }
 
@@ -897,9 +906,20 @@
 <!-- ===== BOOSTERKIST-ONTHULLING ===== -->
 <div id="booster-overlay" class="overlay">
   <div class="result-panel">
-    <div class="booster-reveal-chest" id="booster-anim">🎁</div>
+    <div class="booster-reveal-chest" id="booster-anim">
+      <!-- Getekende kist in plaats van een emoji: die zag er op elk toestel
+           anders uit en paste niet bij de rest. -->
+      <svg viewBox="0 0 64 56" width="112" height="98" aria-hidden="true">
+        <path d="M6 24 h52 v26 a3 3 0 0 1 -3 3 H9 a3 3 0 0 1 -3 -3 Z" fill="#7c4a1e" stroke="#3d230d" stroke-width="2"/>
+        <path d="M6 24 a26 14 0 0 1 52 0 Z" fill="#95591f" stroke="#3d230d" stroke-width="2"/>
+        <rect x="4" y="21" width="56" height="7" rx="2.5" fill="#c8912f" stroke="#5c3a10" stroke-width="1.6"/>
+        <rect x="27" y="18" width="10" height="16" rx="2" fill="#f3c969" stroke="#5c3a10" stroke-width="1.6"/>
+        <circle cx="32" cy="26" r="2.4" fill="#3d230d"/>
+        <path d="M14 27 v25 M50 27 v25" stroke="#c8912f" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+    </div>
     <div id="booster-result" style="display:none;">
-      <div id="booster-art" style="margin: 4px 0 8px;"></div>
+      <div id="booster-art" style="position:relative; margin: 4px 0 8px;"><div id="booster-stralen"></div></div>
       <div class="result-title win" id="booster-name" style="font-size:1.3rem;"></div>
       <div class="result-reason" id="booster-sub"></div>
       <div class="result-reward" id="booster-bonus"></div>
@@ -2014,7 +2034,14 @@ function openBooster() {
   if (!animOff()) { chest.classList.remove('shake'); void chest.offsetWidth; chest.classList.add('shake'); }
   setTimeout(() => {
     chest.style.display = 'none'; res.style.display = '';
-    document.getElementById('booster-art').innerHTML = unitVisual(roll.key, 'p1', 84);
+    // Stralenkrans in de kleur van de zeldzaamheid, dan pas het figuur erover
+    const kleur = roll.duplicate ? '#94a3b8'
+      : (roll.rarity === 'R' ? '#fbbf24' : roll.rarity === 'U' ? '#7dd3fc' : '#cbd5e1');
+    const stralen = animOff() ? ''
+      : `<div id="booster-stralen" style="--bsk:${kleur}">` +
+        Array.from({ length: 12 }, (_, i) => `<i style="--a:${i * 30}deg; animation-delay:${i * 45}ms"></i>`).join('') +
+        '</div>';
+    document.getElementById('booster-art').innerHTML = stralen + unitVisual(roll.key, 'p1', 84);
     document.getElementById('booster-name').textContent = def.name;
     const rarLabel = roll.rarity === 'C' ? 'Common' : roll.rarity === 'U' ? 'Uncommon' : 'Rare';
     document.getElementById('booster-sub').textContent = `${def.fac} · ${def.mp} MP · ${rarLabel}`;

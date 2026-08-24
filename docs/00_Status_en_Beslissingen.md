@@ -359,7 +359,23 @@ waar het spel nog stil bleef.
   afloop: 60 fps in elke fase van een gevecht, renderAll() 5,2 ms bij een vol
   bord met statussen. Vastgelegd met een headless-check, want dit is precies
   het soort ding dat je zonder meten weer terugzet.
-- TESTS: headless 119 -> 122, smoke 41 -> 55 checks. Simulatie: 6/6 potjes
+- PROJECTIELEN NAGEKEKEN. Alle tien naast elkaar gezet in een galerij. Twee
+  vielen door de mand: het schild en de giftanden draaiden mee met de baan en
+  vlogen dus op hun kant. Een zwaard, pijl of ijsscherf hoort zich naar z'n baan
+  te richten; een schild en een kaak blijven rechtop. De giftanden lazen
+  bovendien als drie groene blokjes en zijn nu een witte kaak met twee groene
+  slagtanden. Vastgelegd: geen twee soorten mogen hetzelfde projectiel of
+  hetzelfde geluid delen.
+- GELDIGE DOELWITTEN kloppen rustig (alleen opacity, dus compositor-werk).
+- RONDEL IN HET HART VAN HET BORD. Het midden van het binnenvierkant was leeg.
+  Daar ligt nu het teken waar het spel naar heet, ingebrand in de arenavloer:
+  concentrische ringen met spaken, vier ruitjes op de assen en een kern. Licht
+  gehouden en nagekeken in alle drie de arena's.
+- ART EN OFFLINE-CACHE lopen nu aantoonbaar gelijk: elk plaatje in art/ staat in
+  sw.js, de code verwijst naar precies die plaatjes, en alle 18 units hebben er
+  een. Een hernoemd plaatje dat niet in sw.js staat werkt online prima en is
+  offline stuk — dat merk je pas op een telefoon zonder bereik.
+- TESTS: headless 119 -> 127, smoke 41 -> 55 checks. Simulatie: 6/6 potjes
   lopen normaal af (gemiddeld 31 beurten, geen JS-fouten).
 
 SESSIE 36 — SCHERMPASSING, INSLAGEN OP HET BORD, AI-CHOKEPUNTEN
