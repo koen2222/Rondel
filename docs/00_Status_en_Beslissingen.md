@@ -1,5 +1,5 @@
 RONDEL — STATUS EN BESLISSINGEN
-Laatste update: 24 augustus 2026 (sessie 38)
+Laatste update: 24 augustus 2026 (sessie 39)
 
 KERNCONCEPT
 - Tabletop-first fantasy bordspel, einddoel = digitale app
@@ -304,6 +304,85 @@ kaarten."
   benoemde aanval heeft een animatie, elke soort heeft een kleur, elk
   projectiel staat ook echt in de CSS). Smoke +7 checks voor de bordhoogte, de
   twee vechters, het vliegende projectiel, het schild-icoon en de kaartvlucht.
+
+SESSIE 39 — EVOLUEREN ZOALS IN DUEL, EN VUUR DAT ECHT VUUR IS
+Koen: "als ik de prik doe op een tegenstander dan staat er bovenop dat ik raak
+én mis. En de animatie als het poppetje burnt mag mooier, dat zijn nu drie
+sliertjes. Kijk verder welke vette animaties je toe kan voegen. En daarna wil ik
+dat we de poppetjes kunnen evolven precies zoals in Pokémon Duel — niet alleen
+maar kopen met coins."
+
+EVOLUTIE (het grote stuk) — 1-op-1 uit Duel overgenomen
+Opgezocht hoe het in Duel écht werkt (Duel-gidsen, zie bronnen onderaan):
+  1. Je moet ALLEBEI de figuren bezitten: de basisvorm én z'n evolutie.
+  2. De basisvorm zet je in je team, de evolutie hang je eronder. Een figuur dat
+     klaar is om te evolueren krijgt een BLAUW STIPJE.
+  3. Tijdens een potje evolueert hij als hij een gevecht WINT — verslaan óf van
+     z'n plek verdringen telt allebei.
+  4. Je MAG weigeren.
+  5. Wie mid-potje evolueert krijgt een bonus die je NIET krijgt als je met de
+     eindvorm begint: +10 op elk wit en goud vak, +1 ster op elk paars vak.
+Alle vijf de regels zitten er precies zo in.
+
+- DE KETENS VIELEN EXACT SAMEN MET DE FACTIES. Zes facties, elk met precies één
+  common, één uncommon en één rare — dus zes ketens van drie:
+    Hemelhal    Einherjar -> Eir -> Odin
+    Halfgoden   Hermes -> Chiron -> Loki
+    Smidse      Cycloop -> Hephaistos -> Talos
+    Dodenrijk   Draugr -> Ghul -> Hel
+    Wildernis   Calydonische Ever -> Fenrir -> Quetzalcoatl
+    Vuurdiepte  Kobold -> Cerberus -> Surtr
+  Dat is geen ontwerpkeuze achteraf: de roster lag er al zo. Vastgelegd in
+  checks (zes ketens, elk drie lang, binnen één factie, C->U->R, alle 18 units
+  in precies één keten).
+- WAAR ONZE HUISREGEL EN DUEL ELKAAR RAKEN: wij hadden al "een gevecht winnen =
+  een level erbij". Duel heeft dat niet (daar level je via fusie buiten het
+  potje om). Die twee komen nu samen als een echte KEUZE: evolueer je, dan krijg
+  je de hele schijf van je evolutie mét de Duel-bonus; weiger je, dan groeit je
+  huidige schijf zoals altijd. Zo blijft Duels regel intact én is weigeren geen
+  loze knop.
+- DE AI evolueert ook, en altijd — een grotere schijf mét bonus is nooit
+  slechter. Behalve op Licht: daar hangt hij geen evoluties aan, anders wordt
+  hij halverwege ineens veel sterker en is 'licht' niet meer licht.
+- BEELD: in het team een sleuf onder het figuur met het blauwe stipje, in de
+  collectie de hele keten (wat je niet bezit staat grijs), en op het bord een
+  lichtkolom die uit de grond schiet met ringen en sterren. Plus een eigen
+  klank: een oplopende reeks die uitmondt in een klap.
+- VALKUIL onderweg: doeEvolutie riep arrangeSlots() met één argument aan, maar
+  die verwacht ook een patroonstring. De schijven in UNIT_DEFS staan bij het
+  laden al in hun vaste volgorde en evolutieBonus laat die volgorde intact, dus
+  opnieuw rangschikken hoefde helemaal niet.
+
+DE REST
+- 'MIS' STOND BOVENOP EEN FIGUUR DIE NET EEN KLAP KREEG. Technisch klopte het —
+  de tegenstander miste z'n eigen draai — maar je las twee dingen tegelijk over
+  één poppetje. De badge blijft nu weg bij wie op datzelfde moment iets te
+  verduren krijgt of omvalt.
+- BRAND was drie flikkerende sliertjes. Nu: gloed op de grond, hittewaas over
+  het lijf, negen vlammen in drie lagen die elk in hun eigen tempo dansen (dus
+  geen zichtbaar herhalend patroon), opstijgende vonken en twee slierten rook.
+  De buitenvlammen blijven doorschijnend zodat je nog ziet WIE er staat te
+  branden — dat was bij de eerste poging niet zo.
+- GIF kwam er net zo karig vanaf: vijf stipjes. Nu een gifplas, nevel over het
+  lijf, bellen die opstijgen en bovenaan KNAPPEN, en druppels die eraf lopen.
+  Zwaar vergiftigd is hetzelfde maar paars, dichter en sneller.
+- VERLAMD knettert nu: een ring van stroom die rondloopt, zes bogen en af en toe
+  een volle stoot die het figuur wit laat oplichten.
+- OMSINGELD, de eigenzinnigste regel van Duel, gaf alleen een plofje. Nu
+  schieten acht punten van alle kanten naar binnen en klappen dicht.
+- TIJDNOOD: onder de 30 seconden klopt de klok, onder de 10 alarmeert de hele
+  beurtbalk.
+- Gemeten na al die animaties: nog steeds 60 fps met een vol bord vol statussen,
+  renderAll 5,9 ms.
+- TESTS: headless 134 -> 144, smoke 62 -> 73 checks.
+
+BRONNEN EVOLUTIE (sessie 39)
+- prima games / itechpost / gamerant / player.one Duel-gidsen: "the pre-evolved
+  Pokémon will be able to evolve when it wins a battle and either knocks out or
+  displaces its battle opponent", "players may decline to evolve", "the player
+  must own both the pre-evolved figure and the evolved figure", "Pokémon that
+  are ready for evolution have a blue dot below them", "an evolved figure will
+  receive +10 to its White and Gold Attacks and +1 ★ to its Purple Attacks".
 
 SESSIE 38 — DE REST VAN HET SPEL KRIJGT OOK EEN MOMENT
 Koen: "ik wil dat het er allemaal verschrikkelijk goed uitziet, alles moet een
