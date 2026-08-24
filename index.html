@@ -14,6 +14,15 @@
   :root { --bg: #050403; --ink: #f4ecd8; --p1: #3b82f6; --p1-glow: rgba(59, 130, 246, 0.6); --p2: #ef4444; --p2-glow: rgba(239, 68, 68, 0.6); --gold: #f59e0b; --gold-glow: rgba(245, 158, 11, 0.6); }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: 'EB Garamond', Georgia, serif; overscroll-behavior: none; user-select: none; min-height: 100vh; }
+  /* Op een breed scherm staat het spel in een telefoonkolom. Zonder achtergrond
+     zweeft het in een zwart gat; met een warme gloed staat het op een tafel. */
+  @media (min-width: 720px) {
+    body { background:
+      radial-gradient(ellipse 40% 55% at 50% 50%, rgba(146,64,14,0.30), transparent 68%),
+      radial-gradient(ellipse 70% 60% at 50% 108%, rgba(251,146,60,0.14), transparent 70%),
+      radial-gradient(ellipse 90% 80% at 50% 40%, #17110e 0%, #0a0705 55%, #040302 100%); }
+    .game { box-shadow: 0 0 60px 20px rgba(0,0,0,0.55); }
+  }
   /* Het spelscherm vult precies de hoogte van het toestel; het bord krimpt mee
      zodat je nooit hoeft te scrollen tijdens een potje. */
   .game { max-width: 500px; margin: 0 auto; padding: 8px 6px; display: flex; flex-direction: column; gap: 8px;
@@ -698,7 +707,7 @@
   .booster-card { display: flex; align-items: center; gap: 12px; background: linear-gradient(145deg, #33240f, #1a1208); border: 1px solid rgba(245,158,11,0.5); border-radius: 14px; padding: 12px 14px; cursor: pointer; box-shadow: 0 0 20px rgba(245,158,11,0.12); }
   .booster-card:active { transform: scale(0.98); }
   .booster-card.broke { opacity: 0.5; }
-  .booster-chest { font-size: 2.2rem; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.7)); }
+  .booster-chest { flex: 0 0 auto; display: flex; align-items: center; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.7)); }
   .booster-txt { flex: 1; min-width: 0; }
   .bt-name { font-family: 'Cinzel', serif; font-weight: 700; color: var(--gold); letter-spacing: 0.1em; font-size: 0.9rem; }
   .bt-desc { font-size: 0.68rem; color: #b8ab97; margin-top: 3px; line-height: 1.35; }
@@ -843,7 +852,16 @@
       <div class="subscreen-credits" id="store-credits"></div>
     </div>
     <div class="booster-card" id="booster-card">
-      <div class="booster-chest">🎁</div>
+      <div class="booster-chest">
+        <svg viewBox="0 0 64 56" width="44" height="38" aria-hidden="true">
+          <path d="M6 24 h52 v26 a3 3 0 0 1 -3 3 H9 a3 3 0 0 1 -3 -3 Z" fill="#7c4a1e" stroke="#3d230d" stroke-width="2"/>
+          <path d="M6 24 a26 14 0 0 1 52 0 Z" fill="#95591f" stroke="#3d230d" stroke-width="2"/>
+          <rect x="4" y="21" width="56" height="7" rx="2.5" fill="#c8912f" stroke="#5c3a10" stroke-width="1.6"/>
+          <rect x="27" y="18" width="10" height="16" rx="2" fill="#f3c969" stroke="#5c3a10" stroke-width="1.6"/>
+          <circle cx="32" cy="26" r="2.4" fill="#3d230d"/>
+          <path d="M14 27 v25 M50 27 v25" stroke="#c8912f" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div>
       <div class="booster-txt">
         <div class="bt-name">BOOSTERKIST</div>
         <div class="bt-desc">Eén willekeurige unit. Kleine kans op een Rare. Dubbel? Credits terug.</div>
@@ -4376,6 +4394,16 @@ function aiTurn() {
     const actions = [];
 
     const g2Empty = !unitAt('G2');
+    // Een EIGEN startpunt verdedigen heeft alleen zin als de dreiging er ook
+    // echt langs moet. Zonder die voorwaarde parkeerde de AI zijn eerste twee
+    // figuren op E2_TL en E2_TR en bleef daar staan, terwijl de speler dwars
+    // door het midden naar het doel liep. Gemeten: 10/10 verloren in gemiddeld
+    // 3 beurten tegen een rusher.
+    const dreiger = threat ? state.units[threat.uid] : null;
+    const opDreigroute = (n) => {
+      if (!dreiger || !dreiger.node) return false;
+      return distTo(dreiger.node, n) + distTo(n, 'G2') === distTo(dreiger.node, 'G2');
+    };
     const posScore = (t, dNow, u) => {
       let s = (dNow - distTo(t, 'G1')) * 25 * cfg.advance;
       if (NODES[t].type === 'goal' && NODES[t].owner === 'p1') s = 1000;   // winnende zet: altijd pakken
@@ -4395,7 +4423,7 @@ function aiTurn() {
       const needDefenders = urgent && zoneUnits.length < 2;
       if (needDefenders) s += Math.max(0, 300 - distTo(t, 'G2') * 90) * cfg.keeper;
       // Een eigen startpunt bezet houden sluit de buitenroute af
-      if (danger && OWN_ENTRIES.includes(t) && !unitAt(t)) s += 170 * cfg.keeper;
+      if (danger && OWN_ENTRIES.includes(t) && !unitAt(t) && opDreigroute(t)) s += 170 * cfg.keeper;
       if (GOAL_ZONE.includes(t)) {
         if (needDefenders) s += 300 * cfg.keeper;
         if (t === 'G2') {
@@ -4445,7 +4473,7 @@ function aiTurn() {
           // hij moet immers iets doen — en liep de rusher door het gat.
           if (u.node === 'G2' && danger) s -= 700 * cfg.keeper;
           // ...en ook een bezet eigen startpunt geef je bij dreiging niet zomaar op
-          if (danger && OWN_ENTRIES.includes(u.node) && !OWN_ENTRIES.includes(t)) s -= 220 * cfg.keeper;
+          if (danger && OWN_ENTRIES.includes(u.node) && !OWN_ENTRIES.includes(t) && opDreigroute(u.node)) s -= 220 * cfg.keeper;
           if (u.uid === lastDefender && !GOAL_ZONE.includes(t)) s -= 500;       // laatste verdediger blijft ALTIJD
           else if (inZone && danger && !GOAL_ZONE.includes(t)) s -= 150;        // bij dreiging blijft iedereen liever
           actions.push({ type:'move', uid:u.uid, target:t, score: s + Math.random() * cfg.jitter });

@@ -375,8 +375,33 @@ waar het spel nog stil bleef.
   sw.js, de code verwijst naar precies die plaatjes, en alle 18 units hebben er
   een. Een hernoemd plaatje dat niet in sw.js staat werkt online prima en is
   offline stuk — dat merk je pas op een telefoon zonder bereik.
-- TESTS: headless 119 -> 127, smoke 41 -> 55 checks. Simulatie: 6/6 potjes
-  lopen normaal af (gemiddeld 31 beurten, geen JS-fouten).
+- RUSH-EXPLOIT WAS NOOIT DOOD. Bij het nameten bleek een speler die alleen maar
+  naar het doel beent 10/10 te winnen in GEMIDDELD 3 BEURTEN. Eerst gecontroleerd
+  of dat door dit sessiewerk kwam: dezelfde meting op de build van sessie 36 gaf
+  exact hetzelfde (10/10, 3 beurten). Het was dus geen regressie maar een
+  bestaand gat; de "3/6" in de sessie-36-notitie klopt niet meer.
+  OORZAAK, uit een beurt-voor-beurt-log: de AI zette z'n eerste twee figuren op
+  z'n EIGEN startpunten (E2_TL en E2_TR) en bleef daar staan, terwijl de speler
+  dwars door het midden naar het doel liep. Dat kwam door de sessie-36-regel
+  "een eigen startpunt bezet houden sluit de buitenroute af": +170 om er te gaan
+  staan en -220 om er weer af te stappen. Die -220 won het van de hele
+  verdedigingsgradiënt richting het doel.
+  FIX: die bonus én die straf gelden nu alleen als dat startpunt ook ECHT op de
+  kortste route van de dreiging naar G2 ligt (opDreigroute). Ligt het er niet
+  op, dan is het geen chokepunt maar een parkeerplaats.
+  GEMETEN, tegen een pure rusher (10 potjes, normaal):
+    10/10 gewonnen in gemiddeld 3 beurten  ->  7/10 in gemiddeld 9 beurten.
+  CONTROLE, tegen een willekeurig spelende speler (8 potjes, normaal):
+    vóór de fix 0/6 in 31 beurten, ná de fix 0/8 in 26 beurten — de AI is dus
+    niet zwakker geworden in normaal spel, alleen sneller.
+  De AI zet nu een keeper op G2 in beurt 2 in plaats van op z'n entries te
+  blijven staan. Dat de speler nog steeds vaker wint klopt: rushen is in Duel
+  ook een legitieme strategie — maar het potje is niet meer voorbij voor het
+  begonnen is.
+- BREED SCHERM: op een laptop zweefde het spel in een zwart gat. Nu ligt er een
+  warme gloed achter de kolom en een zachte schaduw eromheen.
+- TESTS: headless 119 -> 128, smoke 41 -> 55 checks. Simulatie: alle potjes
+  lopen normaal af, geen JS-fouten.
 
 SESSIE 36 — SCHERMPASSING, INSLAGEN OP HET BORD, AI-CHOKEPUNTEN
 - HET SPEL PAST NU OP HET SCHERM. Het spelscherm is 100dvh hoog met flex; het
@@ -882,6 +907,15 @@ OPEN PUNTEN — IN VOLGORDE VAN URGENTIE
    geschrapt, entry→doel 7 stappen symmetrisch, doelen nog maar 2 toegangen.
 1. Speeltest: is de rush-exploit nu echt dood? Voelt AI-verdediging eerlijk of frustrerend?
    (sessie 16: keeper-gat gefixt; sessie 17: bord-fix — samen zou dit het moeten zijn)
+   SESSIE 38 GEMETEN: nee, hij was niet dood. Een pure rusher won 10/10 in
+   gemiddeld 3 beurten, óók op de build van sessie 36 — dus geen regressie maar
+   een bestaand gat. De AI parkeerde z'n figuren op z'n eigen startpunten en
+   bleef daar. Na de fix (opDreigroute): 7/10 in 9 beurten. Nog steeds in het
+   voordeel van de rusher, maar het potje is niet meer voorbij voor het begonnen
+   is. RESTEERT: is 7/10 acceptabel? Het bord geeft de rusher 6 stappen vanaf
+   z'n entry en een 3-MP figuur haalt dat in 3 beurten; alleen een bordwijziging
+   verandert dat, en het bord komt nu exact overeen met het echte Duel-bord.
+   Zie de opties (a)-(d) bij het RUSH-punt hierboven.
 2. Speeltest: nieuwe disk-data van alle 18 units (sessie-5 herontwerp) — balance valideren
 3. Store-economie balancen: prijzen, upgrade-kosten, win/verlies-credits (nu eerste gok)
 4. Speeltest: 3 plates te swingy? Level-up tempo OK (KO = +1 level)?
