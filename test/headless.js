@@ -546,7 +546,7 @@ section('=== ART & CACHE (3 checks) ===');
 // Het "Hoe speel je"-scherm beschrijft de regels. Deze checks verankeren de
 // belangrijkste getallen aan de echte code, zodat de uitleg niet stilletjes
 // kan gaan liegen als we later iets balanceren.
-section('=== UITLEG vs CODE (8 checks) ===');
+section('=== UITLEG vs CODE (9 checks) ===');
 {
   const help = html.slice(html.indexOf('const HELP_SECTIONS'), html.indexOf('function renderHelp'));
   if (!help) throw new Error('HELP_SECTIONS niet gevonden');
@@ -565,6 +565,11 @@ section('=== UITLEG vs CODE (8 checks) ===');
     /kost géén actie/.test(help) && /state\.plateUsed = true/.test(html), true);
   check('Uitleg noemt de eerste-zet-regel die effMP afdwingt',
     /1 MP extra/.test(help) && /allereerste zet van het potje MP-1/.test(html), true);
+  // De uitleg belooft dat het GELDENDE vak oplicht, ook als Verwarring of
+  // Scherpschutter de wijzer verschuift. Dat moet de code ook echt doen.
+  check('Uitleg over het oplichtende vak klopt met markeerSlot',
+    /licht het vak op dat telt/.test(help) &&
+    /markeerSlot\(attDiskId, finalAIdx\); markeerSlot\(defDiskId, finalDIdx\);/.test(html), true);
   // De vijf kleurstalen in de uitleg moeten exact de disk-kleuren zijn
   const swatch = [...help.matchAll(/\['(#[0-9a-fA-F]{6})',/g)].map(m => m[1].toLowerCase());
   const diskColors = ['#e5e7eb', '#fbbf24', '#3b82f6', '#8b5cf6', '#ef4444'];
