@@ -348,6 +348,11 @@ Alle vijf de regels zitten er precies zo in.
   collectie de hele keten (wat je niet bezit staat grijs), en op het bord een
   lichtkolom die uit de grond schiet met ringen en sterren. Plus een eigen
   klank: een oplopende reeks die uitmondt in een klap.
+- BALANS NAGEMETEN met evolutie erin (moeilijkheid normaal):
+    tegen een willekeurig spelende speler: 0/8 gewonnen, maar in 17 beurten
+      in plaats van 26 — de AI wint dus fors sneller nu hij evolueert.
+    tegen een pure rusher: 8/10 in 7 beurten (was 7/10 in 9). Binnen de ruis:
+      een rusher gaat gevechten juist uit de weg, dus die merkt er weinig van.
 - VALKUIL onderweg: doeEvolutie riep arrangeSlots() met één argument aan, maar
   die verwacht ook een patroonstring. De schijven in UNIT_DEFS staan bij het
   laden al in hun vaste volgorde en evolutieBonus laat die volgorde intact, dus
@@ -368,6 +373,13 @@ DE REST
   Zwaar vergiftigd is hetzelfde maar paars, dichter en sneller.
 - VERLAMD knettert nu: een ring van stroom die rondloopt, zes bogen en af en toe
   een volle stoot die het figuur wit laat oplichten.
+- SLAAP kreeg een droomwolk die ademt en z'jes die traag wegdrijven; SCHILDWAL
+  was één boogje en is nu een zeshoekig schild om het figuur met een lichtveeg
+  die eroverheen trekt. Daarmee staan alle acht statussen op hetzelfde niveau.
+- ABILITY DIE AFGAAT: Zegenende Aura en Zielenoproep waren alleen een regel
+  tekst. Nu rolt er een gekleurde golf van het punt af, en bij de Aura ook op
+  elke bondgenoot die er écht iets aan had. Zielenoproep zegt er nu bij hoeveel
+  figuren weer inzetbaar zijn.
 - OMSINGELD, de eigenzinnigste regel van Duel, gaf alleen een plofje. Nu
   schieten acht punten van alle kanten naar binnen en klappen dicht.
 - TIJDNOOD: onder de 30 seconden klopt de klok, onder de 10 alarmeert de hele
