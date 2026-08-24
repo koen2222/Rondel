@@ -23,6 +23,16 @@
   .turn-banner { padding: 12px 16px; height: 52px; box-sizing: border-box; border-radius: 12px; background: linear-gradient(90deg, #1f1814, #0a0806); border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 15px rgba(0,0,0,0.5); font-family: 'Cinzel', serif; font-size: 0.95rem; letter-spacing: 0.08em; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s ease; }
   .turn-banner.p1 { border-left: 4px solid var(--p1); box-shadow: 0 0 15px var(--p1-glow); }
   .turn-banner.p2 { border-left: 4px solid var(--p2); box-shadow: 0 0 15px var(--p2-glow); }
+  /* Bij een beurtwissel loopt er licht in de teamkleur door de balk, zodat je
+     ziet dat het schakelde zonder dat er iets van formaat verandert. */
+  .turn-banner { position: relative; overflow: hidden; }
+  .turn-banner.wissel::after { content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(90deg, transparent, var(--wisselk, rgba(255,255,255,0.28)), transparent);
+    animation: beurtVeeg 0.6s ease-out; }
+  .turn-banner.p1 { --wisselk: rgba(96,165,250,0.35); }
+  .turn-banner.p2 { --wisselk: rgba(248,113,113,0.35); }
+  @keyframes beurtVeeg { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+  @media (prefers-reduced-motion: reduce) { .turn-banner.wissel::after { animation: none; opacity: 0; } }
 
   .bench { display: flex; gap: 8px; padding: 8px; background: rgba(255,255,255,0.03); border-radius: 12px; min-height: 70px; overflow-x: auto; border: 1px solid rgba(255,255,255,0.05); }
   .bench.dim { opacity: 0.3; pointer-events: none; }
@@ -456,6 +466,14 @@
   .disk-wrap { position: relative; width: 184px; height: 184px; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.8)); }
   .disk-pointer { position: absolute; top: -6px; left: 50%; transform: translateX(-50%); width: 18px; height: 26px; background: linear-gradient(180deg, #ef4444, #991b1b); border: 2px solid #fff; clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); z-index: 5; box-shadow: 0 0 10px rgba(255,0,0,0.8); }
   .disk-svg { width: 100%; height: 100%; transition: transform 3s cubic-bezier(0.2, 0.8, 0.1, 1); }
+  /* Het vak waar de wijzer op stilstaat licht op */
+  .disk-svg .slot-mark { filter: drop-shadow(0 0 9px #fff) drop-shadow(0 0 18px rgba(255,236,180,0.85));
+    animation: slotMarkIn 0.42s ease-out backwards, slotMarkPuls 1.5s ease-in-out 0.42s infinite; }
+  .disk-svg .slot-mark-waas { animation: slotWaas 1.5s ease-in-out infinite; }
+  @keyframes slotMarkIn { 0% { opacity: 0; stroke-width: 18; } 100% { opacity: 1; stroke-width: 7; } }
+  @keyframes slotMarkPuls { 0%,100% { opacity: 1; stroke-width: 7; } 50% { opacity: 0.8; stroke-width: 5; } }
+  @keyframes slotWaas { 0%,100% { opacity: 1; } 50% { opacity: 0.45; } }
+  @media (prefers-reduced-motion: reduce) { .disk-svg .slot-mark, .disk-svg .slot-mark-waas { animation: none; } }
   .combat-result { margin-top: 24px; font-family: 'Cinzel', serif; font-size: 1.1rem; text-align: center; min-height: 50px; line-height: 1.5; }
   .combat-result .ko { color: var(--p2-soft); font-weight: 900; font-size: 1.3rem; text-shadow: 0 0 10px rgba(239,68,68,0.5); }
   .combat-result .status { color: var(--gold); font-style: italic; }
@@ -476,7 +494,14 @@
   @keyframes clashShake { 0%,100% { transform: translate(0,0); } 15% { transform: translate(-7px,2px); } 30% { transform: translate(6px,-2px); } 45% { transform: translate(-4px,1px); } 60% { transform: translate(3px,-1px); } 80% { transform: translate(-1px,0); } }
   @media (prefers-reduced-motion: reduce) { .disks-row.clash, #clash-flash.go { animation: none; } }
 
-  .plate-strip { display: flex; gap: 6px; overflow-x: auto; padding: 2px; height: 62px; min-height: 62px; flex: 0 0 62px; }
+  /* Meer kaarten dan er passen? Dan loopt de strip aan de rand weg in het
+     donker, zodat een half zichtbare kaart als 'scroll verder' leest en niet
+     als een afgeknipte kaart. */
+  .plate-strip { display: flex; gap: 6px; overflow-x: auto; padding: 2px; height: 62px; min-height: 62px; flex: 0 0 62px;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 26px), transparent 100%);
+    mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 26px), transparent 100%); }
+  .plate-strip::-webkit-scrollbar { display: none; }
   .plate-chip { flex: 0 0 auto; min-width: 110px; background: linear-gradient(145deg, #2a201a, #14100d); border: 1px solid rgba(245,158,11,0.3); border-radius: 8px; padding: 6px 10px; display: flex; flex-direction: column; gap: 2px; cursor: pointer; transition: transform 0.15s; }
   .plate-chip b { font-family: 'Cinzel', serif; font-size: 0.7rem; color: var(--gold); letter-spacing: 0.05em; }
   .plate-chip span { font-size: 0.6rem; color: #a89f91; }
@@ -3598,7 +3623,9 @@ function endTurn() {
   for (const u of Object.values(state.units)) u.fx = {};   // plate-effecten gelden 'deze beurt'
   for (const uid of state.bench[state.turn]) { const u = state.units[uid]; if (u.status.includes('wait')) u.status = u.status.filter(s => s !== 'wait'); }
   sfx('turn');
-  renderAll(); if (!hasAnyAction(state.turn)) { endMatch(state.turn==='p1'?'p2':'p1', 'lockout'); return; }
+  renderAll();
+  beweegKlasse(document.getElementById('turn-banner'), 'wissel', 700);
+  if (!hasAnyAction(state.turn)) { endMatch(state.turn==='p1'?'p2':'p1', 'lockout'); return; }
   // Waarschuwing zodra je aanvoer is afgesneden: dan kun je niets meer inzetten
   // en moet je elke beurt met wat er staat blijven schuiven. In Duel is dit een
   // erkende situatie (er bestaan kaarten die er speciaal tegen zijn).
@@ -3706,7 +3733,9 @@ function renderDisk(svgId, slots, defKey) {
     const sA = (m.start*SLOT_DEG - 90)*Math.PI/180, eA = (m.end*SLOT_DEG - 90)*Math.PI/180, mA = (sA+eA)/2;
     const large = (m.end-m.start)*SLOT_DEG > 180 ? 1 : 0;
     // Basiskleur + subtiele diepte: lichte gloss aan de buitenkant, schaduw bij de naaf
-    el('path', { d: seg(R, IR, sA, eA, large), fill: COLORS[m.slot.k], stroke:'rgba(0,0,0,0.55)', 'stroke-width':1.6 }, svg);
+    // data-start/data-end: zo weet markeerSlot() welk vak de wijzer aanwijst
+    el('path', { d: seg(R, IR, sA, eA, large), fill: COLORS[m.slot.k], stroke:'rgba(0,0,0,0.55)', 'stroke-width':1.6,
+      'data-start': m.start, 'data-end': m.end }, svg);
     el('path', { d: seg(R-1.5, R-13, sA, eA, large), fill:'rgba(255,255,255,0.22)', stroke:'none' }, svg);
     el('path', { d: seg(IR+11, IR, sA, eA, large), fill:'rgba(0,0,0,0.22)', stroke:'none' }, svg);
     const wedgeSlots = m.end - m.start;
@@ -3741,6 +3770,29 @@ function renderDisk(svgId, slots, defKey) {
   el('circle', { cx, cy, r: IR, fill:`url(#dHub${uq})`, stroke:'#fbbf24', 'stroke-width':2.5 }, svg);
   el('ellipse', { cx:cx-6, cy:cy-8, rx:10, ry:6, fill:'rgba(255,255,255,0.20)' }, svg);
   el('circle', { cx, cy, r:4, fill:'#fbbf24', opacity:0.85 }, svg);
+}
+
+// Welk vak wijst de wijzer aan? Zonder markering moet je zelf uitzoeken waar
+// hij stilstaat; nu licht het gedraaide vak op zolang de uitslag in beeld is.
+function markeerSlot(svgId, idx) {
+  if (animOff()) return;
+  const svg = document.getElementById(svgId); if (!svg) return;
+  svg.querySelectorAll('.slot-mark').forEach(e => e.remove());
+  const wedge = [...svg.querySelectorAll('path[data-start]')]
+    .find(p => idx >= +p.dataset.start && idx < +p.dataset.end);
+  if (!wedge) return;
+  // Twee lagen: een lichte waas over het hele vak zodat je het van een afstand
+  // ziet, en een dikke rand eromheen zodat je precies weet welk vak het is.
+  const waas = wedge.cloneNode(false);
+  waas.setAttribute('class', 'slot-mark-waas');
+  waas.setAttribute('fill', 'rgba(255,255,255,0.30)');
+  waas.setAttribute('stroke', 'none');
+  const mark = wedge.cloneNode(false);
+  mark.setAttribute('class', 'slot-mark');
+  mark.setAttribute('fill', 'none');
+  mark.setAttribute('stroke', '#ffffff');
+  mark.setAttribute('stroke-width', '7');
+  for (const e of [waas, mark]) { e.removeAttribute('data-start'); e.removeAttribute('data-end'); svg.appendChild(e); }
 }
 
 function spin(svgId, ms) {
@@ -3867,6 +3919,10 @@ async function runCombat(att, def) {
   // Scherpschutter (X Accuracy): een Miss schuift door naar het vak ernaast
   if (aFx.xaccuracy && aSlots[finalAIdx].k === 'red') finalAIdx = (finalAIdx + 1) % 16;
   if (dFx.xaccuracy && dSlots[finalDIdx].k === 'red') finalDIdx = (finalDIdx + 1) % 16;
+
+  // Laat zien WELK vak je hebt gedraaid — inclusief het doorgeschoven vak bij
+  // Verwarring of Scherpschutter, want dan wijst de wijzer zelf ernaast.
+  markeerSlot(attDiskId, finalAIdx); markeerSlot(defDiskId, finalDIdx);
 
   const attWasFrozen = att.status.includes('frozen'), defWasFrozen = def.status.includes('frozen');
   let aSlot = attWasFrozen ? {k:'red'} : aSlots[finalAIdx];

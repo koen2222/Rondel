@@ -139,6 +139,7 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
       state.locked = false; state.over = false;
       const wit = applyStatus(state.units[mine].slots, []).findIndex(s => s.k === 'white' || s.k === 'gold');
       const blauw = applyStatus(state.units[foe].slots, []).findIndex(s => s.k === 'blue');
+      window.__wit = wit; window.__blauw = blauw;
       window.spin = (id) => new Promise(r => setTimeout(() => r(id === 'disk-bottom' ? wit : blauw), 200));
       runCombat(state.units[mine], state.units[foe]);
       return true;
@@ -159,6 +160,20 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
     ok('Er vliegt een aanval van de één naar de ander', zagVlucht);
     ok('Een blok toont een schild-icoon', zagSchild);
     await page.waitForSelector('#btn-combat-continue:visible', { timeout: 8000 });
+    // Het gedraaide vak licht op — en wel precies het vak waar de wijzer staat
+    const mark = await page.evaluate(() => {
+      const uit = [];
+      for (const [id, idx] of [['disk-top', window.__blauw], ['disk-bottom', window.__wit]]) {
+        const svg = document.getElementById(id);
+        const waas = svg.querySelector('.slot-mark-waas');
+        const rand = svg.querySelector('.slot-mark');
+        if (!waas || !rand) { uit.push(false); continue; }
+        const w = [...svg.querySelectorAll('path[data-start]')].find(p => p.getAttribute('d') === waas.getAttribute('d'));
+        uit.push(!!w && idx >= +w.dataset.start && idx < +w.dataset.end);
+      }
+      return uit;
+    });
+    ok('Het gedraaide vak licht op onder de wijzer', mark.length === 2 && mark.every(Boolean));
     await page.click('#btn-combat-continue');
     await page.waitForTimeout(300);
   }
