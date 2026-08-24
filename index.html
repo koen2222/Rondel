@@ -315,6 +315,40 @@
     100% { transform: rotate(var(--a)) translateX(76px) scale(0.3); opacity: 0; } }
   @media (prefers-reduced-motion: reduce) { #kaart-fx { display: none; } }
 
+  /* De poort die opengaat waar een figuur wordt ingezet */
+  @keyframes portalPlas { 0% { transform: scale(0.15, 0.4); opacity: 0; }
+    18% { transform: scale(1.08, 1.08); opacity: 1; } 45% { transform: scale(1, 1); opacity: 1; }
+    100% { transform: scale(0.7, 0.7); opacity: 0; } }
+  @keyframes portalZuil { 0% { transform: scaleY(0.05); opacity: 0; }
+    22% { transform: scaleY(1); opacity: 0.95; } 55% { opacity: 0.8; }
+    100% { transform: scaleY(1.15); opacity: 0; } }
+  @keyframes portalVonk { 0% { transform: translateY(4px) scale(0.4); opacity: 0; }
+    25% { opacity: 1; } 100% { transform: translateY(-64px) scale(0.2); opacity: 0; } }
+  @keyframes portalGloed { 0% { transform: scale(0.2); opacity: 0; }
+    25% { transform: scale(1); opacity: 0.85; } 100% { transform: scale(0.6); opacity: 0; } }
+  @keyframes portalWalm { 0% { transform: translateY(2px) scale(0.3); opacity: 0; }
+    30% { opacity: 0.8; } 100% { transform: translateY(-48px) scale(1.9); opacity: 0; } }
+  @keyframes portalKlauw { 0% { transform: scale(0.2); opacity: 0; }
+    35% { transform: scale(1); opacity: 0.9; } 100% { transform: scale(1.1); opacity: 0; } }
+  @keyframes portalGolf { 0% { transform: scale(0.2); opacity: 1; }
+    100% { transform: scale(2.6); opacity: 0; } }
+
+  /* Opklimmen naar een hoger level */
+  .lvlfx ellipse, .lvlfx path, .lvlfx text { transform-box: fill-box; transform-origin: center; }
+  @keyframes lvlPlas { 0% { transform: scale(0.2); opacity: 0; } 30% { opacity: 1; }
+    100% { transform: scale(1.6); opacity: 0; } }
+  @keyframes lvlRing { 0% { transform: translateY(8px) scale(0.3); opacity: 0; }
+    25% { opacity: 1; } 100% { transform: translateY(-58px) scale(1.6); opacity: 0; } }
+  @keyframes lvlSter { 0% { transform: rotate(var(--a)) translateX(0) scale(0.3); opacity: 0; }
+    25% { opacity: 1; } 100% { transform: rotate(var(--a)) translateX(58px) scale(1.15); opacity: 0; } }
+  @keyframes lvlTekst { 0% { transform: translateY(14px) scale(0.4); opacity: 0; }
+    22% { transform: translateY(0) scale(1.2); opacity: 1; } 40% { transform: translateY(0) scale(1); }
+    100% { transform: translateY(-20px) scale(1); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .lvlfx { display: none; } }
+  .portal ellipse, .portal circle, .portal path { transform-box: fill-box; transform-origin: center; }
+  .portal-p1 path { transform-origin: 50% 100%; }
+  @media (prefers-reduced-motion: reduce) { .portal { display: none; } }
+
   /* Poorten waar de legers uit komen */
   .spawn-glow { animation: spawnPulse 3.2s ease-in-out infinite; }
   .spawn-twinkle { animation: spawnTwinkle 2.1s ease-in-out infinite; }
@@ -1349,7 +1383,7 @@ let currentMode = 'solo';
 
 function initialState() {
   const ms = S('clockMinutes') * 60000;   // 0 = klok uit
-  return { turn:'p1', actionsLeft:1, units:{}, bench:{p1:[],p2:[]}, hc:{p1:[],p2:[]}, selected:null, legalTargets:new Set(), pendingDeploy:null, over:false, mode: currentMode, aiThinking: false, locked: false, plates:{p1:[],p2:[]}, usedPlates:{p1:[],p2:[]}, counterAttack:{p1:false,p2:false}, plateUsed:false, pendingPlate:null, mpBonus:{}, warcry:{p1:false,p2:false}, firstMoveDone:false, animating:null, pendingFX:[], craters:[], clock: ms ? { p1:ms, p2:ms } : null };
+  return { turn:'p1', actionsLeft:1, units:{}, bench:{p1:[],p2:[]}, hc:{p1:[],p2:[]}, selected:null, legalTargets:new Set(), pendingDeploy:null, over:false, mode: currentMode, aiThinking: false, locked: false, plates:{p1:[],p2:[]}, usedPlates:{p1:[],p2:[]}, counterAttack:{p1:false,p2:false}, plateUsed:false, pendingPlate:null, mpBonus:{}, warcry:{p1:false,p2:false}, firstMoveDone:false, animating:null, pendingFX:[], craters:[], portals:[], clock: ms ? { p1:ms, p2:ms } : null };
 }
 
 // ===== Schaakklok (Duel-regel: 5 min per speler; tijd op = verlies) =====
@@ -1660,7 +1694,14 @@ function endMatch(winner, kind) {
   document.getElementById('result-reason').textContent = msg;
   document.getElementById('result-reward').textContent = state.mode === 'solo' ? `+${gain} credits` : '';
   renderAll();
-  setTimeout(() => { sfx(state.mode !== 'solo' || won ? 'win' : 'lose'); document.getElementById('result-overlay').classList.add('active'); }, 900);
+  // Het eindscherm komt met een tel vertraging, zodat je de laatste zet nog
+  // ziet. Ben je intussen naar het menu gelopen, dan hoort het er niet meer
+  // overheen te ploffen.
+  setTimeout(() => {
+    if (!document.getElementById('screen-game').classList.contains('active')) return;
+    sfx(state.mode !== 'solo' || won ? 'win' : 'lose');
+    document.getElementById('result-overlay').classList.add('active');
+  }, 900);
 }
 
 // ===== Collectie: bekijken + upgraden (met disk-preview) =====
@@ -2132,6 +2173,9 @@ const BOARD_DEFS = `
   <radialGradient id="gMeteor" cx="38%" cy="34%" r="80%">
     <stop offset="0%" stop-color="#fff8dc"/><stop offset="42%" stop-color="#fb923c"/><stop offset="100%" stop-color="#7c2d12"/>
   </radialGradient>
+  <linearGradient id="gPortalLicht" x1="0" y1="1" x2="0" y2="0">
+    <stop offset="0%" stop-color="rgba(219,234,254,0.85)"/><stop offset="45%" stop-color="rgba(147,197,253,0.35)"/><stop offset="100%" stop-color="rgba(147,197,253,0)"/>
+  </linearGradient>
   <radialGradient id="gGate" cx="50%" cy="70%" r="70%">
     <stop offset="0%" stop-color="rgba(255,255,255,0.95)"/><stop offset="45%" stop-color="rgba(191,219,254,0.75)"/><stop offset="100%" stop-color="rgba(96,165,250,0.25)"/>
   </radialGradient>
@@ -2218,6 +2262,7 @@ function renderBoard() {
   // net als in Duel. Alleen een warme grondgloed onder de routes.
   el('ellipse', { cx:270, cy:445, rx:255, ry:255, fill:'url(#gArenaGlow)' }, svg);
   drawCraters(svg);
+  drawPortals(svg);
   // Lichtvlek op de vloer onder elk doel: maakt de doelzones herkenbaar
   for (const [k, n] of Object.entries(NODES)) {
     if (n.type !== 'goal') continue;
@@ -2866,12 +2911,112 @@ function drawCraters(svg) {
   }
 }
 
+// ==========================================
+// INZETPOORT (sessie 38)
+// Koen wilde een duistere put "waar die monsters uit gekropen komen" en een
+// hemelpoort. Die stonden als decor aan de zijkant, maar een figuur verscheen
+// gewoon uit het niets op z'n startpunt. Nu scheurt de poort daar open: bij
+// jou een lichtzuil met vonken, bij de tegenstander een zwart gat met walm en
+// klauwsporen. Het figuur klimt er zichtbaar uit.
+// Poorten leven in state.portals en worden bij elke render opnieuw getekend,
+// zodat ze het herbouwen van de SVG overleven — net als de kraters.
+// ==========================================
+function addPortal(node, owner) {
+  if (animOff() || !NODES[node]) return;
+  state.portals = state.portals || [];
+  state.portals.push({ x: NODES[node].x, y: NODES[node].y, owner, born: performance.now() });
+  if (state.portals.length > 4) state.portals.shift();
+}
+const PORTAL_DUUR = 1300;
+function drawPortals(svg) {
+  const lijst = state.portals || [];
+  if (!lijst.length) return;
+  const nu = performance.now();
+  state.portals = lijst.filter(p => nu - p.born < PORTAL_DUUR);
+  for (const p of state.portals) {
+    // De poort loopt op CSS-animaties, niet op een teken-lus: de SVG wordt bij
+    // elke zet herbouwd en dan zou hij stilstaan. Met een NEGATIEVE vertraging
+    // ter grootte van z'n leeftijd pikt hij de animatie op waar hij was.
+    const oud = nu - p.born;
+    const g = el('g', { class: 'portal portal-' + p.owner, transform: `translate(${p.x},${p.y + 7})` }, svg);
+    const anim = (e, naam, duur, delay) => { e.style.animation = `${naam} ${duur}ms ease-out ${(delay || 0) - oud}ms forwards`; return e; };
+    const ring = p.owner === 'p1' ? 'rgba(191,219,254,0.95)' : 'rgba(217,70,70,0.9)';
+    anim(el('ellipse', { cx:0, cy:0, rx:34, ry:14, fill:'none', stroke:ring, 'stroke-width':4 }, g), 'portalGolf', 900);
+    anim(el('ellipse', { cx:0, cy:0, rx:52, ry:21, fill: p.owner === 'p1' ? 'rgba(147,197,253,0.45)' : 'rgba(88,28,135,0.6)' }, g), 'portalPlas', PORTAL_DUUR);
+    anim(el('ellipse', { cx:0, cy:0, rx:36, ry:15, fill: p.owner === 'p1' ? 'rgba(219,234,254,0.9)' : '#08040a' }, g), 'portalPlas', PORTAL_DUUR);
+    if (p.owner === 'p1') {
+      anim(el('path', { d:'M -38 0 L -22 -96 L 22 -96 L 38 0 Z', fill:'url(#gPortalLicht)' }, g), 'portalZuil', PORTAL_DUUR);
+      for (let i = 0; i < 10; i++) {
+        const a = (i * 36) * Math.PI / 180;
+        anim(el('circle', { cx:Math.cos(a) * 30, cy:0, r:3, fill:'#fff' }, g), 'portalVonk', 900, i * 72);
+      }
+    } else {
+      anim(el('ellipse', { cx:0, cy:1, rx:18, ry:7, fill:'#ef4444' }, g), 'portalGloed', PORTAL_DUUR);
+      for (let i = 0; i < 6; i++) {
+        const a = (i * 61 + 15) * Math.PI / 180;
+        anim(el('circle', { cx:Math.cos(a) * 22, cy:0, r:9, fill:'rgba(52,26,66,0.75)' }, g), 'portalWalm', 1100, i * 110);
+      }
+      for (const dx of [-1, 1]) {
+        anim(el('path', { d:`M ${dx * 19} -4 l ${dx * 10} -13`, stroke:'#be3c3c', 'stroke-width':2.6, 'stroke-linecap':'round' }, g), 'portalKlauw', 700, 90);
+      }
+    }
+  }
+}
+
+// Het figuur klimt uit de poort omhoog in plaats van er te verschijnen.
+function riseUnit(u) {
+  return new Promise(res => {
+    if (animOff() || !u.node) { res(); return; }
+    state.animating = u.uid;
+    renderAll();                       // poort tekenen, statisch figuur verbergen
+    const svg = document.getElementById('board');
+    const n = NODES[u.node];
+    const ghost = unitGroup(u, false); ghost.style.transition = 'none'; svg.appendChild(ghost);
+    const dur = 480 * (animScale() || 1), t0 = performance.now();
+    const ds = depthScale(n.y);
+    const frame = (now) => {
+      const t = Math.min(1, (now - t0) / dur);
+      const e = 1 - Math.pow(1 - t, 3);
+      const lift = (1 - e) * 30;
+      ghost.setAttribute('transform', `translate(${n.x},${n.y + lift}) scale(${ds.toFixed(3)},${(ds * (0.3 + 0.7 * e)).toFixed(3)})`);
+      ghost.setAttribute('opacity', Math.min(1, e * 1.8).toFixed(2));
+      if (t < 1) requestAnimationFrame(frame);
+      // De SVG kan tussendoor herbouwd zijn (klok, AI); dan is de ghost al weg
+      else { if (ghost.parentNode) ghost.parentNode.removeChild(ghost); state.animating = null; renderAll(); res(); }
+    };
+    requestAnimationFrame(frame);
+  });
+}
+
 function queueFX(x, y, kind) { (state.pendingFX = state.pendingFX || []).push({ x, y, kind }); }
 function flushFX() { const list = state.pendingFX || []; state.pendingFX = []; for (const f of list) spawnFX(f.x, f.y, f.kind); }
+// Een figuur dat opklimt verdient meer dan een regeltje tekst: gouden ringen
+// die opstijgen, sterren die wegspatten en het nieuwe levelcijfer dat opbloeit.
+function spawnLevelUp(svg, x, y, lvl) {
+  const g = el('g', { class:'lvlfx', transform:`translate(${x},${y})` }, svg);
+  const zet = (e, naam, duur, delay) => { e.style.animation = `${naam} ${duur}ms ease-out ${delay || 0}ms forwards`; return e; };
+  zet(el('ellipse', { cx:0, cy:8, rx:40, ry:17, fill:'rgba(253,224,71,0.28)' }, g), 'lvlPlas', 700);
+  for (let i = 0; i < 4; i++) {
+    zet(el('ellipse', { cx:0, cy:8, rx:36, ry:15, fill:'none', stroke:'#fde047', 'stroke-width':4 }, g), 'lvlRing', 950, i * 150);
+  }
+  for (let i = 0; i < 10; i++) {
+    const a = (i * 36) * Math.PI / 180;
+    zet(el('path', { d:'M 0 -11 L 3 -3 L 11 0 L 3 3 L 0 11 L -3 3 L -11 0 L -3 -3 Z', fill:'#fff7d6' }, g), 'lvlSter', 850, i * 40);
+    g.lastChild.style.setProperty('--a', (i * 36) + 'deg');
+  }
+  const t = el('text', { x:0, y:-52, 'font-size':28, 'text-anchor':'middle', fill:'#fde047',
+    'font-family':"'Cinzel', serif", 'font-weight':'900', stroke:'#3b2a12', 'stroke-width':1.6,
+    'paint-order':'stroke' }, g);
+  t.textContent = 'LV ' + lvl;
+  zet(t, 'lvlTekst', 1300, 120);
+  setTimeout(() => { if (g.parentNode) g.parentNode.removeChild(g); }, 1500);
+}
+
 function spawnFX(x, y, kind) {
   if (animOff()) return;
   const svg = document.getElementById('board');
   if (kind.startsWith('inslag:')) { spawnImpact(svg, x, y, kind.slice(7)); return; }
+  if (kind.startsWith('level:')) { spawnLevelUp(svg, x, y, kind.slice(6)); return; }
   const g = el('g', {}, svg);
   const n = kind === 'poof' ? 4 : 7;
   for (let i = 0; i < n; i++) {
@@ -2998,7 +3143,12 @@ function moveUnit(u, end) {
           spawnFX(B.x, B.y + 9, 'poof');
           u.node = path[seg + 1]; seg++;
           if (seg < path.length - 1) hopOne();
-          else { svg.removeChild(ghost); svg.removeChild(shadow); state.animating = null; renderAll(); res(); }
+          else {
+            // Ook hier kan de SVG tussendoor herbouwd zijn
+            if (ghost.parentNode) ghost.parentNode.removeChild(ghost);
+            if (shadow.parentNode) shadow.parentNode.removeChild(shadow);
+            state.animating = null; renderAll(); res();
+          }
         }
       };
       requestAnimationFrame(frame);
@@ -3177,8 +3327,13 @@ function doDeploy(u, target) {
   u.node = entry;
   state.bench[u.owner] = state.bench[u.owner].filter(x => x !== u.uid);
   sfx('deploy');
-  if (target === entry || !entry) { onDeployComplete(u); renderAll(); return Promise.resolve(); }
-  return moveUnit(u, target).then(() => onDeployComplete(u));
+  // De poort scheurt open op het startpunt en het figuur klimt eruit
+  addPortal(entry, u.owner);
+  const verder = () => {
+    if (target === entry || !entry) { onDeployComplete(u); renderAll(); return Promise.resolve(); }
+    return moveUnit(u, target).then(() => onDeployComplete(u));
+  };
+  return riseUnit(u).then(verder);
 }
 
 // Inzet-abilities (triggeren zodra de unit op het veld staat)
@@ -3694,6 +3849,7 @@ function levelUp(u) {
   if (u.level >= 4) return; u.level++;
   levelSlotBoost(u);
   sfx('levelup');
+  if (u.node && NODES[u.node]) queueFX(NODES[u.node].x, NODES[u.node].y, 'level:' + u.level);
   toast(`${UNIT_DEFS[u.defKey].name} → Level ${u.level}!`);
 }
 

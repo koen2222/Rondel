@@ -163,6 +163,51 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
     await page.waitForTimeout(300);
   }
 
+  // 5a2b2. Inzetpoort: op het startpunt scheurt een poort open waar het figuur
+  // uit klimt (hemelpoort bij p1, duistere put bij p2).
+  {
+    const gestart = await page.evaluate(() => {
+      const uid = state.bench.p1[0]; if (!uid) return false;
+      // state.over stopt de AI-beurtketen, anders tekent die het bord tussendoor
+      // opnieuw en veegt hij de animatie die we willen meten weg.
+      state.turn = 'p1'; state.locked = false; state.over = true;
+      doDeploy(state.units[uid], 'E2_TL');
+      return true;
+    });
+    ok('Inzet kon geforceerd worden', gestart);
+    await page.waitForTimeout(120);
+    ok('Poort gaat open op het startpunt', await page.locator('#board g.portal').count() >= 1);
+    await page.waitForTimeout(1400);
+    // De poort dooft uit (CSS met fill:forwards); het lege groepje verdwijnt
+    // vanzelf bij de eerstvolgende render van het bord.
+    const dof = await page.evaluate(() => {
+      const g = document.querySelector('#board g.portal');
+      if (!g) return true;
+      return [...g.children].every(c => parseFloat(getComputedStyle(c).opacity) < 0.05);
+    });
+    ok('Poort dooft weer uit', dof);
+  }
+
+  // 5a2b3. Level-up: gouden ringen en het nieuwe levelcijfer op het bord.
+  // We lezen de FX in DEZELFDE evaluate uit: een render van de AI-beurt zou de
+  // SVG anders tussendoor kunnen herbouwen en de meting onbetrouwbaar maken.
+  {
+    const lv = await page.evaluate(() => {
+      const u = Object.values(state.units).find(x => x.owner === 'p1');
+      if (!u) return null;
+      u.node = 'IT2'; u.level = 1;
+      state.bench.p1 = state.bench.p1.filter(x => x !== u.uid);
+      levelUp(u); renderAll();
+      const g = document.querySelector('#board g.lvlfx');
+      return { aantal: document.querySelectorAll('#board g.lvlfx').length,
+               tekst: g ? (g.querySelector('text') || {}).textContent : '',
+               ringen: g ? g.querySelectorAll('ellipse').length : 0 };
+    });
+    ok('Level-up toont een flourish op het bord', !!lv && lv.aantal === 1 && lv.ringen >= 4);
+    ok('Level-up noemt het nieuwe level', !!lv && /LV 2/.test(lv.tekst));
+    await page.waitForTimeout(1500);
+  }
+
   // 5a2c. Kaartanimatie: de gespeelde kaart vliegt groot in beeld
   {
     await page.evaluate(() => {
