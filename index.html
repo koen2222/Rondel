@@ -615,6 +615,11 @@
   .evo-sleuf.aan img, .evo-sleuf.aan svg { opacity: 1; filter: none; }
   .evo-sleuf.mist { opacity: 0.55; }
   .evo-slot-leeg { font-size: 0.8rem !important; color: #6b6459 !important; }
+  /* Een geëvolueerde vorm zet je niet rechtstreeks op: die hang je onder z'n
+     voorloper. Hij blijft zichtbaar (je bezit hem) maar is niet kiesbaar. */
+  .deck-card.evo-only { opacity: 0.62; cursor: default; border-style: dashed; }
+  .deck-card.evo-only img, .deck-card.evo-only svg { filter: grayscale(0.55); }
+  .evo-only-note { font-size: 0.52rem; color: #7dd3fc; margin-top: 3px; font-style: italic; line-height: 1.1; }
   .deck-card.evo-klaar::after { content: ''; position: absolute; top: 6px; left: 6px;
     width: 9px; height: 9px; border-radius: 50%; background: #3b82f6;
     box-shadow: 0 0 8px rgba(59,130,246,0.95); animation: evoStip 1.6s ease-in-out infinite; }
@@ -1492,6 +1497,15 @@ const EVOLUTIE = {
 };
 // Waar evolueert deze sleutel naartoe? (of null als het al de eindvorm is)
 function evolutieVan(key) { return EVOLUTIE[key] || null; }
+// Waar komt deze sleutel vandaan? (of null als het al de basisvorm is)
+function voorloperVan(key) { return Object.keys(EVOLUTIE).find(k => EVOLUTIE[k] === key) || null; }
+// Alleen BASISVORMEN mag je opstellen. Een geëvolueerde vorm verdien je door te
+// evolueren, niet door hem te kopen en neer te zetten. Koen: "je moet alleen
+// ongevolueerde figurines in kunnen zetten en ze alleen kunnen evolven als je
+// de kaart ook hebt gekocht." Dit WIJKT BEWUST AF van Duel, waar je een
+// geëvolueerde vorm gewoon in je deck mag zetten (de evolutiebonus is daar het
+// enige verschil). Zie het statusdocument.
+function isBasisvorm(key) { return !voorloperVan(key); }
 // De hele keten waar deze sleutel in zit, van begin tot eind.
 function evolutieKeten(key) {
   let start = key;
@@ -1593,15 +1607,22 @@ function normalizeDecks(raw, owned) {
   for (let i = 0; i < DECK_SLOTS; i++) {
     const d = raw[i];
     if (!d || !Array.isArray(d.units) || !Array.isArray(d.plates)) continue;
-    const units = d.units.filter(k => UNIT_DEFS[k] && owned[k]);
+    // Alleen basisvormen mogen in het team staan; een geëvolueerde vorm hang je
+    // eronder. Oude teams met een evolutie erin verliezen die unit.
+    const units = d.units.filter(k => UNIT_DEFS[k] && owned[k] && isBasisvorm(k));
     const plates = d.plates.filter(k => PLATES[k]);
     // Aangehangen evoluties: alleen geldig als het écht de evolutie van dat
-    // figuur is én je hem ook bezit. Oude teams zonder evos blijven werken.
+    // figuur is én je hem bezit. De keten loopt door: hang je Eir onder
+    // Einherjar, dan mag Odin daar weer onder. Odin zonder Eir mag niet.
     const evos = {};
     if (d.evos && typeof d.evos === 'object') {
-      for (const k of units) {
-        const e = d.evos[k];
-        if (e && EVOLUTIE[k] === e && owned[e]) evos[k] = e;
+      for (const start of units) {
+        let k = start;
+        while (true) {
+          const e = d.evos[k];
+          if (!e || EVOLUTIE[k] !== e || !owned[e]) break;
+          evos[k] = e; k = e;
+        }
       }
     }
     if (units.length === 6 && plates.length > 0 && plateCost(plates) <= PLATE_BUDGET) out[i] = { units, plates, evos, name: typeof d.name === 'string' ? d.name.slice(0, 16) : '' };
@@ -1975,35 +1996,56 @@ function renderDeckSelect() {
   for (const [key, def] of Object.entries(UNIT_DEFS)) {
     const lvl = profile.owned[key] || 0; const rar = RARITY[key];
     const c = document.createElement('div');
-    if (lvl) {
+    if (lvl && !isBasisvorm(key)) {
+      // Een geëvolueerde vorm zet je NIET rechtstreeks op. Je hangt hem onder
+      // z'n voorloper en verdient hem tijdens het potje.
+      const voor = voorloperVan(key);
+      c.className = 'deck-card evo-only';
+      c.innerHTML = `<span class="rar rar-${rar}">${rar}</span>${unitVisual(key, 'p1', 38)}<div class="name">${def.name}</div><div class="fac">${def.fac} · ${def.mp} MP</div><div class="evo-only-note">evolutie van ${UNIT_DEFS[voor].name}</div>`;
+      c.addEventListener('click', () => { sfx('denied'); toast(`${def.name} zet je niet rechtstreeks in — hang hem onder ${UNIT_DEFS[voor].name} en evolueer tijdens het potje`); });
+    } else if (lvl) {
       const gekozen = deckSel.units.includes(key);
       const evo = evolutieVan(key);
-      const evoHeb = evo && profile.owned[evo];
-      const evoAan = deckSel.evos[key] === evo;
-      c.className = 'deck-card' + (gekozen ? ' selected' : '') + (gekozen && evoAan ? ' evo-klaar' : '');
+      c.className = 'deck-card' + (gekozen ? ' selected' : '') + (gekozen && deckSel.evos[key] ? ' evo-klaar' : '');
       c.innerHTML = `<span class="rar rar-${rar}">${rar}</span>${unitVisual(key, 'p1', 38)}<div class="name">${def.name}</div><div class="fac">${def.fac} · ${def.mp} MP</div><div class="lvl">L${lvl}</div>`;
       c.addEventListener('click', () => {
         const i = deckSel.units.indexOf(key);
-        if (i >= 0) { deckSel.units.splice(i, 1); delete deckSel.evos[key]; }
+        if (i >= 0) {
+          deckSel.units.splice(i, 1);
+          for (const k of evolutieKeten(key)) delete deckSel.evos[k];
+        }
         else if (deckSel.units.length < 6) deckSel.units.push(key);
         else toast('Max 6 units');
         renderDeckSelect();
       });
-      // EVOLUTIESLEUF (Duel): onder het figuur hangt de plek voor z'n evolutie.
-      // Alleen zichtbaar als hij in je team staat — dan is de keuze pas relevant.
+      // EVOLUTIESLEUVEN (Duel): de hele keten hangt onder het figuur. Odin kan
+      // pas als Eir eronder hangt — je klimt stap voor stap omhoog.
       if (gekozen && evo) {
-        const sleuf = document.createElement('div');
-        sleuf.className = 'evo-sleuf' + (evoAan ? ' aan' : '') + (evoHeb ? '' : ' mist');
-        sleuf.innerHTML = evoHeb
-          ? `${unitVisual(evo, 'p1', 22)}<span>${UNIT_DEFS[evo].name}</span>`
-          : `<span class="evo-slot-leeg">▾</span><span>${UNIT_DEFS[evo].name} nodig</span>`;
-        sleuf.addEventListener('click', (e) => {
-          e.stopPropagation();
-          if (!evoHeb) { sfx('denied'); toast(`Je hebt ${UNIT_DEFS[evo].name} nog niet — koop hem in de Winkel`); return; }
-          if (evoAan) delete deckSel.evos[key]; else deckSel.evos[key] = evo;
-          sfx('select'); renderDeckSelect();
-        });
-        c.appendChild(sleuf);
+        let stap = key, diep = 0;
+        while (evolutieVan(stap)) {
+          const doel = evolutieVan(stap);
+          const heb = !!profile.owned[doel];
+          const aan = deckSel.evos[stap] === doel;
+          const vorigeAan = diep === 0 || deckSel.evos[voorloperVan(stap)] === stap;
+          const sleuf = document.createElement('div');
+          sleuf.className = 'evo-sleuf' + (aan ? ' aan' : '') + (heb && vorigeAan ? '' : ' mist');
+          if (diep) sleuf.style.marginLeft = (diep * 10) + 'px';
+          sleuf.innerHTML = heb
+            ? `${unitVisual(doel, 'p1', 22)}<span>${UNIT_DEFS[doel].name}</span>`
+            : `<span class="evo-slot-leeg">▾</span><span>${UNIT_DEFS[doel].name} nodig</span>`;
+          const vanaf = stap, naar = doel, kanKlikken = heb && vorigeAan;
+          sleuf.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (!heb) { sfx('denied'); toast(`Je hebt ${UNIT_DEFS[naar].name} nog niet — koop hem in de Winkel`); return; }
+            if (!vorigeAan) { sfx('denied'); toast(`Hang eerst ${UNIT_DEFS[vanaf].name} eronder`); return; }
+            if (aan) { for (const k of evolutieKeten(vanaf).slice(evolutieKeten(vanaf).indexOf(vanaf))) delete deckSel.evos[k]; }
+            else deckSel.evos[vanaf] = naar;
+            sfx('select'); renderDeckSelect();
+          });
+          if (!kanKlikken && !aan) sleuf.style.cursor = 'default';
+          c.appendChild(sleuf);
+          stap = doel; diep++;
+        }
       }
     } else {
       c.className = 'deck-card locked';
@@ -2034,40 +2076,36 @@ function renderDeckSelect() {
 // zes willekeurige units uit de hele roster op level 1 — vaak een onsamenhangend
 // team. Nu krijgt hij een écht deck: op 'Licht' vooral commons, op 'Zwaar' een
 // factie-samenhangend team met rares op een hoger level.
+// Sinds sessie 40 zet ook de AI alleen BASISVORMEN op; z'n zwaardere figuren
+// verdient hij door te evolueren, net als jij. 'rares' bepaalt daarom niet meer
+// wie er in het team staat maar hoe diep z'n evolutieketens hangen.
 const AI_DECKS = {
-  makkelijk: { pool: ['squire','scout','apprentice','skeleton','boar','imp','archer','lupine'], rares: 0, level: 1 },
-  normaal:   { pool: null, rares: 2, level: 2 },     // pool null = één factie + aanvulling
-  moeilijk:  { pool: null, rares: 3, level: 3 },
+  makkelijk: { ketens: 0, level: 1 },   // geen evoluties: blijft licht
+  normaal:   { ketens: 1, level: 2 },   // één stap: common -> uncommon
+  moeilijk:  { ketens: 2, level: 3 },   // hele keten: tot en met de rare
 };
 function aiDeck() {
   const d = AI_DECKS[S('difficulty')] || AI_DECKS.normaal;
   const keys = Object.keys(UNIT_DEFS);
-  let units;
-  if (d.pool) {
-    units = randomPick(d.pool, 6);
-  } else {
-    // Kies een factie als ruggengraat, vul aan met de sterkste rest
-    const facs = [...new Set(keys.map(k => UNIT_DEFS[k].fac))];
-    const fac = facs[Math.floor(Math.random() * facs.length)];
-    const own = keys.filter(k => UNIT_DEFS[k].fac === fac);
-    const rares = keys.filter(k => RARITY[k] === 'R' && !own.includes(k));
-    units = [...own, ...randomPick(rares, d.rares)];
-    const rest = keys.filter(k => !units.includes(k));
-    units = [...units, ...randomPick(rest, Math.max(0, 6 - units.length))].slice(0, 6);
-  }
+  // Alleen basisvormen — dezelfde regel als voor jou. Er zijn er precies zes,
+  // dus dat is meteen z'n hele team.
+  const units = keys.filter(isBasisvorm).slice(0, 6);
   // Plates die bij het niveau passen: licht = alleen ondersteunend, zwaar = agressief
   const supportive = ['rally','cleanse','bulwark','warcry'];
   const aggressive = ['hex','ensnare','scorch','venom','recall','blink'];
   const plates = S('difficulty') === 'makkelijk'
     ? randomPick(supportive, 3)
     : randomPick([...aggressive, ...supportive], 3);
-  // Evoluties aanhangen. Op Licht doet de AI dat niet — anders wordt hij
-  // halverwege ineens veel sterker en is 'licht' niet meer licht. Vanaf
-  // Normaal hangt hij ze overal onder waar het kan, net als een speler die
-  // z'n team goed opzet.
+  // Evoluties aanhangen, zo diep als het niveau toestaat. Op Licht helemaal
+  // niet — anders wordt hij halverwege ineens veel sterker en is 'licht' niet
+  // meer licht. Op Zwaar hangt de hele keten eronder, tot en met de rare.
   const evos = {};
-  if (S('difficulty') !== 'makkelijk') {
-    for (const k of units) { const e = evolutieVan(k); if (e) evos[k] = e; }
+  for (const k of units) {
+    let stap = k;
+    for (let i = 0; i < d.ketens; i++) {
+      const e = evolutieVan(stap); if (!e) break;
+      evos[stap] = e; stap = e;
+    }
   }
   return { units, plates, evos, level: d.level };
 }
@@ -2112,24 +2150,28 @@ function startGame() {
   state = initialState(); let id = 0;
   // evoKey = de evolutie die je onder dit figuur hebt gehangen. Staat er niets,
   // dan kan hij niet evolueren — precies zoals in Duel.
-  const mk = (defKey, owner, lvl, evoKey) => {
+  const mk = (defKey, owner, lvl, evoMap) => {
     const uid = `u${++id}`;
-    const u = { uid, defKey, owner, node:null, status:[], fx:{}, level:1, evoKey: evoKey || null, evolved:false,
+    // evoMap is de HELE keten die onder dit figuur hangt, niet één stap. Zo kan
+    // Einherjar in hetzelfde potje eerst Eir en daarna Odin worden.
+    const map = evoMap || {};
+    const u = { uid, defKey, owner, node:null, status:[], fx:{}, level:1,
+                evoMap: map, evoKey: map[defKey] || null, evolved:false,
                 slots: JSON.parse(JSON.stringify(UNIT_DEFS[defKey].slots)) };
     if (lvl && lvl > 1) { for (let i = 1; i < lvl; i++) levelSlotBoost(u); u.level = lvl; }
     state.units[uid] = u; state.bench[owner].push(uid);
   };
   const p1Deck = deckP1 || deckSel;   // hotseat: deckP1 geparkeerd, deckSel = P2-keuze
   const p1Evos = p1Deck.evos || {};
-  for (const k of p1Deck.units) mk(k, 'p1', profile.owned[k] || 1, p1Evos[k]);
+  for (const k of p1Deck.units) mk(k, 'p1', profile.owned[k] || 1, p1Evos);
   if (currentMode === 'hotseat' && deckP1) {
     const p2Evos = deckSel.evos || {};
-    for (const k of deckSel.units) mk(k, 'p2', profile.owned[k] || 1, p2Evos[k]);
+    for (const k of deckSel.units) mk(k, 'p2', profile.owned[k] || 1, p2Evos);
     state.plates.p2 = [...deckSel.plates];
   } else {
     const foe = aiDeck();
     const foeEvos = foe.evos || {};
-    for (const k of foe.units) mk(k, 'p2', foe.level, foeEvos[k]);
+    for (const k of foe.units) mk(k, 'p2', foe.level, foeEvos);
     state.plates.p2 = foe.plates;
   }
   state.plates.p1 = [...p1Deck.plates];
@@ -2506,7 +2548,8 @@ const HELP_SECTIONS = [
     'Gaat er een <b>derde</b> figuur KO, dan schuift de langst wachtende terug naar je zijlijn en mag je hem de beurt erna weer inzetten.' ]},
   { h:'Evolueren', p:[
     'Elk figuur hoort bij een <b>keten van drie</b> binnen z\'n eigen factie: van common via uncommon naar rare. Einherjar wordt Eir wordt Odin, Kobold wordt Cerberus wordt Surtr, en zo verder.',
-    'Om te kunnen evolueren moet je <b>allebei de figuren bezitten</b>. Zet de basisvorm in je team en hang z\'n evolutie eronder in de sleuf die dan verschijnt. Een figuur dat klaar is krijgt een <b>blauw stipje</b>.',
+    'Je stelt <b>alleen basisvormen</b> op. Een geëvolueerde vorm koop je niet om hem neer te zetten, maar om hem te kúnnen worden — je verdient hem tijdens het potje.',
+    'Om te kunnen evolueren moet je <b>allebei de figuren bezitten</b>. Zet de basisvorm in je team en hang z\'n evolutie eronder in de sleuf die dan verschijnt. Hangt de derde vorm er óók onder, dan kan hij in hetzelfde potje <b>twee keer</b> evolueren. Een figuur dat klaar is krijgt een <b>blauw stipje</b>.',
     'Tijdens het potje evolueert hij zodra hij een <b>gevecht wint</b> — of hij de ander nou verslaat of van z\'n plek verdringt. Je mag <b>weigeren</b>: dan groeit z\'n huidige schijf gewoon een level.',
     'Wie mid-potje evolueert krijgt een bonus die je NIET krijgt als je met de eindvorm begint: <b>+10 op elk wit en goud vak</b> en <b>+1 ★ op elk paars vak</b>. Klein beginnen en doorgroeien loont dus.' ]},
   { h:'Sterker worden', p:[
@@ -2907,7 +2950,9 @@ function renderBoard() {
   for (const [k, n] of Object.entries(NODES)) {
     if (n.type !== 'goal') continue;
     const col = n.owner === 'p1' ? 'rgba(59,130,246,0.30)' : 'rgba(249,115,22,0.30)';
-    el('ellipse', { cx:n.x, cy:n.y, rx:88, ry:52, fill:col, filter:'blur(0px)', opacity:0.55, style:'mix-blend-mode:screen;' }, svg);
+    // Ronde lichtplas, geen ovaal: het bord kijkt recht van boven, dus een
+    // uitgerekte cirkel klopt niet met de rest van de tekening.
+    el('circle', { cx:n.x, cy:n.y, r:62, fill:col, opacity:0.55, style:'mix-blend-mode:screen;' }, svg);
   }
   // De burchten waar de figuren vandaan komen: die van jou linksonder, die van
   // je tegenstander rechtsboven — dezelfde plek als het apparaat in Duel.
@@ -4201,12 +4246,18 @@ function legalMoves(u) {
 function unitAt(k) { return Object.values(state.units).find(u => u.node === k); }
 
 function checkSurround() {
-  // Duel: figure zonder vrij buurpunt en met minstens één aangrenzende vijand gaat direct KO
+  // Duel-regel, letterlijk: "A Pokémon will be knocked out if the OPPONENT'S
+  // Pokémon are occupying all the points a Pokémon could possibly move to" —
+  // en "this requires ALL adjacent spaces to be filled with your Pokémon".
+  // Wij keken alleen of er géén vrij buurpunt was plus mínstens één vijand
+  // ernaast. Daardoor kon je je eigen figuur doodmaken door hem met je eigen
+  // poppetjes in te sluiten. Nu moet ELK buurpunt door de VIJAND bezet zijn.
+  // (Ingesloten raken door je eigen figuren mag dus wel — dan kun je alleen
+  // niet meer bewegen, en dat is een tactisch probleem, geen KO.)
   for (const u of Object.values(state.units)) {
     if (!u.node) continue;
     const adj = [...ADJ[u.node]];
-    if (adj.some(n => !unitAt(n))) continue;
-    if (!adj.some(n => { const o = unitAt(n); return o && o.owner !== u.owner; })) continue;
+    if (!adj.every(n => { const o = unitAt(n); return o && o.owner !== u.owner; })) continue;
     const vanaf = u.node;
     queueFX(NODES[vanaf].x, NODES[vanaf].y, 'omsingeld');
     koUnit(u);
@@ -4732,7 +4783,7 @@ function levelUp(u) {
 // (+10 wit/goud, +1 ster paars) — daarom loont het om klein te beginnen.
 // ==========================================
 function kanEvolueren(u) {
-  return !!(u && !u.evolved && u.evoKey && UNIT_DEFS[u.evoKey]);
+  return !!(u && u.evoKey && UNIT_DEFS[u.evoKey]);
 }
 
 function doeEvolutie(u) {
@@ -4750,11 +4801,10 @@ function doeEvolutie(u) {
   // NIET opnieuw arrangeSlots(): de schijven in UNIT_DEFS zijn bij het laden al
   // in hun vaste volgorde gezet, en evolutieBonus laat die volgorde intact.
   u.slots = evolutieBonus(tmp.slots);
-  u.evolved = true;
-  // Een keten van drie: na de tweede stap kan hij nóg een keer, mits je die
-  // vorm ook bezit en hem hebt aangehangen. Dat regelt de deck-opbouw, dus
-  // hier stopt het gewoon.
-  u.evoKey = null;
+  // Een keten van drie: hangt de volgende stap er ook onder, dan kan hij in
+  // hetzelfde potje nóg een keer evolueren (na een volgend gewonnen gevecht).
+  u.evoKey = (u.evoMap && u.evoMap[naar]) || null;
+  u.evolved = !u.evoKey;
   u.undyingUsed = false;
   sfx('evolve');
   if (u.node && NODES[u.node]) queueFX(NODES[u.node].x, NODES[u.node].y, 'evolutie:' + u.owner);
@@ -4792,7 +4842,24 @@ let toastT; function toast(msg) { const t = document.getElementById('toast'); t.
 
 document.getElementById('btn-end-turn').addEventListener('click', endTurn);
 document.getElementById('btn-menu').addEventListener('click', () => { if (state.over || !S('confirmExit') || confirm('Duel verlaten en terug naar het menu?')) goHome(); });
-document.getElementById('btn-deck-random').addEventListener('click', () => { const owned = Object.keys(profile.owned); deckSel.units = randomPick(owned, Math.min(6, owned.length)); deckSel.plates = randomPlates(); renderDeckSelect(); });
+// Random vult je team met basisvormen die je bezit, en hangt daar meteen de
+// evoluties onder die je ook al hebt — anders zou 'Random' je evolutieketens
+// stilletjes weggooien.
+document.getElementById('btn-deck-random').addEventListener('click', () => {
+  const basis = Object.keys(profile.owned).filter(isBasisvorm);
+  deckSel.units = randomPick(basis, Math.min(6, basis.length));
+  deckSel.evos = {};
+  for (const k of deckSel.units) {
+    let stap = k;
+    while (true) {
+      const e = evolutieVan(stap);
+      if (!e || !profile.owned[e]) break;
+      deckSel.evos[stap] = e; stap = e;
+    }
+  }
+  deckSel.plates = randomPlates();
+  renderDeckSelect();
+});
 document.getElementById('btn-deck-start').addEventListener('click', onDeckConfirm);
 document.getElementById('btn-deck-back').addEventListener('click', goHome);
 // Home-tegels & subschermen

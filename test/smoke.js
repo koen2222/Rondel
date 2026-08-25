@@ -282,6 +282,40 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
     ok('Verlamd knettert', (st.paralysis || 0) >= 10);
   }
 
+  // 5a2c3b. Omsingeling: alleen de VIJAND kan je insluiten (Duel-regel).
+  // Je eigen figuren eromheen betekent vastzitten, niet doodgaan.
+  {
+    const om = await page.evaluate(() => {
+      const us = Object.values(state.units);
+      const mij = us.filter(u => u.owner === 'p1');
+      const vij = us.filter(u => u.owner === 'p2');
+      if (mij.length < 4 || vij.length < 3) return null;
+      const midden = 'IT2', buren = [...ADJ[midden]];
+      const opstellen = (ring) => {
+        for (const u of us) { u.node = null; state.bench[u.owner] = state.bench[u.owner].filter(x => x !== u.uid); }
+        mij[0].node = midden;
+        buren.forEach((n, i) => { if (ring[i]) ring[i].node = n; });
+      };
+      opstellen(mij.slice(1));           // eigen figuren eromheen
+      checkSurround();
+      const eigenOverleeft = mij[0].node === midden;
+      opstellen(vij);                    // vijanden eromheen
+      mij[0].node = midden;
+      checkSurround();
+      const vijandKO = mij[0].node === null;
+      return { eigenOverleeft, vijandKO, buren: buren.length };
+    });
+    ok('Ingesloten door je EIGEN figuren is geen KO', !!om && om.eigenOverleeft);
+    ok('Ingesloten door de VIJAND is wel een KO', !!om && om.vijandKO);
+  }
+
+  // 5a2c3c. Rond de doelen ligt een cirkel, geen ovaal
+  {
+    const ovalen = await page.evaluate(() => [...document.querySelectorAll('#board ellipse')]
+      .filter(e => { const rx = +e.getAttribute('rx'), ry = +e.getAttribute('ry'); return rx > 40 && ry > 30 && rx !== ry; }).length);
+    ok('Geen uitgerekte ovaal rond de doelpunten', ovalen === 0);
+  }
+
   // 5a2c4. Omsingeld klapt van acht kanten dicht
   {
     const om = await page.evaluate(() => {
@@ -351,11 +385,19 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
     await page.waitForSelector('#deck-overlay.active');
     await page.locator('#deck-units .deck-card', { hasText: 'Einherjar' }).first().click();
     await page.waitForTimeout(150);
-    ok('Evolutiesleuf verschijnt onder een gekozen figuur',
-      await page.locator('#deck-units .deck-card .evo-sleuf').count() === 1);
+    // De hele keten hangt eronder: Einherjar -> Eir -> Odin = twee sleuven
+    ok('De hele evolutieketen verschijnt onder een gekozen figuur',
+      await page.locator('#deck-units .deck-card .evo-sleuf').count() === 2);
     await page.locator('#deck-units .deck-card .evo-sleuf').first().click();
     await page.waitForTimeout(150);
     ok('Evolutie aanhangen werkt', await page.evaluate(() => deckSel.evos.squire) === 'cleric');
+    // De tweede stap kan pas als de eerste hangt
+    await page.locator('#deck-units .deck-card .evo-sleuf').nth(1).click();
+    await page.waitForTimeout(150);
+    ok('Tweede stap van de keten kan erbij', await page.evaluate(() => deckSel.evos.cleric) === 'commander');
+    // Een geëvolueerde vorm staat er wel, maar is niet kiesbaar
+    ok('Geëvolueerde vormen zijn niet rechtstreeks inzetbaar',
+      await page.locator('#deck-units .deck-card.evo-only').count() === 12);
     ok('Aangehangen evolutie krijgt een blauw stipje',
       await page.locator('#deck-units .deck-card.evo-klaar').count() === 1);
 

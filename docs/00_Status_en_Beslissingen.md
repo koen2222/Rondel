@@ -9,6 +9,10 @@ KERNCONCEPT
 
 META-PRINCIPE
 Bij contradictie tussen project-instructies en Pokémon Duel-structuur: Duel wint.
+UITZONDERING (sessie 40, op Koens uitdrukkelijke verzoek): je mag alleen
+BASISVORMEN opstellen. In Duel mag een geëvolueerde vorm gewoon in je deck; hier
+verdien je hem door te evolueren. Dit is de enige bewuste afwijking tot nu toe
+en staat toegelicht bij sessie 40.
 
 WERKAFSPRAAK BESTANDEN (geüpdatet sessie 14)
 - Project draait nu in een git-repo (Claude Code on the web); Claude KAN bestanden lezen
@@ -304,6 +308,52 @@ kaarten."
   benoemde aanval heeft een animatie, elke soort heeft een kleur, elk
   projectiel staat ook echt in de CSS). Smoke +7 checks voor de bordhoogte, de
   twee vechters, het vliegende projectiel, het schild-icoon en de kaartvlucht.
+
+SESSIE 40 — KOENS DRIE PUNTEN
+Koen: "1) er zit een ovaal rondom het startpunt, dat moet rond. 2) een
+tegenstander kan zijn eigen speler insluiten en dan is hij dood, dat moet alleen
+gebeuren als de vijand je insluit. 3) als je een kaart van een level-2 figurine
+koopt kan je hem al direct inzetten; ik vind dat je alleen ongevolueerde
+figurines in moet kunnen zetten."
+
+1. DOELGLOED ROND. Rond elk doel lag een ellips van 88x52. Het bord kijkt recht
+   van boven, dus een uitgerekte cirkel klopt niet met de rest van de tekening.
+   Nu een cirkel van r=62. De start- en doelpunten zelf waren al cirkels.
+
+2. OMSINGELING — WIJ HADDEN HET FOUT, EN DUEL GEEFT KOEN GELIJK.
+   Wij keken of er géén vrij buurpunt was PLUS mínstens één vijand ernaast.
+   Daardoor kon je je eigen figuur doodmaken door hem met je eigen poppetjes in
+   te sluiten. Duel zegt letterlijk: "A Pokémon will be knocked out if the
+   OPPONENT'S Pokémon are occupying all the points a Pokémon could possibly
+   move to" en "this requires ALL adjacent spaces to be filled with your
+   Pokémon". Nu moet ELK buurpunt door de VIJAND bezet zijn. Ingesloten raken
+   door je eigen figuren mag dus: dan kun je niet meer bewegen, en dat is een
+   tactisch probleem, geen KO.
+   GEMETEN: eigen figuren eromheen -> overleeft. Vijanden eromheen -> KO.
+
+3. ALLEEN BASISVORMEN INZETBAAR — BEWUSTE AFWIJKING VAN DUEL.
+   In Duel mag je een geëvolueerde vorm gewoon in je deck zetten; de
+   evolutiebonus is daar het enige verschil. Koen wil het anders: een
+   geëvolueerde vorm koop je niet om hem neer te zetten maar om hem te KUNNEN
+   worden. Dit is dus de eerste bewuste afwijking van het meta-principe, op
+   Koens uitdrukkelijke verzoek, met het oog op de uitgebreidere shop die hij
+   later wil bouwen.
+   - Alleen de zes basisvormen (de commons) staan in je team. De andere twaalf
+     blijven zichtbaar in de deck-selectie, gestippeld, met "evolutie van X".
+   - DE HELE KETEN hangt nu onder je figuur, niet één stap: Kobold -> Cerberus
+     -> Surtr. Odin kan pas als Eir eronder hangt. Daardoor kan een figuur in
+     hetzelfde potje TWEE keer evolueren, elk na een gewonnen gevecht.
+     GEMETEN: Kobold (wit 50/50/50/50/20/20) -> Cerberus (60/60/60/60/30/30) ->
+     Surtr (110/110/110/110/70/70), beide keren met de +10-bonus.
+   - GEVOLG DAT KOEN MOET WETEN: met zes ketens en zes teamplekken ligt je team
+     nu VAST. De keuze verschuift naar welke evoluties je aanhangt en welke
+     kaarten je meeneemt. Pas als de roster groeit (de uitgebreidere shop) wordt
+     het weer een echte team-keuze.
+   - De AI volgt dezelfde regel. AI_DECKS gaat daarom niet meer over WIE er in
+     z'n team staat (dat ligt vast) maar over hoe DIEP z'n ketens hangen:
+     Licht 0 stappen, Normaal 1, Zwaar 2.
+   - 'Random' hangt nu meteen alle evoluties aan die je bezit; anders gooide die
+     knop je ketens stilletjes weg.
 
 SESSIE 39 — EVOLUEREN ZOALS IN DUEL, EN VUUR DAT ECHT VUUR IS
 Koen: "als ik de prik doe op een tegenstander dan staat er bovenop dat ik raak
