@@ -1,5 +1,5 @@
 RONDEL — STATUS EN BESLISSINGEN
-Laatste update: 24 augustus 2026 (sessie 39)
+Laatste update: 25 augustus 2026 (sessie 40)
 
 KERNCONCEPT
 - Tabletop-first fantasy bordspel, einddoel = digitale app
@@ -354,6 +354,28 @@ figurines in moet kunnen zetten."
      Licht 0 stappen, Normaal 1, Zwaar 2.
    - 'Random' hangt nu meteen alle evoluties aan die je bezit; anders gooide die
      knop je ketens stilletjes weg.
+   - IN DE WINKEL staat er nu bij waar een figuur voor dient: "zet je zelf op"
+     bij een basisvorm, "evolutie van X" bij de rest. Zonder dat lijkt een dure
+     rare een miskoop, want je kunt hem niet opstellen.
+   - BALANS NAGEMETEN (normaal, tegen een willekeurig spelende speler): de AI
+     wint nog steeds alles, en nu in 15 beurten. De reeks over de laatste drie
+     sessies: 26 beurten (geen evolutie) -> 17 (evolutie, oude rosters) -> 15
+     (evolutie, alleen basisvormen). Zwakkere startunits, maar de evoluties
+     wegen daar ruim tegenop.
+   - MAAR: TEGEN EEN RUSHER GING HET MIS. 8/8 in gemiddeld 3 beurten — precies
+     de toestand die in sessie 38 was gerepareerd. Nagegaan met een
+     beurt-voor-beurt-log: de AI verdedigt nog steeds correct (keeper op G2 in
+     beurt 2), maar die keeper is nu een COMMON in plaats van een rare, en die
+     verliest het duel op het doel te vaak. Eén gewonnen gevecht op G2 is
+     meteen het potje, dus dat telt zwaar.
+     REPARATIE binnen Koens regel: niet het roster terugdraaien maar de knop
+     gebruiken die daar al voor is — AI_DECKS.level. Normaal van 2 naar 3,
+     Zwaar van 3 naar 4. Een common op level 3 heeft minder Miss-vakken en een
+     grotere hoofdaanval, dus de keeper houdt weer stand.
+
+TESTHARNAS-GAT dat hierbij bovenkwam: test/simulate.js bleef eeuwig hangen zodra
+de gesimuleerde speler een gevecht won met een evolutie eronder — het
+keuzescherm ging open en er klikte niemand. Die klikt nu altijd op evolueren.
 
 SESSIE 39 — EVOLUEREN ZOALS IN DUEL, EN VUUR DAT ECHT VUUR IS
 Koen: "als ik de prik doe op een tegenstander dan staat er bovenop dat ik raak

@@ -2084,8 +2084,8 @@ function renderDeckSelect() {
 // wie er in het team staat maar hoe diep z'n evolutieketens hangen.
 const AI_DECKS = {
   makkelijk: { ketens: 0, level: 1 },   // geen evoluties: blijft licht
-  normaal:   { ketens: 1, level: 2 },   // één stap: common -> uncommon
-  moeilijk:  { ketens: 2, level: 3 },   // hele keten: tot en met de rare
+  normaal:   { ketens: 1, level: 3 },   // één stap: common -> uncommon
+  moeilijk:  { ketens: 2, level: 4 },   // hele keten: tot en met de rare
 };
 function aiDeck() {
   const d = AI_DECKS[S('difficulty')] || AI_DECKS.normaal;
@@ -2304,7 +2304,11 @@ function openUnitDetail(key) {
   if (lvl >= 4) { upBtn.textContent = 'Max level'; upBtn.disabled = true; document.getElementById('detail-note').textContent = 'Deze unit is volledig opgewaardeerd.'; }
   else {
     upBtn.textContent = `Upgrade ◈ ${UPGRADE_COST[lvl]}`; upBtn.disabled = profile.credits < UPGRADE_COST[lvl];
-    document.getElementById('detail-note').textContent = 'Upgrade: sterkste aanvalsslot wordt groter, één Miss-vak verdwijnt.';
+    // Een evolutie zet je niet zelf op, dus zeg erbij wanneer z'n level telt:
+    // pas op het moment dat een figuur ín hem verandert.
+    document.getElementById('detail-note').textContent = isBasisvorm(key)
+      ? 'Upgrade: sterkste aanvalsslot wordt groter, één Miss-vak verdwijnt.'
+      : `Upgrade: sterkste aanvalsslot wordt groter, één Miss-vak verdwijnt. Dit level telt zodra ${UNIT_DEFS[voorloperVan(key)].name} in hem evolueert.`;
   }
   document.getElementById('detail-overlay').classList.add('active');
 }
