@@ -1,5 +1,5 @@
 RONDEL — STATUS EN BESLISSINGEN
-Laatste update: 24 augustus 2026 (sessie 39)
+Laatste update: 25 augustus 2026 (sessie 40)
 
 KERNCONCEPT
 - Tabletop-first fantasy bordspel, einddoel = digitale app
@@ -349,11 +349,51 @@ figurines in moet kunnen zetten."
      nu VAST. De keuze verschuift naar welke evoluties je aanhangt en welke
      kaarten je meeneemt. Pas als de roster groeit (de uitgebreidere shop) wordt
      het weer een echte team-keuze.
+   - MOOI NEVENEFFECT, niet gepland maar wel logisch: de abilities zitten bijna
+     allemaal op de tweede en derde vorm. Van de zes basisvormen heeft alleen
+     Hermes er een (Sluipen). EVOLUEREN IS DUS OOK HOE JE ABILITIES ONTGRENDELT:
+       Einherjar [—] -> Eir [Zegenende Aura] -> Odin [Aanvoerder]
+       Hermes [Sluipen] -> Chiron [—] -> Loki [Betovering]
+       Cycloop [—] -> Hephaistos [Vuurrune] -> Talos [Bergvast]
+       Draugr [—] -> Ghul [Rottende Greep] -> Hel [Zielenoproep]
+       Cal. Ever [—] -> Fenrir [Roedel] -> Quetzalcoatl [Vleugelslag]
+       Kobold [—] -> Cerberus [Helse Jacht] -> Surtr [Onverwoestbaar]
+   - HOTSEAT nagelopen: beide spelers krijgen hun eigen ketens mee en er staan
+     alleen basisvormen op het bord.
    - De AI volgt dezelfde regel. AI_DECKS gaat daarom niet meer over WIE er in
      z'n team staat (dat ligt vast) maar over hoe DIEP z'n ketens hangen:
      Licht 0 stappen, Normaal 1, Zwaar 2.
    - 'Random' hangt nu meteen alle evoluties aan die je bezit; anders gooide die
      knop je ketens stilletjes weg.
+   - IN DE WINKEL staat er nu bij waar een figuur voor dient: "zet je zelf op"
+     bij een basisvorm, "evolutie van X" bij de rest. Zonder dat lijkt een dure
+     rare een miskoop, want je kunt hem niet opstellen.
+   - BALANS NAGEMETEN (normaal, tegen een willekeurig spelende speler): de AI
+     wint nog steeds alles, en nu in 15 beurten. De reeks over de laatste drie
+     sessies: 26 beurten (geen evolutie) -> 17 (evolutie, oude rosters) -> 15
+     (evolutie, alleen basisvormen). Zwakkere startunits, maar de evoluties
+     wegen daar ruim tegenop.
+   - MAAR: TEGEN EEN RUSHER GING HET MIS. 8/8 in gemiddeld 3 beurten — precies
+     de toestand die in sessie 38 was gerepareerd. Nagegaan met een
+     beurt-voor-beurt-log: de AI verdedigt nog steeds correct (keeper op G2 in
+     beurt 2), maar die keeper is nu een COMMON in plaats van een rare, en die
+     verliest het duel op het doel te vaak. Eén gewonnen gevecht op G2 is
+     meteen het potje, dus dat telt zwaar.
+     REPARATIE binnen Koens regel: niet het roster terugdraaien maar de knop
+     gebruiken die daar al voor is — AI_DECKS.level. Normaal van 2 naar 3,
+     Zwaar van 3 naar 4. Een common op level 3 heeft minder Miss-vakken en een
+     grotere hoofdaanval, dus de keeper houdt weer stand.
+     GEMETEN NA DE REPARATIE: 5/10 in gemiddeld 13 beurten. Dat is de BESTE
+     rush-balans die tot nu toe gemeten is. De hele reeks:
+       sessie 38 (AI-fix)                    7/10 in  9 beurten
+       sessie 39 (evolutie, oude rosters)    8/10 in  7 beurten
+       sessie 40 (alleen basisvormen, lv2)   8/8  in  3 beurten  <- kapot
+       sessie 40 (alleen basisvormen, lv3)   5/10 in 13 beurten  <- nu
+     Vijftig-vijftig over dertien beurten: de rusher moet er echt voor vechten.
+
+TESTHARNAS-GAT dat hierbij bovenkwam: test/simulate.js bleef eeuwig hangen zodra
+de gesimuleerde speler een gevecht won met een evolutie eronder — het
+keuzescherm ging open en er klikte niemand. Die klikt nu altijd op evolueren.
 
 SESSIE 39 — EVOLUEREN ZOALS IN DUEL, EN VUUR DAT ECHT VUUR IS
 Koen: "als ik de prik doe op een tegenstander dan staat er bovenop dat ik raak
