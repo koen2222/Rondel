@@ -396,6 +396,11 @@
     100% { transform: translate(0, 26px); opacity: 0; } }
   @media (prefers-reduced-motion: reduce) { .zielfx { display: none; } }
 
+  /* Klaar om te evolueren — hetzelfde blauwe stipje als in Duel */
+  .evo-stip { animation: evoStipBord 1.6s ease-in-out infinite; filter: drop-shadow(0 0 5px rgba(59,130,246,0.95)); }
+  @keyframes evoStipBord { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.55; transform: scale(0.8); } }
+  @media (prefers-reduced-motion: reduce) { .evo-stip { animation: none; } }
+
   /* Ability die afgaat: een golf die van het punt af rolt */
   @keyframes auraGolf { 0% { transform: scale(0.25); opacity: 1; } 100% { transform: scale(2.6); opacity: 0; } }
   @keyframes auraSter { 0% { transform: scale(0.2) rotate(0deg); opacity: 0; }
@@ -1930,12 +1935,31 @@ function goHome() {
   renderHome(); showScreen('home');
 }
 
+// Als er niets te kiezen valt, kies het dan alvast. Sinds alleen basisvormen
+// opgesteld mogen worden bezit een beginner er precies zes — even veel als er
+// teamplekken zijn. Dan is zes keer tikken geen keuze maar een klusje. Zodra je
+// er zeven of meer hebt is het wél weer een keuze en vullen we niets in.
+function vulTeamAlsErNietsTeKiezenValt() {
+  const basis = Object.keys(profile.owned).filter(isBasisvorm);
+  if (deckSel.units.length || basis.length === 0 || basis.length > 6) return;
+  deckSel.units = basis.slice(0, 6);
+  for (const k of deckSel.units) {
+    let stap = k;
+    while (true) {
+      const e = evolutieVan(stap);
+      if (!e || !profile.owned[e]) break;
+      deckSel.evos[stap] = e; stap = e;
+    }
+  }
+}
+
 // Vanuit home: modus kiezen -> deck-selectie openen
 function startMatchFlow(mode) {
   currentMode = mode;
   deckSel = { units: [], plates: [], evos: {} };
   deckStage = 'p1'; deckP1 = null;
   state = initialState(); state.over = true;
+  vulTeamAlsErNietsTeKiezenValt();
   renderDeckSelect();
   document.getElementById('deck-overlay').classList.add('active');
 }
@@ -1949,6 +1973,7 @@ function onDeckConfirm() {
     deckP1 = { units: [...deckSel.units], plates: [...deckSel.plates], evos: { ...deckSel.evos } };
     deckSel = { units: [], plates: [], evos: {} };
     deckStage = 'p2';
+    vulTeamAlsErNietsTeKiezenValt();
     renderDeckSelect();
     toast('Speler 2: stel je leger samen');
     return;
@@ -2817,7 +2842,16 @@ function unitGroup(u, withShadow = true) {
     el('circle', { cx:15, cy:4, r:8, fill: p1 ? '#2563eb' : '#dc2626', stroke:'#fff', 'stroke-width':1.6 }, g);
     const mt = el('text', { x:15, y:7.5, 'font-size':10, 'text-anchor':'middle', fill:'#fff', 'font-weight':'900', 'font-family':'sans-serif' }, g);
     mt.textContent = effMP(u);
+    // KLAAR OM TE EVOLUEREN: hetzelfde blauwe stipje als in Duel. Alleen op het
+    // BORD — daar betekent het iets ("deze staat één gewonnen gevecht van een
+    // nieuwe schijf af"). Aan de zijlijn kan bijna iedereen evolueren, dus daar
+    // zou het stipje geen informatie zijn maar ruis.
+    if (kanEvolueren(u)) {
+      const stip = el('circle', { cx:-15, cy:-52, r:5, fill:'#3b82f6', stroke:'#dbeafe', 'stroke-width':1.6, class:'evo-stip' }, g);
+      stip.style.transformBox = 'fill-box'; stip.style.transformOrigin = 'center';
+    }
   }
+
 
   if (u.level > 1) {
     el('rect', { x:-27, y:-6, width:18, height:12, rx:3, fill:'#fbbf24', stroke:'#000', 'stroke-width':1 }, g);

@@ -383,6 +383,9 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
     if (await page.locator('#screen-game.active').count()) { await page.click('#btn-menu'); await page.waitForTimeout(300); }
     await page.click('#tile-solo');
     await page.waitForSelector('#deck-overlay.active');
+    // Het team wordt automatisch gevuld zolang er niets te kiezen valt (je bezit
+    // precies zes basisvormen). Begin dus met een schone lei.
+    await page.evaluate(() => { deckSel.units = []; deckSel.evos = {}; renderDeckSelect(); });
     await page.locator('#deck-units .deck-card', { hasText: 'Einherjar' }).first().click();
     await page.waitForTimeout(150);
     // De hele keten hangt eronder: Einherjar -> Eir -> Odin = twee sleuven
@@ -454,6 +457,15 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
     ok('Duel-bonus: +10 op wit', !!ev && ev.witBonus);
     ok('Duel-bonus: +1 ster op paars', !!ev && ev.sterBonus);
     ok('Evolutie barst open op het bord', !!ev && ev.fx === 1);
+    // Het blauwe stipje hoort alleen op het BORD te staan, en alleen bij wie nog
+    // een stap te gaan heeft
+    const stip = await page.evaluate(() => {
+      const opBord = Object.values(state.units).filter(u => u.node);
+      return { stippen: document.querySelectorAll('#board .evo-stip').length,
+               kunnen: opBord.filter(u => u.evoKey).length };
+    });
+    ok('Blauw stipje staat bij precies de figuren die nog kunnen evolueren',
+      !!stip && stip.stippen === stip.kunnen);
     await page.waitForTimeout(1400);
   }
 

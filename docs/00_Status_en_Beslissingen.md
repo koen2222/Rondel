@@ -360,6 +360,15 @@ figurines in moet kunnen zetten."
        Kobold [—] -> Cerberus [Helse Jacht] -> Surtr [Onverwoestbaar]
    - HOTSEAT nagelopen: beide spelers krijgen hun eigen ketens mee en er staan
      alleen basisvormen op het bord.
+   - TEAM WORDT AUTOMATISCH GEVULD zolang er niets te kiezen valt. Een beginner
+     bezit precies zes basisvormen en heeft zes teamplekken; dan is zes keer
+     tikken geen keuze maar een klusje. Zodra je er zeven of meer bezit vult het
+     zichzelf niet meer in en is het weer een echte keuze — dus dit gaat vanzelf
+     weg zodra de roster groeit.
+   - BLAUW STIPJE OOK OP HET BORD (Duel heeft dat ook): je ziet tijdens het
+     potje welk figuur nog één gewonnen gevecht van een nieuwe schijf af staat.
+     Alleen op het bord, niet aan de zijlijn — daar kan bijna iedereen
+     evolueren, dus daar zou het geen informatie zijn maar ruis.
    - De AI volgt dezelfde regel. AI_DECKS gaat daarom niet meer over WIE er in
      z'n team staat (dat ligt vast) maar over hoe DIEP z'n ketens hangen:
      Licht 0 stappen, Normaal 1, Zwaar 2.
