@@ -620,6 +620,9 @@
   .deck-card.evo-only { opacity: 0.62; cursor: default; border-style: dashed; }
   .deck-card.evo-only img, .deck-card.evo-only svg { filter: grayscale(0.55); }
   .evo-only-note { font-size: 0.52rem; color: #7dd3fc; margin-top: 3px; font-style: italic; line-height: 1.1; }
+  /* In de winkel: waar dient dit figuur voor? */
+  .evo-rol { color: #7dd3fc !important; font-style: italic; font-size: 0.56rem !important; }
+  .evo-rol.basis { color: #fbbf24 !important; }
   .deck-card.evo-klaar::after { content: ''; position: absolute; top: 6px; left: 6px;
     width: 9px; height: 9px; border-radius: 50%; background: #3b82f6;
     box-shadow: 0 0 8px rgba(59,130,246,0.95); animation: evoStip 1.6s ease-in-out infinite; }
@@ -2334,10 +2337,17 @@ function renderStore() {
     const owned = !!profile.owned[key]; const rar = RARITY[key]; const price = PRICE[rar];
     const c = document.createElement('div');
     c.className = 'coll-card' + (owned ? ' locked' : '');
+    // Zeg erbij wat je koopt: een figuur dat je opstelt, of een evolutie die je
+    // onder z'n voorloper hangt. Anders lijkt een dure rare een miskoop.
+    const voor = voorloperVan(key);
+    const rol = voor
+      ? `<div class="sub evo-rol">evolutie van ${UNIT_DEFS[voor].name}</div>`
+      : `<div class="sub evo-rol basis">zet je zelf op</div>`;
     c.innerHTML = `<span class="rar-chip rar-${rar}">${rar}</span>
       <div>${unitVisual(key, 'p1', 52)}</div>
       <div class="name">${def.name}</div>
       <div class="sub">${def.fac} · ${def.mp} MP</div>
+      ${rol}
       <span class="price-chip">${owned ? 'In bezit' : `KOOP ◈ ${price}`}</span>`;
     if (!owned) c.addEventListener('click', () => {
       if (profile.credits < price) { toast('Te weinig credits — win duels voor meer'); return; }
