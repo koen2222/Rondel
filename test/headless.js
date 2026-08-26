@@ -95,7 +95,7 @@ const evalCode = [
   fxSection,
   kleurMatch[0],
   duelFxSection,
-  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster, FX_TREFWOORDEN, attackFx, FX_KLEUR, FX_PROJECTIEL, projectielVoor, EVOLUTIE, evolutieVan, evolutieKeten, evolutieBonus };',
+  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster, FX_TREFWOORDEN, attackFx, FX_KLEUR, FX_PROJECTIEL, projectielVoor, EVOLUTIE, evolutieVan, voorloperVan, isBasisvorm, evolutieKeten, evolutieBonus };',
 ].join('\n');
 
 // Schrijf tijdelijk evalueerbaar bestand (vermijdt new Function-beperkingen)
@@ -108,7 +108,7 @@ try {
   fs.unlinkSync(tmpPath);
 }
 
-const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster, FX_TREFWOORDEN, attackFx, FX_KLEUR, FX_PROJECTIEL, projectielVoor, EVOLUTIE, evolutieVan, evolutieKeten, evolutieBonus } = extracted;
+const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster, FX_TREFWOORDEN, attackFx, FX_KLEUR, FX_PROJECTIEL, projectielVoor, EVOLUTIE, evolutieVan, voorloperVan, isBasisvorm, evolutieKeten, evolutieBonus } = extracted;
 
 // ─── Test harness ──────────────────────────────────────────────────────────────
 let pass = 0, fail = 0;
@@ -523,7 +523,7 @@ section('=== AANVALSANIMATIES (17 checks) ===');
 }
 
 // ─── 4g1b. EVOLUTIE (sessie 39, Duel-regels) ──────────────────────────────────
-section('=== EVOLUTIE (10 checks) ===');
+section('=== EVOLUTIE (14 checks) ===');
 {
   // Zes facties, elk precies één keten van drie: common -> uncommon -> rare
   const ketens = [...new Set(Object.keys(UNIT_DEFS).map(k => evolutieKeten(k).join('>')))].sort();
@@ -544,6 +544,15 @@ section('=== EVOLUTIE (10 checks) ===');
   check('Geen unit zit in twee ketens', new Set(alle).size, alle.length);
   // Eindvormen evolueren nergens meer heen
   check('Een rare is de eindvorm', ketens.map(k => evolutieVan(k.split('>')[2])), [null,null,null,null,null,null]);
+
+  // Alleen basisvormen mag je opstellen (Koens regel, sessie 40)
+  const basis = Object.keys(UNIT_DEFS).filter(isBasisvorm).sort();
+  check('Precies zes basisvormen, één per factie', basis.length, 6);
+  check('Elke basisvorm is de eerste van z\'n keten',
+    basis.filter(k => evolutieKeten(k)[0] !== k), []);
+  check('Geen enkele basisvorm heeft een voorloper', basis.map(voorloperVan).filter(Boolean), []);
+  check('Alle twaalf andere vormen hebben er wel een',
+    Object.keys(UNIT_DEFS).filter(k => !isBasisvorm(k)).filter(k => !voorloperVan(k)), []);
 
   // De bonus van Duel: +10 op wit en goud, +1 ster op paars, rest onaangeroerd
   const voor = [{k:'white',v:30},{k:'gold',v:60},{k:'purple',effect:'burn',stars:1},{k:'blue'},{k:'red'}];

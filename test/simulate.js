@@ -48,6 +48,13 @@ const MAX_TURNS = 220;
         await page.waitForTimeout(30);
         continue;
       }
+      // Evolutiescherm open? Altijd evolueren — dat is voor een simulatie de
+      // interessante tak, en zonder wegklikken blijft het potje eeuwig hangen.
+      if (await page.locator('#evo-overlay.active').count()) {
+        await page.click('#btn-evo-ja').catch(() => {});
+        await page.waitForTimeout(30);
+        continue;
+      }
       if (await page.locator('#result-overlay.active').count()) {
         outcome = (await page.locator('#result-title').innerText()).trim();
         reason = (await page.locator('#result-reason').innerText()).trim();
