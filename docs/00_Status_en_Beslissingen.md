@@ -390,6 +390,11 @@ figurines in moet kunnen zetten."
        sessie 40 (alleen basisvormen, lv2)   8/8  in  3 beurten  <- kapot
        sessie 40 (alleen basisvormen, lv3)   5/10 in 13 beurten  <- nu
      Vijftig-vijftig over dertien beurten: de rusher moet er echt voor vechten.
+     CONTROLE tegen een willekeurig spelende speler, ook op level 3: 0/8 in 24
+     beurten (was 0/8 in 15 op level 2). De AI wint dus nog steeds alles, maar
+     doet er LANGER over — een sterkere keeper blijft langer verdedigen in plaats
+     van door te stoten, en op level 3 overleven beide kanten meer gevechten.
+     Dat is precies de goede kant op: minder walsen, meer potje.
 
 TESTHARNAS-GAT dat hierbij bovenkwam: test/simulate.js bleef eeuwig hangen zodra
 de gesimuleerde speler een gevecht won met een evolutie eronder — het
