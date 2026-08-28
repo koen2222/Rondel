@@ -244,7 +244,7 @@ check('G2 aanwezig en type=goal',  NODES['G2']?.type, 'goal');
 section('=== DISK-LAYOUTS (20 checks) ===');
 {
   const keys = Object.keys(UNIT_DEFS);
-  check('Alle 18 units hebben een layout', keys.every(k => DISK_LAYOUT[k]), true);
+  check('Elke unit heeft een layout', keys.every(k => DISK_LAYOUT[k]), true);
   let allPerm = true, all16 = true;
   for (const k of keys) {
     const base = UNIT_DEFS[k].slots;                       // ongearrangeerde blokken
@@ -475,7 +475,7 @@ section('=== BOOSTERKIST (7 checks) ===');
 // Koen wil dat ELKE aanval een belevenis is. Deze checks bewaken dat er geen
 // aanval bestaat zonder animatie, en dat elke animatie ook echt getekend kan
 // worden: een soort zonder projectiel-CSS of kleur zou onzichtbaar blijven.
-section('=== AANVALSANIMATIES (17 checks) ===');
+section('=== AANVALSANIMATIES (20 checks) ===');
 {
   const soorten = new Set(FX_TREFWOORDEN.map(([, s]) => s));
   for (const s of Object.keys(FX_PROJECTIEL)) soorten.add(s);
@@ -489,6 +489,32 @@ section('=== AANVALSANIMATIES (17 checks) ===');
     }
   }
   check('Elke benoemde aanval heeft een animatie', zonderFx, []);
+
+  // Deze check slaagt altijd door de terugval, en zegt dus niets over of een
+  // naam op de JUISTE animatie uitkomt. De twee hieronder doen dat wel:
+  //  - een aanvalsnaam die nergens op matcht valt stil terug op snede/bliksem,
+  //    en dan ziet een vuuraanval eruit als een zwaardhouw;
+  //  - een soort die geen enkele aanval meer oplevert is dode animatie-code.
+  const perSoort = {};
+  for (const k of Object.keys(UNIT_DEFS)) {
+    for (const s of UNIT_DEFS[k].slots) {
+      if (s.k === 'red' || s.k === 'blue' || !s.name) continue;
+      const fx = attackFx(s);
+      (perSoort[fx] = perSoort[fx] || []).push(s.name);
+    }
+  }
+  check('Elke animatiesoort wordt door minstens één aanval gebruikt',
+    [...soorten].filter(s => !perSoort[s]), []);
+  // Twee units met dezelfde aanvalsnaam maar andere schade lezen als een fout
+  const namen = {};
+  for (const [k, d] of Object.entries(UNIT_DEFS))
+    for (const s of d.slots) if (s.name) (namen[s.name] = namen[s.name] || new Set()).add(k);
+  check('Geen twee figuren delen een aanvalsnaam',
+    Object.entries(namen).filter(([, u]) => u.size > 1).map(([n]) => n), []);
+  // Sessie 41 liep hier tegenaan: 'as' zit in Katanasnee, 'lans' in Kristalglans,
+  // 'ijs' in Krijsroep. Losse woorddelen die een naam stilletjes kapen.
+  check('Klingsnee → snede (niet vuur via "as" in Katanasnee)',
+    attackFx({ k:'white', v:50, name:'Klingsnee' }), 'snede');
 
   // Trefwoorden komen op volgorde: 'Schildbeuk' is een schild, geen hamer
   check('Schildbeuk → schild (niet hamer)', attackFx({ k:'blue', name:'Schildbeuk' }) || attackFx({ k:'white', v:20, name:'Schildbeuk' }), 'schild');
@@ -525,10 +551,14 @@ section('=== AANVALSANIMATIES (17 checks) ===');
 // ─── 4g1b. EVOLUTIE (sessie 39, Duel-regels) ──────────────────────────────────
 section('=== EVOLUTIE (14 checks) ===');
 {
-  // Zes facties, elk precies één keten van drie: common -> uncommon -> rare
+  // Elke factie precies één keten van drie: common -> uncommon -> rare.
+  // Niet op een vast getal vastpinnen — er komen ketens bij (sessie 41: van
+  // zes naar twintig), en dan moet de vorm gecontroleerd blijven, niet het
+  // aantal.
   const ketens = [...new Set(Object.keys(UNIT_DEFS).map(k => evolutieKeten(k).join('>')))].sort();
-  check('Zes evolutieketens, één per factie', ketens.length, 6);
-  check('Elke keten is precies drie lang', ketens.map(k => k.split('>').length), [3,3,3,3,3,3]);
+  const facties = new Set(Object.values(UNIT_DEFS).map(u => u.fac));
+  check('Eén evolutieketen per factie', ketens.length, facties.size);
+  check('Elke keten is precies drie lang', [...new Set(ketens.map(k => k.split('>').length))], [3]);
   // Een keten blijft binnen z'n eigen factie
   const gemengd = ketens.filter(k => new Set(k.split('>').map(u => UNIT_DEFS[u].fac)).size !== 1);
   check('Een keten blijft binnen één factie', gemengd, []);
@@ -538,20 +568,20 @@ section('=== EVOLUTIE (14 checks) ===');
   const rar = {}; for (const m of RAR_.matchAll(/(\w+):'([CUR])'/g)) rar[m[1]] = m[2];
   const fout = ketens.filter(k => { const r = k.split('>').map(u => RANG[rar[u]]); return !(r[0] < r[1] && r[1] < r[2]); });
   check('Elke keten loopt van Common via Uncommon naar Rare', fout, []);
-  // Alle 18 units zitten in precies één keten
+  // Elke unit zit in precies één keten
   const alle = ketens.flatMap(k => k.split('>'));
-  check('Alle 18 units zitten in een keten', alle.length, Object.keys(UNIT_DEFS).length);
+  check('Elke unit zit in een keten', alle.length, Object.keys(UNIT_DEFS).length);
   check('Geen unit zit in twee ketens', new Set(alle).size, alle.length);
   // Eindvormen evolueren nergens meer heen
-  check('Een rare is de eindvorm', ketens.map(k => evolutieVan(k.split('>')[2])), [null,null,null,null,null,null]);
+  check('Een rare is de eindvorm', ketens.filter(k => evolutieVan(k.split('>')[2])), []);
 
   // Alleen basisvormen mag je opstellen (Koens regel, sessie 40)
   const basis = Object.keys(UNIT_DEFS).filter(isBasisvorm).sort();
-  check('Precies zes basisvormen, één per factie', basis.length, 6);
+  check('Eén basisvorm per factie', basis.length, facties.size);
   check('Elke basisvorm is de eerste van z\'n keten',
     basis.filter(k => evolutieKeten(k)[0] !== k), []);
   check('Geen enkele basisvorm heeft een voorloper', basis.map(voorloperVan).filter(Boolean), []);
-  check('Alle twaalf andere vormen hebben er wel een',
+  check('Alle geëvolueerde vormen hebben er wel een',
     Object.keys(UNIT_DEFS).filter(k => !isBasisvorm(k)).filter(k => !voorloperVan(k)), []);
 
   // De bonus van Duel: +10 op wit en goud, +1 ster op paars, rest onaangeroerd
@@ -591,7 +621,7 @@ section('=== ART & CACHE (3 checks) ===');
   const inCode = artMatch ? (artMatch[0].match(/art\/[a-z0-9_-]+\.png/gi) || []).map(s => s.slice(4)).sort() : [];
   check('Elk plaatje in art/ staat ook in de offline-cache', inSw, opSchijf);
   check('De code verwijst naar precies die plaatjes', inCode, opSchijf);
-  check('Alle 18 units hebben een plaatje', inCode.length, Object.keys(UNIT_DEFS).length);
+  check('Elke unit heeft een plaatje', inCode.length, Object.keys(UNIT_DEFS).length);
 }
 
 // ─── 4h. UITLEG KLOPT MET DE CODE (sessie 24) ──────────────────────────────────

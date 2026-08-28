@@ -24,7 +24,10 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
   // 2. Collectie
   await page.click('#tile-collection');
   ok('Collectie-scherm opent', await page.locator('#screen-collection.active').count() === 1);
-  ok('18 unit-kaarten in collectie', await page.locator('#coll-grid .coll-card').count() === 18);
+  // Niet op een vast getal vastpinnen: het aantal figuren groeit (18 -> 54 in
+  // sessie 41). Wat moet kloppen is dat de collectie ze ALLEMAAL laat zien.
+  const aantalUnits = await page.evaluate(() => Object.keys(UNIT_DEFS).length);
+  ok(`Alle ${aantalUnits} unit-kaarten in collectie`, await page.locator('#coll-grid .coll-card').count() === aantalUnits);
 
   // 3. Unit-detail met disk
   await page.locator('#coll-grid .coll-card:not(.locked)').first().click();
@@ -38,7 +41,7 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
   await page.click('.btn-back');
   await page.click('#tile-store');
   ok('Winkel opent', await page.locator('#screen-store.active').count() === 1);
-  ok('Koopbare kaarten aanwezig', await page.locator('#store-grid .price-chip').count() === 18);
+  ok('Koopbare kaarten aanwezig', await page.locator('#store-grid .price-chip').count() === aantalUnits);
   ok('Boosterkist zichtbaar in de winkel', await page.locator('#booster-card').count() === 1);
   {
     const snap = () => page.evaluate(() => ({ credits: profile.credits, units: Object.keys(profile.owned).length }));
@@ -399,8 +402,9 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
     await page.waitForTimeout(150);
     ok('Tweede stap van de keten kan erbij', await page.evaluate(() => deckSel.evos.cleric) === 'commander');
     // Een geëvolueerde vorm staat er wel, maar is niet kiesbaar
+    const aantalEvo = await page.evaluate(() => Object.keys(UNIT_DEFS).filter(k => !isBasisvorm(k)).length);
     ok('Geëvolueerde vormen zijn niet rechtstreeks inzetbaar',
-      await page.locator('#deck-units .deck-card.evo-only').count() === 12);
+      await page.locator('#deck-units .deck-card.evo-only').count() === aantalEvo);
     ok('Aangehangen evolutie krijgt een blauw stipje',
       await page.locator('#deck-units .deck-card.evo-klaar').count() === 1);
 

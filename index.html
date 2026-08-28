@@ -1284,7 +1284,47 @@ const UNIT_DEFS = {
   wyrmling:    { name:'Quetzalcoatl',      fac:'Wildernis', mp:2, slots:[...W(3,60,'Veerslag'), ...W(2,30,'Staartzwiep'), ...G(3,60,'Zonnevuur'), ...P(4,'burn',2,'Asadem'), ...B(2), ...R(2)] },
   imp:         { name:'Kobold',            fac:'Vuurdiepte',mp:3, slots:[...W(3,30,'Drietandprik'), ...W(2,10,'Plaagstoot'), ...P(3,'burn',1,'Vonkenspel'), ...B(2), ...R(6)] },
   hellhound:   { name:'Cerberus',          fac:'Vuurdiepte',mp:3, slots:[...W(4,50,'Drievoudige Beet'), ...W(2,20,'Grauw'), ...P(3,'burn',1,'Helleblaf'), ...B(3), ...R(4)] },
-  pitlord:     { name:'Surtr',             fac:'Vuurdiepte',mp:2, slots:[...W(4,100,'Wereldbrand'), ...W(2,60,'Vuurvuist'), ...G(4,70,'Laaiende Klauw'), ...P(2,'burn',2,'Zwavelvloek'), ...B(1), ...R(3)] }
+  pitlord:     { name:'Surtr',             fac:'Vuurdiepte',mp:2, slots:[...W(4,100,'Wereldbrand'), ...W(2,60,'Vuurvuist'), ...G(4,70,'Laaiende Klauw'), ...P(2,'burn',2,'Zwavelvloek'), ...B(1), ...R(3)] },
+
+  // ---- Twaalf nieuwe ketens (sessie 41). Zelfde opbouw als hierboven: zestien
+  // vakken, twee onderscheiden witte aanvallen, en per aanval een naam die op
+  // de juiste animatie uitkomt (nagelopen tegen FX_TREFWOORDEN).
+  siren:        { name:'Sirene',          fac:'Zeediepte',    mp:3, slots:[...W(3,30,'Lokwoord'), ...W(2,10,'Vinnenslag'), ...P(3,'sleep',1,'Sirenenlied'), ...B(2), ...R(6)] },
+  hydra:        { name:'Hydra',           fac:'Zeediepte',    mp:2, slots:[...W(3,50,'Koppenbeet'), ...W(2,20,'Staartslag'), ...P(4,'badlypoison',1,'Gifwalm'), ...B(3), ...R(4)] },
+  poseidon:     { name:'Poseidon',        fac:'Zeediepte',    mp:2, slots:[...G(3,60,'Stormgolf'), ...W(3,70,'Drietandstoot'), ...W(2,40,'Zeebeuk'), ...P(3,'paralysis',2,'Zeebevel'), ...B(2), ...R(3)] },
+  harpy:        { name:'Harpij',          fac:'Stormhoogte',  mp:3, slots:[...W(3,30,'Klauwgriep'), ...W(2,10,'Duikslag'), ...P(3,'confusion',1,'Schrille Kreet'), ...B(2), ...R(6)] },
+  roc:          { name:'Roc',             fac:'Stormhoogte',  mp:3, slots:[...W(4,60,'Klauwvangst'), ...W(2,20,'Veerschot'), ...P(2,'paralysis',1,'Stormwind'), ...B(3), ...R(5)] },
+  thunderbird:  { name:'Donderdvogel',    fac:'Stormhoogte',  mp:2, slots:[...G(3,60,'Bliksemstorm'), ...W(3,70,'Onweersklauw'), ...W(2,40,'Stormveer'), ...P(3,'paralysis',2,'Donderbevel'), ...B(2), ...R(3)] },
+  shabti:       { name:'Sjabti',          fac:'Zandrijk',     mp:2, slots:[...W(3,40,'Steenvuist'), ...W(2,10,'Zandslag'), ...P(2,'sleep',1,'Grafspreuk'), ...B(3), ...R(6)] },
+  sphinx:       { name:'Sfinx',           fac:'Zandrijk',     mp:2, slots:[...W(3,50,'Leeuwenklauw'), ...W(2,20,'Pootslag'), ...P(4,'confusion',1,'Raadselwoord'), ...B(3), ...R(4)] },
+  anubis:       { name:'Anubis',          fac:'Zandrijk',     mp:2, slots:[...G(3,60,'Zielenweging'), ...W(3,70,'Scepterslag'), ...W(2,40,'Dodenstaf'), ...P(3,'sleep',2,'Balsemvloek'), ...B(2), ...R(3)] },
+  jaguarwarrior:{ name:'Jaguarkrijger',   fac:'Zonnetempel',  mp:3, slots:[...W(3,40,'Obsidiaanslag'), ...W(2,10,'Klauwprik'), ...P(2,'paralysis',1,'Oorlogskreet'), ...B(3), ...R(6)] },
+  ahuizotl:     { name:'Ahuizotl',        fac:'Zonnetempel',  mp:3, slots:[...W(3,50,'Staartgreep'), ...W(2,20,'Waterbeet'), ...P(4,'poison',1,'Diepstroom'), ...B(3), ...R(4)] },
+  tezcatlipoca: { name:'Tezcatlipoca',    fac:'Zonnetempel',  mp:2, slots:[...G(4,50,'Spiegelschijn'), ...W(2,70,'Obsidiaandolk'), ...P(4,'confusion',2,'Nachtwind'), ...B(3), ...R(3)] },
+  kappa:        { name:'Kappa',           fac:'Bamboewoud',   mp:2, slots:[...W(3,40,'Schaalslag'), ...W(2,10,'Kombeet'), ...P(2,'confusion',1,'Waterkom'), ...B(3), ...R(6)] },
+  tengu:        { name:'Tengu',           fac:'Bamboewoud',   mp:3, slots:[...W(4,50,'Klingsnee'), ...W(2,20,'Snelle Snee'), ...P(2,'confusion',1,'Bergwind'), ...B(3), ...R(5)] },
+  ryujin:       { name:'Ryujin',          fac:'Bamboewoud',   mp:2, slots:[...G(3,60,'Parelschijn'), ...W(3,70,'Drakenklauw'), ...W(2,40,'Staartzwaai'), ...P(4,'paralysis',2,'Tijbevel'), ...B(2), ...R(2)] },
+  domovoi:      { name:'Domovoj',         fac:'Diepe Woud',   mp:2, slots:[...W(3,40,'Bezemslag'), ...W(2,10,'Haardvonk'), ...P(2,'sleep',1,'Haardspreuk'), ...B(3), ...R(6)] },
+  leshy:        { name:'Leshy',           fac:'Diepe Woud',   mp:2, slots:[...W(3,50,'Takkenslag'), ...W(2,20,'Wortelklem'), ...P(4,'poison',1,'Sporenwalm'), ...B(3), ...R(4)] },
+  babayaga:     { name:'Baba Jaga',       fac:'Diepe Woud',   mp:3, slots:[...G(3,50,'Vijzelstamp'), ...W(3,60,'Heksenstaf'), ...W(2,30,'Botsnee'), ...P(4,'badlypoison',2,'Ketelbrouwsel'), ...B(2), ...R(2)] },
+  frostwight:   { name:'Rijpgeest',       fac:'IJsvlakte',    mp:2, slots:[...W(3,40,'Rijpbijl'), ...W(2,10,'IJsstoot'), ...P(2,'paralysis',1,'Vrieskou'), ...B(3), ...R(6)] },
+  jotun:        { name:'Jotun',           fac:'IJsvlakte',    mp:2, slots:[...W(4,60,'Vuistslag'), ...W(2,20,'IJsscherf'), ...P(2,'paralysis',1,'Vriesadem'), ...B(3), ...R(5)] },
+  ymir:         { name:'Ymir',            fac:'IJsvlakte',    mp:2, slots:[...G(3,60,'Oerrijp'), ...W(4,80,'Reuzenvuist'), ...W(2,40,'IJsklauw'), ...P(3,'paralysis',2,'Vriesgreep'), ...B(2), ...R(2)] },
+  gnome:        { name:'Gnoom',           fac:'Berghart',     mp:2, slots:[...W(3,40,'Houweelslag'), ...W(2,10,'Lantaarnschijn'), ...P(2,'confusion',1,'Kristalschijn'), ...B(3), ...R(6)] },
+  mountaintroll:{ name:'Bergtrol',        fac:'Berghart',     mp:2, slots:[...W(4,60,'Knotsbeuk'), ...W(2,20,'Rotsworp'), ...P(2,'paralysis',1,'Steenstamp'), ...B(3), ...R(5)] },
+  mountainking: { name:'Dovregubbe',      fac:'Berghart',     mp:2, slots:[...G(3,60,'Bergbevel'), ...W(3,70,'Koningshamer'), ...W(2,40,'Kroonslag'), ...P(3,'paralysis',2,'Diepe Echo'), ...B(2), ...R(3)] },
+  peri:         { name:'Peri',            fac:'Woestijnwind', mp:3, slots:[...W(3,30,'Vleugelveeg'), ...W(2,10,'Windsnee'), ...P(3,'sleep',1,'Zandslaap'), ...B(2), ...R(6)] },
+  marid:        { name:'Marid',           fac:'Woestijnwind', mp:2, slots:[...W(3,50,'Blauwe Vuist'), ...W(2,20,'Rookslag'), ...P(4,'confusion',1,'Wensbedrog'), ...B(3), ...R(4)] },
+  ifrit:        { name:'Ifrit',           fac:'Woestijnwind', mp:2, slots:[...G(3,60,'Laaiend Oordeel'), ...W(3,70,'Hellevlam'), ...W(2,40,'Asvonk'), ...P(4,'burn',2,'Brandvloek'), ...B(2), ...R(2)] },
+  anansi:       { name:'Anansi',          fac:'Savanne',      mp:2, slots:[...W(3,40,'Spinklauw'), ...W(2,10,'Draadsnee'), ...P(2,'poison',1,'Webgif'), ...B(3), ...R(6)] },
+  mamiwata:     { name:'Mami Wata',       fac:'Savanne',      mp:2, slots:[...W(3,50,'Slangenklem'), ...W(2,20,'Kamslag'), ...P(4,'poison',1,'Waterlied'), ...B(3), ...R(4)] },
+  shango:       { name:'Shango',          fac:'Savanne',      mp:2, slots:[...G(3,60,'Bliksembijl'), ...W(3,70,'Dubbele Bijl'), ...W(2,40,'Vonkslag'), ...P(3,'paralysis',2,'Stormbevel'), ...B(2), ...R(3)] },
+  puca:         { name:'Puca',            fac:'Nevelheuvels', mp:3, slots:[...W(3,30,'Nevelhoef'), ...W(2,10,'Schimmensnee'), ...P(3,'confusion',1,'Dwaallicht'), ...B(2), ...R(6)] },
+  cusidhe:      { name:'Cu Sidhe',        fac:'Nevelheuvels', mp:3, slots:[...W(4,50,'Grafbeet'), ...W(2,20,'Scheurklauw'), ...P(2,'sleep',1,'Doodsblaf'), ...B(3), ...R(5)] },
+  morrigan:     { name:'Morrigan',        fac:'Nevelheuvels', mp:2, slots:[...G(3,60,'Ravenstorm'), ...W(3,70,'Speerworp'), ...W(2,40,'Schildwering'), ...P(3,'confusion',2,'Doemzang'), ...B(2), ...R(3)] },
+  lamassu:      { name:'Lamassu',         fac:'Sterrenhof',   mp:2, slots:[...W(3,40,'Steenklauw'), ...W(2,10,'Vleugelslag'), ...P(2,'paralysis',1,'Poortwacht'), ...B(3), ...R(6)] },
+  anzu:         { name:'Anzu',            fac:'Sterrenhof',   mp:3, slots:[...W(4,60,'Roofklauw'), ...W(2,20,'Tafelslag'), ...P(2,'paralysis',1,'Windgier'), ...B(3), ...R(5)] },
+  tiamat:       { name:'Tiamat',          fac:'Sterrenhof',   mp:2, slots:[...G(4,60,'Chaosbrand'), ...W(3,70,'Drakenbeet'), ...W(2,40,'Vloedstaart'), ...P(4,'badlypoison',2,'Oervloek'), ...B(1), ...R(2)] },
 };
 
 // ==========================================
@@ -1314,7 +1354,43 @@ const DISK_LAYOUT = {
   wyrmling:    'G3 W3 R1 W2 P4 R1 B2',
   imp:         'W3 R3 W2 P3 R3 B2',
   hellhound:   'W4 R2 W2 P3 R2 B3',
-  pitlord:     'G4 W4 R2 W2 P2 R1 B1'
+  pitlord:     'G4 W4 R2 W2 P2 R1 B1',
+  siren:        'W3 R3 W2 P3 R3 B2',
+  hydra:        'W3 R2 B3 W2 P4 R2',
+  poseidon:     'G3 W3 R1 W2 R2 P3 B2',
+  harpy:        'W3 R3 W2 P3 R3 B2',
+  roc:          'W4 R3 B3 W2 P2 R2',
+  thunderbird:  'G3 W3 R1 W2 R2 P3 B2',
+  shabti:       'W3 R3 W2 P2 R3 B3',
+  sphinx:       'W3 R2 B3 W2 P4 R2',
+  anubis:       'G3 W3 R1 W2 R2 P3 B2',
+  jaguarwarrior:'W3 R3 W2 P2 R3 B3',
+  ahuizotl:     'W3 R2 B3 W2 P4 R2',
+  tezcatlipoca: 'G4 W2 R3 P4 B3',
+  kappa:        'W3 R3 W2 P2 R3 B3',
+  tengu:        'W4 R3 B3 W2 P2 R2',
+  ryujin:       'G3 W3 R1 W2 R1 P4 B2',
+  domovoi:      'W3 R3 W2 P2 R3 B3',
+  leshy:        'W3 R2 B3 W2 P4 R2',
+  babayaga:     'G3 W3 R1 W2 R1 P4 B2',
+  frostwight:   'W3 R3 W2 P2 R3 B3',
+  jotun:        'W4 R3 B3 W2 P2 R2',
+  ymir:         'G3 W4 R1 W2 R1 P3 B2',
+  gnome:        'W3 R3 W2 P2 R3 B3',
+  mountaintroll:'W4 R3 B3 W2 P2 R2',
+  mountainking: 'G3 W3 R1 W2 R2 P3 B2',
+  peri:         'W3 R3 W2 P3 R3 B2',
+  marid:        'W3 R2 B3 W2 P4 R2',
+  ifrit:        'G3 W3 R1 W2 R1 P4 B2',
+  anansi:       'W3 R3 W2 P2 R3 B3',
+  mamiwata:     'W3 R2 B3 W2 P4 R2',
+  shango:       'G3 W3 R1 W2 R2 P3 B2',
+  puca:         'W3 R3 W2 P3 R3 B2',
+  cusidhe:      'W4 R3 B3 W2 P2 R2',
+  morrigan:     'G3 W3 R1 W2 R2 P3 B2',
+  lamassu:      'W3 R3 W2 P2 R3 B3',
+  anzu:         'W4 R3 B3 W2 P2 R2',
+  tiamat:       'G4 W3 R1 W2 R1 P4 B1'
 };
 
 // Herschikt base-slots volgens het layout-patroon. Retourneert null (en de
@@ -1364,6 +1440,12 @@ const UNIT_ABILITY = {
   cleric:'blessing', commander:'command', scout:'stalk', weaver:'enchant',
   runesmith:'emberrune', warden:'mountain', ghoul:'rot', necromancer:'raise',
   lupine:'pack', wyrmling:'fly', hellhound:'infernal', pitlord:'undying',
+  hydra:'rot', poseidon:'command', roc:'fly', thunderbird:'undying',
+  sphinx:'enchant', anubis:'raise', ahuizotl:'rot', tezcatlipoca:'enchant',
+  tengu:'stalk', ryujin:'fly', leshy:'mountain', babayaga:'enchant',
+  jotun:'mountain', ymir:'undying', mountaintroll:'mountain', mountainking:'command',
+  marid:'stalk', ifrit:'emberrune', mamiwata:'blessing', shango:'command',
+  cusidhe:'pack', morrigan:'fly', anzu:'fly', tiamat:'undying',
 };
 for (const [k, ab] of Object.entries(UNIT_ABILITY)) UNIT_DEFS[k].ability = ab;
 
@@ -1403,6 +1485,42 @@ const UNIT_ART = {
   imp: "art/imp.png",
   hellhound: "art/hellhound.png",
   pitlord: "art/pitlord.png",
+  siren: "art/siren.png",
+  hydra: "art/hydra.png",
+  poseidon: "art/poseidon.png",
+  harpy: "art/harpy.png",
+  roc: "art/roc.png",
+  thunderbird: "art/thunderbird.png",
+  shabti: "art/shabti.png",
+  sphinx: "art/sphinx.png",
+  anubis: "art/anubis.png",
+  jaguarwarrior: "art/jaguarwarrior.png",
+  ahuizotl: "art/ahuizotl.png",
+  tezcatlipoca: "art/tezcatlipoca.png",
+  kappa: "art/kappa.png",
+  tengu: "art/tengu.png",
+  ryujin: "art/ryujin.png",
+  domovoi: "art/domovoi.png",
+  leshy: "art/leshy.png",
+  babayaga: "art/babayaga.png",
+  frostwight: "art/frostwight.png",
+  jotun: "art/jotun.png",
+  ymir: "art/ymir.png",
+  gnome: "art/gnome.png",
+  mountaintroll: "art/mountaintroll.png",
+  mountainking: "art/mountainking.png",
+  peri: "art/peri.png",
+  marid: "art/marid.png",
+  ifrit: "art/ifrit.png",
+  anansi: "art/anansi.png",
+  mamiwata: "art/mamiwata.png",
+  shango: "art/shango.png",
+  puca: "art/puca.png",
+  cusidhe: "art/cusidhe.png",
+  morrigan: "art/morrigan.png",
+  lamassu: "art/lamassu.png",
+  anzu: "art/anzu.png",
+  tiamat: "art/tiamat.png",
 };
 
 // ==========================================
@@ -1479,7 +1597,11 @@ function plateIcon(key, size) {
 const RARITY = {
   squire:'C', scout:'C', apprentice:'C', skeleton:'C', boar:'C', imp:'C',
   cleric:'U', archer:'U', runesmith:'U', ghoul:'U', lupine:'U', hellhound:'U',
-  commander:'R', weaver:'R', warden:'R', necromancer:'R', wyrmling:'R', pitlord:'R'
+  commander:'R', weaver:'R', warden:'R', necromancer:'R', wyrmling:'R', pitlord:'R',
+  // twaalf nieuwe ketens, elk common -> uncommon -> rare
+  siren:'C', harpy:'C', shabti:'C', jaguarwarrior:'C', kappa:'C', domovoi:'C', frostwight:'C', gnome:'C', peri:'C', anansi:'C', puca:'C', lamassu:'C',
+  hydra:'U', roc:'U', sphinx:'U', ahuizotl:'U', tengu:'U', leshy:'U', jotun:'U', mountaintroll:'U', marid:'U', mamiwata:'U', cusidhe:'U', anzu:'U',
+  poseidon:'R', thunderbird:'R', anubis:'R', tezcatlipoca:'R', ryujin:'R', babayaga:'R', ymir:'R', mountainking:'R', ifrit:'R', shango:'R', morrigan:'R', tiamat:'R',
 };
 // ==========================================
 // EVOLUTIE (sessie 39) — 1-op-1 overgenomen uit Pokémon Duel
@@ -1502,6 +1624,18 @@ const EVOLUTIE = {
   skeleton:'ghoul',      ghoul:'necromancer',     // Dodenrijk:  Draugr -> Ghul -> Hel
   boar:'lupine',         lupine:'wyrmling',       // Wildernis:  Calydonische Ever -> Fenrir -> Quetzalcoatl
   imp:'hellhound',       hellhound:'pitlord',     // Vuurdiepte: Kobold -> Cerberus -> Surtr
+  siren:'hydra',          hydra:'poseidon',       // Zeediepte: Sirene -> Hydra -> Poseidon
+  harpy:'roc',            roc:'thunderbird',      // Stormhoogte: Harpij -> Roc -> Donderdvogel
+  shabti:'sphinx',        sphinx:'anubis',        // Zandrijk: Sjabti -> Sfinx -> Anubis
+  jaguarwarrior:'ahuizotl',ahuizotl:'tezcatlipoca',// Zonnetempel: Jaguarkrijger -> Ahuizotl -> Tezcatlipoca
+  kappa:'tengu',          tengu:'ryujin',         // Bamboewoud: Kappa -> Tengu -> Ryujin
+  domovoi:'leshy',        leshy:'babayaga',       // Diepe Woud: Domovoj -> Leshy -> Baba Jaga
+  frostwight:'jotun',     jotun:'ymir',           // IJsvlakte: Rijpgeest -> Jotun -> Ymir
+  gnome:'mountaintroll',  mountaintroll:'mountainking',// Berghart: Gnoom -> Bergtrol -> Dovregubbe
+  peri:'marid',           marid:'ifrit',          // Woestijnwind: Peri -> Marid -> Ifrit
+  anansi:'mamiwata',      mamiwata:'shango',      // Savanne: Anansi -> Mami Wata -> Shango
+  puca:'cusidhe',         cusidhe:'morrigan',     // Nevelheuvels: Puca -> Cu Sidhe -> Morrigan
+  lamassu:'anzu',         anzu:'tiamat',          // Sterrenhof: Lamassu -> Anzu -> Tiamat
 };
 // Waar evolueert deze sleutel naartoe? (of null als het al de eindvorm is)
 function evolutieVan(key) { return EVOLUTIE[key] || null; }
@@ -1802,7 +1936,11 @@ function unitVisual(defKey, owner, h) {
 function unitSilhouette(defKey, owner) {
   const PAL = {
     Hemelhal: ['#cbd5e1', '#f59e0b'], Halfgoden: ['#34d399', '#d1fae5'], Smidse: ['#d97706', '#e5e7eb'],
-    Dodenrijk: ['#e5e7eb', '#a78bfa'], Wildernis: ['#b45309', '#fde68a'], Vuurdiepte: ['#ef4444', '#fb923c']
+    Dodenrijk: ['#e5e7eb', '#a78bfa'], Wildernis: ['#b45309', '#fde68a'], Vuurdiepte: ['#ef4444', '#fb923c'],
+    Zeediepte: ['#38bdf8', '#a5f3fc'], Stormhoogte: ['#94a3b8', '#fde047'], Zandrijk: ['#fbbf24', '#fef3c7'],
+    Zonnetempel: ['#f97316', '#fde68a'], Bamboewoud: ['#4ade80', '#bbf7d0'], 'Diepe Woud': ['#65a30d', '#d9f99d'],
+    IJsvlakte: ['#7dd3fc', '#e0f2fe'], Berghart: ['#a8a29e', '#fbbf24'], Woestijnwind: ['#60a5fa', '#fed7aa'],
+    Savanne: ['#eab308', '#86efac'], Nevelheuvels: ['#818cf8', '#e0e7ff'], Sterrenhof: ['#d4a373', '#fde68a']
   };
   const [f, a] = PAL[(UNIT_DEFS[defKey] || {}).fac] || ['#cbd5e1', '#ffffff'];
   const SIL = {
@@ -2115,9 +2253,9 @@ const AI_DECKS = {
 function aiDeck() {
   const d = AI_DECKS[S('difficulty')] || AI_DECKS.normaal;
   const keys = Object.keys(UNIT_DEFS);
-  // Alleen basisvormen — dezelfde regel als voor jou. Er zijn er precies zes,
-  // dus dat is meteen z'n hele team.
-  const units = keys.filter(isBasisvorm).slice(0, 6);
+  // Alleen basisvormen — dezelfde regel als voor jou. Sinds sessie 41 zijn er
+  // twintig, dus het is weer een echte keuze en niet meer z'n hele voorraad.
+  const units = randomPick(keys.filter(isBasisvorm), 6);
   // Plates die bij het niveau passen: licht = alleen ondersteunend, zwaar = agressief
   const supportive = ['rally','cleanse','bulwark','warcry'];
   const aggressive = ['hex','ensnare','scorch','venom','recall','blink'];
