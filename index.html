@@ -2620,7 +2620,12 @@ function renderStore() {
       : 'Eén willekeurige unit. Kleine kans op een Rare. Dubbel? Diamantjes terug.';
   }
   const g = document.getElementById('store-grid'); g.innerHTML = '';
-  const entries = Object.entries(UNIT_DEFS).sort(([a], [b]) => (profile.owned[a] ? 1 : 0) - (profile.owned[b] ? 1 : 0));
+  // Wat je nog niet hebt eerst, en daarbinnen het goedkoopst eerst. Anders
+  // staat een uncommon-evolutie boven de commons en ziet een beginner met tien
+  // diamantjes vooral dingen die hij niet kan betalen en toch niet mag opstellen.
+  const RANG = { C:0, U:1, R:2 };
+  const entries = Object.entries(UNIT_DEFS).sort(([a], [b]) =>
+    (profile.owned[a] ? 1 : 0) - (profile.owned[b] ? 1 : 0) || RANG[RARITY[a]] - RANG[RARITY[b]]);
   for (const [key, def] of entries) {
     const owned = !!profile.owned[key]; const rar = RARITY[key]; const price = PRICE[rar];
     const c = document.createElement('div');
