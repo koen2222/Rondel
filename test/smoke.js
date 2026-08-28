@@ -19,7 +19,7 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
 
   // 1. Home toont
   ok('Home-scherm actief na boot', await page.locator('#screen-home.active').count() === 1);
-  ok('Credits zichtbaar op home', /\d+/.test(await page.locator('#home-credits').innerText()));
+  ok('Beide valuta zichtbaar op home', (await page.locator('#home-valuta .cur').count()) === 2);
 
   // 2. Collectie
   await page.click('#tile-collection');
@@ -43,17 +43,35 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
   ok('Winkel opent', await page.locator('#screen-store.active').count() === 1);
   ok('Koopbare kaarten aanwezig', await page.locator('#store-grid .price-chip').count() === aantalUnits);
   ok('Boosterkist zichtbaar in de winkel', await page.locator('#booster-card').count() === 1);
+  ok('Alle kaarten staan ook in de winkel',
+    await page.locator('#store-plates .price-chip').count() === await page.evaluate(() => Object.keys(PLATES).length));
   {
-    const snap = () => page.evaluate(() => ({ credits: profile.credits, units: Object.keys(profile.owned).length }));
+    // Munten wisselen voor diamantjes, anders is er niets te kopen
+    const voorWissel = await page.evaluate(() => ({ m: profile.munten, d: profile.diamanten }));
+    await page.locator('#bundel-rij .bundel').first().click();
+    const naWissel = await page.evaluate(() => ({ m: profile.munten, d: profile.diamanten }));
+    ok('Munten wisselen levert diamantjes op', naWissel.d > voorWissel.d && naWissel.m < voorWissel.m);
+  }
+  {
+    // Een kaart kopen die je nog niet hebt
+    const teKoop = page.locator('#store-plates .coll-card:not(.locked)').first();
+    const hadKaarten = await page.evaluate(() => Object.keys(profile.ownedPlates).length);
+    await page.evaluate(() => { profile.diamanten += 50; saveProfile(); renderStore(); });
+    await teKoop.click();
+    ok('Kaart kopen in de winkel werkt',
+      await page.evaluate(() => Object.keys(profile.ownedPlates).length) === hadKaarten + 1);
+  }
+  {
+    const snap = () => page.evaluate(() => ({ diamanten: profile.diamanten, units: Object.keys(profile.owned).length }));
     const before = await snap();
     await page.click('#booster-card');
     await page.waitForSelector('#booster-overlay.active');
     await page.waitForTimeout(1500);
     const after = await snap();
-    // Je krijgt altijd iets: een nieuwe unit, of credits terug bij een duplicaat
+    // Je krijgt altijd iets: een nieuwe unit, of diamantjes terug bij een duplicaat
     const gotUnit = after.units > before.units;
-    const gotRefund = after.credits > before.credits - 150;
-    ok('Kist levert een unit of credits terug', gotUnit || gotRefund);
+    const gotRefund = after.diamanten > before.diamanten - 6;
+    ok('Kist levert een unit of diamantjes terug', gotUnit || gotRefund);
     ok('Kist toont de naam van de unit', (await page.locator('#booster-name').innerText()).length > 2);
     await page.click('#btn-booster-close');
   }
@@ -73,6 +91,12 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
     const cost = await page.evaluate(() => plateCost(JSON.parse(localStorage.getItem('rondel_profile')).decks[0].plates));
     ok('Team bewaren werkt', !!saved && saved.units.length === 6 && saved.plates.length > 0);
     ok('Kaarten passen binnen het budget van 8', cost > 0 && cost <= 8);
+  }
+  {
+    // Kaarten die je niet bezit staan grijs, net als figuren die je niet hebt
+    const nietBezeten = await page.evaluate(() => Object.keys(PLATES).filter(k => !profile.ownedPlates[k]).length);
+    ok('Niet-gekochte kaarten staan grijs in het deck-scherm',
+      await page.locator('#deck-plates .deck-card.locked').count() === nietBezeten && nietBezeten > 0);
   }
   await page.click('#btn-deck-start');
   await page.waitForSelector('#screen-game.active');

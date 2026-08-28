@@ -772,7 +772,26 @@
   .subscreen-head { display: flex; align-items: center; gap: 12px; }
   .btn-back { background: linear-gradient(145deg, #2a201a, #14100d); border: 1px solid rgba(245,158,11,0.35); color: var(--gold); border-radius: 10px; padding: 8px 14px; font-family: 'Cinzel', serif; font-size: 0.85rem; cursor: pointer; }
   .subscreen-title { font-family: 'Cinzel', serif; font-weight: 700; font-size: 1.15rem; letter-spacing: 0.12em; color: var(--gold); }
-  .subscreen-credits { margin-left: auto; font-family: 'Cinzel', serif; font-size: 0.85rem; color: var(--ink); }
+  .subscreen-credits { margin-left: auto; font-family: 'Cinzel', serif; font-size: 0.85rem; color: var(--ink); display: flex; gap: 10px; align-items: center; }
+  /* Valuta: muntje of diamantje met het getal ernaast, overal hetzelfde blokje. */
+  .cur { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; color: var(--gold); }
+  .cur.diam { color: #67e8f9; }
+  .cur .cur-ico { display: block; }
+  .cur-ico { vertical-align: -2px; }
+  /* Wisselknoppen: munten erin, diamantjes eruit. */
+  .bundel-rij { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+  .bundel { position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px;
+            padding: 10px 4px 8px; min-height: 74px; border-radius: 12px; cursor: pointer;
+            background: linear-gradient(160deg, rgba(103,232,249,0.13), rgba(14,116,144,0.10));
+            border: 1px solid rgba(103,232,249,0.35); color: var(--ink); font-family: inherit; }
+  .bundel:active { transform: scale(0.97); }
+  .bundel.broke { opacity: 0.45; }
+  .bundel .b-diam { display: flex; align-items: center; gap: 5px; color: #a5f3fc; font-family: 'Cinzel', serif; font-size: 1.05rem; }
+  .bundel .b-munt { display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--gold); }
+  .bundel .b-extra { position: absolute; top: -6px; right: -4px; background: var(--gold); color: #1a1206;
+                     font-size: 0.62rem; font-weight: 800; padding: 1px 5px; border-radius: 8px; }
+  /* Kaarten in de winkel: zelfde kaartje als een figuur, maar met de beschrijving eronder. */
+  .coll-card.plate-koop .sub { font-size: 0.68rem; line-height: 1.25; min-height: 2.5em; }
   .coll-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
   .coll-card { position: relative; background: linear-gradient(160deg, #241c33, #110d1d); border: 1px solid rgba(125,211,252,0.14); border-radius: 12px; padding: 12px 6px 10px; text-align: center; cursor: pointer; transition: transform 0.15s; overflow: hidden; }
   .coll-card:active { transform: scale(0.96); }
@@ -926,7 +945,7 @@
     <div class="home-title">RONDEL</div>
     <div class="home-sub">Tactisch duel op het bord der legenden</div>
     <div class="profile-bar">
-      <div class="profile-chip">◈ <b id="home-credits">0</b></div>
+      <div class="profile-chip" id="home-valuta"></div>
       <div class="profile-chip">Collectie <b id="home-owned">0</b>/18</div>
       <div class="profile-chip">W <b id="home-wins">0</b> · V <b id="home-losses">0</b></div>
     </div>
@@ -941,7 +960,7 @@
           <path d="M20.6 2.8 L10 15.4 L6.7 19.3" stroke-width="2"/>
           <path d="M12.4 17.4 L7.6 13.5" stroke-width="1.8"/><circle cx="5.8" cy="20.4" r="1.5"/>
         </svg>
-        <div class="tname">DUEL</div><div class="tdesc">Solo tegen het AI-systeem — verdien credits</div></div>
+        <div class="tname">DUEL</div><div class="tdesc">Solo tegen het AI-systeem — verdien munten</div></div>
       <div class="home-tile" id="tile-hotseat">
         <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="7.5" cy="7" r="3"/><path d="M2.5 20 v-2.5 a5 5 0 0 1 10 0 V20"/>
@@ -958,7 +977,7 @@
         <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 2.5 L20 12 L12 21.5 L4 12 Z"/><path d="M7.5 12 L12 6.6 L16.5 12 L12 17.4 Z"/>
         </svg>
-        <div class="tname">WINKEL</div><div class="tdesc">Nieuwe units kopen met credits</div></div>
+        <div class="tname">WINKEL</div><div class="tdesc">Figuren en kaarten kopen met diamantjes</div></div>
       <div class="home-tile" id="tile-help">
         <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 6.2 Q8.5 3.5 3 4.4 V18.6 Q8.5 17.7 12 20.4 Q15.5 17.7 21 18.6 V4.4 Q15.5 3.5 12 6.2 Z"/>
@@ -997,6 +1016,8 @@
       <div class="subscreen-title">WINKEL</div>
       <div class="subscreen-credits" id="store-credits"></div>
     </div>
+    <div class="deck-sub" style="margin-top:2px;">Munten wisselen voor diamantjes</div>
+    <div class="bundel-rij" id="bundel-rij"></div>
     <div class="booster-card" id="booster-card">
       <div class="booster-chest">
         <svg viewBox="0 0 64 56" width="44" height="38" aria-hidden="true">
@@ -1010,12 +1031,14 @@
       </div>
       <div class="booster-txt">
         <div class="bt-name">BOOSTERKIST</div>
-        <div class="bt-desc">Eén willekeurige unit. Kleine kans op een Rare. Dubbel? Credits terug.</div>
+        <div class="bt-desc">Eén willekeurige unit. Kleine kans op een Rare. Dubbel? Diamantjes terug.</div>
       </div>
-      <div class="booster-price" id="booster-price">◈ 150</div>
+      <div class="booster-price" id="booster-price"></div>
     </div>
-    <div class="deck-sub" style="margin-top:4px;">Of koop gericht</div>
+    <div class="deck-sub" style="margin-top:10px;">Figuren</div>
     <div class="coll-grid" id="store-grid"></div>
+    <div class="deck-sub" style="margin-top:10px;">Kaarten</div>
+    <div class="coll-grid" id="store-plates"></div>
   </div>
 </div>
 
@@ -1591,8 +1614,31 @@ function plateIcon(key, size) {
   return `<svg viewBox="0 0 24 24" width="${size||22}" height="${size||22}" style="color:${color};flex-shrink:0;" fill="none" stroke="currentColor" stroke-linecap="round">${body}</svg>`;
 }
 
+// Valuta-iconen. Emoji zou hier makkelijker zijn, maar dat botst met de
+// Cinzel-typografie van de rest; deze twee tekenen mee in dezelfde stijl als
+// de plate-iconen.
+function muntIcon(size) {
+  const n = size || 15;
+  return `<svg class="cur-ico" viewBox="0 0 24 24" width="${n}" height="${n}" aria-hidden="true">` +
+    `<circle cx="12" cy="12" r="9.2" fill="#f0b429" stroke="#8a5a10" stroke-width="1.6"/>` +
+    `<circle cx="12" cy="12" r="6" fill="none" stroke="#8a5a10" stroke-width="1.1" opacity="0.8"/>` +
+    `<path d="M12 7.6 l1.35 2.9 3.05 0.4 -2.25 2.15 0.57 3.05 -2.72 -1.5 -2.72 1.5 0.57 -3.05 -2.25 -2.15 3.05 -0.4 Z" fill="#8a5a10"/></svg>`;
+}
+function diamantIcon(size) {
+  const n = size || 15;
+  return `<svg class="cur-ico" viewBox="0 0 24 24" width="${n}" height="${n}" aria-hidden="true">` +
+    `<path d="M7 3 h10 l5 6 -10 12 -10 -12 Z" fill="#67e8f9" stroke="#0e7490" stroke-width="1.5" stroke-linejoin="round"/>` +
+    `<path d="M2 9 h20 M7 3 l3 6 -3 12 M17 3 l-3 6 3 12 M10 9 l2 12 2 -12" fill="none" stroke="#0e7490" stroke-width="1.1" opacity="0.75"/></svg>`;
+}
+// "42" met het juiste muntje ervoor, overal hetzelfde.
+function munten(n) { return `<span class="cur">${muntIcon()}<b>${n}</b></span>`; }
+function diamanten(n) { return `<span class="cur diam">${diamantIcon()}<b>${n}</b></span>`; }
+function beideValuta() { return munten(profile.munten) + diamanten(profile.diamanten); }
+// Wat kost deze kaart? Naar z'n kostenpunten, net als de figuren naar hun rarity.
+function plaatPrijs(key) { return PLATE_PRIJS[PLATES[key] ? PLATES[key].cost : 1] || 3; }
+
 // ==========================================
-// STORE & COLLECTIE — kaartjes kopen/upgraden met credits
+// STORE & COLLECTIE — figuren en kaarten kopen met diamantjes, upgraden met munten
 // ==========================================
 const RARITY = {
   squire:'C', scout:'C', apprentice:'C', skeleton:'C', boar:'C', imp:'C',
@@ -1671,20 +1717,44 @@ function evolutieBonus(slots) {
 }
 // EVO-END (marker voor headless tests — niet verwijderen)
 
-const PRICE = { C:100, U:200, R:400 };
-const UPGRADE_COST = { 1:150, 2:250, 3:400 }; // kosten van huidig level naar volgend (max 4)
-const WIN_CREDITS = 100, LOSS_CREDITS = 25;
+// ==========================================
+// TWEE VALUTA (sessie 41) — zoals Pokemon Duel: je verdient MUNTEN met spelen
+// en wisselt die om in DIAMANTJES; alles in de winkel kost diamantjes.
+// Waarom niet één munt? Omdat kopen en trainen dan om dezelfde pot vechten en
+// je elke upgrade voelt als een gemiste figuur. Nu is het gescheiden:
+//   munten = trainen (upgraden) en wisselen
+//   diamantjes = kopen (figuren, kaarten, kist)
+// De koers is zo gekozen dat het tempo gelijk blijft aan voor deze sessie: een
+// gewonnen potje gaf 100 munten en een common kostte 100, en dat klopt nog
+// steeds (100 munten = 4 diamantjes = één common).
+// ==========================================
+// ECONOMIE-START (marker voor headless tests — niet verwijderen)
+const MUNT_PER_DIAMANT = 25;
+// Grotere bundels geven meer waar voor je geld, net als in Duel.
+const DIAMANT_BUNDELS = [
+  { diamanten: 10,  munten: 250  },   // recht toe recht aan
+  { diamanten: 45,  munten: 1000 },   // ~10% extra
+  { diamanten: 100, munten: 2000 },   // ~20% extra
+];
+const PRICE = { C:4, U:8, R:16 };                 // figuren, in diamantjes
+const PLATE_PRIJS = { 1:3, 2:6, 3:10 };           // kaarten, naar hun kostenpunten
+// De drie kaarten waar je mee begint. Genoeg om meteen een geldig team te
+// bouwen (samen 3 van de 8 punten), de rest koop je.
+const STARTER_PLATES = ['fullheal', 'respin', 'xattack'];
+const UPGRADE_COST = { 1:150, 2:250, 3:400 }; // in MUNTEN: van huidig level naar volgend (max 4)
+const WIN_MUNTEN = 100, LOSS_MUNTEN = 25;
+// ECONOMIE-END (marker voor headless tests — niet verwijderen)
 
 // ==========================================
 // BOOSTERKIST (sessie 24) — in Duel kwam je aan figuren via boosters, niet via
 // een vaste winkel. De winkel blijft ongewijzigd (gericht kopen, duurder); de
-// kist is de goedkope gok. Dubbel? Dan krijg je credits terug, zodat een kist
+// kist is de goedkope gok. Dubbel? Dan krijg je diamantjes terug, zodat een kist
 // nooit weggegooid geld is.
 // ==========================================
 // BOOSTER-START (marker voor headless tests — niet verwijderen)
-const BOOSTER_COST = 150;
+const BOOSTER_COST = 6;                            // in diamantjes (= 150 munten)
 const BOOSTER_ODDS = [['C', 0.65], ['U', 0.27], ['R', 0.08]];
-const BOOSTER_REFUND = { C: 60, U: 120, R: 240 };
+const BOOSTER_REFUND = { C: 2, U: 5, R: 10 };
 // Puur: rand01 = getal in [0,1) voor de rarity, pick01 = idem voor de unitkeuze.
 function rollBooster(rand01, pick01, owned, rarityMap) {
   let acc = 0, rar = 'C';
@@ -1739,11 +1809,17 @@ function normalizeSettings(raw) {
 
 let profile;
 const DECK_SLOTS = 3;
-function freshProfile() { return { credits: 300, owned: { squire:1, scout:1, apprentice:1, skeleton:1, boar:1, imp:1 }, stats: { wins:0, losses:0 }, settings: freshSettings(), decks: Array(DECK_SLOTS).fill(null) }; }
+function freshProfile() {
+  const ownedPlates = {}; for (const k of STARTER_PLATES) ownedPlates[k] = 1;
+  return { munten: 300, diamanten: 0,
+           owned: { squire:1, scout:1, apprentice:1, skeleton:1, boar:1, imp:1 },
+           ownedPlates, stats: { wins:0, losses:0 }, settings: freshSettings(),
+           decks: Array(DECK_SLOTS).fill(null) };
+}
 // Opgeslagen teams valideren: units die je niet (meer) bezit vallen weg, en een
 // slot dat daardoor incompleet wordt gaat leeg — zo kan een oud slot nooit een
 // ongeldig potje starten.
-function normalizeDecks(raw, owned) {
+function normalizeDecks(raw, owned, ownedPlates) {
   const out = Array(DECK_SLOTS).fill(null);
   if (!Array.isArray(raw)) return out;
   for (let i = 0; i < DECK_SLOTS; i++) {
@@ -1752,7 +1828,12 @@ function normalizeDecks(raw, owned) {
     // Alleen basisvormen mogen in het team staan; een geëvolueerde vorm hang je
     // eronder. Oude teams met een evolutie erin verliezen die unit.
     const units = d.units.filter(k => UNIT_DEFS[k] && owned[k] && isBasisvorm(k));
-    const plates = d.plates.filter(k => PLATES[k]);
+    // Kaarten koop je sinds sessie 41 ook. Een opgeslagen team dat kaarten
+    // bevat die je (nog) niet bezit verliest die kaarten — maar NIET z'n zes
+    // figuren: het krijgt de starterkaarten terug in plaats van leeg te gaan.
+    // Anders zou de migratie stil een heel team wissen.
+    let plates = d.plates.filter(k => PLATES[k] && ownedPlates[k]);
+    if (!plates.length) plates = STARTER_PLATES.filter(k => ownedPlates[k]);
     // Aangehangen evoluties: alleen geldig als het écht de evolutie van dat
     // figuur is én je hem bezit. De keten loopt door: hang je Eir onder
     // Einherjar, dan mag Odin daar weer onder. Odin zonder Eir mag niet.
@@ -1771,13 +1852,26 @@ function normalizeDecks(raw, owned) {
   }
   return out;
 }
+// Een opgeslagen profiel bijwerken naar de huidige vorm. Apart van
+// loadProfile() zodat het zonder localStorage te testen is.
+// Sessie 41: credits werden munten, en er kwamen diamantjes en kaartbezit bij.
+// Een oud profiel houdt z'n saldo en krijgt de drie starterkaarten.
+function migreerProfiel(p) {
+  if (!p || !p.owned) return freshProfile();
+  if (!p.stats) p.stats = { wins:0, losses:0 };
+  if (typeof p.munten !== 'number') p.munten = typeof p.credits === 'number' ? p.credits : 300;
+  delete p.credits;
+  if (typeof p.diamanten !== 'number') p.diamanten = 0;
+  if (!p.ownedPlates || typeof p.ownedPlates !== 'object') p.ownedPlates = {};
+  for (const k of STARTER_PLATES) p.ownedPlates[k] = 1;   // altijd een speelbaar deck
+  return p;
+}
 function loadProfile() {
   try { const raw = localStorage.getItem('rondel_profile'); profile = raw ? JSON.parse(raw) : freshProfile(); }
   catch(e) { profile = freshProfile(); }
-  if (!profile || typeof profile.credits !== 'number' || !profile.owned) profile = freshProfile();
-  if (!profile.stats) profile.stats = { wins:0, losses:0 };
+  profile = migreerProfiel(profile);
   profile.settings = normalizeSettings(profile.settings);   // migratie voor oude profielen
-  profile.decks = normalizeDecks(profile.decks, profile.owned);
+  profile.decks = normalizeDecks(profile.decks, profile.owned, profile.ownedPlates);
 }
 function saveProfile() { try { localStorage.setItem('rondel_profile', JSON.stringify(profile)); } catch(e) {} }
 // Korte accessor; valt terug op de default als het profiel nog niet geladen is.
@@ -2058,7 +2152,7 @@ function showScreen(name) {
 }
 
 function renderHome() {
-  document.getElementById('home-credits').textContent = profile.credits;
+  document.getElementById('home-valuta').innerHTML = beideValuta();
   document.getElementById('home-owned').textContent = Object.keys(profile.owned).length;
   document.getElementById('home-wins').textContent = profile.stats.wins;
   document.getElementById('home-losses').textContent = profile.stats.losses;
@@ -2156,7 +2250,7 @@ function renderDeckSelect() {
   if (currentMode === 'hotseat') title.textContent = deckStage === 'p1' ? '— SPELER 1 (BLAUW) — STEL JE LEGER SAMEN —' : '— SPELER 2 (ROOD) — STEL JE LEGER SAMEN —';
   else title.textContent = '— STEL JE LEGER SAMEN —';
   document.getElementById('btn-deck-start').textContent = (currentMode === 'hotseat' && deckStage === 'p1') ? 'Volgende' : 'Start';
-  document.getElementById('deck-credits').textContent = `◈ ${profile.credits} CREDITS`;
+  document.getElementById('deck-credits').innerHTML = beideValuta();
   renderDeckSlots();
   const ug = document.getElementById('deck-units'); ug.innerHTML = '';
   for (const [key, def] of Object.entries(UNIT_DEFS)) {
@@ -2222,9 +2316,14 @@ function renderDeckSelect() {
   }
   const pg = document.getElementById('deck-plates'); pg.innerHTML = '';
   for (const [key, p] of Object.entries(PLATES)) {
-    const c = document.createElement('div'); c.className = 'deck-card' + (deckSel.plates.includes(key) ? ' selected' : '');
-    c.innerHTML = `<span class="rar" style="color:var(--gold)">${p.cost}</span><div style="display:flex;justify-content:center;margin-bottom:2px;">${plateIcon(key, 26)}</div><div class="name">${p.name}</div><div class="fac">${p.desc}</div>`;
+    const heb = !!profile.ownedPlates[key];
+    const c = document.createElement('div');
+    // Zelfde behandeling als een unit die je niet hebt: grijs, met de weg ernaartoe.
+    c.className = 'deck-card' + (heb ? (deckSel.plates.includes(key) ? ' selected' : '') : ' locked');
+    c.innerHTML = `<span class="rar" style="color:var(--gold)">${p.cost}</span><div style="display:flex;justify-content:center;margin-bottom:2px;">${plateIcon(key, 26)}</div><div class="name">${p.name}</div><div class="fac">${p.desc}</div>` +
+      (heb ? '' : '<div class="price">— via Winkel —</div>');
     c.addEventListener('click', () => {
+      if (!heb) { sfx('denied'); toast(`${p.name} koop je in de Winkel`); return; }
       const i = deckSel.plates.indexOf(key);
       if (i >= 0) { deckSel.plates.splice(i, 1); }
       else if (plateCost(deckSel.plates) + p.cost <= PLATE_BUDGET) { deckSel.plates.push(key); }
@@ -2233,7 +2332,7 @@ function renderDeckSelect() {
     });
     pg.appendChild(c);
   }
-  document.getElementById('deck-count-units').textContent = `Units: ${deckSel.units.length} / 6 (collectie: ${Object.keys(profile.owned).length}/18)`;
+  document.getElementById('deck-count-units').textContent = `Units: ${deckSel.units.length} / 6 (collectie: ${Object.keys(profile.owned).length}/${Object.keys(UNIT_DEFS).length})`;
   document.getElementById('deck-count-plates').textContent = `Kaarten: ${plateCost(deckSel.plates)} / ${PLATE_BUDGET} punten (${deckSel.plates.length} stuks)`;
   document.getElementById('btn-deck-start').disabled = !(deckSel.units.length === 6 && deckSel.plates.length > 0);
 }
@@ -2377,8 +2476,8 @@ function endMatch(winner, kind) {
   state.over = true; stopClock(); clearSpinTicks();
   let gain = 0;
   if (state.mode === 'solo') {
-    gain = winner === 'p1' ? WIN_CREDITS : LOSS_CREDITS;
-    profile.credits += gain;
+    gain = winner === 'p1' ? WIN_MUNTEN : LOSS_MUNTEN;
+    profile.munten += gain;
     if (winner === 'p1') profile.stats.wins++; else profile.stats.losses++;
     saveProfile();
   }
@@ -2392,7 +2491,7 @@ function endMatch(winner, kind) {
   document.getElementById('result-title').textContent = state.mode === 'solo' ? (won ? 'OVERWINNING' : 'VERSLAGEN') : (won ? 'SPELER 1 WINT' : 'SPELER 2 WINT');
   document.getElementById('result-title').className = 'result-title ' + (state.mode !== 'solo' || won ? 'win' : 'lose');
   document.getElementById('result-reason').textContent = msg;
-  document.getElementById('result-reward').textContent = state.mode === 'solo' ? `+${gain} credits` : '';
+  document.getElementById('result-reward').innerHTML = state.mode === 'solo' ? `+${gain} ${muntIcon(14)} munten` : '';
   renderAll();
   // Het eindscherm komt met een tel vertraging, zodat je de laatste zet nog
   // ziet. Ben je intussen naar het menu gelopen, dan hoort het er niet meer
@@ -2412,7 +2511,7 @@ function slotsAtLevel(defKey, lvl) {
 }
 
 function renderCollection() {
-  document.getElementById('coll-credits').textContent = `◈ ${profile.credits}`;
+  document.getElementById('coll-credits').innerHTML = beideValuta();
   const g = document.getElementById('coll-grid'); g.innerHTML = '';
   for (const [key, def] of Object.entries(UNIT_DEFS)) {
     const lvl = profile.owned[key] || 0; const rar = RARITY[key];
@@ -2466,7 +2565,7 @@ function openUnitDetail(key) {
   const upBtn = document.getElementById('btn-detail-upgrade');
   if (lvl >= 4) { upBtn.textContent = 'Max level'; upBtn.disabled = true; document.getElementById('detail-note').textContent = 'Deze unit is volledig opgewaardeerd.'; }
   else {
-    upBtn.textContent = `Upgrade ◈ ${UPGRADE_COST[lvl]}`; upBtn.disabled = profile.credits < UPGRADE_COST[lvl];
+    upBtn.innerHTML = `Upgrade ${muntIcon(14)} ${UPGRADE_COST[lvl]}`; upBtn.disabled = profile.munten < UPGRADE_COST[lvl];
     // Een evolutie zet je niet zelf op, dus zeg erbij wanneer z'n level telt:
     // pas op het moment dat een figuur ín hem verandert.
     document.getElementById('detail-note').textContent = isBasisvorm(key)
@@ -2480,23 +2579,45 @@ function doUpgrade() {
   const lvl = profile.owned[detailKey];
   if (!detailKey || lvl >= 4) return;
   const cost = UPGRADE_COST[lvl];
-  if (profile.credits < cost) { toast('Te weinig credits'); return; }
-  profile.credits -= cost; profile.owned[detailKey] = lvl + 1; saveProfile();
+  if (profile.munten < cost) { toast('Te weinig munten'); return; }
+  profile.munten -= cost; profile.owned[detailKey] = lvl + 1; saveProfile();
   toast(`${UNIT_DEFS[detailKey].name} → Level ${lvl + 1}!`);
   renderCollection(); openUnitDetail(detailKey); // detail ververst: disk groeit zichtbaar
 }
 
 // ===== Winkel: units kopen =====
 function renderStore() {
-  document.getElementById('store-credits').textContent = `◈ ${profile.credits}`;
+  document.getElementById('store-credits').innerHTML = beideValuta();
+  // Munten omwisselen. Grotere bundels geven meer diamantjes per munt; dat
+  // staat er ook bij, anders lijkt de dure knop gewoon duur.
+  const br = document.getElementById('bundel-rij');
+  if (br) {
+    br.innerHTML = '';
+    const basis = DIAMANT_BUNDELS[0].munten / DIAMANT_BUNDELS[0].diamanten;
+    for (const bundel of DIAMANT_BUNDELS) {
+      const kanIk = profile.munten >= bundel.munten;
+      const extra = Math.round((1 - (bundel.munten / bundel.diamanten) / basis) * 100);
+      const knop = document.createElement('button');
+      knop.className = 'bundel' + (kanIk ? '' : ' broke');
+      knop.innerHTML = `<span class="b-diam">${diamantIcon(20)}<b>${bundel.diamanten}</b></span>` +
+        `<span class="b-munt">${muntIcon(13)} ${bundel.munten}</span>` +
+        (extra > 0 ? `<span class="b-extra">+${extra}%</span>` : '');
+      knop.addEventListener('click', () => {
+        if (profile.munten < bundel.munten) { sfx('denied'); toast('Te weinig munten — win duels om te sparen'); return; }
+        profile.munten -= bundel.munten; profile.diamanten += bundel.diamanten; saveProfile();
+        sfx('select'); toast(`+${bundel.diamanten} diamantjes`); renderStore();
+      });
+      br.appendChild(knop);
+    }
+  }
   const bc = document.getElementById('booster-card');
   if (bc) {
     const allOwned = Object.keys(UNIT_DEFS).every(k => profile.owned[k]);
-    document.getElementById('booster-price').textContent = `◈ ${BOOSTER_COST}`;
-    bc.classList.toggle('broke', profile.credits < BOOSTER_COST);
+    document.getElementById('booster-price').innerHTML = `${diamantIcon(16)} ${BOOSTER_COST}`;
+    bc.classList.toggle('broke', profile.diamanten < BOOSTER_COST);
     bc.querySelector('.bt-desc').textContent = allOwned
-      ? 'Je hebt alles al — een kist geeft nu alleen credits terug.'
-      : 'Eén willekeurige unit. Kleine kans op een Rare. Dubbel? Credits terug.';
+      ? 'Je hebt alles al — een kist geeft nu alleen diamantjes terug.'
+      : 'Eén willekeurige unit. Kleine kans op een Rare. Dubbel? Diamantjes terug.';
   }
   const g = document.getElementById('store-grid'); g.innerHTML = '';
   const entries = Object.entries(UNIT_DEFS).sort(([a], [b]) => (profile.owned[a] ? 1 : 0) - (profile.owned[b] ? 1 : 0));
@@ -2515,23 +2636,46 @@ function renderStore() {
       <div class="name">${def.name}</div>
       <div class="sub">${def.fac} · ${def.mp} MP</div>
       ${rol}
-      <span class="price-chip">${owned ? 'In bezit' : `KOOP ◈ ${price}`}</span>`;
+      <span class="price-chip">${owned ? 'In bezit' : `KOOP ${diamantIcon(13)} ${price}`}</span>`;
     if (!owned) c.addEventListener('click', () => {
-      if (profile.credits < price) { toast('Te weinig credits — win duels voor meer'); return; }
-      profile.credits -= price; profile.owned[key] = 1; saveProfile();
-      toast(`${def.name} gekocht!`); renderStore();
+      if (profile.diamanten < price) { sfx('denied'); toast('Te weinig diamantjes — wissel er munten voor om'); return; }
+      profile.diamanten -= price; profile.owned[key] = 1; saveProfile();
+      sfx('select'); toast(`${def.name} gekocht!`); renderStore();
     });
     g.appendChild(c);
+  }
+
+  // Kaarten. Tot sessie 41 had iedereen ze allemaal gratis; nu begin je met
+  // drie starters en koop je de rest, net als de figuren.
+  const pg = document.getElementById('store-plates');
+  if (!pg) return;
+  pg.innerHTML = '';
+  const plaatEntries = Object.entries(PLATES).sort(([a], [b]) => (profile.ownedPlates[a] ? 1 : 0) - (profile.ownedPlates[b] ? 1 : 0));
+  for (const [key, plaat] of plaatEntries) {
+    const heb = !!profile.ownedPlates[key]; const prijs = plaatPrijs(key);
+    const c = document.createElement('div');
+    c.className = 'coll-card plate-koop' + (heb ? ' locked' : '');
+    c.innerHTML = `<span class="rar-chip" style="color:var(--gold)">${plaat.cost}</span>
+      <div style="display:flex;justify-content:center;margin:4px 0 2px;">${plateIcon(key, 30)}</div>
+      <div class="name">${plaat.name}</div>
+      <div class="sub">${plaat.desc}</div>
+      <span class="price-chip">${heb ? 'In bezit' : `KOOP ${diamantIcon(13)} ${prijs}`}</span>`;
+    if (!heb) c.addEventListener('click', () => {
+      if (profile.diamanten < prijs) { sfx('denied'); toast('Te weinig diamantjes — wissel er munten voor om'); return; }
+      profile.diamanten -= prijs; profile.ownedPlates[key] = 1; saveProfile();
+      sfx('select'); toast(`${plaat.name} gekocht!`); renderStore();
+    });
+    pg.appendChild(c);
   }
 }
 
 // ===== Boosterkist openen =====
 function openBooster() {
-  if (profile.credits < BOOSTER_COST) { sfx('denied'); toast('Te weinig credits — win duels om te sparen'); return; }
-  profile.credits -= BOOSTER_COST;
+  if (profile.diamanten < BOOSTER_COST) { sfx('denied'); toast('Te weinig diamantjes — wissel er munten voor om'); return; }
+  profile.diamanten -= BOOSTER_COST;
   const roll = rollBooster(Math.random(), Math.random(), profile.owned, RARITY);
   const def = UNIT_DEFS[roll.key];
-  if (roll.duplicate) profile.credits += roll.refund; else profile.owned[roll.key] = 1;
+  if (roll.duplicate) profile.diamanten += roll.refund; else profile.owned[roll.key] = 1;
   saveProfile();
 
   const ov = document.getElementById('booster-overlay');
@@ -2556,11 +2700,11 @@ function openBooster() {
     const rarLabel = roll.rarity === 'C' ? 'Common' : roll.rarity === 'U' ? 'Uncommon' : 'Rare';
     document.getElementById('booster-sub').textContent = `${def.fac} · ${def.mp} MP · ${rarLabel}`;
     document.getElementById('booster-bonus').textContent = roll.duplicate
-      ? `Had je al — +${roll.refund} credits terug`
+      ? `Had je al — +${roll.refund} diamantjes terug`
       : 'Nieuw in je collectie!';
     document.getElementById('booster-name').className = 'result-title ' + (roll.duplicate ? 'lose' : 'win');
     document.getElementById('btn-booster-again').textContent = `Nog een kist ◈ ${BOOSTER_COST}`;
-    document.getElementById('btn-booster-again').disabled = profile.credits < BOOSTER_COST;
+    document.getElementById('btn-booster-again').disabled = profile.diamanten < BOOSTER_COST;
     sfx(roll.duplicate ? 'block' : (roll.rarity === 'R' ? 'win' : 'levelup'));
     if (!roll.duplicate) Audio_.buzz(roll.rarity === 'R' ? [40, 60, 90] : 35);
     renderStore(); renderHome();
@@ -2658,12 +2802,12 @@ function renderSettings() {
   const pbox = document.createElement('div'); pbox.className = 'set-group';
   pbox.innerHTML = `<div class="set-group-title">PROFIEL</div>
     <div class="set-row"><div class="set-label"><div class="t">Jouw voortgang</div>
-      <div class="d">◈ ${profile.credits} credits · ${Object.keys(profile.owned).length}/18 units · ${profile.stats.wins} gewonnen, ${profile.stats.losses} verloren</div></div></div>`;
+      <div class="d">${munten(profile.munten)} · ${diamanten(profile.diamanten)} · ${Object.keys(profile.owned).length}/${Object.keys(UNIT_DEFS).length} figuren · ${Object.keys(profile.ownedPlates).length}/${Object.keys(PLATES).length} kaarten · ${profile.stats.wins} gewonnen, ${profile.stats.losses} verloren</div></div></div>`;
   const rr = document.createElement('div'); rr.className = 'set-row';
-  rr.innerHTML = `<div class="set-label"><div class="t set-danger">Alles wissen</div><div class="d">Verwijdert je credits, units en statistieken. Dit kan niet ongedaan worden gemaakt.</div></div>`;
+  rr.innerHTML = `<div class="set-label"><div class="t set-danger">Alles wissen</div><div class="d">Verwijdert je munten, diamantjes, figuren, kaarten en statistieken. Dit kan niet ongedaan worden gemaakt.</div></div>`;
   const rb = document.createElement('button'); rb.className = 'btn set-danger'; rb.style.flex = '0 0 auto'; rb.textContent = 'Wissen';
   rb.addEventListener('click', () => {
-    if (!confirm('Weet je het zeker? Al je credits, units en statistieken worden gewist.')) return;
+    if (!confirm('Weet je het zeker? Al je munten, diamantjes, figuren, kaarten en statistieken worden gewist.')) return;
     if (!confirm('Echt zeker? Dit kan niet ongedaan worden gemaakt.')) return;
     const keep = profile.settings;
     profile = freshProfile(); profile.settings = keep; saveProfile();
@@ -2731,8 +2875,13 @@ const HELP_SECTIONS = [
     'Wie mid-potje evolueert krijgt een bonus die je NIET krijgt als je met de eindvorm begint: <b>+10 op elk wit en goud vak</b> en <b>+1 ★ op elk paars vak</b>. Klein beginnen en doorgroeien loont dus.' ]},
   { h:'Sterker worden', p:[
     'Versla je een vijand, dan gaat je figuur <b>een level omhoog</b> (tot level 4): zijn sterkste aanval wordt een groter vak en er verdwijnt een mis-vak.',
-    'In de <b>Collectie</b> kun je units met credits permanent upgraden. Die levels blijven voor altijd.' ]},
+    'In de <b>Collectie</b> kun je figuren met munten permanent upgraden. Die levels blijven voor altijd.' ]},
+  { h:'Munten en diamantjes', p:[
+    'Er zijn twee soorten geld. <b>Munten</b> verdien je met duelleren: 100 als je wint, 25 als je verliest. Daar train je figuren mee in de Collectie.',
+    '<b>Diamantjes</b> koop je met munten, en daarmee koop je alles in de Winkel: figuren, kaarten en de boosterkist. De koers is 1 diamantje voor 25 munten, en wie in één keer een grotere bundel wisselt krijgt er tot 20% bij.',
+    'Zo botsen kopen en trainen niet om dezelfde pot. Een common kost 4 diamantjes — precies één gewonnen potje.' ]},
   { h:'Je kaarten', p:[
+    'Je begint met drie kaarten (Genezing, Tweede Kans en Krachtstoot); de rest koop je in de Winkel met diamantjes. Kaarten die je nog niet hebt staan grijs in het deck-scherm.',
     'Elke kaart heeft een <b>kostprijs</b> van 1, 2 of 3 punten. Je mag voor maximaal <b>8 punten</b> aan kaarten meenemen — dus veel goedkope of een paar dure.',
     'Er zijn vijf soorten: <b>herstel</b> (statussen wissen, iemand uit het Healing Center halen), <b>draaien</b> (jij of je tegenstander moet opnieuw draaien), <b>gevecht</b> (meer schade, of juist niet verslagen kunnen worden), <b>beweging</b> (terugroepen, wisselen, springen) en <b>bijzonder</b>.',
     'Elke kaart werkt <b>één keer per potje</b>. Met <b>Hergebruik</b> maak je al je gebruikte kaarten weer bruikbaar.' ]},

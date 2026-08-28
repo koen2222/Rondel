@@ -70,6 +70,13 @@ if (!fxSection) throw new Error('FX-blok niet gevonden');
 if (!duelFxSection) throw new Error('DUELFX-blok niet gevonden');
 if (!kleurMatch) throw new Error('FX_KLEUR niet gevonden');
 const decksMatch   = html.match(/\nconst DECK_SLOTS[\s\S]*?\nfunction normalizeDecks\([\s\S]*?\n\}/);
+// Twee valuta (sessie 41): prijzen, wisselkoers en de profielmigratie
+const economieSection = html.slice(html.indexOf('// ECONOMIE-START'), html.indexOf('// ECONOMIE-END'));
+const freshProfileMatch = html.match(/\nfunction freshProfile\(\)[\s\S]*?\n\}/);
+const migreerMatch = html.match(/\nfunction migreerProfiel\([\s\S]*?\n\}/);
+if (!economieSection) throw new Error('ECONOMIE-blok niet gevonden');
+if (!freshProfileMatch) throw new Error('freshProfile() niet gevonden');
+if (!migreerMatch) throw new Error('migreerProfiel() niet gevonden');
 if (!platesSection) throw new Error('PLATES-blok niet gevonden');
 if (!decksMatch)  throw new Error('normalizeDecks() niet gevonden');
 if (!condMatch) throw new Error('applyCondition() niet gevonden');
@@ -90,12 +97,15 @@ const evalCode = [
   koMatch[0],
   condMatch[0],
   platesSection,
+  economieSection,
   decksMatch[0],
+  freshProfileMatch[0],
+  migreerMatch[0],
   evoSection,
   fxSection,
   kleurMatch[0],
   duelFxSection,
-  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster, FX_TREFWOORDEN, attackFx, FX_KLEUR, FX_PROJECTIEL, projectielVoor, EVOLUTIE, evolutieVan, voorloperVan, isBasisvorm, evolutieKeten, evolutieBonus };',
+  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster, FX_TREFWOORDEN, attackFx, FX_KLEUR, FX_PROJECTIEL, projectielVoor, EVOLUTIE, evolutieVan, voorloperVan, isBasisvorm, evolutieKeten, evolutieBonus, MUNT_PER_DIAMANT, DIAMANT_BUNDELS, PRICE, PLATE_PRIJS, STARTER_PLATES, UPGRADE_COST, WIN_MUNTEN, LOSS_MUNTEN, freshProfile, migreerProfiel };',
 ].join('\n');
 
 // Schrijf tijdelijk evalueerbaar bestand (vermijdt new Function-beperkingen)
@@ -108,7 +118,7 @@ try {
   fs.unlinkSync(tmpPath);
 }
 
-const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster, FX_TREFWOORDEN, attackFx, FX_KLEUR, FX_PROJECTIEL, projectielVoor, EVOLUTIE, evolutieVan, voorloperVan, isBasisvorm, evolutieKeten, evolutieBonus } = extracted;
+const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster, FX_TREFWOORDEN, attackFx, FX_KLEUR, FX_PROJECTIEL, projectielVoor, EVOLUTIE, evolutieVan, voorloperVan, isBasisvorm, evolutieKeten, evolutieBonus, MUNT_PER_DIAMANT, DIAMANT_BUNDELS, PRICE, PLATE_PRIJS, STARTER_PLATES, UPGRADE_COST, WIN_MUNTEN, LOSS_MUNTEN, freshProfile, migreerProfiel } = extracted;
 
 // ─── Test harness ──────────────────────────────────────────────────────────────
 let pass = 0, fail = 0;
@@ -412,22 +422,73 @@ section('=== INSTELLINGEN (8 checks) ===');
 }
 
 // ─── 4e. OPGESLAGEN TEAMS (sessie 24) ──────────────────────────────────────────
-section('=== OPGESLAGEN TEAMS (5 checks) ===');
+section('=== OPGESLAGEN TEAMS (7 checks) ===');
 {
   const owned = { squire:1, scout:1, apprentice:1, skeleton:1, boar:1, imp:1 };
+  // Sinds sessie 41 bezit je kaarten ook; voor deze checks heeft de speler ze allemaal.
+  const alle = {}; for (const k of Object.keys(PLATES)) alle[k] = 1;
   const good = { units:['squire','scout','apprentice','skeleton','boar','imp'], plates:['fullheal','xattack','respin'] };
-  check('Geldig team blijft behouden', normalizeDecks([good], owned)[0].units.length, 6);
-  check('Altijd precies 3 slots', normalizeDecks([good], owned).length, DECK_SLOTS);
+  check('Geldig team blijft behouden', normalizeDecks([good], owned, alle)[0].units.length, 6);
+  check('Altijd precies 3 slots', normalizeDecks([good], owned, alle).length, DECK_SLOTS);
   // Unit verkocht/niet in bezit → slot wordt ongeldig en dus leeg
   const partial = { units:['squire','scout','apprentice','skeleton','boar','pitlord'], plates:['fullheal','xattack','respin'] };
-  check('Team met niet-bezeten unit wordt leeggemaakt', normalizeDecks([partial], owned)[0], null);
+  check('Team met niet-bezeten unit wordt leeggemaakt', normalizeDecks([partial], owned, alle)[0], null);
   // Onbekende kaart wordt eruit gefilterd; de rest van het team blijft geldig
   const badPlate = { units: good.units, plates:['fullheal','xattack','bestaatniet'] };
-  check('Onbekende kaart wordt uit het team gefilterd', normalizeDecks([badPlate], owned)[0].plates, ['fullheal','xattack']);
+  check('Onbekende kaart wordt uit het team gefilterd', normalizeDecks([badPlate], owned, alle)[0].plates, ['fullheal','xattack']);
   // Boven budget → slot ongeldig
   const tooPricey = { units: good.units, plates:['cape','cape','cape','focus','revive'] };
-  check('Team boven het kaartbudget wordt leeggemaakt', normalizeDecks([tooPricey], owned)[0], null);
-  check('Rommel-invoer geeft lege slots', normalizeDecks('kapot', owned), [null, null, null]);
+  check('Team boven het kaartbudget wordt leeggemaakt', normalizeDecks([tooPricey], owned, alle)[0], null);
+  check('Rommel-invoer geeft lege slots', normalizeDecks('kapot', owned, alle), [null, null, null]);
+  // Migratie sessie 41: een team met kaarten die je niet bezit mag z'n zes
+  // figuren NIET kwijtraken — het valt terug op de starterkaarten. Anders wist
+  // de migratie stil een compleet team.
+  const alleenStarters = {}; for (const k of STARTER_PLATES) alleenStarters[k] = 1;
+  const duurDeck = { units: good.units, plates: ['cape', 'focus'] };
+  const na = normalizeDecks([duurDeck], owned, alleenStarters)[0];
+  check('Team met niet-bezeten kaarten houdt z\'n zes figuren', na && na.units.length, 6);
+  check('...en krijgt de starterkaarten terug', na && na.plates, STARTER_PLATES);
+}
+
+// ─── 4e1. TWEE VALUTA (sessie 41) ─────────────────────────────────────────────
+// De koers moet het tempo van vóór deze sessie houden: een gewonnen potje gaf
+// 100 credits en een common kostte er 100. Nu loopt dat via diamantjes, en dan
+// is het makkelijk om er per ongeluk een grind-spel van te maken.
+section('=== TWEE VALUTA (9 checks) ===');
+{
+  check('Een gewonnen potje betaalt precies één common',
+    WIN_MUNTEN / MUNT_PER_DIAMANT, PRICE.C);
+  check('Een uncommon kost twee potjes', PRICE.U, PRICE.C * 2);
+  check('Een rare kost vier potjes', PRICE.R, PRICE.C * 4);
+  check('Verliezen levert een kwart van winnen op', LOSS_MUNTEN * 4, WIN_MUNTEN);
+  // Bundels: groter mag nooit ONgunstiger zijn dan de kleinste, anders straf je
+  // de speler die in één keer wisselt.
+  const koers = b => b.munten / b.diamanten;
+  const basis = koers(DIAMANT_BUNDELS[0]);
+  check('De kleinste bundel is precies de wisselkoers', basis, MUNT_PER_DIAMANT);
+  check('Grotere bundels zijn nooit duurder per diamantje',
+    DIAMANT_BUNDELS.filter(b => koers(b) > basis + 1e-9), []);
+  check('Elke bundel is strikt groter dan de vorige',
+    DIAMANT_BUNDELS.every((b, i) => i === 0 || b.diamanten > DIAMANT_BUNDELS[i-1].diamanten), true);
+  // Kaarten: duurdere kaarten kosten meer, en elke kostprijs heeft een tarief
+  check('Elke kaartkostprijs heeft een diamantprijs',
+    Object.keys(PLATES).filter(k => !PLATE_PRIJS[PLATES[k].cost]), []);
+  check('Een duurdere kaart kost ook meer diamantjes',
+    [PLATE_PRIJS[1] < PLATE_PRIJS[2], PLATE_PRIJS[2] < PLATE_PRIJS[3]], [true, true]);
+}
+
+// ─── 4e1b. PROFIEL-MIGRATIE (sessie 41) ───────────────────────────────────────
+section('=== PROFIEL-MIGRATIE (6 checks) ===');
+{
+  const oud = { credits: 725, owned: { squire:1, scout:1 }, stats: { wins:3, losses:1 } };
+  const na = migreerProfiel(JSON.parse(JSON.stringify(oud)));
+  check('Credits worden munten, saldo blijft staan', na.munten, 725);
+  check('Het oude veld is weg', na.credits, undefined);
+  check('Diamantjes beginnen op nul', na.diamanten, 0);
+  check('De drie starterkaarten staan erin',
+    STARTER_PLATES.filter(k => !na.ownedPlates[k]), []);
+  check('Alleen de starters, niet de hele stapel', Object.keys(na.ownedPlates).length, STARTER_PLATES.length);
+  check('Figuren blijven onaangeroerd', Object.keys(na.owned).sort(), ['scout', 'squire']);
 }
 
 // ─── 4e2. KAARTEN / PLATES (sessie 29, naar de echte Duel-plates) ──────────────
