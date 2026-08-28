@@ -1,5 +1,5 @@
 RONDEL — STATUS EN BESLISSINGEN
-Laatste update: 25 augustus 2026 (sessie 40)
+Laatste update: 28 augustus 2026 (sessie 41)
 
 KERNCONCEPT
 - Tabletop-first fantasy bordspel, einddoel = digitale app
@@ -18,7 +18,7 @@ WERKAFSPRAAK BESTANDEN (geüpdatet sessie 14)
 - Project draait nu in een git-repo (Claude Code on the web); Claude KAN bestanden lezen
   EN schrijven/committen op de feature-branch. De oude read-only-aanname (sessie 9) vervalt.
 - Repo-structuur (sessie 14): index.html (game) + manifest.webmanifest + sw.js + icon-192/512.png
-  in de root, art/ met 18 losse unit-PNG's, docs/00_Status_en_Beslissingen.md (dit document).
+  in de root, art/ met 54 losse unit-PNG's, docs/00_Status_en_Beslissingen.md (dit document).
 - Werkafspraak: edit bestaande bestanden, herbouw niet vanaf nul. De gebalanceerde disk-data,
   bord-layout en visuals in index.html zijn maandenlang werk — nooit ongevraagd weggooien.
 
@@ -308,6 +308,101 @@ kaarten."
   benoemde aanval heeft een animatie, elke soort heeft een kleur, elk
   projectiel staat ook echt in de CSS). Smoke +7 checks voor de bordhoogte, de
   twee vechters, het vliegende projectiel, het schild-icoon en de kaartvlucht.
+
+SESSIE 41 — VIERENVIJFTIG FIGUREN EN EEN WINKEL MET TWEE VALUTA
+Koen leverde twee vellen met 36 nieuwe figuurtjes aan: "ik wil ook net zo'n
+store als in pokemon duel dat je ze kan kopen met diamantjes, en ik wil ook dat
+je diamantjes kan kopen met verdiende munten, en ik wil hetzelfde voor die
+kaarten." Dit is precies wat sessie 40 als gevolg noteerde: met zes ketens lag
+je team vast, en pas met een grotere roster wordt teambouw weer een keuze.
+
+1. DE FIGUREN UIT DE VELLEN KNIPPEN — VIER MISLUKTE RONDEN EN WAAROM
+   De vellen (1504x704) zetten de figuren op een donkere stenen muur met lichte
+   voegen en gloeiende runen, elk op een eigen sokkel. tools/sheet_split.py
+   probeerde ze daar vier ronden lang met een luminantiedrempel vanaf te halen.
+   Dat KAN niet, en dat is nu ook gemeten: Morrigans zwarte mantel heeft
+   mediane luminantie 32 en verzadiging 9, en een lichte muurvoeg precies
+   hetzelfde. Elke drempel die de voeg weggooit vreet haar mantel op, en
+   andersom. De vierde poging (drempels die per cel met de muur meebewegen)
+   sloeg door: figuren vielen uit elkaar in losse stukken.
+   OPGELOST met rembg (een U2-Net-model): dat scheidt onderwerp van achtergrond
+   op vorm en samenhang in plaats van op helderheid. In één keer alle 36 heel,
+   inclusief Morrigans mantel, Ifrits vlammen en de vacht van Cu Sidhe.
+   TWEEDE FOUT, apart gevonden: het raster deelde de hoogte in gelijke derden.
+   De naamregels staan op y 226-239, 454-467 en 682-694, dus de tekst van rij 1
+   loopt DOOR de rekenkundige rijgrens op 234 heen. Rij 2 begon daardoor midden
+   in de naam eronder en er stond "st Wight" in het plaatje. Rijen worden nu op
+   de naamregels afgebakend, niet op derden.
+   DE SOKKEL blijft handwerk. Automatisch vinden waar het beeldje ophoudt en de
+   steen begint lukt niet: bij Morrigan hangt de mantel even breed door tot ver
+   boven de schijf, bij Anansi is de schijf even breed als de spin zelf. Elke
+   vormregel die de een goed doet snijdt de ander de benen af. De snijhoogte
+   staat daarom per figuur in de tabel SOKKEL, met de hand afgelezen van het
+   lineaalvel dat het script met --lineaal-vel uitdraait.
+   LES voor de volgende keer: kijk niet naar de eindplaatjes maar naar het
+   MASKER (--masker-vel legt de maskerrand in magenta over het origineel). Op
+   de eindplaatjes zie je dat er iets mis is, op het masker zie je wat.
+
+2. TWAALF NIEUWE KETENS (36 figuren, samen 54)
+   Zeediepte, Stormhoogte, Zandrijk, Zonnetempel, Bamboewoud, Diepe Woud,
+   IJsvlakte, Berghart, Woestijnwind, Savanne, Nevelheuvels en Sterrenhof.
+   Elke keten volgt de opbouw van de bestaande zes: zestien vakken, twee
+   onderscheiden witte aanvallen (burn en paralysis wissen alleen de KLEINSTE,
+   dus met één aanvalswaarde wist dat de hele schijf — Koens miss-loop uit
+   sessie 23), geen ability op de basisvorm en wel op stap twee en drie.
+   AANVALSNAMEN zijn stuk voor stuk tegen FX_TREFWOORDEN nagelopen, en dat was
+   nodig: die tabel matcht op losse woorddelen en kaapt namen stilletjes.
+   'as' zit in Katanasnee (werd vuur), 'lans' in Kristalglans (werd snede),
+   'ijs' in Krijsroep (werd kou). Alle drie hernoemd. Alle tien de
+   animatiesoorten worden nu door minstens één aanval gebruikt; daar is een
+   check voor, want de bestaande check "elke benoemde aanval heeft een
+   animatie" slaagt altijd door de terugval en vangt dit dus niet.
+   AI-DECK: koos zes basisvormen met slice(0, 6) omdat het er precies zes waren.
+   Met twintig is dat weer een echte keuze en pakt hij er willekeurig zes.
+   Het automatisch vullen van je eigen team stopt vanzelf zodra je er meer dan
+   zes bezit — precies zoals sessie 40 al voorspelde.
+
+3. TWEE VALUTA
+   MUNTEN verdien je met duelleren (win 100, verlies 25, ongewijzigd) en daar
+   train je mee. DIAMANTJES koop je met munten en daarmee koop je alles in de
+   winkel. Reden om te splitsen: met één pot vechten kopen en trainen om
+   hetzelfde geld en voelt elke upgrade als een gemiste figuur.
+   KOERS zo gekozen dat het tempo exact gelijk blijft aan hiervoor:
+   1 diamantje = 25 munten, een common kost 4 diamantjes = 100 munten = precies
+   één gewonnen potje. Uncommon 8, rare 16, boosterkist 6, duplicaat geeft
+   2/5/10 terug. Grotere wisselbundels geven tot 20% extra (10/250, 45/1000,
+   100/2000). Upgraden blijft in munten (150/250/400).
+   KAARTEN waren tot nu toe gratis voor iedereen. Je begint nu met drie
+   (Genezing, Tweede Kans, Krachtstoot — samen 3 van de 8 punten, dus meteen
+   een geldig team) en koopt de rest, geprijsd naar hun kostenpunten: 3, 6 of
+   10 diamantjes. In het deck-scherm krijgen niet-gekochte kaarten dezelfde
+   grijze behandeling als een figuur dat je nog niet hebt.
+   MIGRATIE-VAL die er bijna in zat: normalizeDecks() filtert kaarten die je
+   niet bezit weg en gooit het slot leeg zodra er niets overblijft. Voor een
+   bestaand profiel had dat compleet opgeslagen teams gewist, inclusief de zes
+   figuren. Zo'n team valt nu terug op de starterkaarten. Er is een check voor.
+   De migratie zit in migreerProfiel(), los van loadProfile(), zodat de test
+   hem zonder localStorage kan draaien.
+
+BALANS OPNIEUW GEMETEN (de AI kiest nu uit twintig basisvormen in plaats van
+zes, dus de reeks moest door):
+  sessie 40 (alleen basisvormen, lv3)   rush 5/10 in 13 beurten
+  sessie 41 (twintig basisvormen)       rush 5/10 in 12 beurten
+  sessie 40 controle (random speler)    0/8 in 24 beurten
+  sessie 41 controle (random speler)    1/8 in 22 beurten
+Ongewijzigd binnen de ruis. Nieuw in de rush-meting: 2 van de 10 potjes eindigen
+nu met "je kon geen zet meer doen" in plaats van een doelpunt. Dat is een
+bestaande verliesconditie, maar hij kwam niet eerder voor; met twintig
+basisvormen kan de AI vaker een traag, breed team krijgen dat de rusher
+insluit. Waard om te speeltesten of dat als een eerlijk verlies voelt.
+
+TESTS: headless 148 -> 168 checks, smoke 79 -> 84. De tellingen die op een vast
+aantal stonden (18 kaarten, zes ketens, twaalf evoluties) komen nu uit de data
+zelf, zodat de laatste zes figuren ze niet opnieuw omgooien.
+
+NOG TE DOEN: twee ketens uit docs/figurine-prompts-60.md ontbreken nog
+(Titanenveld: Faun/Minotaurus/Typhon, en Schemerwacht: Strigoi/Rusalka/
+Tsjernobog). Daarmee komen we op de zestig die Koen wil.
 
 SESSIE 40 — KOENS DRIE PUNTEN
 Koen: "1) er zit een ovaal rondom het startpunt, dat moet rond. 2) een
@@ -1151,6 +1246,13 @@ OPEN PUNTEN — IN VOLGORDE VAN URGENTIE
     i.p.v. sudden death (s22), geluid (s24). Hele lijst is nu af.
 14. NIEUW (sessie 24): boosterkist-economie balanceren — 150 credits, C65/U27/
     R8, duplicaat-terugbetaling 60/120/240. Eerste gok, speeltesten.
+16. NIEUW (sessie 41): de laatste zes figuren (Titanenveld en Schemerwacht) er
+    nog bij, dan staat de roster op zestig.
+17. NIEUW (sessie 41): speeltesten of de twee valuta goed voelen. De koers is
+    zo gezet dat het tempo gelijk blijft aan hiervoor, maar of wisselen als een
+    keuze voelt of als een extra klik is niet te rekenen.
+18. NIEUW (sessie 41): 2 van de 10 rush-potjes eindigen nu met "je kon geen zet
+    meer doen". Voelt dat als een eerlijk verlies of als vastlopen?
 15. NIEUW (sessie 24): AI-moeilijkheidsgraden speeltesten — is "Licht" echt
     toegankelijk en "Zwaar" echt uitdagend maar eerlijk?
 

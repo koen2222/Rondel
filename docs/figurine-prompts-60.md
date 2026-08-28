@@ -3,6 +3,14 @@
 Je hebt er nu **18** (zes ketens van drie). Dit document levert **42 nieuwe**, in
 **14 nieuwe ketens van drie**, samen dus **60**.
 
+> **STAND VAN ZAKEN (sessie 41).** Twaalf van deze veertien ketens zijn binnen
+> en zitten in het spel: de roster staat op **54**. Wat nog mist zijn
+> **keten 13 (Titanenveld)** en **keten 14 (Schemerwacht)** — zes figuren.
+> Draai daarvoor alleen die twee blokken; de rest is klaar.
+>
+> Eén naamverschil: Gemini noemde keten 5 z'n eindvorm "Eastern Dragon", maar
+> het bestand heet `ryujin.png` zoals hieronder. Doc en code delen die naam.
+
 Elke keten is één factie met een eigen niche en een eigen kleurenpalet, zodat je
 ze op een bord van 48 bij 66 pixels nog uit elkaar houdt. Binnen een keten moet
 je zien dat het dezelfde soort is die groeit: stap 1 klein en simpel, stap 2
@@ -28,6 +36,24 @@ volgroeid, stap 3 de ontzagwekkende eindvorm.
 Lukt een transparante achtergrond niet? Vraag dan een **egaal witte** achtergrond
 en draai `python3 tools/cutout.py art-nieuw/*.png -o art/`. Dat script snijdt
 het figuur eruit zonder het witte binnenin (botten, tanden, gewaden) te slopen.
+
+Levert Gemini in plaats daarvan één groot **vel** met alle figuren op een
+achtergrond (zo kwamen de eerste twaalf ketens binnen), gebruik dan
+`tools/sheet_split.py`. Dat knipt per cel met `rembg` — een uitknipmodel, geen
+drempel, want op een stenen muur met lichte voegen valt een zwarte mantel niet
+van de achtergrond te onderscheiden op helderheid:
+
+```
+pip install "rembg[cpu]"
+python3 tools/sheet_split.py vel.png --namen namen.txt -o art/ \
+        --masker-vel masker.png --lineaal-vel lineaal.png
+```
+
+`--masker-vel` legt de maskerrand in magenta over het origineel: dáár zie je of
+er iets lekt of wordt aangevreten, niet op de eindplaatjes. `--lineaal-vel`
+tekent hoogtelijnen over elk figuur; daarvan lees je de snijhoogte af voor de
+tabel `SOKKEL` bovenin het script, want waar het beeldje ophoudt en de sokkel
+begint is niet automatisch te vinden.
 
 ---
 
