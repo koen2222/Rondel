@@ -1,5 +1,5 @@
 RONDEL — STATUS EN BESLISSINGEN
-Laatste update: 29 augustus 2026 (sessie 42)
+Laatste update: 29 augustus 2026 (sessie 43)
 
 KERNCONCEPT
 - Tabletop-first fantasy bordspel, einddoel = digitale app
@@ -313,6 +313,68 @@ kaarten."
   benoemde aanval heeft een animatie, elke soort heeft een kleur, elk
   projectiel staat ook echt in de CSS). Smoke +7 checks voor de bordhoogte, de
   twee vechters, het vliegende projectiel, het schild-icoon en de kaartvlucht.
+
+SESSIE 43 — HET GEVECHT IS EEN SCENE GEWORDEN
+Koen koos: een echte kleine cutscene, geen kort accentje. En op de vraag wat er
+met de draaiwielen moet gebeuren antwoordde hij iets anders dan gevraagd, en
+beter: "het moeten drie verschillende bewegingen zijn, je moet nooit weten wat
+er komt." Dat is de belangrijkste zin van de opdracht, want het lost het enige
+echte risico van een cutscene op — een filmpje van twee seconden dat elk gevecht
+identiek is, gaat bij het twintigste gevecht vervelen.
+
+HET TONEEL. Zodra beide wielen stilstaan wijken ze (schaal 0,72 en opacity 0,07)
+en krijgen de twee kemphanen het scherm voor zich alleen, met een spot op de
+vloer. Drie lagen diep, en dat is geen omslachtigheid maar noodzaak:
+  .dt-acteur — WAAR hij staat (--x/--y/--r/--s, met een overgang)
+  .dt-lijf   — WAT hij doet (uitval, incasseren, vallen: keyframes)
+  img        — welke kant hij op kijkt
+Zat de uitval-animatie op dezelfde laag als de positie, dan overschrijft de
+keyframe de positie en klapt het figuur naar het midden.
+
+ZES CHOREOGRAFIEEN, gekozen op wat er ECHT gedraaid is: uitval, botsing,
+pareerslag, vloek, doorbraak, misser. Elke scene heeft een past() die naar de
+uitkomst kijkt, zodat de beweging altijd klopt — een pareerslag speelt alleen
+als er ook werkelijk geblokt is. Uit de scenes die passen wordt willekeurig
+gekozen, maar NOOIT dezelfde als de vorige keer. Zonder dat laatste komt
+'uitval' er veruit het vaakst uit, want die past op de meeste uitkomsten.
+GEMETEN over twintig gevechten: alle zes de scenes gezien, nul keer twee
+dezelfde achter elkaar.
+
+DE VAL is een echte tuimeling geworden in plaats van een rotatie met een fade:
+terugslag weg van de klap, tollen, landen, even blijven liggen, dan pas doven.
+Vier varianten op lichaamsbouw (LIJF uit sessie 42b): een reus zakt in, een
+geest lost op, iets met vleugels tolt weg, de rest gaat achterover. Dit is de
+kleine ragdoll uit stap (d) van de ragdoll-volgorde; komt er ooit art in losse
+delen, dan verandert alleen wat er binnen deze keyframes beweegt.
+
+DRIE DINGEN DIE ONDERWEG BOVENKWAMEN
+1. De verliezer vloog het scherm uit. Nagerekend in plaats van bijgesteld op
+   gevoel: vanaf het midden reikt een tuimelende figuur tot ~215 px (basis 72 +
+   terugslag 46 + z'n eigen halve breedte gedraaid), en dat past niet op een
+   telefoon van 360. Het hele speelvlak schaalt nu mee met de schermbreedte.
+   NA: op 390 reikt hij tot 368, op 360 tot 340. Allebei binnen beeld.
+2. HET DRAAIEN IS KORTER (was 2800/3400 ms, nu 1900/2300). Met een scene erachter
+   leest een lange aanloop als wachten in plaats van als spanning. Netto duurt
+   een gevecht daardoor niet langer dan hiervoor.
+3. HARPIJ HAD EEN ZWARTE RECHTHOEK ACHTER ZICH — een stuk muur dat rembg had
+   laten staan. Dat zag ik nooit op de contactvellen, want die staan op een
+   DONKERE achtergrond. Op magenta viel het meteen op, en bij vier anderen ook.
+   sheet_split.py heeft nu een MODEL-tabel per figuur: isnet-general-use doet
+   het voor bijna iedereen het beste, maar bij harpy, hydra, ahuizotl,
+   jaguarwarrior en tiamat knipt u2net wel schoon.
+   LES: controleer nieuwe figuren altijd op een FELLE achtergrond.
+
+BRUIKBAAR HOUDEN: tik op het toneel en de scene springt naar het eind. Staat het
+animatietempo op 'uit', dan wordt het toneel volledig overgeslagen en valt alles
+terug op de oude weergave naast de wielen — dat is ook wat simulate.js gebruikt.
+GEMETEN: 60-61 fps tijdens de scene, op 390 en op 360.
+
+TESTS: headless 175 -> 181, smoke 86 -> 90. De belangrijkste nieuwe check is dat
+ELKE uitkomst die resolve() kan opleveren minstens een passende scene heeft —
+zonder die check valt een gevecht stil zodra iemand een combinatie draait waar
+niets op past. Verder: nooit twee keer dezelfde achter elkaar (200 trekkingen),
+elke lichaamsbouw heeft een valvariant die ook echt in de CSS staat, en de
+prestatiecheck uit sessie 42 loopt nu ook over de toneel-keyframes.
 
 SESSIE 42b — DE POPPETJES GAAN ADEMEN, EN DE WEG NAAR DE RAGDOLLS
 Koen: "maak het gewoon grafisch fantastisch... en op termijn wil ik dat die
@@ -1362,6 +1424,9 @@ OPEN PUNTEN — IN VOLGORDE VAN URGENTIE
     per lichaamsbouw, (b) blijvende figuur-laag die renders overleeft, (c)
     skeletanimatie idle/lopen/slaan/geraakt, (d) ragdoll bij KO. Stap (a) is het
     werk, (b) is de verbouwing, (c) en (d) zijn daarna klein.
+    STAND SESSIE 43: (d) is er in het klein al — de val op het dueltoneel. Het
+    toneel denkt bovendien al in losse acteurs met een eigen lijf-laag, dus (c)
+    hangt nu alleen nog op de art. (a) is de volgende stap.
 16. NIEUW (sessie 41): de laatste zes figuren (Titanenveld en Schemerwacht) er
     nog bij, dan staat de roster op zestig.
 17. NIEUW (sessie 41): speeltesten of de twee valuta goed voelen. De koers is

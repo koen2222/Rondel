@@ -64,6 +64,9 @@ const evoSection = html.slice(html.indexOf('const EVOLUTIE ='), html.indexOf('//
 // Lichaamsbouw (sessie 42): bepaalt de stilstaande beweging, en straks het skelet
 const lijfSection = html.slice(html.indexOf('// LIJF-START'), html.indexOf('// LIJF-END'));
 if (!lijfSection) throw new Error('LIJF-blok niet gevonden');
+// Het dueltoneel (sessie 43): zes choreografieën en de keuze ertussen
+const toneelSection = html.slice(html.indexOf('// TONEEL-START'), html.indexOf('// TONEEL-END'));
+if (!toneelSection) throw new Error('TONEEL-blok niet gevonden');
 if (!evoSection) throw new Error('EVO-blok niet gevonden');
 // Aanvalsanimaties: trefwoord→soort (FX) en soort→projectiel (DUELFX)
 const fxSection = html.slice(html.indexOf('const FX_TREFWOORDEN ='), html.indexOf('// FX-END'));
@@ -107,9 +110,10 @@ const evalCode = [
   evoSection,
   lijfSection,
   fxSection,
+  toneelSection,
   kleurMatch[0],
   duelFxSection,
-  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster, FX_TREFWOORDEN, attackFx, FX_KLEUR, FX_PROJECTIEL, projectielVoor, EVOLUTIE, evolutieVan, voorloperVan, isBasisvorm, evolutieKeten, evolutieBonus, MUNT_PER_DIAMANT, DIAMANT_BUNDELS, PRICE, PLATE_PRIJS, STARTER_PLATES, UPGRADE_COST, WIN_MUNTEN, LOSS_MUNTEN, freshProfile, migreerProfiel, LIJF, lijfVan };',
+  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster, FX_TREFWOORDEN, attackFx, FX_KLEUR, FX_PROJECTIEL, projectielVoor, EVOLUTIE, evolutieVan, voorloperVan, isBasisvorm, evolutieKeten, evolutieBonus, MUNT_PER_DIAMANT, DIAMANT_BUNDELS, PRICE, PLATE_PRIJS, STARTER_PLATES, UPGRADE_COST, WIN_MUNTEN, LOSS_MUNTEN, freshProfile, migreerProfiel, LIJF, lijfVan, DUEL_SCENES, kiesDuelScene, VAL_PER_LIJF, valVoor };',
 ].join('\n');
 
 // Schrijf tijdelijk evalueerbaar bestand (vermijdt new Function-beperkingen)
@@ -122,7 +126,7 @@ try {
   fs.unlinkSync(tmpPath);
 }
 
-const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster, FX_TREFWOORDEN, attackFx, FX_KLEUR, FX_PROJECTIEL, projectielVoor, EVOLUTIE, evolutieVan, voorloperVan, isBasisvorm, evolutieKeten, evolutieBonus, MUNT_PER_DIAMANT, DIAMANT_BUNDELS, PRICE, PLATE_PRIJS, STARTER_PLATES, UPGRADE_COST, WIN_MUNTEN, LOSS_MUNTEN, freshProfile, migreerProfiel, LIJF, lijfVan } = extracted;
+const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster, FX_TREFWOORDEN, attackFx, FX_KLEUR, FX_PROJECTIEL, projectielVoor, EVOLUTIE, evolutieVan, voorloperVan, isBasisvorm, evolutieKeten, evolutieBonus, MUNT_PER_DIAMANT, DIAMANT_BUNDELS, PRICE, PLATE_PRIJS, STARTER_PLATES, UPGRADE_COST, WIN_MUNTEN, LOSS_MUNTEN, freshProfile, migreerProfiel, LIJF, lijfVan, DUEL_SCENES, kiesDuelScene, VAL_PER_LIJF, valVoor } = extracted;
 
 // ─── Test harness ──────────────────────────────────────────────────────────────
 let pass = 0, fail = 0;
@@ -679,6 +683,42 @@ section('=== LICHAAMSBOUW (4 checks) ===');
   })(), true);
 }
 
+// ─── 4g1d. HET DUELTONEEL (sessie 43) ─────────────────────────────────────────
+// Zes choreografieën, gekozen op wat er gedraaid is. Twee dingen kunnen hier
+// stilletjes misgaan: een uitkomst waar géén scène op past (dan valt het
+// gevecht stil), en een lichaamsbouw zonder valvariant (dan blijft de verliezer
+// gewoon staan).
+section('=== DUELTONEEL (6 checks) ===');
+{
+  const css = html.slice(html.indexOf('<style'), html.indexOf('</style>'));
+  const soorten = [
+    {k:'white', v:40, name:'Slag'}, {k:'gold', v:60, name:'Doorbraak'},
+    {k:'purple', stars:1, effect:'burn', name:'Vloek'}, {k:'blue'}, {k:'red'},
+  ];
+  const zonderScene = [];
+  for (const a of soorten) for (const d of soorten) {
+    const ctx = { aSlot:a, dSlot:d, fxA:attackFx(a), fxD:attackFx(d),
+                  geblokA:a.k==='blue', geblokD:d.k==='blue' };
+    if (!DUEL_SCENES.some(sc => sc.past(ctx))) zonderScene.push(a.k + ' vs ' + d.k);
+  }
+  check('Elke uitkomst heeft minstens één passende scène', zonderScene, []);
+  check('Er zijn zes choreografieën', DUEL_SCENES.length, 6);
+  check('Elke scène heeft een naam, een past() en een speel()',
+    DUEL_SCENES.filter(sc => !sc.naam || typeof sc.past !== 'function' || typeof sc.speel !== 'function'), []);
+  // Koens eis: je moet nooit weten wat er komt. De keuze mag dus nooit twee
+  // keer achter elkaar dezelfde scène opleveren als er een alternatief is.
+  const ctxBreed = { aSlot:{k:'white',v:50,name:'Slag'}, dSlot:{k:'purple',stars:1,effect:'burn',name:'Vloek'},
+                     fxA:'snede', fxD:'vuur', geblokA:false, geblokD:false };
+  let herhaald = 0, vorige = null;
+  for (let i = 0; i < 200; i++) { const sc = kiesDuelScene(ctxBreed, vorige); if (sc.naam === vorige) herhaald++; vorige = sc.naam; }
+  check('Nooit twee keer achter elkaar dezelfde scène', herhaald, 0);
+  // Elke lichaamsbouw moet een val hebben die ook echt in de CSS staat
+  const bouwen = [...new Set(Object.values(LIJF))];
+  check('Elke lichaamsbouw heeft een valvariant', bouwen.filter(b => !VAL_PER_LIJF[b]), []);
+  check('Elke valvariant staat ook in de CSS',
+    [...new Set(Object.values(VAL_PER_LIJF))].filter(v => !new RegExp('\\.dt-lijf\\.' + v + '\\b').test(css)), []);
+}
+
 // ─── 4g2. PRESTATIE-VALKUILEN (sessie 38) ─────────────────────────────────────
 // Twee dingen die gemeten de beeldsnelheid halveerden. Ze zijn makkelijk terug
 // te zetten zonder het te merken, dus ze staan hier vast.
@@ -704,16 +744,17 @@ section('=== PRESTATIE (5 checks) ===');
   // Haakjes tellen in plaats van een regex: een keyframes-blok bevat zelf weer
   // accolades, dus een niet-hebberige regex pakt of te weinig of de halve CSS.
   const menuKeys = [];
-  for (const m of css.matchAll(/@keyframes\s+(ha[A-Za-z]+)\s*\{/g)) {
+  for (const m of css.matchAll(/@keyframes\s+(ha[A-Za-z]+|val[A-Za-z]+|toneel[A-Za-z]+)\s*\{/g)) {
     let i = m.index + m[0].length, diep = 1;
     while (i < css.length && diep > 0) { if (css[i] === '{') diep++; else if (css[i] === '}') diep--; i++; }
-    menuKeys.push([m[1], css.slice(m.index + m[0].length, i - 1)]);
+    // Commentaar eruit, anders leest "vanaf hier ligt hij:" als een eigenschap.
+    menuKeys.push([m[1], css.slice(m.index + m[0].length, i - 1).replace(/\/\*[\s\S]*?\*\//g, '')]);
   }
   const fout = [];
   for (const [naam, body] of menuKeys)
     for (const m of body.matchAll(/([a-z-]+)\s*:/g))
       if (!['transform', 'opacity'].includes(m[1])) fout.push(naam + ' → ' + m[1]);
-  check('Menu-arena animeert alleen transform en opacity', fout, []);
+  check('Menu en dueltoneel animeren alleen transform en opacity', fout, []);
   check('...en er zijn ook echt van die keyframes', menuKeys.length > 0, true);
 }
 

@@ -284,7 +284,7 @@
     animation: prTol .9s linear infinite; }
 
   /* De aanvaller doet een uitval richting de tegenstander */
-  .fighter.stoot { animation: fighterLunge 0.42s cubic-bezier(.3,-0.4,.4,1.5); }
+  .fighter.stoot, .dt-lijf.stoot { animation: fighterLunge 0.42s cubic-bezier(.3,-0.4,.4,1.5); }
   @keyframes fighterLunge { 0%,100% { transform: translateX(0) scale(1); }
     30% { transform: translateX(var(--lunge, 14px)) scale(1.06); } }
 
@@ -577,7 +577,7 @@
     width: 70px; height: 18px; border-radius: 50%; }
   .fighter.p1::after { background: radial-gradient(ellipse, rgba(59,130,246,0.6), transparent 70%); }
   .fighter.p2::after { background: radial-gradient(ellipse, rgba(239,68,68,0.6), transparent 70%); }
-  .fighter.raakt { animation: fighterHit 0.5s ease-out; }
+  .fighter.raakt, .dt-lijf.raakt { animation: fighterHit 0.5s ease-out; }
   .fighter.valt  { animation: fighterKO 0.9s ease-in forwards; }
   @keyframes fighterHit { 0%,100% { transform: translate(0,0); }
     20% { transform: translate(-8px,3px) rotate(-5deg); } 45% { transform: translate(7px,-2px) rotate(4deg); }
@@ -614,6 +614,92 @@
   #clash-flash { position: absolute; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(circle at 50% 42%, rgba(255,255,255,0.9) 0%, rgba(255,235,180,0.4) 30%, transparent 65%); }
   #clash-flash.go { animation: clashFlash 0.45s ease-out; }
   @keyframes clashFlash { 0% { opacity: 0.9; } 100% { opacity: 0; } }
+  /* ===== HET DUELTONEEL (sessie 43) =====
+     Zodra beide wielen stilstaan wijken ze en krijgen de twee kemphanen het
+     scherm voor zich alleen. De opbouw is drie lagen diep, en dat is geen
+     omslachtigheid maar noodzaak:
+       .dt-acteur — WAAR hij staat (via --x/--y/--r/--s, met een overgang)
+       .dt-lijf   — WAT hij doet (uitval, incasseren, vallen: keyframes)
+       img        — welke kant hij op kijkt, plus z'n ademhaling
+     Zou de uitval-animatie op dezelfde laag zitten als de positie, dan
+     overschrijft de keyframe de positie en klapt het figuur naar het midden. */
+  #duel-toneel { position: absolute; inset: 0; z-index: 5; pointer-events: none; opacity: 0;
+    transition: opacity 260ms ease; }
+  #duel-toneel.aan { opacity: 1; pointer-events: auto; cursor: pointer; }
+  /* Spot op het toneel: warm in het midden, donker naar de randen. Zonder dit
+     staan de twee in dezelfde schemer als al het andere en poppen ze niet. */
+  #duel-toneel::before { content: ''; position: absolute; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(ellipse 68% 26% at 50% 46%, rgba(255,204,140,0.20), transparent 70%),
+      radial-gradient(ellipse 120% 70% at 50% 46%, transparent 34%, rgba(6,3,2,0.72) 82%); }
+  /* Het hele speelvlak schaalt mee met de schermbreedte. Doorgerekend: vanaf
+     het midden reikt een tuimelende figuur tot ongeveer 215 px (basis 72 +
+     terugslag 46 + z'n eigen halve breedte gedraaid). Op een telefoon van 360
+     past dat niet, en dan vliegt de verliezer het beeld uit. */
+  .dt-veld { position: absolute; inset: 0; transform: scale(var(--tsch, 1)); transform-origin: 50% 52%; }
+  .dt-vloer { position: absolute; left: 50%; top: 52%; width: 360px; height: 104px;
+    margin-left: -180px; margin-top: -30px; border-radius: 50%; transform: scale(0.6); opacity: 0;
+    transition: transform 300ms ease, opacity 300ms ease;
+    background: radial-gradient(ellipse at 50% 50%, rgba(255,228,178,0.52), rgba(255,158,66,0.22) 48%, transparent 76%); }
+  #duel-toneel.aan .dt-vloer { transform: scale(1); opacity: 1; }
+  .dt-acteur { position: absolute; left: 50%; top: 52%; width: 148px; height: 186px; margin-left: -74px;
+    display: flex; align-items: flex-end; justify-content: center;
+    transform: translate(calc(var(--x, 0px)), calc(-100% + var(--y, 0px))) rotate(var(--r, 0deg)) scale(var(--s, 1));
+    transition: transform 260ms cubic-bezier(.3,.7,.3,1); will-change: transform; }
+  .dt-lijf { width: 100%; height: 100%; display: flex; align-items: flex-end; justify-content: center; }
+  .dt-lijf img { max-width: 100%; max-height: 100%; transform: scaleX(var(--kijk, 1));
+    filter: drop-shadow(0 8px 12px rgba(0,0,0,0.9)) drop-shadow(0 0 16px rgba(255,190,110,0.28)); }
+  .dt-hint { position: absolute; left: 0; right: 0; bottom: 8%; text-align: center;
+    font-size: 0.72rem; letter-spacing: 0.12em; color: rgba(244,236,216,0.45); text-transform: uppercase; }
+
+  /* De val. Vier varianten, gekozen op lichaamsbouw: --kb is de richting van de
+     klap (-1 of 1), zodat hij altijd WEG van de slag tuimelt. Dit is de kleine
+     ragdoll; komt er ooit art in losse delen, dan verandert alleen wat hier
+     binnen beweegt. */
+  .dt-lijf.val-achterover { animation: valAchterover 900ms cubic-bezier(.3,.5,.4,1) forwards; }
+  .dt-lijf.val-tol        { animation: valTol        900ms cubic-bezier(.25,.6,.4,1) forwards; }
+  .dt-lijf.val-inzak      { animation: valInzak      900ms cubic-bezier(.4,.1,.7,1) forwards; }
+  .dt-lijf.val-los        { animation: valLos        900ms ease-out forwards; }
+  @keyframes valAchterover {
+    0%   { transform: translate(0,0) rotate(0deg); opacity: 1; }
+    18%  { transform: translate(calc(var(--kb,1) * 18px), -24px) rotate(calc(var(--kb,1) * 34deg)); }
+    48%  { transform: translate(calc(var(--kb,1) * 32px), 8px)  rotate(calc(var(--kb,1) * 92deg)); }
+    62%  { transform: translate(calc(var(--kb,1) * 38px), -7px) rotate(calc(var(--kb,1) * 106deg)); }
+    /* vanaf hier ligt hij: eerst nog even blijven liggen, dan pas vervagen */
+    78%  { transform: translate(calc(var(--kb,1) * 44px), 10px) rotate(calc(var(--kb,1) * 118deg)); opacity: 1; }
+    88%  { transform: translate(calc(var(--kb,1) * 45px), 10px) rotate(calc(var(--kb,1) * 119deg)); opacity: 1; }
+    100% { transform: translate(calc(var(--kb,1) * 46px), 10px) rotate(calc(var(--kb,1) * 120deg)); opacity: 0; } }
+  @keyframes valTol {
+    0%   { transform: translate(0,0) rotate(0deg) scale(1); opacity: 1; }
+    30%  { transform: translate(calc(var(--kb,1) * 24px), -40px) rotate(calc(var(--kb,1) * 180deg)) scale(0.94); }
+    68%  { transform: translate(calc(var(--kb,1) * 46px), -6px) rotate(calc(var(--kb,1) * 400deg)) scale(0.84); opacity: 1; }
+    86%  { transform: translate(calc(var(--kb,1) * 54px), 12px) rotate(calc(var(--kb,1) * 470deg)) scale(0.78); opacity: 1; }
+    100% { transform: translate(calc(var(--kb,1) * 56px), 12px) rotate(calc(var(--kb,1) * 480deg)) scale(0.76); opacity: 0; } }
+  @keyframes valInzak {
+    0%   { transform: translate(0,0) rotate(0deg) scale(1,1); opacity: 1; }
+    22%  { transform: translate(calc(var(--kb,1) * 12px), 2px) rotate(calc(var(--kb,1) * 6deg)) scale(1.04,0.94); }
+    60%  { transform: translate(calc(var(--kb,1) * 20px), 16px) rotate(calc(var(--kb,1) * 48deg)) scale(1.06,0.82); }
+    82%  { transform: translate(calc(var(--kb,1) * 26px), 22px) rotate(calc(var(--kb,1) * 74deg)) scale(1.1,0.72); opacity: 1; }
+    100% { transform: translate(calc(var(--kb,1) * 28px), 24px) rotate(calc(var(--kb,1) * 78deg)) scale(1.1,0.7); opacity: 0; } }
+  @keyframes valLos {
+    0%   { transform: translate(0,0) scale(1); opacity: 1; }
+    35%  { transform: translate(calc(var(--kb,1) * 14px), -22px) scale(1.06); opacity: 0.72; }
+    100% { transform: translate(calc(var(--kb,1) * 26px), -74px) scale(1.22); opacity: 0; } }
+
+  /* Camera: schok op het hele toneel, en één moment dat het beeld inzoomt op de
+     beslissende klap. */
+  #duel-toneel.schok { animation: clashShake 0.5s ease-out; }
+  #duel-toneel.zoom  { animation: toneelZoom 620ms ease-out; }
+  @keyframes toneelZoom { 0% { transform: scale(1); } 30% { transform: scale(1.09); } 100% { transform: scale(1); } }
+  /* Zolang het toneel speelt zakken de wielen weg. Alleen schaal en opacity —
+     een filter zou hier elke frame opnieuw berekend worden. */
+  .disks-row { transition: transform 300ms ease, opacity 300ms ease; }
+  .disks-row.wijk { transform: scale(0.72); opacity: 0.07; }
+  @media (prefers-reduced-motion: reduce) {
+    #duel-toneel, .dt-vloer, .dt-acteur, .disks-row { transition: none; }
+    .dt-lijf[class*="val-"], #duel-toneel.schok, #duel-toneel.zoom { animation: none; }
+  }
+
   .disks-row.clash { animation: clashShake 0.5s ease-out; }
   @keyframes clashShake { 0%,100% { transform: translate(0,0); } 15% { transform: translate(-7px,2px); } 30% { transform: translate(6px,-2px); } 45% { transform: translate(-4px,1px); } 60% { transform: translate(3px,-1px); } 80% { transform: translate(-1px,0); } }
   @media (prefers-reduced-motion: reduce) { .disks-row.clash, #clash-flash.go { animation: none; } }
@@ -1279,6 +1365,16 @@
 </div>
 <div id="combat-overlay" class="overlay">
   <div id="clash-flash"></div>
+  <!-- Het toneel waar de twee elkaar echt opzoeken. Staat onder de FX-laag,
+       zodat projectielen en inslagen er overheen spelen. -->
+  <div id="duel-toneel" aria-hidden="true">
+    <div class="dt-veld" id="dt-veld">
+      <div class="dt-vloer"></div>
+      <div class="dt-acteur" id="dt-att"><div class="dt-lijf fighter"></div></div>
+      <div class="dt-acteur" id="dt-def"><div class="dt-lijf fighter"></div></div>
+    </div>
+    <div class="dt-hint">tik om over te slaan</div>
+  </div>
   <div id="attack-fx"></div>
   <div class="combat-vs">— DUEL —</div>
   <div class="disks-row">
@@ -3784,6 +3880,212 @@ function speelTreffer(bron, doel, soort, geblokt) {
   return raakNa + 620 * schaal;
 }
 
+
+// ==========================================
+// HET DUELTONEEL (sessie 43) — zes choreografieën, nooit twee keer dezelfde
+// Koen: "het moeten drie verschillende bewegingen zijn, je moet nooit weten wat
+// er komt." Dat is niet alleen mooier maar ook de enige manier waarop een
+// filmpje van twee seconden een heel potje lang leuk blijft: je ziet een
+// gevecht tientallen keren, en één vaste opname gaat vervelen.
+// Elke scène heeft een past() die kijkt naar wat er ECHT gedraaid is, zodat de
+// beweging altijd klopt met de uitkomst — een pareerslag speelt alleen als er
+// ook werkelijk geblokt is. Uit de scènes die passen wordt willekeurig gekozen,
+// maar nooit dezelfde als de vorige keer.
+// ==========================================
+// TONEEL-START (marker voor headless tests — niet verwijderen)
+
+// Welke val hoort bij dit lichaam? Een reus zakt in, een geest lost op, iets
+// met vleugels tolt weg, de rest gaat achterover.
+const VAL_PER_LIJF = { zwaar:'val-inzak', steen:'val-inzak', geest:'val-los',
+                       vleugel:'val-tol', slang:'val-tol', mens:'val-achterover', beest:'val-achterover' };
+function valVoor(defKey) { return VAL_PER_LIJF[lijfVan(defKey)] || 'val-achterover'; }
+
+const DUEL_SCENES = [
+  { naam:'uitval',
+    past: c => !!(c.fxA || c.fxD),
+    speel: async c => {
+      const [slaan, incasseren] = c.fxA ? [c.att, c.def] : [c.def, c.att];
+      await c.opkomst(160);
+      c.zet(slaan, { x: slaan.kant * 26 }, 220); await c.pauze(200);
+      await c.klap(slaan, incasseren);
+    } },
+
+  { naam:'botsing',
+    past: c => !!(c.fxA && c.fxD),
+    speel: async c => {
+      await c.opkomst(120);
+      c.zet(c.att, { x: c.att.kant * 34 }, 240);
+      c.zet(c.def, { x: c.def.kant * 34 }, 240);
+      await c.pauze(240);
+      c.schok(); await c.klap(c.att, c.def, true);   // en meteen terug
+    } },
+
+  { naam:'pareerslag',
+    past: c => !!((c.fxA && c.geblokD) || (c.fxD && c.geblokA)),
+    speel: async c => {
+      const [slaan, blokken] = (c.fxA && c.geblokD) ? [c.att, c.def] : [c.def, c.att];
+      await c.opkomst(160);
+      c.zet(slaan, { x: slaan.kant * 30 }, 200); await c.pauze(190);
+      await c.klap(slaan, blokken);
+      // Terugstuiteren op het schild: dát is wat een blok betekent.
+      c.zet(slaan, { x: slaan.kant * -18, r: slaan.kant * -8 }, 180); await c.pauze(200);
+      c.zet(slaan, { x: slaan.kant * 6, r: 0 }, 220); await c.pauze(160);
+    } },
+
+  { naam:'vloek',
+    past: c => c.aSlot.k === 'purple' || c.dSlot.k === 'purple',
+    speel: async c => {
+      const [vloeker, slachtoffer] = c.aSlot.k === 'purple' ? [c.att, c.def] : [c.def, c.att];
+      await c.opkomst(200);
+      // Geen aanloop: de vloeker rijst op en het teken reist traag over.
+      c.zet(vloeker, { y: -18, s: 1.06 }, 380); await c.pauze(400);
+      await c.klap(vloeker, slachtoffer);
+      c.zet(slachtoffer, { s: 0.92, r: slachtoffer.kant * 5 }, 260);
+      c.zet(vloeker, { y: 0, s: 1 }, 320); await c.pauze(280);
+    } },
+
+  { naam:'doorbraak',
+    past: c => c.aSlot.k === 'gold' || c.dSlot.k === 'gold',
+    speel: async c => {
+      const [door, geraakt] = c.aSlot.k === 'gold' ? [c.att, c.def] : [c.def, c.att];
+      await c.opkomst(140);
+      // Als een veeg dwars langs de ander heen, en dan van achteren.
+      c.zet(door, { x: door.kant * -70, s: 0.94 }, 190); await c.pauze(190);
+      c.zet(geraakt, { r: geraakt.kant * -10 }, 160);
+      c.zoom(); await c.klap(door, geraakt);
+      c.zet(door, { x: door.kant * 10, s: 1 }, 260); await c.pauze(220);
+    } },
+
+  { naam:'misser',
+    past: c => !c.fxA && !c.fxD,
+    speel: async c => {
+      const uitvaller = c.aSlot.k === 'red' ? c.att : c.def;
+      const ander = uitvaller === c.att ? c.def : c.att;
+      await c.opkomst(160);
+      c.zet(uitvaller, { x: uitvaller.kant * 44, r: uitvaller.kant * 8 }, 200);
+      c.zet(ander, { x: ander.kant * -30, y: -6 }, 200);          // stapt opzij
+      await c.pauze(230);
+      c.zet(uitvaller, { x: uitvaller.kant * 62, r: uitvaller.kant * 18 }, 260);  // struikelt door
+      await c.klap(uitvaller, ander);
+      c.zet(uitvaller, { x: uitvaller.kant * 20, r: 0 }, 300);
+      c.zet(ander, { x: 0, y: 0 }, 300); await c.pauze(280);
+    } },
+];
+
+// Kiest een scène die past bij wat er gedraaid is, maar nooit dezelfde als de
+// vorige keer. Zonder dat laatste komt 'uitval' er veruit het vaakst uit, want
+// die past op de meeste uitkomsten.
+function kiesDuelScene(ctx, vorige) {
+  const passend = DUEL_SCENES.filter(sc => sc.past(ctx));
+  if (!passend.length) return DUEL_SCENES.find(sc => sc.naam === 'misser');
+  const anders = passend.filter(sc => sc.naam !== vorige);
+  const pool = anders.length ? anders : passend;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+// De regie: toneel opzetten, de gekozen scène spelen, de verliezer laten
+// tuimelen, opruimen. Geeft terug welke scène gespeeld is (de tests lezen dat).
+let toneelOverslaan = false;
+async function speelDuelScene(att, def, info) {
+  const toneel = document.getElementById('duel-toneel');
+  const rij = document.querySelector('#combat-overlay .disks-row');
+  const laag = document.getElementById('attack-fx');
+  if (!toneel || animOff()) return null;
+  const schaal = animScale() || 1;
+
+  const maak = (id, unit, basis, kant) => {
+    const elm = document.getElementById(id), lijf = elm.querySelector('.dt-lijf');
+    lijf.className = 'dt-lijf fighter';
+    lijf.innerHTML = unitVisual(unit.defKey, unit.owner, 150);
+    const img = lijf.querySelector('img'); if (img) img.style.setProperty('--kijk', kant > 0 ? 1 : -1);
+    elm.style.transitionDuration = '0ms';
+    elm.style.setProperty('--x', basis + 'px');
+    for (const v of ['--y', '--r', '--s']) elm.style.removeProperty(v);
+    return { elm, lijf, basis, kant, unit };
+  };
+  // De aanvaller links, de verdediger rechts; kant is de richting waarin hij
+  // z'n tegenstander ziet staan, zodat elke scène "naar voren" kan zeggen
+  // zonder zelf over links en rechts na te denken.
+  const veld = document.getElementById('dt-veld');
+  if (veld) veld.style.setProperty('--tsch', Math.min(1, (window.innerWidth / 2 - 10) / 215).toFixed(3));
+  const A = maak('dt-att', att, -72, 1), D = maak('dt-def', def, 72, -1);
+
+  toneelOverslaan = false;
+  const opOverslaan = () => { toneelOverslaan = true; };
+  toneel.addEventListener('click', opOverslaan);
+  const pauze = ms => new Promise(res => {
+    if (toneelOverslaan) return res();
+    const t = setTimeout(res, Math.round(ms * schaal));
+    const kijk = setInterval(() => { if (toneelOverslaan) { clearTimeout(t); clearInterval(kijk); res(); } }, 40);
+    setTimeout(() => clearInterval(kijk), Math.round(ms * schaal) + 20);
+  });
+
+  const ctx = {
+    att: A, def: D, aSlot: info.aSlot, dSlot: info.dSlot,
+    fxA: info.fxA, fxD: info.fxD,
+    geblokA: info.aSlot.k === 'blue', geblokD: info.dSlot.k === 'blue',
+    pauze,
+    zet(acteur, v, ms) {
+      acteur.elm.style.transitionDuration = Math.round((ms == null ? 260 : ms) * schaal) + 'ms';
+      if (v.x != null) acteur.elm.style.setProperty('--x', (acteur.basis + v.x) + 'px');
+      if (v.y != null) acteur.elm.style.setProperty('--y', v.y + 'px');
+      if (v.r != null) acteur.elm.style.setProperty('--r', v.r + 'deg');
+      if (v.s != null) acteur.elm.style.setProperty('--s', v.s);
+    },
+    async opkomst(ms) {
+      ctx.zet(A, { x: 0 }, 300); ctx.zet(D, { x: 0 }, 300);
+      await pauze(ms == null ? 160 : ms);
+    },
+    schok() { beweegKlasse(toneel, 'schok', 520 * schaal); },
+    zoom()  { beweegKlasse(toneel, 'zoom', 640 * schaal); },
+    // Eén klap, met de bestaande choreografie uit speelTreffer. `terug` laat de
+    // ander vlak erna van zich af slaan (dat is wat een botsing onderscheidt).
+    async klap(bron, doel, terug) {
+      const soort = bron === A ? info.fxA : info.fxD;
+      const geblokt = bron === A ? ctx.geblokD : ctx.geblokA;
+      let wacht = soort ? speelTreffer(bron.lijf, doel.lijf, soort, geblokt) : 260 * schaal;
+      if (terug) {
+        const soort2 = bron === A ? info.fxD : info.fxA;
+        const geblokt2 = bron === A ? ctx.geblokA : ctx.geblokD;
+        if (soort2) setTimeout(() => speelTreffer(doel.lijf, bron.lijf, soort2, geblokt2), Math.round(200 * schaal));
+        wacht = Math.max(wacht, 200 * schaal + 700 * schaal);
+      }
+      await pauze(wacht / schaal);
+    },
+  };
+
+  rij && rij.classList.add('wijk');
+  toneel.classList.add('aan');
+  await pauze(240);
+
+  const scene = kiesDuelScene(ctx, state.laatsteScene);
+  state.laatsteScene = scene.naam;
+  await scene.speel(ctx);
+
+  // De val. Weg van degene die sloeg, dus de richting komt uit de opstelling.
+  const valLijst = [];
+  if (info.attNeer) valLijst.push([A, -A.kant]);
+  if (info.defNeer) valLijst.push([D, -D.kant]);
+  if (valLijst.length) {
+    for (const [acteur, richting] of valLijst) {
+      acteur.lijf.style.setProperty('--kb', richting);
+      acteur.lijf.classList.add(valVoor(acteur.unit.defKey));
+    }
+    ctx.schok(); sfx('ko');
+    await pauze(880);
+  } else {
+    await pauze(220);
+  }
+
+  toneel.classList.remove('aan');
+  toneel.removeEventListener('click', opOverslaan);
+  rij && rij.classList.remove('wijk');
+  await pauze(240);
+  if (laag) laag.innerHTML = '';
+  return scene.naam;
+}
+// TONEEL-END (marker voor headless tests — niet verwijderen)
+
 // ===== Plates als KAARTEN op tafel (Duel-look) =====
 // In Duel liggen je support-kaarten rechtsonder naast het veld. Hier tekenen we
 // ze in de bord-SVG zelf, licht gewaaierd, met het icoon en de naam erop.
@@ -5103,7 +5405,9 @@ async function runCombat(att, def) {
   document.getElementById('combat-result').textContent = ''; document.getElementById('btn-combat-continue').style.display = 'none';
   ov.classList.add('active');
 
-  const [aIdx, dIdx] = await Promise.all([spin(attDiskId, 2800 + Math.random()*400), spin(defDiskId, 3400 + Math.random()*400)]);
+  // Korter draaien dan vroeger (was 2800/3400): sinds er een scène achteraan
+  // komt, leest een lange aanloop als wachten in plaats van als spanning.
+  const [aIdx, dIdx] = await Promise.all([spin(attDiskId, 1900 + Math.random()*300), spin(defDiskId, 2300 + Math.random()*300)]);
 
   // Clash: flits + schok zodra beide wielen stilstaan
   sfx('clash');
@@ -5202,9 +5506,17 @@ async function runCombat(att, def) {
     const schaal = animOff() ? 0 : (animScale() || 1);
     const fxA = attackFx(aSlot), fxD = attackFx(dSlot);
     const attNeer = r.attKO || attRetreat, defNeer = r.defKO || defRetreat;
+
+    // Het toneel: de twee zoeken elkaar echt op, in een van zes choreografieën.
+    // Lukt dat (animaties aan), dan is de afhandeling hieronder al gespeeld en
+    // slaan we hem over. Staat het tempo op 'uit', dan valt alles terug op de
+    // oude, stilstaande weergave naast de wielen.
+    const gespeeld = await speelDuelScene(att, def, { aSlot, dSlot, fxA, fxD, attNeer, defNeer });
+    if (gespeeld) { state.laatsteScene = gespeeld; }
+
     let wacht = 0;
-    if (fxA) wacht = Math.max(wacht, speelTreffer(attFig, defFig, fxA, dSlot.k === 'blue'));
-    if (fxD) {
+    if (!gespeeld && fxA) wacht = Math.max(wacht, speelTreffer(attFig, defFig, fxA, dSlot.k === 'blue'));
+    if (!gespeeld && fxD) {
       const start = Math.round((fxA ? 220 : 0) * schaal);
       setTimeout(() => speelTreffer(defFig, attFig, fxD, aSlot.k === 'blue'), start);
       wacht = Math.max(wacht, start + 760 * schaal);
@@ -5216,14 +5528,16 @@ async function runCombat(att, def) {
     // gedraaid is staat sowieso onder het scherm ("Miss ⚔ Grafzwaard 40").
     const attRaakt = !!fxD || attNeer;   // de aanvaller krijgt zelf iets te verduren
     const defRaakt = !!fxA || defNeer;
-    if (!fxA && aSlot.k === 'red' && !attRaakt) { toonBadge('mis', fxMidden(attFig, fxLaag)); sfx('mis'); }
-    if (!fxD && dSlot.k === 'red' && !defRaakt) { toonBadge('mis', fxMidden(defFig, fxLaag)); sfx('mis'); }
-    if (!fxA && !fxD && aSlot.k === 'blue' && !attRaakt) toonBadge('schild', fxMidden(attFig, fxLaag));
-    if (!fxA && !fxD && dSlot.k === 'blue' && !defRaakt) toonBadge('schild', fxMidden(defFig, fxLaag));
-    if (!fxA && !fxD) wacht = Math.max(wacht, 620 * schaal);
+    if (!gespeeld) {
+      if (!fxA && aSlot.k === 'red' && !attRaakt) { toonBadge('mis', fxMidden(attFig, fxLaag)); sfx('mis'); }
+      if (!fxD && dSlot.k === 'red' && !defRaakt) { toonBadge('mis', fxMidden(defFig, fxLaag)); sfx('mis'); }
+      if (!fxA && !fxD && aSlot.k === 'blue' && !attRaakt) toonBadge('schild', fxMidden(attFig, fxLaag));
+      if (!fxA && !fxD && dSlot.k === 'blue' && !defRaakt) toonBadge('schild', fxMidden(defFig, fxLaag));
+      if (!fxA && !fxD) wacht = Math.max(wacht, 620 * schaal);
+    }
     // Wie het niet overleeft gaat neer — ook als de winnende klap niet zichtbaar
     // was (goud dat op een blok stukloopt, bijvoorbeeld).
-    if (attNeer || defNeer) {
+    if (!gespeeld && (attNeer || defNeer)) {
       const valNa = Math.max(0, wacht - 360 * schaal);
       if (attNeer && attFig) setTimeout(() => attFig.classList.add('valt'), valNa);
       if (defNeer && defFig) setTimeout(() => defFig.classList.add('valt'), valNa);

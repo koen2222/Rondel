@@ -196,7 +196,18 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
     }
     ok('Er vliegt een aanval van de één naar de ander', zagVlucht);
     ok('Een blok toont een schild-icoon', zagSchild);
+    // Het toneel: de twee moeten elkaar echt opzoeken, en de wielen wijken.
+    ok('De twee staan op het dueltoneel',
+      await page.locator('#duel-toneel.aan .dt-lijf img').count() === 2);
+    ok('De wielen wijken tijdens de scène',
+      await page.locator('#combat-overlay .disks-row.wijk').count() === 1);
+    ok('Er is een scène gekozen die bij de uitkomst past',
+      typeof (await page.evaluate(() => state.laatsteScene)) === 'string');
+    // Overslaan: een filmpje dat je honderd keer ziet moet weg kunnen.
+    const voorTik = Date.now();
+    await page.locator('#duel-toneel').click({ position: { x: 30, y: 30 } });
     await page.waitForSelector('#btn-combat-continue:visible', { timeout: 8000 });
+    ok('Tikken slaat de scène over', Date.now() - voorTik < 2500);
     // Het gedraaide vak licht op — en wel precies het vak waar de wijzer staat
     const mark = await page.evaluate(() => {
       const uit = [];

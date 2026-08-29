@@ -39,6 +39,20 @@ except ImportError:
     sys.exit("Pillow ontbreekt. Installeer met: pip install pillow")
 
 
+# Welk uitknipmodel voor welk figuur? isnet-general-use doet het voor bijna
+# iedereen het beste, maar laat bij een handvol figuren een stuk muur staan —
+# op een donkere achtergrond zie je dat niet, op het gevechtstoneel wel. Bij die
+# paar knipt u2net wel schoon. Controleer nieuwe figuren dus altijd op een
+# FELLE achtergrond (magenta), niet op een donkere.
+MODEL = {
+    "harpy.png": "u2net",
+    "hydra.png": "u2net",
+    "ahuizotl.png": "u2net",
+    "jaguarwarrior.png": "u2net",
+    "tiamat.png": "u2net",
+}
+
+
 # Waar houdt het figuur op en begint de sokkel? Per bestand een fractie van de
 # EIGEN hoogte van het figuur (0 = bovenkant, 1 = onderkant), afgelezen van het
 # lineaalvel. Staat een figuur er niet in, dan blijft de sokkel staan en zegt
@@ -330,7 +344,11 @@ def main():
         with open(args.namen) as f:
             namen = [r.strip() for r in f if r.strip()]
 
-    sessie = new_session(args.model)
+    sessies = { args.model: new_session(args.model) }
+    def sessie_voor(naam):
+        m = MODEL.get(naam, args.model)
+        if m not in sessies: sessies[m] = new_session(m)
+        return sessies[m]
     paren = [] if (args.masker_vel or args.lineaal_vel) else None
     n = 0
     for y0, y1 in rb:
@@ -339,12 +357,12 @@ def main():
             naam = namen[n] if n < len(namen) else f"fig{n}.png"
             n += 1
             snij = None if args.houd_sokkel else SOKKEL.get(naam)
-            fig = knip_figuur(cel, sessie, args.marge, args.hoogte, snij, paren)
+            fig = knip_figuur(cel, sessie_voor(naam), args.marge, args.hoogte, snij, paren)
             if fig is None:
                 print(f"  ! {naam}: niets gevonden")
                 continue
             fig.save(os.path.join(args.uit, naam))
-            hoe = f"  sokkel bij {snij:.2f}" if snij is not None else "  SOKKEL ONBEKEND"
+            hoe = (f"  sokkel bij {snij:.2f}" if snij is not None else "  SOKKEL ONBEKEND") + (f"  [{MODEL[naam]}]" if naam in MODEL else "")
             print(f"  ✓ {naam}  {fig.size[0]}x{fig.size[1]}{hoe}")
     if paren:
         if args.masker_vel:
