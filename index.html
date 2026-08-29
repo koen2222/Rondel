@@ -81,7 +81,7 @@
     box-shadow: inset 0 0 90px rgba(0,0,0,0.7), 0 10px 34px rgba(0,0,0,0.92); }
   /* De vloer is NIET één kleur: er liggen zachte kleurvlekken overheen, zoals
      het parelmoerachtige oppervlak in Duel. Elke arena heeft z'n eigen palet. */
-  .board-wrap[data-arena="vuur"] {
+  .board-wrap[data-arena="vuur"], .ha-vloer[data-arena="vuur"] {
     background:
       radial-gradient(ellipse 34% 20% at 22% 24%, rgba(250,204,21,0.30), transparent 70%),
       radial-gradient(ellipse 30% 18% at 78% 30%, rgba(244,63,94,0.28), transparent 70%),
@@ -89,14 +89,14 @@
       radial-gradient(ellipse 36% 22% at 74% 78%, rgba(251,146,60,0.32), transparent 72%),
       radial-gradient(ellipse 62% 34% at 50% 36%, rgba(253,186,116,0.34), transparent 72%),
       radial-gradient(ellipse 85% 62% at 50% 44%, #8a3410 0%, #4a1408 52%, #1a0705 100%); }
-  .board-wrap[data-arena="kristal"] {
+  .board-wrap[data-arena="kristal"], .ha-vloer[data-arena="kristal"] {
     background:
       radial-gradient(ellipse 34% 20% at 24% 26%, rgba(103,232,249,0.26), transparent 70%),
       radial-gradient(ellipse 30% 18% at 76% 30%, rgba(244,114,182,0.22), transparent 70%),
       radial-gradient(ellipse 32% 20% at 28% 76%, rgba(167,139,250,0.26), transparent 70%),
       radial-gradient(ellipse 36% 22% at 74% 74%, rgba(147,197,253,0.24), transparent 72%),
       linear-gradient(180deg, #5b4a82 0%, #423463 32%, #302750 62%, #1a1530 100%); }
-  .board-wrap[data-arena="woud"] {
+  .board-wrap[data-arena="woud"], .ha-vloer[data-arena="woud"] {
     background:
       radial-gradient(ellipse 34% 20% at 22% 26%, rgba(190,242,100,0.26), transparent 70%),
       radial-gradient(ellipse 30% 18% at 78% 30%, rgba(45,212,191,0.24), transparent 70%),
@@ -717,38 +717,94 @@
      opstijgende sintels en een donkere hemel erboven. Alles in CSS, want dit is
      een statische laag die niets hoeft te herberekenen. */
   .home { position: relative; min-height: 100vh; max-width: 500px; margin: 0 auto; padding: 40px 18px 30px; display: flex; flex-direction: column; gap: 18px;
+    background: transparent; }
+
+  /* ===== MENU-ARENA =====
+     Het menu kijkt uit over de arena waarin je straks vecht, en draait er traag
+     omheen — zoals een voetbalspel z'n stadion op de achtergrond laat zien.
+     De hele schijf is ÉÉN element met een 3D-transform, zodat de browser hem als
+     losse compositielaag mag afhandelen. Er beweegt daarom alleen transform en
+     opacity; niets dat opnieuw berekend moet worden. Dat is dezelfde regel die
+     de rest van het spel op 60 fps houdt (zie de arena-CSS hierboven). */
+  #home-arena { position: fixed; inset: 0; overflow: hidden; z-index: 0; pointer-events: none;
     background:
-      radial-gradient(ellipse 60% 30% at 50% 104%, rgba(251,146,60,0.30), transparent 70%),
-      radial-gradient(ellipse 40% 24% at 12% 88%, rgba(244,63,94,0.16), transparent 72%),
-      radial-gradient(ellipse 40% 24% at 88% 84%, rgba(250,204,21,0.14), transparent 72%),
-      radial-gradient(ellipse 70% 40% at 50% 16%, #22193a 0%, #120e21 55%, #060410 100%); }
-  #home-fx { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+      radial-gradient(ellipse 120% 44% at 50% 64%, rgba(255,201,128,0.34), transparent 68%),
+      radial-gradient(ellipse 76% 28% at 50% 50%, rgba(255,146,54,0.30), transparent 70%),
+      linear-gradient(180deg, #3d2456 0%, #6d3651 19%, #a85c33 38%, #dd9440 53%, #77401f 70%, #29150f 100%); }
+  #home-arena .wrap3d { position: absolute; inset: 0; perspective: 860px; perspective-origin: 50% 34%; }
+  .ha-schijf { position: absolute; left: 50%; top: 61%; width: 124vw; height: 124vw;
+    margin-left: -62vw; margin-top: -62vw; border-radius: 50%;
+    transform: rotateX(64deg); transform-origin: 50% 50%;
+    animation: haDraai 150s linear infinite;
+    will-change: transform; backface-visibility: hidden;
+    box-shadow: 0 0 0 4px rgba(255,231,180,0.42), 0 0 26px 6px rgba(255,190,110,0.45),
+                0 0 140px 40px rgba(255,163,64,0.32); }
+  @keyframes haDraai { from { transform: rotateX(64deg) rotateZ(0deg); }
+                       to   { transform: rotateX(64deg) rotateZ(360deg); } }
+  /* Drie vloeren over elkaar; ze wisselen elkaar af, elk ~28 seconden in beeld.
+     De vertragingen zijn negatief, dus er staat er bij het openen meteen één
+     goed en je ziet nooit twee arena's tegelijk. */
+  .ha-vloer { position: absolute; inset: 0; border-radius: 50%; opacity: 0;
+    animation: haVloerWissel 90s linear infinite; }
+  .ha-vloer:nth-of-type(1) { animation-delay: 0s; }
+  .ha-vloer:nth-of-type(2) { animation-delay: -30s; }
+  .ha-vloer:nth-of-type(3) { animation-delay: -60s; }
+  @keyframes haVloerWissel { 0%, 30% { opacity: 1; } 33.3%, 96.7% { opacity: 0; } 100% { opacity: 1; } }
+  /* Het licht dat op de vloer valt. Statische gradient binnen de draaiende laag,
+     dus hij wordt één keer getekend en daarna alleen meegedraaid. */
+  .ha-vloer::after { content: ''; position: absolute; inset: 0; border-radius: 50%;
+    background: radial-gradient(circle at 50% 42%, rgba(255,236,195,0.52), rgba(255,182,96,0.26) 44%, rgba(255,150,60,0.10) 66%, transparent 80%); }
+  .ha-bord { position: absolute; left: 50%; top: 50%; width: 72%; height: 72%;
+    margin: -36% 0 0 -36%; overflow: visible; opacity: 0.9; }
+  .ha-lijn  { stroke: rgba(255,242,215,0.62); stroke-width: 5; }
+  .ha-punt  { fill: rgba(26,12,7,0.42); stroke: rgba(255,233,185,0.75); stroke-width: 3.5; }
+  .ha-punt.ha-entry { fill: rgba(255,182,92,0.20); stroke: rgba(255,226,172,0.85); }
+  .ha-punt.ha-goal  { fill: rgba(255,198,112,0.32); stroke: rgba(255,242,205,0.95); stroke-width: 5; }
+  /* De verre rand van de schijf smelt in de lucht, de voorrand wordt donkerder
+     zodat de tegels leesbaar blijven. */
+  .ha-horizon { position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(61,36,86,0.94) 0%, rgba(109,54,81,0.58) 15%, rgba(0,0,0,0) 36%,
+                rgba(0,0,0,0) 66%, rgba(38,20,14,0.62) 86%, rgba(24,12,9,0.86) 100%); }
+  @media (min-width: 720px) {
+    .ha-schijf { width: 900px; height: 900px; margin-left: -450px; margin-top: -450px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ha-schijf { animation: none; }
+    .ha-vloer { animation: none; opacity: 0; }
+    .ha-vloer:nth-of-type(1) { opacity: 1; }
+  }
+
+  #home-fx { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 1; }
   #home-fx i { position: absolute; display: block; width: 4px; height: 4px; border-radius: 50%;
     background: radial-gradient(circle, rgba(255,236,190,0.9), rgba(255,170,90,0) 70%);
     animation: emberRise linear infinite; }
-  .home > *:not(#home-fx) { position: relative; z-index: 1; }
+  .home > *:not(#home-fx):not(#home-arena) { position: relative; z-index: 2; }
   @media (prefers-reduced-motion: reduce) { #home-fx { display: none; } }
   .home-title { text-align: center; font-family: 'Cinzel', serif; font-weight: 900; font-size: 3rem; letter-spacing: 0.18em; color: var(--gold); text-shadow: 0 0 25px var(--gold-glow), 0 4px 8px rgba(0,0,0,0.8); margin-top: 12px;
     animation: titelGloed 5s ease-in-out infinite; }
   @keyframes titelGloed { 0%,100% { text-shadow: 0 0 25px var(--gold-glow), 0 4px 8px rgba(0,0,0,0.8); }
     50% { text-shadow: 0 0 42px var(--gold-glow), 0 0 12px rgba(253,224,71,0.5), 0 4px 8px rgba(0,0,0,0.8); } }
   @media (prefers-reduced-motion: reduce) { .home-title { animation: none; } }
-  .home-sub { text-align: center; font-style: italic; color: #a89f91; font-size: 0.95rem; margin-top: -12px; }
+  .home-sub { text-align: center; font-style: italic; color: #f3ddc0; font-size: 0.95rem; margin-top: -12px; text-shadow: 0 2px 8px rgba(30,12,6,0.8); }
   .profile-bar { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
-  .profile-chip { background: linear-gradient(145deg, #2a201a, #14100d); border: 1px solid rgba(245,158,11,0.3); border-radius: 20px; padding: 6px 16px; font-family: 'Cinzel', serif; font-size: 0.8rem; color: var(--ink); }
+  .profile-chip { background: linear-gradient(145deg, rgba(62,40,26,0.82), rgba(26,16,11,0.88)); border: 1px solid rgba(253,224,71,0.34); border-radius: 20px; padding: 6px 16px; font-family: 'Cinzel', serif; font-size: 0.8rem; color: var(--ink); box-shadow: 0 4px 14px rgba(20,8,4,0.4); }
   .profile-chip b { color: var(--gold); }
   .home-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; }
-  .home-tile { position: relative; background: linear-gradient(160deg, #241c33, #110d1d); border: 1px solid rgba(125,211,252,0.15); border-radius: 14px; padding: 20px 12px 16px; text-align: center; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; overflow: hidden; }
-  .home-tile::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 45%; background: linear-gradient(180deg, rgba(255,255,255,0.06), transparent); pointer-events: none; }
+  /* Doorschijnend en warm: de arena blijft er doorheen leven in plaats van dat
+     de tegels hem afdekken. Geen backdrop-filter — die kostte de helft van de
+     fps (gemeten, sessie 36). */
+  .home-tile { position: relative; background: linear-gradient(160deg, rgba(72,40,30,0.72), rgba(30,15,12,0.84)); border: 1px solid rgba(253,224,71,0.22); border-radius: 14px; padding: 20px 12px 16px; text-align: center; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; overflow: hidden;
+    box-shadow: 0 6px 22px rgba(20,8,4,0.45), inset 0 1px 0 rgba(255,222,170,0.14); }
+  .home-tile::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 45%; background: linear-gradient(180deg, rgba(255,228,180,0.10), transparent); pointer-events: none; }
   .home-tile:active { transform: scale(0.97); }
-  .home-tile.big { grid-column: 1 / -1; padding: 26px 12px; border-color: rgba(245,158,11,0.45); box-shadow: 0 0 18px rgba(245,158,11,0.12); }
+  .home-tile.big { grid-column: 1 / -1; padding: 26px 12px; border-color: rgba(253,224,71,0.55); box-shadow: 0 0 26px rgba(245,158,11,0.28), inset 0 1px 0 rgba(255,232,190,0.20); }
   /* Gouden veeg die traag over de duel-tegel loopt */
   .home-tile.big::after { content: ''; position: absolute; top: -50%; left: -70%; width: 45%; height: 200%;
     background: linear-gradient(90deg, transparent, rgba(253,224,71,0.16), transparent);
     transform: rotate(16deg); animation: tegelVeeg 6s ease-in-out infinite; pointer-events: none; }
   @keyframes tegelVeeg { 0%, 62% { left: -70%; } 100% { left: 130%; } }
   .home-tile .ico { display: block; margin: 0 auto 8px; width: 38px; height: 38px;
-    color: #cbd5e1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.7)); }
+    color: #ffe9c4; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.7)); }
   .home-tile.big .ico { width: 46px; height: 46px; color: var(--gold);
     filter: drop-shadow(0 0 10px var(--gold-glow)) drop-shadow(0 2px 4px rgba(0,0,0,0.7)); }
   /* De tegels komen één voor één binnen als je het menu opent */
@@ -768,7 +824,13 @@
   .home-tile .tdesc { font-size: 0.72rem; color: #a89f91; margin-top: 4px; }
   .home-foot { text-align: center; color: #665f52; font-size: 0.7rem; margin-top: auto; padding-top: 20px; }
 
-  .subscreen { min-height: 100vh; max-width: 500px; margin: 0 auto; padding: 16px 12px 30px; display: flex; flex-direction: column; gap: 12px; background: radial-gradient(ellipse at 50% 15%, #17122a 0%, #0b0916 55%, #050409 100%); }
+  /* Zelfde warme licht als het menu: anders stap je uit een verlichte arena
+     zo een koude kelder in. */
+  .subscreen { min-height: 100vh; max-width: 500px; margin: 0 auto; padding: 16px 12px 30px; display: flex; flex-direction: column; gap: 12px;
+    background:
+      radial-gradient(ellipse 90% 30% at 50% 100%, rgba(251,146,60,0.20), transparent 72%),
+      radial-gradient(ellipse 70% 34% at 50% 6%, rgba(255,180,90,0.12), transparent 70%),
+      linear-gradient(180deg, #2a1b2e 0%, #1a1119 42%, #100a0e 74%, #080506 100%); }
   .subscreen-head { display: flex; align-items: center; gap: 12px; }
   .btn-back { background: linear-gradient(145deg, #2a201a, #14100d); border: 1px solid rgba(245,158,11,0.35); color: var(--gold); border-radius: 10px; padding: 8px 14px; font-family: 'Cinzel', serif; font-size: 0.85rem; cursor: pointer; }
   .subscreen-title { font-family: 'Cinzel', serif; font-weight: 700; font-size: 1.15rem; letter-spacing: 0.12em; color: var(--gold); }
@@ -793,7 +855,7 @@
   /* Kaarten in de winkel: zelfde kaartje als een figuur, maar met de beschrijving eronder. */
   .coll-card.plate-koop .sub { font-size: 0.68rem; line-height: 1.25; min-height: 2.5em; }
   .coll-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-  .coll-card { position: relative; background: linear-gradient(160deg, #241c33, #110d1d); border: 1px solid rgba(125,211,252,0.14); border-radius: 12px; padding: 12px 6px 10px; text-align: center; cursor: pointer; transition: transform 0.15s; overflow: hidden; }
+  .coll-card { position: relative; background: linear-gradient(160deg, #34222a, #1a1013); border: 1px solid rgba(253,224,71,0.16); border-radius: 12px; padding: 12px 6px 10px; text-align: center; cursor: pointer; transition: transform 0.15s; overflow: hidden; }
   .coll-card:active { transform: scale(0.96); }
   .coll-card .name { font-family: 'Cinzel', serif; font-size: 0.62rem; color: var(--ink); margin-top: 6px; }
   .coll-card .sub { font-size: 0.58rem; color: #a89f91; margin-top: 2px; }
@@ -941,12 +1003,23 @@
 <!-- ===== HOME ===== -->
 <div id="screen-home" class="screen">
   <div class="home">
+    <div id="home-arena" aria-hidden="true">
+      <div class="wrap3d">
+        <div class="ha-schijf">
+          <div class="ha-vloer" data-arena="vuur"></div>
+          <div class="ha-vloer" data-arena="kristal"></div>
+          <div class="ha-vloer" data-arena="woud"></div>
+          <svg class="ha-bord" id="ha-bord" viewBox="15 190 510 510" xmlns="http://www.w3.org/2000/svg"></svg>
+        </div>
+      </div>
+      <div class="ha-horizon"></div>
+    </div>
     <div id="home-fx"></div>
     <div class="home-title">RONDEL</div>
     <div class="home-sub">Tactisch duel op het bord der legenden</div>
     <div class="profile-bar">
       <div class="profile-chip" id="home-valuta"></div>
-      <div class="profile-chip">Collectie <b id="home-owned">0</b>/18</div>
+      <div class="profile-chip">Collectie <b id="home-owned">0</b>/<span id="home-total">0</span></div>
       <div class="profile-chip">W <b id="home-wins">0</b> · V <b id="home-losses">0</b></div>
     </div>
     <div class="home-tiles">
@@ -2154,8 +2227,10 @@ function showScreen(name) {
 function renderHome() {
   document.getElementById('home-valuta').innerHTML = beideValuta();
   document.getElementById('home-owned').textContent = Object.keys(profile.owned).length;
+  document.getElementById('home-total').textContent = Object.keys(UNIT_DEFS).length;
   document.getElementById('home-wins').textContent = profile.stats.wins;
   document.getElementById('home-losses').textContent = profile.stats.losses;
+  buildHomeArena();
   buildHomeFx();
 }
 
@@ -2377,6 +2452,29 @@ function aiDeck() {
 
 // Sintels één keer aanmaken; ze leven in de HTML-laag en overleven het
 // opnieuw opbouwen van de bord-SVG.
+// De arena achter het menu. Het bord komt uit dezelfde NODES en ROUTES als het
+// echte bord — geen tweede kopie van de geometrie, dus wat je in het menu ziet
+// draaien is precies waar je straks op speelt. Eén keer tekenen is genoeg: de
+// laag beweegt met een transform en wordt nooit opnieuw opgebouwd.
+function buildHomeArena() {
+  const svg = document.getElementById('ha-bord');
+  if (!svg || svg.childElementCount) return;
+  const NS = 'http://www.w3.org/2000/svg';
+  const mk = (tag, attrs) => {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    svg.appendChild(e);
+  };
+  for (const [a, b] of ROUTES) {
+    const p = NODES[a], q = NODES[b];
+    mk('line', { x1: p.x, y1: p.y, x2: q.x, y2: q.y, class: 'ha-lijn' });
+  }
+  for (const n of Object.values(NODES)) {
+    const r = n.type === 'goal' ? 21 : n.type === 'entry' ? 14 : 9;
+    mk('circle', { cx: n.x, cy: n.y, r, class: 'ha-punt ha-' + n.type });
+  }
+}
+
 // Sintels in het menu, dezelfde laag als in de arena maar wat rustiger.
 function buildHomeFx() {
   const box = document.getElementById('home-fx');

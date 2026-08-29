@@ -1,5 +1,5 @@
 RONDEL — STATUS EN BESLISSINGEN
-Laatste update: 28 augustus 2026 (sessie 41)
+Laatste update: 29 augustus 2026 (sessie 42)
 
 KERNCONCEPT
 - Tabletop-first fantasy bordspel, einddoel = digitale app
@@ -19,6 +19,11 @@ WERKAFSPRAAK BESTANDEN (geüpdatet sessie 14)
   EN schrijven/committen op de feature-branch. De oude read-only-aanname (sessie 9) vervalt.
 - Repo-structuur (sessie 14): index.html (game) + manifest.webmanifest + sw.js + icon-192/512.png
   in de root, art/ met 54 losse unit-PNG's, docs/00_Status_en_Beslissingen.md (dit document).
+- ZUINIG WERKEN (sessie 42, Koens uitdrukkelijke basisregel): hou het verbruik
+  laag. Niet breed rondzoeken als een gerichte grep het ook doet, geen
+  sub-agents inzetten voor werk dat in één keer kan, geen hele bestanden inlezen
+  waar een fragment volstaat, en niet opnieuw uitzoeken wat al vaststaat. Meten
+  boven gokken blijft gelden — maar meet gericht.
 - Werkafspraak: edit bestaande bestanden, herbouw niet vanaf nul. De gebalanceerde disk-data,
   bord-layout en visuals in index.html zijn maandenlang werk — nooit ongevraagd weggooien.
 
@@ -308,6 +313,54 @@ kaarten."
   benoemde aanval heeft een animatie, elke soort heeft een kleur, elk
   projectiel staat ook echt in de CSS). Smoke +7 checks voor de bordhoogte, de
   twee vechters, het vliegende projectiel, het schild-icoon en de kaartvlucht.
+
+SESSIE 42 — HET MENU KIJKT UIT OVER DE ARENA
+Koen: "ik vind het nog een beetje luguber ogen, het is nog een beetje donker en
+een beetje naar. Ik wil het mooi en enthousiast maken. Op de achtergrond van het
+menu wil ik de arena waar je in vecht, en dat je daar langzaam omheen draait —
+net als FIFA met het stadion op de achtergrond."
+Gekozen: warm en fel (niet 'warmer maar nog steeds donker'), en de achtergrond
+draait langzaam door alle drie de arena's heen.
+
+KAN HET? JA, EN GOEDKOOP. Geen WebGL, geen videobestand, geen beeldsequentie —
+alle drie zouden de PWA opblazen of de telefoon leegtrekken. Het is één schijf
+met een 3D-transform:
+  - #home-arena ligt fixed achter het menu en draagt de lucht (een warme
+    zonsondergang in plaats van het bijna-zwarte paars van hiervoor).
+  - .ha-schijf is één element met rotateX(64deg) en een rotateZ die er in 150
+    seconden één keer omheen draait. Eén transform op één element = één
+    compositielaag; de browser hoeft niets te hertekenen.
+  - Drie .ha-vloer-lagen eronder wisselen elkaar af met opacity, 28 seconden
+    per arena. De vertragingen zijn negatief (-0s/-30s/-60s op een cyclus van
+    90s), dus bij het openen staat er meteen één goed en zie je er nooit twee
+    tegelijk.
+  - De naar-achteren-wijkende rand smelt in de lucht via .ha-horizon; daardoor
+    lees je een horizon en niet een schijf die in het niets ophoudt.
+GEMETEN: 60 fps op het menu.
+
+HET BORD IN HET MENU KOMT UIT DEZELFDE DATA. buildHomeArena() tekent lijnen uit
+ROUTES en punten uit NODES — geen tweede kopie van de geometrie. Wat je in het
+menu ziet draaien is exact het bord waarop je speelt, en een smoke-check telt
+dat na. Zo kan het menu nooit stilletjes een ander bord tonen.
+Idem voor de kleuren: de selectors .board-wrap[data-arena="x"] gelden nu óók
+voor .ha-vloer[data-arena="x"], dus er is één palet per arena in plaats van
+twee die uit de pas kunnen lopen.
+
+WARM UITGELICHT. De lucht loopt van diep paars bovenin naar amber op de horizon.
+De tegels waren koud paars-blauw (#241c33) en dekten de arena af; ze zijn nu
+warm en half doorzichtig, zodat de arena erdoorheen blijft leven. Géén
+backdrop-filter — die kostte in sessie 36 gemeten de helft van de fps. De
+subschermen (collectie, winkel) waren nog koud paars en vloekten daarmee; die
+zijn meegegaan, anders stap je uit een verlichte arena zo een kelder in.
+
+MEEGENOMEN: de teller op het menu stond nog vast op "/18" terwijl er 54 figuren
+zijn. Komt nu uit UNIT_DEFS.
+
+TESTS: headless 168 -> 171, smoke 84 -> 86. De twee interessantste zijn
+prestatiechecks: de menu-arena moet dezelfde paletten delen als het bord, en in
+de keyframes van die achtergrond mag ALLEEN transform en opacity staan. Alles
+anders (breedte, kleur, filter) dwingt een herberekening per frame af, en dat is
+precies waarmee een achtergrondanimatie een telefoon sloopt.
 
 SESSIE 41 — VIERENVIJFTIG FIGUREN EN EEN WINKEL MET TWEE VALUTA
 Koen leverde twee vellen met 36 nieuwe figuurtjes aan: "ik wil ook net zo'n

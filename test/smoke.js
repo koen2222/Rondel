@@ -20,6 +20,16 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
   // 1. Home toont
   ok('Home-scherm actief na boot', await page.locator('#screen-home.active').count() === 1);
   ok('Beide valuta zichtbaar op home', (await page.locator('#home-valuta .cur').count()) === 2);
+  {
+    // De arena achter het menu wordt getekend uit dezelfde NODES en ROUTES als
+    // het echte bord. Tellen bewijst dat: wijkt de geometrie af, dan klopt het
+    // aantal niet meer en kijk je in het menu naar een ander bord dan je speelt.
+    const verwacht = await page.evaluate(() => ({ lijnen: ROUTES.length, punten: Object.keys(NODES).length }));
+    ok('Menu-arena tekent het echte bord',
+      await page.locator('#ha-bord .ha-lijn').count() === verwacht.lijnen &&
+      await page.locator('#ha-bord .ha-punt').count() === verwacht.punten);
+    ok('Alle drie de arena-vloeren liggen klaar', await page.locator('#home-arena .ha-vloer').count() === 3);
+  }
 
   // 2. Collectie
   await page.click('#tile-collection');

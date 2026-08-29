@@ -656,7 +656,7 @@ section('=== EVOLUTIE (14 checks) ===');
 // ─── 4g2. PRESTATIE-VALKUILEN (sessie 38) ─────────────────────────────────────
 // Twee dingen die gemeten de beeldsnelheid halveerden. Ze zijn makkelijk terug
 // te zetten zonder het te merken, dus ze staan hier vast.
-section('=== PRESTATIE (3 checks) ===');
+section('=== PRESTATIE (5 checks) ===');
 {
   const css = html.slice(html.indexOf('<style'), html.indexOf('</style>'));
   // 1. backdrop-filter over een schermvullende overlay: 36 i.p.v. 60 fps
@@ -668,6 +668,27 @@ section('=== PRESTATIE (3 checks) ===');
   check('Alle drie de arena-achtergronden staan in CSS op .board-wrap', arenas, ['vuur', 'kristal', 'woud']);
   // 3. Sintels zijn losse CSS-elementen, niet per render getekende SVG-nodes
   check('Sintels zijn een statische CSS-laag', /#arena-fx i \{/.test(css), true);
+  // 4. De menu-arena hergebruikt dezelfde paletten als het bord. Een tweede
+  //    kopie van die gradients loopt gegarandeerd uit de pas met het echte bord.
+  const menuArenas = ['vuur', 'kristal', 'woud'].filter(a => new RegExp(`\\.ha-vloer\\[data-arena="${a}"\\]`).test(css));
+  check('De menu-arena deelt de paletten van het bord', menuArenas, ['vuur', 'kristal', 'woud']);
+  // 5. In de draaiende menu-arena mag ALLEEN transform en opacity bewegen. Al
+  //    het andere (breedte, kleur, filter) dwingt een herberekening per frame af
+  //    en dat is precies waar een achtergrondanimatie een telefoon mee sloopt.
+  // Haakjes tellen in plaats van een regex: een keyframes-blok bevat zelf weer
+  // accolades, dus een niet-hebberige regex pakt of te weinig of de halve CSS.
+  const menuKeys = [];
+  for (const m of css.matchAll(/@keyframes\s+(ha[A-Za-z]+)\s*\{/g)) {
+    let i = m.index + m[0].length, diep = 1;
+    while (i < css.length && diep > 0) { if (css[i] === '{') diep++; else if (css[i] === '}') diep--; i++; }
+    menuKeys.push([m[1], css.slice(m.index + m[0].length, i - 1)]);
+  }
+  const fout = [];
+  for (const [naam, body] of menuKeys)
+    for (const m of body.matchAll(/([a-z-]+)\s*:/g))
+      if (!['transform', 'opacity'].includes(m[1])) fout.push(naam + ' → ' + m[1]);
+  check('Menu-arena animeert alleen transform en opacity', fout, []);
+  check('...en er zijn ook echt van die keyframes', menuKeys.length > 0, true);
 }
 
 // ─── 4g3. ART EN OFFLINE-CACHE LOPEN GELIJK (sessie 38) ───────────────────────
