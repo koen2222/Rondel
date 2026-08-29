@@ -478,11 +478,16 @@
 
   /* Lichtgevende witte routes en ringpunten (Duel-look). De gloed staat op de
      GROEP, niet per lijn — één filter i.p.v. zestig scheelt enorm op mobiel. */
-  .routes-glow { filter: drop-shadow(0 0 4px rgba(255,236,200,0.85)); }
-  .route-halo { stroke: rgba(255,190,120,0.22); stroke-width: 8; stroke-linecap: round; fill: none; }
-  .route-core { stroke: #fff; stroke-width: 2.6; stroke-linecap: round; fill: none; }
-  .nodes-glow { filter: drop-shadow(0 0 3px rgba(255,255,255,0.6)); }
-  .node-rim { stroke: #fff; }
+  /* De routes waren hard wit en 2.6 breed: ze schreeuwden harder dan de
+     poppetjes en maakten het bord een tekening in plaats van een arena. Nu
+     liggen ze als warme lichtaders IN de vloer — een donkere groef eronder,
+     een warme kern erin, en de gloed doet de rest. */
+  .routes-glow { filter: drop-shadow(0 0 5px rgba(255,214,150,0.7)); }
+  .route-halo { stroke: rgba(255,196,130,0.20); stroke-width: 9; stroke-linecap: round; fill: none; }
+  .route-groef { stroke: rgba(28,10,6,0.45); stroke-width: 5; stroke-linecap: round; fill: none; }
+  .route-core { stroke: rgba(255,244,224,0.92); stroke-width: 1.9; stroke-linecap: round; fill: none; }
+  .nodes-glow { filter: drop-shadow(0 0 3px rgba(255,228,180,0.6)); }
+  .node-rim { stroke: rgba(255,240,214,0.92); }
 
   .goal-halo { fill: none; stroke-width: 2.5; animation: goalPulse 2.4s ease-in-out infinite; }
   .goal-halo.p1 { stroke: #60a5fa; }
@@ -503,6 +508,36 @@
   @media (prefers-reduced-motion: reduce) { .node-glow.active { animation: none; } }
   
   .unit-fig { cursor: pointer; }
+  /* ===== STILSTAANDE BEWEGING (sessie 42) =====
+     Een figuur dat volkomen stilstaat leest als een sticker. Elk poppetje
+     beweegt daarom zachtjes, en HOE hangt af van z'n lichaamsbouw (zie LIJF).
+     Twee dingen om te weten:
+     - het draaipunt ligt op de VOETEN (50% 100%), anders zakt hij door de vloer
+       of zweeft hij van z'n sokkel af;
+     - het bord-SVG wordt bij elke zet opnieuw opgebouwd, dus de animatie zou
+       telkens vanaf nul beginnen en alle 12 figuren zouden synchroon pulseren.
+       Daarom krijgt elk figuur een NEGATIEVE animation-delay ter grootte van
+       z'n leeftijd — dezelfde truc als bij de poorten. Dan pikt hij na een
+       herbouw op waar hij gebleven was. */
+  .fig-art { transform-box: fill-box; transform-origin: 50% 100%; }
+  .fig-art[data-lijf="mens"]    { animation: ademMens    3.4s ease-in-out infinite; }
+  .fig-art[data-lijf="zwaar"]   { animation: ademZwaar   4.8s ease-in-out infinite; }
+  .fig-art[data-lijf="beest"]   { animation: ademBeest   3.0s ease-in-out infinite; }
+  .fig-art[data-lijf="slang"]   { animation: ademSlang   4.4s ease-in-out infinite; }
+  .fig-art[data-lijf="vleugel"] { animation: ademVleugel 2.4s ease-in-out infinite; }
+  .fig-art[data-lijf="geest"]   { animation: ademGeest   5.2s ease-in-out infinite; }
+  /* Een stenen beeld ademt niet. Het gloeit alleen heel traag op, zodat het
+     niet dood oogt maar ook niet levend. */
+  .fig-art[data-lijf="steen"]   { animation: ademSteen   7s   ease-in-out infinite; }
+  @keyframes ademMens    { 0%,100% { transform: scale(1,1); }        50% { transform: scale(0.994,1.018) translateY(-0.4px); } }
+  @keyframes ademZwaar   { 0%,100% { transform: scale(1,1) rotate(0deg); }     50% { transform: scale(1.012,1.024) rotate(-0.7deg); } }
+  @keyframes ademBeest   { 0%,100% { transform: scale(1,1) translateY(0); }    50% { transform: scale(1.014,0.99) translateY(0.5px); } }
+  @keyframes ademSlang   { 0%,100% { transform: rotate(-1.6deg) scaleX(0.996); } 50% { transform: rotate(1.6deg) scaleX(1.004); } }
+  @keyframes ademVleugel { 0%,100% { transform: translateY(0) rotate(-0.8deg); } 50% { transform: translateY(-2.2px) rotate(0.8deg); } }
+  @keyframes ademGeest   { 0%,100% { transform: translateY(0) scale(1); opacity: 1; }
+                           50%     { transform: translateY(-2.6px) scale(1.008); opacity: 0.9; } }
+  @keyframes ademSteen   { 0%,100% { opacity: 1; } 50% { opacity: 0.93; } }
+  @media (prefers-reduced-motion: reduce) { .fig-art { animation: none !important; } }
   .unit-fig.selected .fig-base { stroke: var(--gold); stroke-width: 3; filter: drop-shadow(0 0 12px var(--gold)); }
   .unit-fig.selected .fig-glow { opacity: 0.9; }
   .fig-art { filter: drop-shadow(0 3px 3px rgba(0,0,0,0.75)); }
@@ -1560,6 +1595,44 @@ function moveLabel(slot) {
   return 'Miss';
 }
 // ABILITIES-END (marker voor headless tests — niet verwijderen)
+
+
+// ==========================================
+// LICHAAMSBOUW (sessie 42) — hoe is dit figuur gebouwd?
+// Nu bepaalt het hoe hij stilstaand beweegt: een reus ademt traag en zwaar, een
+// vogel wipt, een slang zwaait, een geest zweeft en een stenen beeld staat stil.
+// Zonder dit staan 54 poppetjes er als stickers bij en dat is precies wat een
+// bordspel doods maakt.
+// Straks bepaalt het op welk SKELET hij gerigd wordt. Dat is de reden dat het
+// een aparte tabel is en geen los animatieveldje: 54 figuren afzonderlijk
+// riggen is niet te doen, maar zeven lichaamssoorten wel — dan is het per
+// figuur nog alleen z'n eigen ledematen op de juiste botten hangen.
+// ==========================================
+// LIJF-START (marker voor headless tests — niet verwijderen)
+const LIJF = {
+  // de oorspronkelijke achttien
+  squire:'mens', cleric:'mens', commander:'mens', scout:'mens', archer:'beest',
+  weaver:'mens', apprentice:'zwaar', runesmith:'mens', warden:'zwaar',
+  skeleton:'mens', ghoul:'mens', necromancer:'geest', boar:'beest',
+  lupine:'beest', wyrmling:'slang', imp:'mens', hellhound:'beest', pitlord:'zwaar',
+  // Zeediepte, Stormhoogte, Zandrijk, Zonnetempel
+  siren:'mens', hydra:'slang', poseidon:'zwaar',
+  harpy:'vleugel', roc:'vleugel', thunderbird:'vleugel',
+  shabti:'steen', sphinx:'beest', anubis:'mens',
+  jaguarwarrior:'mens', ahuizotl:'slang', tezcatlipoca:'mens',
+  // Bamboewoud, Diepe Woud, IJsvlakte, Berghart
+  kappa:'mens', tengu:'vleugel', ryujin:'slang',
+  domovoi:'mens', leshy:'zwaar', babayaga:'geest',
+  frostwight:'geest', jotun:'zwaar', ymir:'zwaar',
+  gnome:'mens', mountaintroll:'zwaar', mountainking:'zwaar',
+  // Woestijnwind, Savanne, Nevelheuvels, Sterrenhof
+  peri:'vleugel', marid:'geest', ifrit:'geest',
+  anansi:'beest', mamiwata:'slang', shango:'mens',
+  puca:'beest', cusidhe:'beest', morrigan:'mens',
+  lamassu:'beest', anzu:'vleugel', tiamat:'slang',
+};
+function lijfVan(key) { return LIJF[key] || 'mens'; }
+// LIJF-END (marker voor headless tests — niet verwijderen)
 
 // Echte character-art (base64). Elke nieuwe PNG van Koen = één regel erbij.
 const UNIT_ART = {
@@ -3194,6 +3267,15 @@ function statusFX(g, u) {
 // Figuur op het bord. Naar Duel-verhoudingen: de figuur is FORS ten opzichte
 // van z'n sokkel (ruwweg 1,4x de sokkeldiameter hoog), de sokkel is een dikke
 // schijf met een fel oplichtende teamrand en een gekleurde gloed op de grond.
+// Hoe lang ademt dit figuur al? Eén vaste starttijd voor de app, plus een vaste
+// verschuiving per figuur, zodat er nooit twee precies gelijk lopen.
+const ADEM_T0 = (typeof performance !== 'undefined' ? performance.now() : 0);
+function ademLeeftijd(u) {
+  let h = 0; const k = String(u.uid || u.defKey || '');
+  for (let i = 0; i < k.length; i++) h = (h * 31 + k.charCodeAt(i)) % 997;
+  return (performance.now() - ADEM_T0) / 1000 + (h / 997) * 6;
+}
+
 function unitGroup(u, withShadow = true) {
   const g = document.createElementNS(SVG_NS, 'g');
   const p1 = u.owner === 'p1';
@@ -3201,6 +3283,13 @@ function unitGroup(u, withShadow = true) {
   const glow  = p1 ? 'rgba(59,130,246,0.55)' : 'rgba(239,68,68,0.55)';
   const side  = p1 ? '#0e2050' : '#450d0d';
   const RX = 20, RY = 9.5;                 // sokkelmaat
+
+  // Vast trefvlak, als eerste kind zodat het niets afdekt. Twee redenen:
+  // 1) het figuur ademt permanent, en zonder dit vlak beweegt de omhullende
+  //    doos van de groep mee — dan is er geen stabiel doel om op te tikken en
+  //    springt ook het ankerpunt van de gevechtsanimaties heen en weer;
+  // 2) een iets ruimer vlak dan het poppetje tikt op een telefoon prettiger.
+  el('rect', { x:-30, y:-67, width:60, height:89, fill:'transparent', class:'fig-hit' }, g);
 
   if (withShadow) {
     el('ellipse', { cx:0, cy:13, rx:RX+3, ry:RY*0.85, fill:'rgba(0,0,0,0.45)' }, g);
@@ -3218,7 +3307,12 @@ function unitGroup(u, withShadow = true) {
   if (art) {
     // Groter dan voorheen (34x48 -> 42x58) en iets dieper in de sokkel gezet,
     // zodat de figuur er echt OP lijkt te staan in plaats van erboven te zweven.
-    el('image', { x:-24, y:-63, width:48, height:66, href:art, class:'fig-art' }, g);
+    const im = el('image', { x:-24, y:-63, width:48, height:66, href:art, class:'fig-art' }, g);
+    // Lichaamsbouw bepaalt HOE hij ademt; de negatieve vertraging zorgt dat hij
+    // na een herbouw van het bord verder gaat waar hij was in plaats van terug
+    // naar nul te springen (en dat alle figuren dus niet synchroon pulseren).
+    im.setAttribute('data-lijf', lijfVan(u.defKey));
+    im.style.animationDelay = (-ademLeeftijd(u)).toFixed(2) + 's';
   } else {
     const fo = document.createElementNS(SVG_NS, 'foreignObject');
     fo.setAttribute('x',-18); fo.setAttribute('y',-28); fo.setAttribute('width',36); fo.setAttribute('height',31);
@@ -3404,7 +3498,14 @@ function renderBoard() {
   // Routes: brede zachte halo + witte kern; de gloed staat op de groep
   const gRoutes = el('g', { class:'routes-glow' }, svg);
   const gHalo = el('g', {}, gRoutes), gRoute = el('g', {}, gRoutes);
-  for (const [a,b] of ROUTES) { const A = NODES[a], B = NODES[b]; el('line', { x1:A.x, y1:A.y, x2:B.x, y2:B.y, class:'route-halo' }, gHalo); el('line', { x1:A.x, y1:A.y, x2:B.x, y2:B.y, class:'route-core' }, gRoute); }
+  for (const [a,b] of ROUTES) {
+    const A = NODES[a], B = NODES[b];
+    el('line', { x1:A.x, y1:A.y, x2:B.x, y2:B.y, class:'route-halo' }, gHalo);
+    // Donkere groef onder de lichtader: daardoor ligt de route ín de vloer in
+    // plaats van er als draad overheen te liggen.
+    el('line', { x1:A.x, y1:A.y, x2:B.x, y2:B.y, class:'route-groef' }, gHalo);
+    el('line', { x1:A.x, y1:A.y, x2:B.x, y2:B.y, class:'route-core' }, gRoute);
+  }
   const gNodes = el('g', { class:'nodes-glow' }, svg);
   for (const [key, n] of Object.entries(NODES)) {
     const ds = 0.85 + 0.15 * (depthScale(n.y) - 0.78) / 0.22;   // nodes achterin iets kleiner

@@ -61,6 +61,9 @@ const condMatch    = html.match(/\nfunction applyCondition\([\s\S]*?\n\}/);
 const platesSection = html.slice(html.indexOf('const PLATE_BUDGET ='), html.indexOf('// PLATES-END'));
 // Evolutie: ketens + bonus (Duel-regels)
 const evoSection = html.slice(html.indexOf('const EVOLUTIE ='), html.indexOf('// EVO-END'));
+// Lichaamsbouw (sessie 42): bepaalt de stilstaande beweging, en straks het skelet
+const lijfSection = html.slice(html.indexOf('// LIJF-START'), html.indexOf('// LIJF-END'));
+if (!lijfSection) throw new Error('LIJF-blok niet gevonden');
 if (!evoSection) throw new Error('EVO-blok niet gevonden');
 // Aanvalsanimaties: trefwoord→soort (FX) en soort→projectiel (DUELFX)
 const fxSection = html.slice(html.indexOf('const FX_TREFWOORDEN ='), html.indexOf('// FX-END'));
@@ -102,10 +105,11 @@ const evalCode = [
   freshProfileMatch[0],
   migreerMatch[0],
   evoSection,
+  lijfSection,
   fxSection,
   kleurMatch[0],
   duelFxSection,
-  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster, FX_TREFWOORDEN, attackFx, FX_KLEUR, FX_PROJECTIEL, projectielVoor, EVOLUTIE, evolutieVan, voorloperVan, isBasisvorm, evolutieKeten, evolutieBonus, MUNT_PER_DIAMANT, DIAMANT_BUNDELS, PRICE, PLATE_PRIJS, STARTER_PLATES, UPGRADE_COST, WIN_MUNTEN, LOSS_MUNTEN, freshProfile, migreerProfiel };',
+  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster, FX_TREFWOORDEN, attackFx, FX_KLEUR, FX_PROJECTIEL, projectielVoor, EVOLUTIE, evolutieVan, voorloperVan, isBasisvorm, evolutieKeten, evolutieBonus, MUNT_PER_DIAMANT, DIAMANT_BUNDELS, PRICE, PLATE_PRIJS, STARTER_PLATES, UPGRADE_COST, WIN_MUNTEN, LOSS_MUNTEN, freshProfile, migreerProfiel, LIJF, lijfVan };',
 ].join('\n');
 
 // Schrijf tijdelijk evalueerbaar bestand (vermijdt new Function-beperkingen)
@@ -118,7 +122,7 @@ try {
   fs.unlinkSync(tmpPath);
 }
 
-const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster, FX_TREFWOORDEN, attackFx, FX_KLEUR, FX_PROJECTIEL, projectielVoor, EVOLUTIE, evolutieVan, voorloperVan, isBasisvorm, evolutieKeten, evolutieBonus, MUNT_PER_DIAMANT, DIAMANT_BUNDELS, PRICE, PLATE_PRIJS, STARTER_PLATES, UPGRADE_COST, WIN_MUNTEN, LOSS_MUNTEN, freshProfile, migreerProfiel } = extracted;
+const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster, FX_TREFWOORDEN, attackFx, FX_KLEUR, FX_PROJECTIEL, projectielVoor, EVOLUTIE, evolutieVan, voorloperVan, isBasisvorm, evolutieKeten, evolutieBonus, MUNT_PER_DIAMANT, DIAMANT_BUNDELS, PRICE, PLATE_PRIJS, STARTER_PLATES, UPGRADE_COST, WIN_MUNTEN, LOSS_MUNTEN, freshProfile, migreerProfiel, LIJF, lijfVan } = extracted;
 
 // ─── Test harness ──────────────────────────────────────────────────────────────
 let pass = 0, fail = 0;
@@ -651,6 +655,28 @@ section('=== EVOLUTIE (14 checks) ===');
   check('Evolutiebonus: +10 op wit en goud', [na[0].v, na[1].v], [40, 70]);
   check('Evolutiebonus: +1 ster op paars', na[2].stars, 2);
   check('Evolutiebonus laat blauw en rood met rust', [na[3].k, na[4].k, na[3].v, na[4].v], ['blue','red',undefined,undefined]);
+}
+
+// ─── 4g1c. LICHAAMSBOUW (sessie 42) ───────────────────────────────────────────
+// Elk figuur beweegt stilstaand volgens z'n lichaamsbouw. Vergeet je er één,
+// dan valt hij stil terug op 'mens' en staat een draak te ademen als een ridder
+// — dat zie je pas als je goed kijkt, dus hier vastgezet.
+section('=== LICHAAMSBOUW (4 checks) ===');
+{
+  const css = html.slice(html.indexOf('<style'), html.indexOf('</style>'));
+  const keys = Object.keys(UNIT_DEFS);
+  check('Elk figuur heeft een lichaamsbouw', keys.filter(k => !LIJF[k]), []);
+  check('Geen lichaamsbouw voor een figuur dat niet bestaat',
+    Object.keys(LIJF).filter(k => !UNIT_DEFS[k]), []);
+  // Elke soort moet ook echt een eigen beweging in de CSS hebben, anders staat
+  // hij er alsnog roerloos bij.
+  const soorten = [...new Set(Object.values(LIJF))];
+  check('Elke lichaamsbouw heeft een eigen animatie',
+    soorten.filter(soort => !new RegExp(`\\.fig-art\\[data-lijf="${soort}"\\]`).test(css)), []);
+  check('Geen twee lichaamsbouwen delen dezelfde animatie', (() => {
+    const namen = soorten.map(soort => (css.match(new RegExp(`\\.fig-art\\[data-lijf="${soort}"\\][^;]*animation:\\s*([A-Za-z]+)`)) || [])[1]);
+    return namen.length === new Set(namen).size && !namen.includes(undefined);
+  })(), true);
 }
 
 // ─── 4g2. PRESTATIE-VALKUILEN (sessie 38) ─────────────────────────────────────

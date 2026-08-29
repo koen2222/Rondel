@@ -314,6 +314,65 @@ kaarten."
   projectiel staat ook echt in de CSS). Smoke +7 checks voor de bordhoogte, de
   twee vechters, het vliegende projectiel, het schild-icoon en de kaartvlucht.
 
+SESSIE 42b — DE POPPETJES GAAN ADEMEN, EN DE WEG NAAR DE RAGDOLLS
+Koen: "maak het gewoon grafisch fantastisch... en op termijn wil ik dat die
+figurines ragdolls worden die met elkaar vechten, net als de schaakstukken in
+Harry Potter, en zoals in Heroes of Might and Magic dat ze op elkaar afkomen en
+een klein gevecht hebben. Dat kan denk in niet in HTML, maar daar wil ik wel
+naartoe — misschien moeten we nu alvast voorsorteren."
+
+KAN HET IN HTML? JA. Dit is geen "helaas": browsergames doen dit al jaren.
+- De loop-en-vecht-animatie is 2D SKELETANIMATIE: knip een figuur in ~8 delen
+  (hoofd, romp, twee armen, twee benen, wapen), hang ze aan botten en animeer
+  idle/lopen/slaan/geraakt/dood. Dat is exact hoe HoMM-eenheden en vrijwel elke
+  mobiele kaartvechter het doen, en het draait op 60 fps in de browser.
+- Het KAPOTGAAN is ragdoll-fysica: dezelfde delen, maar met scharnieren en
+  zwaartekracht. Dat is het Harry Potter-moment, en het is technisch het
+  makkelijkste deel van het hele verhaal.
+DE ECHTE KOSTENPOST IS NIET DE CODE MAAR DE ART. 54 figuren in delen knippen en
+riggen is het werk. Maar dat hoeft niet 54 keer: het hoeft één keer per
+LICHAAMSBOUW. Vandaar de tabel hieronder.
+
+LIJF — ZEVEN LICHAAMSBOUWEN (dit is het voorsorteren)
+mens, zwaar, beest, slang, vleugel, geest, steen. Elk van de 54 figuren heeft er
+één. Nu bepaalt het hoe hij STILSTAAND beweegt; straks bepaalt het op welk
+skelet hij gerigd wordt. Het is bewust een aparte tabel en geen los
+animatieveldje, juist omdat het die tweede rol moet kunnen dragen.
+Waarom dit nu al de moeite waard is: 54 poppetjes die volkomen stilstaan lezen
+als stickers. Een reus die traag en zwaar ademt, een vogel die wipt, een slang
+die zwaait en een geest die zweeft maken het bord in één klap levend — en het
+kost niets, want het is CSS op een transform.
+
+TWEE DINGEN DIE ONDERWEG BOVENKWAMEN
+1. Het bord-SVG wordt bij elke zet opnieuw opgebouwd, dus de ademhaling zou
+   telkens vanaf nul beginnen en alle twaalf figuren zouden synchroon pulseren.
+   Opgelost met dezelfde truc als bij de poorten: een NEGATIEVE animation-delay
+   ter grootte van de leeftijd van het figuur, plus een vaste verschuiving per
+   uid zodat er nooit twee gelijk lopen.
+2. Playwright weigerde ineens op figuren te klikken: "element is not stable".
+   Terecht — de omhullende doos van de groep bewoog mee met de ademhaling.
+   Elk figuur heeft nu een VAST, onzichtbaar trefvlak als eerste kind. Dat lost
+   drie dingen tegelijk op: de test klikt weer, het ankerpunt van de
+   gevechtsanimaties (fxMidden meet die doos) staat stil in plaats van te
+   trillen, en het tikvlak op een telefoon is ruimer geworden.
+GEMETEN: 60 fps met twaalf ademende figuren op het bord.
+
+DE ROUTES waren hard wit op 2.6 breed en schreeuwden harder dan de poppetjes.
+Nu liggen ze als warme lichtaders ÍN de vloer: een donkere groef eronder, een
+dunne warme kern erin, de gloed doet de rest.
+
+WAT ER ARCHITECTONISCH NOG MOET VOOR DE RAGDOLLS (niet nu gedaan, wel bekend):
+elk figuur wordt bij elke render weggegooid en opnieuw getekend, en beweegt via
+een 'ghost'-kopie. Dat werkt voor een sprongetje maar niet voor een figuur dat
+z'n eigen loopcyclus en fysica-toestand moet bijhouden. Daar is een blijvende
+figuur-laag voor nodig die renders overleeft. Dat is de volgende stap zodra er
+art in delen is — nu zou die verbouwing niets opleveren wat de
+negatieve-vertraging-truc niet ook al geeft.
+
+TESTS: headless 171 -> 175, smoke 86. De nieuwe checks bewaken de tabel: elk
+figuur heeft een lichaamsbouw, er staat er geen in voor een figuur dat niet
+bestaat, elke bouw heeft een eigen animatie in de CSS, en geen twee delen er één.
+
 SESSIE 42 — HET MENU KIJKT UIT OVER DE ARENA
 Koen: "ik vind het nog een beetje luguber ogen, het is nog een beetje donker en
 een beetje naar. Ik wil het mooi en enthousiast maken. Op de achtergrond van het
@@ -1299,6 +1358,10 @@ OPEN PUNTEN — IN VOLGORDE VAN URGENTIE
     i.p.v. sudden death (s22), geluid (s24). Hele lijst is nu af.
 14. NIEUW (sessie 24): boosterkist-economie balanceren — 150 credits, C65/U27/
     R8, duplicaat-terugbetaling 60/120/240. Eerste gok, speeltesten.
+19. NIEUW (sessie 42): ragdoll-gevechten. Volgorde: (a) art in delen knippen
+    per lichaamsbouw, (b) blijvende figuur-laag die renders overleeft, (c)
+    skeletanimatie idle/lopen/slaan/geraakt, (d) ragdoll bij KO. Stap (a) is het
+    werk, (b) is de verbouwing, (c) en (d) zijn daarna klein.
 16. NIEUW (sessie 41): de laatste zes figuren (Titanenveld en Schemerwacht) er
     nog bij, dan staat de roster op zestig.
 17. NIEUW (sessie 41): speeltesten of de twee valuta goed voelen. De koers is
