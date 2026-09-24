@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B1C2C">
+<title>Schijfduel</title>
+<meta name="description" content="Draai de schijf. Verover het doel.">
+<link rel="manifest" href="../../manifest.webmanifest">
+<link rel="icon" href="../../icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ===== MENU ===== -->
+<div class="scherm aan" id="menu">
+  <div id="menu-arena" aria-hidden="true">
+    <div class="diepte"><div class="menu-schijf"><svg id="menu-bord"></svg></div></div>
+    <div class="menu-horizon"></div>
+  </div>
+  <div class="titel">SCHIJFDUEL</div>
+  <div class="tagline">Draai de schijf. Verover het doel.</div>
+  <div class="titelregel" id="menu-titel"></div>
+  <div class="tegels">
+    <div class="tegel groot" id="t-campagne"><b>CAMPAGNE</b><span>Twaalf hoofdstukken — verdien je beesten</span></div>
+    <div class="tegel" id="t-ladder"><b>LADDER</b><span>Van Brons naar Legende</span></div>
+    <div class="tegel" id="t-vrij"><b>VRIJ SPEL</b><span>Tegen de computer</span></div>
+    <div class="tegel" id="t-hotseat"><b>HOTSEAT</b><span>Twee spelers, één toestel</span></div>
+    <div class="tegel" id="t-stal"><b>STAL</b><span>Je beesten en hun schijven</span></div>
+    <div class="tegel groot" id="t-regels"><b>REGELS</b><span>Hoe speel je Schijfduel</span></div>
+  </div>
+</div>
+
+<!-- ===== STAL ===== -->
+<div class="scherm" id="stal">
+  <div class="kop"><button class="terug" data-naar="menu">‹ Terug</button><h2>STAL</h2></div>
+  <p class="uitleg">Tik op een beest voor z'n schijf en de kans per vak. Beesten die je nog niet hebt, verdien je in de campagne.</p>
+  <div class="raster" id="stal-raster"></div>
+</div>
+
+<!-- ===== TEAM KIEZEN ===== -->
+<div class="scherm" id="team">
+  <div class="kop"><button class="terug" id="team-terug">‹ Terug</button><h2 id="team-titel">KIES JE TEAM</h2></div>
+  <p class="uitleg" id="team-uitleg">Kies zes beesten.</p>
+  <div class="raster" id="team-raster"></div>
+  <div class="acties" style="margin-top:14px"><button class="knop" id="team-willekeurig">Willekeurig</button><button class="knop goud" id="team-start" disabled>Start</button></div>
+</div>
+
+<!-- ===== SPEL ===== -->
+<div class="scherm" id="spel">
+  <div class="balk" id="balk"><span id="balk-tekst"></span><span class="fase" id="balk-fase"></span></div>
+  <div class="rij-kant" id="rij-blauw"><span class="label">blauw</span><div class="vak" id="bank-blauw"></div><div class="vak wacht" id="wacht-blauw"></div></div>
+  <div id="bord-wrap"><svg id="bord"></svg></div>
+  <div class="rij-kant" id="rij-rood"><span class="label">rood</span><div class="vak" id="bank-rood"></div><div class="vak wacht" id="wacht-rood"></div></div>
+  <div class="hint" id="hint"></div>
+  <div class="acties"><button class="knop" id="k-pas">Beurt overslaan</button><button class="knop" id="k-geenduel" style="display:none">Geen duel</button><button class="knop klein" id="k-menu">Menu</button></div>
+</div>
+
+<!-- ===== CAMPAGNE ===== -->
+<div class="scherm" id="campagne">
+  <div class="kop"><button class="terug" data-naar="menu">‹ Terug</button><h2>CAMPAGNE</h2></div>
+  <p class="uitleg">Elk hoofdstuk: drie gevechten, het derde tegen een baas. Speel je het uit, dan sluit dat beest zich bij je stal aan.</p>
+  <div id="camp-lijst"></div>
+</div>
+
+<!-- ===== LADDER ===== -->
+<div class="scherm" id="ladder">
+  <div class="kop"><button class="terug" data-naar="menu">‹ Terug</button><h2>LADDER</h2></div>
+  <div class="ladder-hart">
+    <svg viewBox="0 0 64 72" aria-hidden="true"><path id="ladder-schild" d="M32 3 L60 14 V36 C60 52 48 64 32 69 C16 64 4 52 4 36 V14 Z" stroke-width="3"/><path d="M32 20 l4.4 9 9.9 1.4 -7.2 7 1.7 9.8 -8.8 -4.6 -8.8 4.6 1.7 -9.8 -7.2 -7 9.9 -1.4 Z" fill="#F3E6C8"/></svg>
+    <div class="ladder-naam" id="ladder-naam"></div>
+    <div class="ladder-sterren" id="ladder-sterren"></div>
+    <p class="uitleg" id="ladder-doel"></p>
+    <button class="knop goud" id="ladder-zoek">Zoek tegenstander</button>
+  </div>
+  <p class="uitleg">Winnen: een ster erbij. Drie sterren: een divisie omhoog. Verliezen kost een ster, maar onder de bodem van je rang zak je nooit.</p>
+  <div id="ladder-trap"></div>
+</div>
+
+<!-- ===== REGELS ===== -->
+<div class="scherm" id="regels">
+  <div class="kop"><button class="terug" data-naar="menu">‹ Terug</button><h2>REGELS</h2></div>
+  <div class="regels">
+    <h4>Het doel</h4><p>Twee spelers, zes beesten per kant. Zet aan het <b>einde van je beurt</b> een eigen beest op het doel van de ander, en je wint. Rood begint onder, blauw boven.</p>
+    <h4>Je beurt</h4><p>Eén actie: <b>inzetten</b> (van de bank op een eigen vrije entry, en daarna nog lopen met z'n MP) of <b>lopen</b> met een beest dat al staat. Alleen langs de lijnen, niet door andere beesten heen, en eindigen op een lege knoop. Daarna mag je <b>één duel</b> aangaan met een vijand naast je — hoeft niet. De speler die begint loopt in beurt 1 één stap minder.</p>
+    <h4>De schijf</h4><p>Elk beest heeft een schijf van 24 tikken. Hoe groter een vak, hoe groter de kans. Tik op een beest om de kansen in procenten te zien.</p>
+    <ul>
+      <li><b>Ontwijk</b> (groenblauw) wint van alles. Twee keer ontwijk: er gebeurt niets.</li>
+      <li><b>Goud</b> wint van paars. Tegen wit of goud: de hoogste schade wint.</li>
+      <li><b>Paars</b> wint van wit. Twee keer paars: de meeste sterren wint.</li>
+      <li><b>Wit</b> tegen wit of goud: de hoogste schade wint.</li>
+      <li><b>Mis</b> verliest van alles, behalve van mis.</li>
+      <li>Gelijk is gelijk: er gebeurt niets.</li>
+    </ul>
+    <h4>Paarse effecten</h4><p><b>Duw</b>: de ander schuift een knoop van je af. <b>Wissel</b>: jullie ruilen van plek. <b>Vastpin</b>: de ander kan z'n volgende beurt niet lopen. <b>Wacht</b>: de ander doet z'n volgende beurt niets. <b>Poortslot</b>: een entry van de ander is een ronde dicht.</p>
+    <h4>Knock-out</h4><p>Wie verliest van wit of goud gaat naar de <b>wachtplaats</b>, en is na één volle eigen beurt terug op de bank. Wie van alle kanten door vijanden is ingesloten, is meteen knock-out.</p>
+    <h4>Bijzondere beesten</h4><p>Minotaurus slaat 10 harder op de middenas. Witte Wieven loopt door vrienden heen. Draugr blijft een beurt langer in de wachtplaats. Phoenix gaat bij z'n eerste knock-out naar de bank in plaats van de wachtplaats. Golem is niet te duwen of te wisselen.</p>
+  </div>
+</div>
+
+<!-- ===== DUEL ===== -->
+<div class="overlay" id="duel">
+  <div class="paneel">
+    <h3>— DUEL —</h3>
+    <div class="duel-rij">
+      <div class="duel-kant" id="duel-a"><span class="wie"></span><div class="duel-fig"></div><div class="wiel-wrap"><div class="wiel-wijzer"></div><svg></svg></div></div>
+      <div class="duel-kant" id="duel-d"><span class="wie"></span><div class="duel-fig"></div><div class="wiel-wrap"><div class="wiel-wijzer"></div><svg></svg></div></div>
+    </div>
+    <div class="uitslag" id="duel-uitslag"></div>
+    <button class="knop goud" id="duel-verder" style="display:none">Verder</button>
+  </div>
+</div>
+
+<!-- ===== INFO: schijf met kansen ===== -->
+<div class="overlay" id="info">
+  <div class="paneel">
+    <div class="beeld" id="info-beeld" style="height:96px"></div>
+    <h3 id="info-naam"></h3>
+    <p class="uitleg" id="info-sub"></p>
+    <div class="wiel-wrap" style="margin:0 auto"><svg id="info-wiel"></svg></div>
+    <div class="odds-lijst" id="info-odds"></div>
+    <button class="knop" id="info-sluit" style="margin-top:14px">Sluiten</button>
+  </div>
+</div>
+
+<!-- ===== VOORAF (campagne) ===== -->
+<div class="overlay" id="vooraf">
+  <div class="paneel">
+    <h3 id="vooraf-titel"></h3>
+    <p class="uitleg" id="vooraf-sub"></p>
+    <div class="raster" id="vooraf-team"></div>
+    <button class="knop goud" id="vooraf-start" style="margin-top:14px">Kies je team</button>
+    <button class="knop" id="vooraf-terug" style="margin-top:8px">Terug</button>
+  </div>
+</div>
+
+<!-- ===== UITSLAG ===== -->
+<div class="overlay" id="uitslag">
+  <div class="paneel">
+    <h3 id="uitslag-titel"></h3>
+    <p class="uitleg" id="uitslag-reden"></p>
+    <div id="uitslag-extra"></div>
+    <button class="knop goud" id="uitslag-verder" style="margin-top:14px; display:none"></button>
+    <button class="knop" id="uitslag-terug" style="margin-top:8px">Terug naar het menu</button>
+  </div>
+</div>
+
+<div class="melding" id="melding"></div>
+
+<script src="game.js"></script>
+<script src="ai.js"></script>
+<script src="voortgang.js"></script>
+<script src="render.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

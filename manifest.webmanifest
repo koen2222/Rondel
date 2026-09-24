@@ -1,12 +1,13 @@
 {
-  "name": "Rondel",
-  "short_name": "Rondel",
-  "description": "Tactisch fantasy bordspel met spinner-disk combat",
-  "start_url": "./index.html",
+  "name": "Schijfduel",
+  "short_name": "Schijfduel",
+  "description": "Draai de schijf. Verover het doel.",
+  "start_url": "./schijfduel/proto/index.html",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0a0806",
-  "theme_color": "#0a0806",
+  "background_color": "#0B1C2C",
+  "theme_color": "#0B1C2C",
   "icons": [
     { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
     { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }

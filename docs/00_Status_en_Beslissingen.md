@@ -1,3 +1,32 @@
+SCHIJFDUEL (vanaf sessie 46) — LEES DIT EERST
+Vanaf sessie 46 is het spel Schijfduel, naar Groks handoff
+(schijfduel/SCHIJFDUEL_CLAUDE_HANDOFF.md). Koen koos ervoor het vorige spel
+daarmee te laten overschrijven. Alles hieronder is de GESCHIEDENIS van Rondel;
+dat spel staat in git op commit 8184d9c. Voor Schijfduel: zie schijfduel/rules.md,
+schijfduel/README.md en CLAUDE.md in de root.
+
+SESSIE 46 — OVERGESTAPT OP SCHIJFDUEL
+- Groks zip bevatte geen spelcode: een ontwerpdocument (door Grok zelf een
+  "reconstructie uit geheugen" genoemd) plus board.json en vinyls.json. Ik heb Koen
+  gewezen op wat overschrijven kost (het Duel-bord, 54 figuren, winkel, kaarten,
+  evolutie, mega); hij koos er bewust voor.
+- Gebouwd in Groks structuur: regelmotor (puur, ook in Node), greedy-AI, campagne
+  (12 hoofdstukken, een per beest; uitspelen = het beest in je stal) en ladder
+  (Brons tot Legende, alleen rang en titel — Grok: geen winkel, geen gacha).
+  "Liga" heet "Ladder": Groks IP-regel verbiedt league-terminologie.
+- Vervallen omdat ze botsen met "geen kaarten, geen gacha": mega, winkel,
+  boosterkist, EX/UX. De paarse effecten zaten al in Groks ontwerp (PUSH, SWAP,
+  PIN, RETURN, WAIT, ENTRYLOCK).
+- Art: 8 van de 12 beesten hergebruiken figuren uit het vorige spel; 4 hebben een
+  embleem tot de art er is (docs/vinyl-prompts.md).
+- In Groks eigen tekst klopt niet: het kortste pad (8, niet 9) en de spiegeling
+  (C_S2 raakt de poorten niet). JSON gevolgd; vraag voor Koen staat in rules.md.
+- Testen: 56 regelchecks (node) en 18 in de browser. AI tegen AI, 40 potjes:
+  rood 15, blauw 14, gelijk 11 — het dichtzetten van je eigen doel met een zwaar
+  beest maakt potjes vaak onbeslist. Bevinding voor Koen.
+- Een tag op de oude versie pushen mocht niet (de sessie mag alleen naar z'n eigen
+  branch pushen); daarom staat de commit-hash 8184d9c overal genoemd.
+
 RONDEL — STATUS EN BESLISSINGEN
 Laatste update: 24 september 2026 (sessie 45)
 

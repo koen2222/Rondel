@@ -1,7 +1,13 @@
-const CACHE = 'rondel-v73';
+// Offline-cache voor Schijfduel. Nieuwe cache-naam, zodat telefoons die nog het
+// vorige spel (Rondel, cache 'rondel-v…') hadden, het oude weggooien.
+const CACHE = 'schijfduel-v1';
 const ASSETS = [
   './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png',
-  './art/ahuizotl.png', './art/anansi.png', './art/anubis.png', './art/anzu.png', './art/apprentice.png', './art/archer.png', './art/babayaga.png', './art/boar.png', './art/cleric.png', './art/commander.png', './art/cusidhe.png', './art/domovoi.png', './art/frostwight.png', './art/ghoul.png', './art/gnome.png', './art/harpy.png', './art/hellhound.png', './art/hydra.png', './art/ifrit.png', './art/imp.png', './art/jaguarwarrior.png', './art/jotun.png', './art/kappa.png', './art/lamassu.png', './art/leshy.png', './art/lupine.png', './art/mamiwata.png', './art/marid.png', './art/morrigan.png', './art/mountainking.png', './art/mountaintroll.png', './art/necromancer.png', './art/peri.png', './art/pitlord.png', './art/poseidon.png', './art/puca.png', './art/roc.png', './art/runesmith.png', './art/ryujin.png', './art/scout.png', './art/shabti.png', './art/shango.png', './art/siren.png', './art/skeleton.png', './art/sphinx.png', './art/squire.png', './art/tengu.png', './art/tezcatlipoca.png', './art/thunderbird.png', './art/tiamat.png', './art/warden.png', './art/weaver.png', './art/wyrmling.png', './art/ymir.png'
+  './schijfduel/board.json', './schijfduel/vinyls.json',
+  './schijfduel/proto/index.html', './schijfduel/proto/style.css', './schijfduel/proto/game.js',
+  './schijfduel/proto/ai.js', './schijfduel/proto/voortgang.js', './schijfduel/proto/render.js', './schijfduel/proto/app.js',
+  './art/skeleton.png', './art/apprentice.png', './art/lupine.png', './art/warden.png',
+  './art/puca.png', './art/anzu.png', './art/peri.png', './art/morrigan.png'
 ];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS))); self.skipWaiting(); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });

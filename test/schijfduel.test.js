@@ -171,5 +171,40 @@ sectie('AI TEGEN AI');
   check('Rood en blauw winnen allebei (geen kant is kansloos)', rood >= 8 && blauw >= 8, true);
 }
 
+sectie('CAMPAGNE');
+{
+  const V = require('../schijfduel/proto/voortgang.js');
+  const alle = vinyls.vinyls.map(v => v.id);
+  check('Twaalf hoofdstukken, één per beest', [V.CAMPAGNE.length, new Set(V.CAMPAGNE).size, V.CAMPAGNE.every(k => alle.includes(k))], [12, 12, true]);
+  const p = V.freshProfiel();
+  check('Je begint met zes beesten', p.stal.length, 6);
+  check('Hoofdstuk 1 levert een beest op dat je nog niet hebt', p.stal.includes(V.CAMPAGNE[0]), false);
+  const fout = [];
+  V.CAMPAGNE.forEach((k, h) => { for (let g = 0; g < V.GEVECHTEN; g++) { const t = V.campagneGevecht(h, g, alle);
+    if (t.team.length !== 6 || new Set(t.team).size !== 6 || !t.team.every(x => alle.includes(x))) fout.push(h + '/' + g); } });
+  check('Alle 36 gevechten: zes verschillende bestaande beesten', fout, []);
+  check('Zelfde gevecht = zelfde team', JSON.stringify(V.campagneGevecht(3, 1, alle)), JSON.stringify(V.campagneGevecht(3, 1, alle)));
+  check('Alleen gevecht 1 van hoofdstuk 1 is open', [V.campagneOpen({}, 0, 0), V.campagneOpen({}, 0, 1), V.campagneOpen({}, 1, 0)], [true, false, false]);
+  V.campagneWinst(p, 0, 0); V.campagneWinst(p, 0, 1); const r = V.campagneWinst(p, 0, 2);
+  check('Hoofdstuk uitspelen: het beest komt in je stal', [r.hoofdstukKlaar, r.beest, p.stal.includes(V.CAMPAGNE[0])], [true, V.CAMPAGNE[0], true]);
+  check('Nog een keer winnen levert niets extra', V.campagneWinst(p, 0, 2).nieuw, false);
+  check('Daarna gaat hoofdstuk 2 open', V.campagneOpen(p.campagne, 1, 0), true);
+}
+
+sectie('LADDER');
+{
+  const V = require('../schijfduel/proto/voortgang.js');
+  const reeks = (l, u) => u.reduce((x, w) => V.ladderNaUitslag(x, w).ladder, l);
+  const nul = { plek: 0, sterren: 0, hoogste: 0 };
+  check('Begin in Brons III', V.ladderNaam(0), 'Brons III');
+  check('Drie keer winnen = Brons II', V.ladderNaam(reeks(nul, [true, true, true]).plek), 'Brons II');
+  check('Verliezen in Brons III kost niets', reeks(nul, [false, false]), nul);
+  const zilver = reeks(nul, Array(9).fill(true));
+  check('Negen keer winnen = Zilver III', V.ladderNaam(zilver.plek), 'Zilver III');
+  check('Onder de bodem van je rang zak je nooit', V.ladderNaam(reeks(zilver, [false, false, false, false]).plek), 'Zilver III');
+  check('Een nieuwe rang levert een titel op', V.ladderNaUitslag({ plek: 2, sterren: 2, hoogste: 2 }, true).nieuweTitel, V.TITELS[1]);
+  check('Legende is de top', V.ladderNaam(reeks(nul, Array(40).fill(true)).plek), 'Legende');
+}
+
 console.log(`\n${ok + fout} checks — ${ok} ✓  ${fout} ✗`);
 process.exit(fout ? 1 : 0);
