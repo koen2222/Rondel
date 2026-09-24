@@ -508,6 +508,19 @@
   @media (prefers-reduced-motion: reduce) { .node-glow.active { animation: none; } }
   
   .unit-fig { cursor: pointer; }
+  /* ===== MEGA (sessie 44) =====
+     Een gemegade figuur draagt een roze-violette ring die blijft draaien zolang
+     de mega duurt, plus een badge met de beurten die hij nog heeft. Alleen
+     transform en opacity: de prestatiecheck bewaakt dat. */
+  .mega-ring { transform-box: fill-box; transform-origin: center; animation: megaDraai 3.2s linear infinite; }
+  .mega-gloed { transform-box: fill-box; transform-origin: center; animation: megaGloed 1.8s ease-in-out infinite; }
+  @keyframes megaDraai { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @keyframes megaGloed { 0%,100% { opacity: 0.55; transform: scale(1); } 50% { opacity: 0.95; transform: scale(1.08); } }
+  #mega-flits { position: fixed; inset: 0; pointer-events: none; z-index: 40; opacity: 0;
+    background: radial-gradient(circle at 50% 45%, rgba(255,255,255,0.95), rgba(240,171,252,0.55) 35%, transparent 70%); }
+  #mega-flits.go { animation: megaFlits 0.7s ease-out; }
+  @keyframes megaFlits { 0% { opacity: 1; } 100% { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .mega-ring, .mega-gloed, #mega-flits.go { animation: none; } }
   /* ===== STILSTAANDE BEWEGING (sessie 42) =====
      Een figuur dat volkomen stilstaat leest als een sticker. Elk poppetje
      beweegt daarom zachtjes, en HOE hangt af van z'n lichaamsbouw (zie LIJF).
@@ -1265,6 +1278,7 @@
     <span><span style="opacity:0.6; font-size:0.7rem;">FASE:</span> <span id="turn-name">Speler 1</span></span>
     <span style="display:flex; gap:12px; align-items:center;"><span style="font-size:0.8rem;" id="turn-clock">⏱ 5:00</span><span style="font-size:0.8rem; color:var(--gold);" id="turn-actions">1 ACTIE</span></span>
   </div>
+  <div id="mega-flits"></div>
   <div class="board-wrap"><div id="arena-fx"></div><svg id="board" viewBox="0 0 540 850" xmlns="http://www.w3.org/2000/svg"></svg></div>
   <div id="plate-strip" class="plate-strip"></div>
   <div class="action-bar">
@@ -1823,6 +1837,12 @@ const PLATES = {
   recycle:  { name:'Hergebruik',    duel:'Recycle',        cost:2, cat:'bijzonder',desc:'Al je gebruikte kaarten worden weer bruikbaar', target:'none' },
   // Duel heeft een kaart die ALLEEN bestaat voor de situatie "de vijand bezet
   // al mijn startpunten" — het bewijs dat dat een bedoelde spelsituatie is.
+  // Mega-evolutie (sessie 44). In Duel is een mega een aparte figuur die je met
+  // een speciale kaart laat megaën; zonder mega-art geven wij die kaart los, en
+  // hij werkt op elke eindvorm. De regels zelf zijn die van Duel (Serebii):
+  // "remain Mega Evolved for 7 turns", "only Mega Evolve 1 Pokémon per game",
+  // en een effect op je hele team.
+  megasteen:{ name:'Megasteen',     duel:'Mega Evolution', cost:2, cat:'bijzonder',desc:'Eén eindvorm op het veld megat 7 beurten: sterker, en z\'n hele team profiteert. Eén keer per potje.', target:'ally' },
   counter:  { name:'Tegenaanval',   duel:'Counter Attack', cost:1, cat:'bijzonder',desc:'Zolang de vijand ál je startpunten bezet, krijgen je figuren +1 MP', target:'none' },
 };
 function plateCost(keys) { return (keys || []).reduce((a, k) => a + (PLATES[k] ? PLATES[k].cost : 0), 0); }
@@ -1849,6 +1869,7 @@ const PLATE_ICONS = {
   hurdle:   ['#4ade80', '<path d="M4 18 Q12 2 20 18" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="18" r="2.4" stroke-width="1.6"/>'],
   cape:     ['#a3a3a3', '<path d="M12 4 Q7 6 6 12 Q5.5 17 8 20 L12 17 L16 20 Q18.5 17 18 12 Q17 6 12 4 Z" stroke-width="1.7" stroke-linejoin="round" stroke-dasharray="3 2"/>'],
   // Bijzonder
+  megasteen:['#f0abfc', '<path d="M12 3 L18 9 L12 21 L6 9 Z" stroke-width="1.8" stroke-linejoin="round"/><path d="M6 9 H18 M9.5 9 L12 21 L14.5 9" stroke-width="1.2" opacity="0.8"/><circle cx="12" cy="6.2" r="1" fill="currentColor"/>'],
   recycle:  ['#34d399', '<path d="M7 8 L4.5 12 L9 12 M17 16 L19.5 12 L15 12" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 12 a5 5 0 0 1 8.5 -2.5 M15 12 a5 5 0 0 1 -8.5 2.5" stroke-width="1.8"/>']
 };
 function plateIcon(key, size) {
@@ -2307,7 +2328,7 @@ let currentMode = 'solo';
 
 function initialState() {
   const ms = S('clockMinutes') * 60000;   // 0 = klok uit
-  return { turn:'p1', actionsLeft:1, units:{}, bench:{p1:[],p2:[]}, hc:{p1:[],p2:[]}, selected:null, legalTargets:new Set(), pendingDeploy:null, over:false, mode: currentMode, aiThinking: false, locked: false, plates:{p1:[],p2:[]}, usedPlates:{p1:[],p2:[]}, counterAttack:{p1:false,p2:false}, plateUsed:false, pendingPlate:null, mpBonus:{}, warcry:{p1:false,p2:false}, firstMoveDone:false, animating:null, pendingFX:[], craters:[], portals:[], clock: ms ? { p1:ms, p2:ms } : null };
+  return { turn:'p1', actionsLeft:1, units:{}, bench:{p1:[],p2:[]}, hc:{p1:[],p2:[]}, selected:null, legalTargets:new Set(), pendingDeploy:null, over:false, mode: currentMode, aiThinking: false, locked: false, plates:{p1:[],p2:[]}, usedPlates:{p1:[],p2:[]}, counterAttack:{p1:false,p2:false}, megaGebruikt:{p1:false,p2:false}, plateUsed:false, pendingPlate:null, mpBonus:{}, warcry:{p1:false,p2:false}, firstMoveDone:false, animating:null, pendingFX:[], craters:[], portals:[], clock: ms ? { p1:ms, p2:ms } : null };
 }
 
 // ===== Schaakklok (Duel-regel: 5 min per speler; tijd op = verlies) =====
@@ -2355,6 +2376,7 @@ function applyCondition(u, st) {
 }
 
 function koUnit(u) {
+  if (u.mega || u.slotsVoorMega) megaEinde(u, true);   // een verslagen mega is geen mega meer
   u.node = null; u.status = []; u.vast = 0;
   // Bergvast (Mountain Warden): sla het Healing Center over, direct terug naar de bank
   if (abilityOf(u) === 'mountain') { u.status = ['wait']; state.bench[u.owner].push(u.uid); return; }
@@ -2600,11 +2622,18 @@ function aiDeck() {
   // twintig, dus het is weer een echte keuze en niet meer z'n hele voorraad.
   const units = randomPick(keys.filter(isBasisvorm), 6);
   // Plates die bij het niveau passen: licht = alleen ondersteunend, zwaar = agressief
-  const supportive = ['rally','cleanse','bulwark','warcry'];
-  const aggressive = ['hex','ensnare','scorch','venom','recall','blink'];
-  const plates = S('difficulty') === 'makkelijk'
+  // Deze lijsten noemden tot sessie 44 nog kaarten die in sessie 29 zijn
+  // verdwenen ('rally', 'cleanse' …). aiUsePlate vond ze dus nooit en de AI
+  // speelde in de praktijk geen enkele kaart. Nu echte kaarten, binnen budget.
+  const supportive = ['fullheal','revive','xdefend','respin'];
+  const aggressive = ['xattack','xspeed','dazzle','focus'];
+  let plates = S('difficulty') === 'makkelijk'
     ? randomPick(supportive, 3)
     : randomPick([...aggressive, ...supportive], 3);
+  // Op Zwaar hangt de hele keten eronder, dus heeft hij eindvormen: dan ook
+  // een megasteen, net als een speler die weet wat hij doet.
+  if (S('difficulty') === 'moeilijk') plates = ['megasteen', ...plates.slice(0, 2)];
+  while (plateCost(plates) > PLATE_BUDGET) plates.pop();
   // Evoluties aanhangen, zo diep als het niveau toestaat. Op Licht helemaal
   // niet — anders wordt hij halverwege ineens veel sterker en is 'licht' niet
   // meer licht. Op Zwaar hangt de hele keten eronder, tot en met de rare.
@@ -3133,6 +3162,10 @@ const HELP_SECTIONS = [
     '<b>Gif</b> verzwakt je aanvallen, <b>zwaar gif</b> nog meer. <b>Brand</b> verzwakt alles én maakt je kleinste aanval een mis. <b>Verlamming</b> maakt je kleinste aanval een mis.',
     '<b>Verwarring</b> laat de schijf één vakje verspringen. <b>Slaap</b> houdt je stil tot een bondgenoot naast je staat. <b>Bevroren</b> laat je wel lopen maar niet aanvallen, en gaat na één gevecht vanzelf weg.',
     'Genezen doe je met de <b>Cleanse</b>-plate, via het Healing Center, of met een ability.' ]},
+  { h:'Mega-evolutie', p:[
+    'Met de kaart <b>Megasteen</b> in je deck kan één <b>eindvorm</b> op het veld megaën — maar <b>één keer per potje</b>.',
+    'Een mega blijft <b>7 beurten</b> gemegad (je ziet een roze ring en een M met het aantal beurten). Z\'n aanvallen worden 30 sterker, z\'n paarse vakken krijgen een ster erbij en één mis-vak wordt een blok.',
+    'En hij helpt z\'n <b>hele team</b>: een zware of dierlijke mega laat bondgenoten 10 harder slaan, de rest laat ze een punt verder lopen. Zo werkt het ook in Duel.' ]},
   { h:'Paarse effecten', p:[
     'Niet elk paars vak geeft een status. Sommige <b>doen iets</b> met de ander, net als in Duel:',
     '<b>Wegduwen</b> — de ander schuift één punt van je af (nooit een doel in). <b>Wisselen</b> — jullie ruilen van plek; zet dat iemand op een doel, dan telt het. <b>Vastzetten</b> — de ander kan z\'n volgende beurt niet bewegen (je ziet kettingen). <b>Terugsturen</b> — de ander gaat terug naar z\'n zijlijn, zonder Healing Center.',
@@ -3457,6 +3490,15 @@ function unitGroup(u, withShadow = true) {
     el('circle', { cx:16, cy:-24, r:7.5, fill:c, stroke:'#000', 'stroke-width':1.2 }, g);
     const t = el('text', { x:16, y:-20.5, 'font-size':10, 'text-anchor':'middle', fill:'#000', 'font-weight':'900', 'font-family':'sans-serif' }, g);
     t.textContent = u.status[0][0].toUpperCase();
+  }
+  // Mega: ring om de sokkel en een badge met de resterende beurten
+  if (u.mega && u.node) {
+    el('ellipse', { cx:0, cy:4, rx:27, ry:12, fill:'rgba(240,171,252,0.22)', class:'mega-gloed' }, g);
+    el('ellipse', { cx:0, cy:4, rx:25, ry:11, fill:'none', stroke:'#f0abfc', 'stroke-width':2.2,
+                    'stroke-dasharray':'7 5', class:'mega-ring' }, g);
+    el('circle', { cx:-16, cy:-50, r:8.5, fill:'#a21caf', stroke:'#fdf4ff', 'stroke-width':1.5 }, g);
+    const mt = el('text', { x:-16, y:-46.5, 'font-size':9.5, 'text-anchor':'middle', fill:'#fff', 'font-weight':'900', 'font-family':'sans-serif' }, g);
+    mt.textContent = 'M' + u.mega;
   }
   statusFX(g, u);
   return g;
@@ -4222,10 +4264,15 @@ function onPlateTap(idx) {
     if (key === 'recycle' && !(state.usedPlates[player] || []).length) { sfx('denied'); toast('Je hebt nog geen kaarten gebruikt'); return; }
     usePlate(player, idx); return;
   }
+  if (key === 'megasteen') {
+    if (state.megaGebruikt && state.megaGebruikt[player]) { sfx('denied'); toast('Je hebt deze potje al gemegad — dat kan maar één keer'); return; }
+    if (!Object.values(state.units).some(u => magMegaen(u, player))) { sfx('denied'); toast('Zet eerst een eindvorm op het veld — alleen die kan megaën'); return; }
+  }
   state.pendingPlate = { idx, key, stage: 1 }; state.selected = null; state.pendingDeploy = null;
   state.legalTargets = new Set();
   for (const u of Object.values(state.units)) {
     if (!u.node) continue;
+    if (key === 'megasteen') { if (magMegaen(u, player)) state.legalTargets.add(u.node); continue; }
     if ((pl.target === 'enemy' && u.owner !== player) || ((pl.target === 'ally' || pl.target === 'ally-then-node' || pl.target === 'ally-then-ally') && u.owner === player)) state.legalTargets.add(u.node);
   }
   if (state.legalTargets.size === 0) { state.pendingPlate = null; toast('Geen geldig doelwit'); renderAll(); return; }
@@ -4320,6 +4367,7 @@ function usePlate(player, idx, targetUid, targetNode) {
   else if (key === 'swapspot') { const other = state.units[state.pendingPlate.uid]; const a = other.node; other.node = u.node; u.node = a; }
   else if (key === 'hurdle') { state.units[state.pendingPlate.uid].node = targetNode; }
   else if (key === 'counter') { state.counterAttack[player] = true; }
+  else if (key === 'megasteen') { megaEvolueer(u); }
   else if (key === 'recycle') { state.usedPlates[player] = (state.usedPlates[player] || []); state.plates[player].push(...state.usedPlates[player]); state.usedPlates[player] = []; }
   else if (pl.fx) { u.fx = u.fx || {}; u.fx[pl.fx] = true; }
   // Kaart is op — bewaren zodat Hergebruik hem kan terughalen
@@ -4342,6 +4390,7 @@ function applyPlateFx(u, slot) {
   if (fx.xspeed && s.k === 'white') s = { ...s, k: 'gold', name: (s.name || 'Aanval') + ' +' };
   if (fx.xattack && (s.k === 'white' || s.k === 'gold')) s = { ...s, v: (s.v || 0) + 30 };
   if (fx.xspatk && s.k === 'purple') s = { ...s, stars: (s.stars || 1) + 2 };
+  if (megaAuraVoor(u) === 'kracht' && (s.k === 'white' || s.k === 'gold')) s = { ...s, v: (s.v || 0) + 10 };
   return s;
 }
 function clearPlateFx(u) { if (u) u.fx = {}; }
@@ -4700,7 +4749,7 @@ function spawnEvolutie(svg, x, y, owner) {
 // Een ability die afgaat: een gekleurde golf die van het punt af rolt. Kort en
 // klein, want dit gebeurt vaak — het mag opvallen zonder in de weg te zitten.
 function spawnAura(svg, x, y, soort) {
-  const kleur = soort === 'raise' ? '#a78bfa' : '#7dd3fc';
+  const kleur = soort === 'raise' ? '#a78bfa' : soort === 'mega' ? '#f0abfc' : '#7dd3fc';
   const g = el('g', { class:'aurafx', transform:`translate(${x},${y})` }, svg);
   for (let i = 0; i < 3; i++) {
     const r = el('ellipse', { cx:0, cy:6, rx:20, ry:8, fill:'none', stroke:kleur, 'stroke-width':3 }, g);
@@ -5007,7 +5056,8 @@ function abilityMPBonus(u) {
 function effMP(u) {
   // Tegenaanval: extra bewegingsruimte zolang je aanvoer geblokkeerd is
   const counter = (state.counterAttack && state.counterAttack[u.owner] && entriesBlockedBy(u.owner)) ? 1 : 0;
-  let mp = Math.min(3, UNIT_DEFS[u.defKey].mp + (state.mpBonus[u.uid] || 0) + (state.warcry[u.owner] ? 1 : 0) + abilityMPBonus(u) + counter);
+  const megaVaart = megaAuraVoor(u) === 'vaart' ? 1 : 0;
+  let mp = Math.min(3, UNIT_DEFS[u.defKey].mp + (state.mpBonus[u.uid] || 0) + (state.warcry[u.owner] ? 1 : 0) + abilityMPBonus(u) + counter + megaVaart);
   if (!state.firstMoveDone) mp = Math.max(1, mp - 1); // Duel: allereerste zet van het potje MP-1
   return mp;
 }
@@ -5154,6 +5204,7 @@ function endTurn() {
   // Sleep geneest via een aangrenzende bondgenoot; frozen geneest sinds sessie 22 ná een gevecht (Duel-regel)
   for (const u of Object.values(state.units)) { if (!u.node) continue; if (u.status.includes('sleep')) { const hasAdj = [...ADJ[u.node]].some(n => { const o = unitAt(n); return o && o.owner === u.owner; }); if (hasAdj) u.status = u.status.filter(s => s!=='sleep'); } }
   for (const u of Object.values(state.units)) if (u.owner === state.turn && u.vast) u.vast--;
+  for (const u of Object.values(state.units)) if (u.owner === state.turn && u.mega) { u.mega--; if (!u.mega) megaEinde(u); }
   state.turn = state.turn==='p1'?'p2':'p1'; state.actionsLeft = 1; state.selected = null; state.pendingDeploy = null; state.legalTargets = new Set();
   state.plateUsed = false; state.pendingPlate = null; state.mpBonus = {}; state.warcry = { p1:false, p2:false };
   for (const u of Object.values(state.units)) u.fx = {};   // plate-effecten gelden 'deze beurt'
@@ -5668,6 +5719,76 @@ async function runCombat(att, def) {
 }
 
 // ==========================================
+// MEGA-EVOLUTIE (sessie 44) — de regels uit Duel (Serebii, mechanics.shtml):
+//  - "you'll receive a special plate to Mega Evolve the Pokémon"
+//  - "it will remain Mega Evolved for 7 turns"
+//  - "You can only Mega Evolve 1 Pokémon per game"
+//  - megas hebben "more power and an effect that affects your entire team"
+// De 7 beurten tellen we in beurten van de eigenaar, net als het vastzetten.
+// ==========================================
+// MEGA-START (marker voor headless tests — niet verwijderen)
+const MEGA_BEURTEN = 7;
+// Meer kracht: +30 op wit en goud, +1 ster op paars, en één mis-vak wordt een
+// blok. Het aantal vakken blijft 16, de volgorde blijft staan.
+function megaSchijf(slots) {
+  let misWeg = false;
+  return slots.map(s => {
+    if (s.k === 'white' || s.k === 'gold') return { ...s, v: (s.v || 0) + 30 };
+    if (s.k === 'purple') return { ...s, stars: (s.stars || 1) + 1 };
+    if (s.k === 'red' && !misWeg) { misWeg = true; return { k:'blue' }; }
+    return { ...s };
+  });
+}
+// Het effect op het hele team hangt af van de lichaamsbouw: zware, dierlijke
+// en slangachtige eindvormen geven kracht, de rest geeft vaart.
+const MEGA_TEAM = {
+  kracht: { naam:'Megakracht', uitleg:'bondgenoten slaan 10 harder' },
+  vaart:  { naam:'Megavaart',  uitleg:'bondgenoten lopen 1 punt verder' },
+};
+function megaTeamVan(key) { return ['zwaar', 'beest', 'slang', 'steen'].includes(lijfVan(key)) ? 'kracht' : 'vaart'; }
+function isEindvorm(key) { return !isBasisvorm(key) && !evolutieVan(key); }
+function magMegaen(u, player) {
+  return !!(u && u.node && u.owner === player && !u.mega && isEindvorm(u.defKey)
+            && !(state.megaGebruikt && state.megaGebruikt[player]));
+}
+// Welk team-effect werkt er nu voor deze figuur? (van een ANDERE gemegade bondgenoot)
+function megaAuraVoor(u) {
+  if (!state || !state.units) return null;
+  const m = Object.values(state.units).find(o => o !== u && o.owner === u.owner && o.node && o.mega);
+  return m ? megaTeamVan(m.defKey) : null;
+}
+// MEGA-END (marker voor headless tests — niet verwijderen)
+
+function megaEvolueer(u) {
+  u.slotsVoorMega = u.slots.map(s => ({ ...s }));
+  u.levelBijMega = u.level;
+  u.slots = megaSchijf(u.slots);
+  u.mega = MEGA_BEURTEN;
+  (state.megaGebruikt = state.megaGebruikt || {})[u.owner] = true;
+  const n = NODES[u.node];
+  queueFX(n.x, n.y, 'evolutie:' + u.owner);
+  queueFX(n.x, n.y, 'aura:mega');
+  sfx('evolve');
+  flitsScherm();
+  toast(`MEGA ${UNIT_DEFS[u.defKey].name}! ${MEGA_TEAM[megaTeamVan(u.defKey)].naam}: ${MEGA_TEAM[megaTeamVan(u.defKey)].uitleg} (${MEGA_BEURTEN} beurten)`);
+}
+// Terug naar gewoon. Levels die hij tijdens de mega verdiende blijft hij houden.
+function megaEinde(u, stil) {
+  if (!u.mega && !u.slotsVoorMega) return;
+  if (u.slotsVoorMega) {
+    u.slots = u.slotsVoorMega;
+    for (let l = u.levelBijMega || u.level; l < u.level; l++) levelSlotBoost(u);
+  }
+  u.mega = 0; u.slotsVoorMega = null;
+  if (!stil) toast(`${UNIT_DEFS[u.defKey].name} is niet meer gemegad`);
+}
+function flitsScherm() {
+  if (animOff()) return;
+  const f = document.getElementById('mega-flits'); if (!f) return;
+  f.classList.remove('go'); void f.offsetWidth; f.classList.add('go');
+}
+
+// ==========================================
 // PAARSE EFFECTEN (sessie 44) — paars doet in Duel meer dan een status geven
 // Serebii noemt bij de paarse aanvallen steeds dezelfde handvol acties: de
 // ander wegduwen (Knock Away), van plek wisselen (Switch), vastzetten (Wait) en
@@ -5942,6 +6063,13 @@ function aiUsePlate() {
   if (state.plateUsed || !state.plates[AI].length) return;
   const mine = state.plates[AI];
   const has = k => mine.indexOf(k);
+  // Megaën zodra er een eindvorm staat die bijna gaat vechten of op weg is
+  const megaIdx = has('megasteen');
+  if (megaIdx >= 0) {
+    const kandidaat = Object.values(state.units).find(u => magMegaen(u, AI) &&
+      [...ADJ[u.node]].some(n => { const o = unitAt(n); return o && o.owner !== AI; }));
+    if (kandidaat) { usePlate(AI, megaIdx, kandidaat.uid); return; }
+  }
 
   // Staat er een eigen figuur naast een vijand? Dan is er zo een gevecht: geef
   // hem een gevechtskaart mee.

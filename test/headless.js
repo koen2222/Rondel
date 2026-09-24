@@ -71,6 +71,8 @@ if (!toneelSection) throw new Error('TONEEL-blok niet gevonden');
 const paarsSection = html.slice(html.indexOf('// PAARS-START'), html.indexOf('// PAARS-END'));
 const unitAtMatch = html.match(/\nfunction unitAt\(k\) \{[^\n]*\}/);
 if (!paarsSection || !unitAtMatch) throw new Error('PAARS-blok of unitAt() niet gevonden');
+const megaSection = html.slice(html.indexOf('// MEGA-START'), html.indexOf('// MEGA-END'));
+if (!megaSection) throw new Error('MEGA-blok niet gevonden');
 if (!evoSection) throw new Error('EVO-blok niet gevonden');
 // Aanvalsanimaties: trefwoord→soort (FX) en soort→projectiel (DUELFX)
 const fxSection = html.slice(html.indexOf('const FX_TREFWOORDEN ='), html.indexOf('// FX-END'));
@@ -117,9 +119,10 @@ const evalCode = [
   toneelSection,
   unitAtMatch[0],
   paarsSection,
+  megaSection,
   kleurMatch[0],
   duelFxSection,
-  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster, FX_TREFWOORDEN, attackFx, FX_KLEUR, FX_PROJECTIEL, projectielVoor, EVOLUTIE, evolutieVan, voorloperVan, isBasisvorm, evolutieKeten, evolutieBonus, MUNT_PER_DIAMANT, DIAMANT_BUNDELS, PRICE, PLATE_PRIJS, STARTER_PLATES, UPGRADE_COST, WIN_MUNTEN, LOSS_MUNTEN, freshProfile, migreerProfiel, LIJF, lijfVan, DUEL_SCENES, kiesDuelScene, VAL_PER_LIJF, valVoor, PAARS_EFFECTEN, isPaarsEffect, paarsLabel };',
+  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster, FX_TREFWOORDEN, attackFx, FX_KLEUR, FX_PROJECTIEL, projectielVoor, EVOLUTIE, evolutieVan, voorloperVan, isBasisvorm, evolutieKeten, evolutieBonus, MUNT_PER_DIAMANT, DIAMANT_BUNDELS, PRICE, PLATE_PRIJS, STARTER_PLATES, UPGRADE_COST, WIN_MUNTEN, LOSS_MUNTEN, freshProfile, migreerProfiel, LIJF, lijfVan, DUEL_SCENES, kiesDuelScene, VAL_PER_LIJF, valVoor, PAARS_EFFECTEN, isPaarsEffect, paarsLabel, MEGA_BEURTEN, megaSchijf, MEGA_TEAM, megaTeamVan, isEindvorm, magMegaen, megaAuraVoor };',
 ].join('\n');
 
 // Schrijf tijdelijk evalueerbaar bestand (vermijdt new Function-beperkingen)
@@ -132,7 +135,7 @@ try {
   fs.unlinkSync(tmpPath);
 }
 
-const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster, FX_TREFWOORDEN, attackFx, FX_KLEUR, FX_PROJECTIEL, projectielVoor, EVOLUTIE, evolutieVan, voorloperVan, isBasisvorm, evolutieKeten, evolutieBonus, MUNT_PER_DIAMANT, DIAMANT_BUNDELS, PRICE, PLATE_PRIJS, STARTER_PLATES, UPGRADE_COST, WIN_MUNTEN, LOSS_MUNTEN, freshProfile, migreerProfiel, LIJF, lijfVan, DUEL_SCENES, kiesDuelScene, VAL_PER_LIJF, valVoor, PAARS_EFFECTEN, isPaarsEffect, paarsLabel } = extracted;
+const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster, FX_TREFWOORDEN, attackFx, FX_KLEUR, FX_PROJECTIEL, projectielVoor, EVOLUTIE, evolutieVan, voorloperVan, isBasisvorm, evolutieKeten, evolutieBonus, MUNT_PER_DIAMANT, DIAMANT_BUNDELS, PRICE, PLATE_PRIJS, STARTER_PLATES, UPGRADE_COST, WIN_MUNTEN, LOSS_MUNTEN, freshProfile, migreerProfiel, LIJF, lijfVan, DUEL_SCENES, kiesDuelScene, VAL_PER_LIJF, valVoor, PAARS_EFFECTEN, isPaarsEffect, paarsLabel, MEGA_BEURTEN, megaSchijf, MEGA_TEAM, megaTeamVan, isEindvorm, magMegaen, megaAuraVoor } = extracted;
 
 // ─── Test harness ──────────────────────────────────────────────────────────────
 let pass = 0, fail = 0;
@@ -764,6 +767,34 @@ section('=== PAARSE EFFECTEN (9 checks) ===');
   check('Terugsturen zet hem op z\'n eigen zijlijn', [st.units.d.node, st.bench.p2], [null, ['d']]);
 }
 
+// ─── 4g1f. MEGA-EVOLUTIE (sessie 44) ──────────────────────────────────────────
+// Duel (Serebii): 7 beurten, één per potje, meer kracht en een team-effect.
+section('=== MEGA-EVOLUTIE (8 checks) ===');
+{
+  check('Een mega duurt 7 beurten, zoals in Duel', MEGA_BEURTEN, 7);
+  check('De Megasteen is een kaart binnen het budget', !!PLATES.megasteen && PLATES.megasteen.cost <= PLATE_BUDGET, true);
+  const eind = Object.keys(UNIT_DEFS).filter(isEindvorm);
+  check('Achttien eindvormen kunnen megaën', eind.length, 18);
+  check('Een basisvorm kan niet megaën', Object.keys(UNIT_DEFS).filter(isBasisvorm).some(isEindvorm), false);
+  const voor = UNIT_DEFS.pitlord.slots, na = megaSchijf(voor);
+  const som = (sl, k) => sl.filter(x => x.k === k).length;
+  check('Mega-schijf: nog steeds 16 vakken, één mis minder, één blok meer',
+    [na.length, som(na, 'red'), som(na, 'blue')], [16, som(voor, 'red') - 1, som(voor, 'blue') + 1]);
+  check('Mega-schijf: +30 op het sterkste wit', Math.max(...na.filter(x => x.k === 'white').map(x => x.v)),
+    Math.max(...voor.filter(x => x.k === 'white').map(x => x.v)) + 30);
+  // Eén keer per potje
+  const st = { units:{ a:{ uid:'a', owner:'p1', node:'IT1', defKey:'pitlord', status:[] } }, megaGebruikt:{ p1:true, p2:false } };
+  __setState(st);
+  check('Maar één mega per potje', magMegaen(st.units.a, 'p1'), false);
+  // Team-effect geldt voor de ANDEREN, niet voor de mega zelf
+  const tm = { units:{ m:{ uid:'m', owner:'p1', node:'IT1', defKey:'pitlord', mega:3, status:[] },
+                        b:{ uid:'b', owner:'p1', node:'IT3', defKey:'squire', status:[] },
+                        v:{ uid:'v', owner:'p2', node:'IT2', defKey:'imp', status:[] } } };
+  __setState(tm);
+  check('Het team-effect werkt op bondgenoten, niet op de mega zelf of de vijand',
+    [megaAuraVoor(tm.units.b), megaAuraVoor(tm.units.m), megaAuraVoor(tm.units.v)], [megaTeamVan('pitlord'), null, null]);
+}
+
 // ─── 4g2. PRESTATIE-VALKUILEN (sessie 38) ─────────────────────────────────────
 // Twee dingen die gemeten de beeldsnelheid halveerden. Ze zijn makkelijk terug
 // te zetten zonder het te merken, dus ze staan hier vast.
@@ -789,7 +820,7 @@ section('=== PRESTATIE (5 checks) ===');
   // Haakjes tellen in plaats van een regex: een keyframes-blok bevat zelf weer
   // accolades, dus een niet-hebberige regex pakt of te weinig of de halve CSS.
   const menuKeys = [];
-  for (const m of css.matchAll(/@keyframes\s+(ha[A-Za-z]+|val[A-Za-z]+|toneel[A-Za-z]+)\s*\{/g)) {
+  for (const m of css.matchAll(/@keyframes\s+(ha[A-Za-z]+|val[A-Za-z]+|toneel[A-Za-z]+|mega[A-Za-z]+)\s*\{/g)) {
     let i = m.index + m[0].length, diep = 1;
     while (i < css.length && diep > 0) { if (css[i] === '{') diep++; else if (css[i] === '}') diep--; i++; }
     // Commentaar eruit, anders leest "vanaf hier ligt hij:" als een eigenschap.

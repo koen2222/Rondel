@@ -114,6 +114,10 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
   ok('Bord gerenderd met precies 28 punten (Duel: 26 + 2 doelen)', await page.locator('#board [data-node]').count() === 28);
   ok('Bench P1: 6 figuren naast het bord', await page.locator('#board g.bench-p1 g.bench-fig').count() === 6);
   ok('Bench P2: 6 figuren naast het bord', await page.locator('#board g.bench-p2 g.bench-fig').count() === 6);
+  // Tot sessie 44 kreeg de AI kaarten mee die in sessie 29 al waren verdwenen,
+  // en speelde hij dus nooit een kaart. Niemand merkte het.
+  ok('De AI heeft alleen kaarten die echt bestaan',
+    await page.evaluate(() => state.plates.p2.length > 0 && state.plates.p2.every(k => PLATES[k])));
   await page.waitForTimeout(600);
   ok('Schaakklok tikt (m:ss zichtbaar)', /⏱ [0-9]:[0-5][0-9]/.test(await page.locator('#turn-clock').innerText()));
 
