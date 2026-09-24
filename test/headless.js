@@ -73,6 +73,8 @@ const unitAtMatch = html.match(/\nfunction unitAt\(k\) \{[^\n]*\}/);
 if (!paarsSection || !unitAtMatch) throw new Error('PAARS-blok of unitAt() niet gevonden');
 const megaSection = html.slice(html.indexOf('// MEGA-START'), html.indexOf('// MEGA-END'));
 if (!megaSection) throw new Error('MEGA-blok niet gevonden');
+const campSection = html.slice(html.indexOf('// CAMPAGNE-START'), html.indexOf('// CAMPAGNE-END'));
+if (!campSection) throw new Error('CAMPAGNE-blok niet gevonden');
 if (!evoSection) throw new Error('EVO-blok niet gevonden');
 // Aanvalsanimaties: trefwoord→soort (FX) en soort→projectiel (DUELFX)
 const fxSection = html.slice(html.indexOf('const FX_TREFWOORDEN ='), html.indexOf('// FX-END'));
@@ -110,10 +112,11 @@ const evalCode = [
   condMatch[0],
   platesSection,
   economieSection,
+  evoSection,
+  campSection,
   decksMatch[0],
   freshProfileMatch[0],
   migreerMatch[0],
-  evoSection,
   lijfSection,
   fxSection,
   toneelSection,
@@ -122,7 +125,7 @@ const evalCode = [
   megaSection,
   kleurMatch[0],
   duelFxSection,
-  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster, FX_TREFWOORDEN, attackFx, FX_KLEUR, FX_PROJECTIEL, projectielVoor, EVOLUTIE, evolutieVan, voorloperVan, isBasisvorm, evolutieKeten, evolutieBonus, MUNT_PER_DIAMANT, DIAMANT_BUNDELS, PRICE, PLATE_PRIJS, STARTER_PLATES, UPGRADE_COST, WIN_MUNTEN, LOSS_MUNTEN, freshProfile, migreerProfiel, LIJF, lijfVan, DUEL_SCENES, kiesDuelScene, VAL_PER_LIJF, valVoor, PAARS_EFFECTEN, isPaarsEffect, paarsLabel, MEGA_BEURTEN, megaSchijf, MEGA_TEAM, megaTeamVan, isEindvorm, magMegaen, megaAuraVoor };',
+  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster, FX_TREFWOORDEN, attackFx, FX_KLEUR, FX_PROJECTIEL, projectielVoor, EVOLUTIE, evolutieVan, voorloperVan, isBasisvorm, evolutieKeten, evolutieBonus, MUNT_PER_DIAMANT, DIAMANT_BUNDELS, PRICE, PLATE_PRIJS, STARTER_PLATES, UPGRADE_COST, WIN_MUNTEN, LOSS_MUNTEN, freshProfile, migreerProfiel, LIJF, lijfVan, DUEL_SCENES, kiesDuelScene, VAL_PER_LIJF, valVoor, PAARS_EFFECTEN, isPaarsEffect, paarsLabel, MEGA_BEURTEN, megaSchijf, MEGA_TEAM, megaTeamVan, isEindvorm, magMegaen, megaAuraVoor, CAMPAGNE, GEVECHTEN_PER_HOOFDSTUK, campagneGevecht, campagneOpen, campagneBeloning, basisVanFactie, LIGA_TOP, LIGA_STERREN, LIGA_PROMOTIE, ligaRang, ligaNaam, freshLiga, ligaNaUitslag, ligaTegenstander, zaadRng };',
 ].join('\n');
 
 // Schrijf tijdelijk evalueerbaar bestand (vermijdt new Function-beperkingen)
@@ -135,7 +138,7 @@ try {
   fs.unlinkSync(tmpPath);
 }
 
-const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster, FX_TREFWOORDEN, attackFx, FX_KLEUR, FX_PROJECTIEL, projectielVoor, EVOLUTIE, evolutieVan, voorloperVan, isBasisvorm, evolutieKeten, evolutieBonus, MUNT_PER_DIAMANT, DIAMANT_BUNDELS, PRICE, PLATE_PRIJS, STARTER_PLATES, UPGRADE_COST, WIN_MUNTEN, LOSS_MUNTEN, freshProfile, migreerProfiel, LIJF, lijfVan, DUEL_SCENES, kiesDuelScene, VAL_PER_LIJF, valVoor, PAARS_EFFECTEN, isPaarsEffect, paarsLabel, MEGA_BEURTEN, megaSchijf, MEGA_TEAM, megaTeamVan, isEindvorm, magMegaen, megaAuraVoor } = extracted;
+const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster, FX_TREFWOORDEN, attackFx, FX_KLEUR, FX_PROJECTIEL, projectielVoor, EVOLUTIE, evolutieVan, voorloperVan, isBasisvorm, evolutieKeten, evolutieBonus, MUNT_PER_DIAMANT, DIAMANT_BUNDELS, PRICE, PLATE_PRIJS, STARTER_PLATES, UPGRADE_COST, WIN_MUNTEN, LOSS_MUNTEN, freshProfile, migreerProfiel, LIJF, lijfVan, DUEL_SCENES, kiesDuelScene, VAL_PER_LIJF, valVoor, PAARS_EFFECTEN, isPaarsEffect, paarsLabel, MEGA_BEURTEN, megaSchijf, MEGA_TEAM, megaTeamVan, isEindvorm, magMegaen, megaAuraVoor, CAMPAGNE, GEVECHTEN_PER_HOOFDSTUK, campagneGevecht, campagneOpen, campagneBeloning, basisVanFactie, LIGA_TOP, LIGA_STERREN, LIGA_PROMOTIE, ligaRang, ligaNaam, freshLiga, ligaNaUitslag, ligaTegenstander, zaadRng } = extracted;
 
 // ─── Test harness ──────────────────────────────────────────────────────────────
 let pass = 0, fail = 0;
@@ -797,6 +800,47 @@ section('=== MEGA-EVOLUTIE (8 checks) ===');
   __setState(tm);
   check('Het team-effect werkt op bondgenoten, niet op de mega zelf of de vijand',
     [megaAuraVoor(tm.units.b), megaAuraVoor(tm.units.m), megaAuraVoor(tm.units.v)], [megaTeamVan('pitlord'), null, null]);
+}
+
+// ─── 4g1g. CAMPAGNE EN LIGA (sessie 45) ───────────────────────────────────────
+section('=== CAMPAGNE (9 checks) ===');
+{
+  const facties = new Set(Object.values(UNIT_DEFS).map(u => u.fac));
+  check('Eén hoofdstuk per factie, geen dubbele', [CAMPAGNE.length, new Set(CAMPAGNE).size, CAMPAGNE.every(f => facties.has(f))], [facties.size, facties.size, true]);
+  check('Elke factie heeft een basisvorm om te verdienen', CAMPAGNE.filter(f => !basisVanFactie(f)), []);
+  // Elk gevecht moet een geldig team opleveren: zes verschillende basisvormen
+  const fout = [];
+  CAMPAGNE.forEach((f, h) => { for (let g = 0; g < GEVECHTEN_PER_HOOFDSTUK; g++) {
+    const t = campagneGevecht(h, g);
+    if (t.units.length !== 6 || new Set(t.units).size !== 6 || !t.units.every(isBasisvorm) || !t.plates.every(k => PLATES[k]) || plateCost(t.plates) > PLATE_BUDGET) fout.push(h + '/' + g);
+  } });
+  check('Alle 54 gevechten leveren een geldig team', fout, []);
+  check('Hetzelfde gevecht geeft altijd hetzelfde team', JSON.stringify(campagneGevecht(4, 1)), JSON.stringify(campagneGevecht(4, 1)));
+  check('De moeilijkheid loopt op', [campagneGevecht(0, 0).level, campagneGevecht(17, 2).level, campagneGevecht(17, 2).gedrag], [1, 4, 'moeilijk']);
+  check('Alleen hoofdstuk 1 gevecht 1 is open bij een nieuw profiel',
+    [campagneOpen({}, 0, 0), campagneOpen({}, 0, 1), campagneOpen({}, 1, 0)], [true, false, false]);
+  check('Hoofdstuk uitgespeeld → volgende gaat open', campagneOpen({ [CAMPAGNE[0]]: 3 }, 1, 0), true);
+  const kern = basisVanFactie(CAMPAGNE[3]);
+  // Een nieuwe speler moet vanaf hoofdstuk 1 iets te verdienen hebben
+  check('Hoofdstuk 1 levert een nieuwe speler een figuur op',
+    !!campagneBeloning(0, 2, freshProfile().owned).figuur, true);
+  check('Hoofdstuk uitspelen levert de basisvorm op, of diamantjes als je hem al hebt',
+    [campagneBeloning(3, 2, {}).figuur, campagneBeloning(3, 2, { [kern]: 1 }).figuur, campagneBeloning(3, 0, {}).figuur], [kern, null, null]);
+}
+section('=== LIGA (7 checks) ===');
+{
+  const reeks = (start, uitslagen) => uitslagen.reduce((l, w) => ligaNaUitslag(l, w).liga, start);
+  check('Nieuw profiel begint in Brons III', ligaNaam(freshLiga().plek), 'Brons III');
+  check('Drie keer winnen = een divisie omhoog', ligaNaam(reeks(freshLiga(), [true, true, true]).plek), 'Brons II');
+  check('Negen keer winnen = Zilver III', ligaNaam(reeks(freshLiga(), Array(9).fill(true)).plek), 'Zilver III');
+  check('Verliezen in Brons III kost niets', reeks(freshLiga(), [false, false, false]), freshLiga());
+  // Net in Zilver III zonder sterren: verliezen mag je niet terug naar Brons sturen
+  const zilver = reeks(freshLiga(), Array(9).fill(true));
+  check('Onder de bodem van je rang zak je nooit', ligaNaam(reeks(zilver, [false, false, false, false]).plek), 'Zilver III');
+  const r = ligaNaUitslag({ plek: 5, sterren: 2, hoogste: 5 }, true);   // Zilver I -> Goud III
+  check('Eerste keer Goud levert de promotiebeloning', [r.promotie, r.beloning], [true, LIGA_PROMOTIE[2]]);
+  const nogmaals = ligaNaUitslag({ plek: 8, sterren: 2, hoogste: 11 }, true);
+  check('Een rang die je al had levert geen tweede beloning', nogmaals.beloning, 0);
 }
 
 // ─── 4g2. PRESTATIE-VALKUILEN (sessie 38) ─────────────────────────────────────

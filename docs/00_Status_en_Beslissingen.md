@@ -1,5 +1,5 @@
 RONDEL — STATUS EN BESLISSINGEN
-Laatste update: 24 september 2026 (sessie 44)
+Laatste update: 24 september 2026 (sessie 45)
 
 KERNCONCEPT
 - Tabletop-first fantasy bordspel, einddoel = digitale app
@@ -313,6 +313,39 @@ kaarten."
   benoemde aanval heeft een animatie, elke soort heeft een kleur, elk
   projectiel staat ook echt in de CSS). Smoke +7 checks voor de bordhoogte, de
   twee vechters, het vliegende projectiel, het schild-icoon en de kaartvlucht.
+
+SESSIE 45 — CAMPAGNE EN LIGA
+Koen: "bouw nu ook de campagne en de liga". De ontwerpkeuzes heb ik zelf gemaakt
+naar hoe Duel het deed; hieronder zodat ze bij te sturen zijn.
+
+DE NAAD. Er is een object volgendePotje met een vaste tegenstander (units, level,
+evolutiediepte, kaarten, AI-gedrag). aiDeck() en aiCfg() gebruiken die als hij er
+is, anders de instelling zoals altijd. state.mode blijft 'solo', dus alle
+AI-logica werkt ongewijzigd; state.context ('duel'/'campagne'/'liga') bepaalt de
+beloning. Het gewone Duel verandert niet (nagemeten met simulate.js).
+
+CAMPAGNE: achttien hoofdstukken, een per factie, elk drie gevechten; het derde is
+een baasgevecht met de hele keten tot de eindvorm. De teams zijn geen 54
+handgeschreven lijsten maar een generator met VASTE willekeur per gevecht
+(zaadRng): de vooruitblik toont precies het team dat je tegenkomt, en opnieuw
+spelen geeft hetzelfde team. Level, evolutiediepte en AI-gedrag lopen op; vanaf
+hoofdstuk 13 heeft de baas een megasteen.
+Beloning: de eerste winst per gevecht diamantjes; een hoofdstuk uitspelen levert
+de BASISVORM van die factie op (of diamantjes als je hem al had). VOLGORDE
+BEWUST: eerst de facties waarvan een nieuwe speler de basisvorm nog niet heeft,
+zodat je vanaf hoofdstuk 1 een figuur verdient. De eerste versie begon met de zes
+oorspronkelijke facties en gaf daardoor zes hoofdstukken lang alleen diamantjes.
+
+LIGA: Brons, Zilver, Goud, Platina (elk III/II/I) en Legende. Winst +1 ster, drie
+sterren is een divisie omhoog; verlies -1 ster maar NOOIT onder de bodem van je
+rang. Tegenstander hangt af van je rang (Brons speelt makkelijk op level 1,
+Legende moeilijk met hele ketens en een megasteen). Eerste keer een nieuwe rang:
+10/20/30/50 diamantjes. Geen seizoenen of reset: dat heeft pas zin met echte
+tegenstanders.
+
+TESTS: headless 202 -> 218, smoke 91 -> 102. Onderweg: smoke klikte "de tweede
+terugknop in de pagina" om uit de winkel te gaan; met twee nieuwe schermen ervoor
+was dat ineens de Liga. Alle terugknoppen in de test zijn nu per scherm benoemd.
 
 SESSIE 44 — DICHTER BIJ DUEL: PAARSE EFFECTEN, MEGA, VIJF ZELDZAAMHEDEN
 Koen: "kan je het spel verder afmaken dat het zo veel mogelijk op Pokemon Duel
@@ -1476,8 +1509,10 @@ OPEN PUNTEN — IN VOLGORDE VAN URGENTIE
     R8, duplicaat-terugbetaling 60/120/240. Eerste gok, speeltesten.
 20. NIEUW (sessie 44): de AI speelt sinds deze sessie weer kaarten. Balans
     opnieuw speeltesten; alle metingen van sessie 38-43 waren zonder AI-kaarten.
-21. NIEUW (sessie 44): nog niet gebouwde Duel-onderdelen die Koen niet koos:
-    campagne, Liga met rangen, dagelijkse missies. En online (zie het document).
+21. NIEUW (sessie 44): nog niet gebouwde Duel-onderdelen: dagelijkse missies,
+    en online (zie het document). Campagne en Liga zijn er sinds sessie 45.
+22. NIEUW (sessie 45): speeltesten of de campagne-curve klopt — de generator
+    gokt level 1 t/m 4 over 54 gevechten; misschien is hoofdstuk 12-18 te zwaar.
 19. NIEUW (sessie 42): ragdoll-gevechten. Volgorde: (a) art in delen knippen
     per lichaamsbouw, (b) blijvende figuur-laag die renders overleeft, (c)
     skeletanimatie idle/lopen/slaan/geraakt, (d) ragdoll bij KO. Stap (a) is het

@@ -971,6 +971,50 @@
   .btn-back { background: linear-gradient(145deg, #2a201a, #14100d); border: 1px solid rgba(245,158,11,0.35); color: var(--gold); border-radius: 10px; padding: 8px 14px; font-family: 'Cinzel', serif; font-size: 0.85rem; cursor: pointer; }
   .subscreen-title { font-family: 'Cinzel', serif; font-weight: 700; font-size: 1.15rem; letter-spacing: 0.12em; color: var(--gold); }
   .subscreen-credits { margin-left: auto; font-family: 'Cinzel', serif; font-size: 0.85rem; color: var(--ink); display: flex; gap: 10px; align-items: center; }
+  /* ===== CAMPAGNE (sessie 45) ===== */
+  .camp-lijst { display: flex; flex-direction: column; gap: 10px; }
+  .camp-kaart { display: grid; grid-template-columns: 64px 1fr; grid-template-rows: auto auto; gap: 4px 10px; align-items: center;
+    padding: 10px 12px; border-radius: 14px; background: linear-gradient(160deg, #34222a, #1a1013); border: 1px solid rgba(253,224,71,0.18); }
+  .camp-kaart.klaar { border-color: rgba(134,239,172,0.45); box-shadow: 0 0 14px rgba(134,239,172,0.12); }
+  .camp-kaart.dicht { opacity: 0.45; }
+  .camp-art { grid-row: 1 / span 2; display: flex; justify-content: center; }
+  .camp-nr { font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; color: #a8a29e; }
+  .camp-naam { font-family: 'Cinzel', serif; font-weight: 700; color: var(--gold); font-size: 1.05rem; }
+  .camp-prijs { font-size: 0.78rem; color: #e7d9c3; }
+  .camp-bollen { display: flex; gap: 8px; }
+  .camp-bol { width: 44px; height: 44px; border-radius: 50%; font-family: 'Cinzel', serif; font-weight: 900; font-size: 0.95rem;
+    border: 2px solid rgba(255,255,255,0.18); background: #1c1216; color: #78716c; cursor: pointer; }
+  .camp-bol.open { border-color: var(--gold); color: var(--gold); box-shadow: 0 0 12px var(--gold-glow); }
+  .camp-bol.gewonnen { background: linear-gradient(145deg, #16a34a, #14532d); border-color: #86efac; color: #fff; }
+  .camp-bol.baas { font-size: 1.15rem; }
+  .vooraf-team { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+  .vooraf-fig { display: flex; flex-direction: column; align-items: center; font-size: 0.72rem; color: #e7d9c3; text-align: center; }
+  .res-figuur { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: 10px; font-size: 0.95rem; }
+  .res-regel { margin-top: 6px; font-size: 0.9rem; }
+  .res-promotie { color: var(--gold); font-family: 'Cinzel', serif; font-weight: 900; }
+  /* ===== LIGA (sessie 45) ===== */
+  .liga-hart { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 18px 12px 20px; border-radius: 16px;
+    background: radial-gradient(ellipse at 50% 20%, rgba(255,200,120,0.14), transparent 70%), linear-gradient(160deg, #34222a, #1a1013);
+    border: 1px solid rgba(253,224,71,0.25); }
+  .liga-embleem svg { width: 96px; height: 108px; filter: drop-shadow(0 6px 14px rgba(0,0,0,0.7)); }
+  .liga-embleem path:first-child { stroke-width: 3; }
+  .liga-embleem .liga-embleem-ster { fill: rgba(255,255,255,0.9); }
+  .rang-0 path:first-child, .liga-dot.rang-0 { fill: #b45309; stroke: #fcd34d; background: #b45309; }
+  .rang-1 path:first-child, .liga-dot.rang-1 { fill: #94a3b8; stroke: #f1f5f9; background: #94a3b8; }
+  .rang-2 path:first-child, .liga-dot.rang-2 { fill: #eab308; stroke: #fef9c3; background: #eab308; }
+  .rang-3 path:first-child, .liga-dot.rang-3 { fill: #22d3ee; stroke: #cffafe; background: #22d3ee; }
+  .rang-4 path:first-child, .liga-dot.rang-4 { fill: #c026d3; stroke: #f5d0fe; background: #c026d3; }
+  .liga-naam { font-family: 'Cinzel', serif; font-weight: 900; font-size: 1.5rem; color: var(--gold); letter-spacing: 0.08em; }
+  .liga-sterren { display: flex; gap: 6px; font-size: 1.7rem; }
+  .liga-ster { color: #44403c; } .liga-ster.aan { color: #fde047; text-shadow: 0 0 10px rgba(253,224,71,0.7); }
+  .liga-legende { font-size: 0.9rem; color: #f5d0fe; }
+  .liga-doel { font-size: 0.85rem; color: #e7d9c3; text-align: center; }
+  .liga-zoek { width: 100%; max-width: 280px; margin-top: 8px; }
+  .liga-trap { display: flex; flex-direction: column-reverse; gap: 6px; }
+  .liga-trede { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 10px; background: rgba(255,255,255,0.03);
+    font-family: 'Cinzel', serif; color: #78716c; }
+  .liga-trede.gehaald { color: #d6d3d1; } .liga-trede.nu { color: var(--gold); background: rgba(253,224,71,0.08); border: 1px solid rgba(253,224,71,0.3); }
+  .liga-dot { display: block; width: 14px; height: 14px; border-radius: 50%; }
   /* Valuta: muntje of diamantje met het getal ernaast, overal hetzelfde blokje. */
   .cur { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; color: var(--gold); }
   .cur.diam { color: #67e8f9; }
@@ -1169,7 +1213,17 @@
           <path d="M20.6 2.8 L10 15.4 L6.7 19.3" stroke-width="2"/>
           <path d="M12.4 17.4 L7.6 13.5" stroke-width="1.8"/><circle cx="5.8" cy="20.4" r="1.5"/>
         </svg>
-        <div class="tname">DUEL</div><div class="tdesc">Solo tegen het AI-systeem — verdien munten</div></div>
+        <div class="tname">DUEL</div><div class="tdesc">Vrij potje tegen het AI-systeem — verdien munten</div></div>
+      <div class="home-tile" id="tile-campagne">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 20 V5 l5 -2 6 2 5 -2 v15 l-5 2 -6 -2 Z"/><path d="M9 3 v15 M15 5 v15"/>
+        </svg>
+        <div class="tname">CAMPAGNE</div><div class="tdesc">18 hoofdstukken, verdien figuren</div></div>
+      <div class="home-tile" id="tile-liga">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M7 4 h10 v4 a5 5 0 0 1 -10 0 Z"/><path d="M7 5 H4 a3 3 0 0 0 3 4 M17 5 h3 a3 3 0 0 1 -3 4"/><path d="M12 13 v4 M8 20 h8 M9.5 17 h5 v3"/>
+        </svg>
+        <div class="tname">LIGA</div><div class="tdesc">Klim van Brons naar Legende</div></div>
       <div class="home-tile" id="tile-hotseat">
         <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="7.5" cy="7" r="3"/><path d="M2.5 20 v-2.5 a5 5 0 0 1 10 0 V20"/>
@@ -1214,6 +1268,39 @@
       <div class="subscreen-credits" id="coll-credits"></div>
     </div>
     <div class="coll-grid" id="coll-grid"></div>
+  </div>
+</div>
+
+<!-- ===== CAMPAGNE (sessie 45) ===== -->
+<div id="screen-campagne" class="screen">
+  <div class="subscreen">
+    <div class="subscreen-head">
+      <button class="btn-back" data-back="home">‹ Terug</button>
+      <div class="subscreen-title">CAMPAGNE</div>
+      <div class="subscreen-credits" id="camp-valuta"></div>
+    </div>
+    <div class="deck-sub">Versla elke factie in drie gevechten. Wie het hoofdstuk uitspeelt, krijgt z'n figuur.</div>
+    <div class="camp-lijst" id="camp-lijst"></div>
+  </div>
+</div>
+
+<!-- ===== LIGA (sessie 45) ===== -->
+<div id="screen-liga" class="screen">
+  <div class="subscreen">
+    <div class="subscreen-head">
+      <button class="btn-back" data-back="home">‹ Terug</button>
+      <div class="subscreen-title">LIGA</div>
+      <div class="subscreen-credits" id="liga-valuta"></div>
+    </div>
+    <div class="liga-hart">
+      <div class="liga-embleem" id="liga-embleem"><svg viewBox="0 0 64 72" aria-hidden="true"><path d="M32 3 L60 14 V36 C60 52 48 64 32 69 C16 64 4 52 4 36 V14 Z"/><path class="liga-embleem-ster" d="M32 20 l4.4 9 9.9 1.4 -7.2 7 1.7 9.8 -8.8 -4.6 -8.8 4.6 1.7 -9.8 -7.2 -7 9.9 -1.4 Z"/></svg></div>
+      <div class="liga-naam" id="liga-naam"></div>
+      <div class="liga-sterren" id="liga-sterren"></div>
+      <div class="liga-doel" id="liga-doel"></div>
+      <button class="btn primary liga-zoek" id="btn-liga-zoek">Zoek tegenstander</button>
+    </div>
+    <div class="deck-sub">Winnen levert een ster op, verliezen kost er een — maar onder de bodem van je rang zak je nooit.</div>
+    <div class="liga-trap" id="liga-trap"></div>
   </div>
 </div>
 
@@ -1296,7 +1383,19 @@
     <div class="result-title win" id="result-title">OVERWINNING</div>
     <div class="result-reason" id="result-reason"></div>
     <div class="result-reward" id="result-reward"></div>
-    <button class="btn primary" id="btn-result-menu" style="width:100%; margin-top:18px;">Terug naar het menu</button>
+    <button class="btn primary" id="btn-result-verder" style="width:100%; margin-top:18px; display:none;"></button>
+    <button class="btn" id="btn-result-menu" style="width:100%; margin-top:10px;">Terug naar het menu</button>
+  </div>
+</div>
+
+<!-- ===== CAMPAGNE: WIE STAAT ER TEGENOVER JE ===== -->
+<div id="vooraf-overlay" class="overlay">
+  <div class="result-panel">
+    <div class="evo-kop" id="vooraf-titel"></div>
+    <div class="result-reason" id="vooraf-sub"></div>
+    <div class="vooraf-team" id="vooraf-team"></div>
+    <button class="btn primary" id="btn-vooraf-start" style="width:100%; margin-top:16px;">Kies je team</button>
+    <button class="btn" id="btn-vooraf-terug" style="width:100%; margin-top:10px;">Terug</button>
   </div>
 </div>
 
@@ -2089,6 +2188,7 @@ function freshProfile() {
   return { munten: 300, diamanten: 0,
            owned: { squire:1, scout:1, apprentice:1, skeleton:1, boar:1, imp:1 },
            ownedPlates, stats: { wins:0, losses:0 }, settings: freshSettings(),
+           campagne: {}, liga: freshLiga(),
            decks: Array(DECK_SLOTS).fill(null) };
 }
 // Opgeslagen teams valideren: units die je niet (meer) bezit vallen weg, en een
@@ -2139,6 +2239,9 @@ function migreerProfiel(p) {
   if (typeof p.diamanten !== 'number') p.diamanten = 0;
   if (!p.ownedPlates || typeof p.ownedPlates !== 'object') p.ownedPlates = {};
   for (const k of STARTER_PLATES) p.ownedPlates[k] = 1;   // altijd een speelbaar deck
+  // Sessie 45: voortgang in de campagne en je plek in de Liga
+  if (!p.campagne || typeof p.campagne !== 'object') p.campagne = {};
+  if (!p.liga || typeof p.liga.plek !== 'number') p.liga = freshLiga();
   return p;
 }
 function loadProfile() {
@@ -2627,7 +2730,17 @@ const AI_DECKS = {
   normaal:   { ketens: 1, level: 3 },   // één stap: common -> uncommon
   moeilijk:  { ketens: 2, level: 4 },   // hele keten: tot en met de rare
 };
+// Het potje dat je gaat spelen, als het uit de campagne of de Liga komt. Staat
+// er niets, dan is het een vrij Duel-potje op de moeilijkheid uit Instellingen.
+let volgendePotje = null;
 function aiDeck() {
+  const t = volgendePotje && volgendePotje.tegenstander;
+  if (t) {
+    const evos = {};
+    for (const k of t.units) { let stap = k;
+      for (let i = 0; i < t.ketens; i++) { const e = evolutieVan(stap); if (!e) break; evos[stap] = e; stap = e; } }
+    return { units: [...t.units], plates: [...t.plates], evos, level: t.level };
+  }
   const d = AI_DECKS[S('difficulty')] || AI_DECKS.normaal;
   const keys = Object.keys(UNIT_DEFS);
   // Alleen basisvormen — dezelfde regel als voor jou. Sinds sessie 41 zijn er
@@ -2748,6 +2861,8 @@ function startGame() {
     state.plates.p2 = foe.plates;
   }
   state.plates.p1 = [...p1Deck.plates];
+  state.context = currentMode !== 'solo' ? 'hotseat' : (volgendePotje ? volgendePotje.soort : 'duel');
+  state.aiGedrag = volgendePotje && volgendePotje.tegenstander ? volgendePotje.tegenstander.gedrag : null;
   showScreen('game');
   const cEl = document.getElementById('turn-clock');
   if (cEl) { cEl.textContent = state.clock ? '⏱ ' + fmtClock(state.clock.p1) : '⏱ —'; cEl.style.color = ''; }
@@ -2799,7 +2914,11 @@ function endMatch(winner, kind) {
   document.getElementById('result-title').textContent = state.mode === 'solo' ? (won ? 'OVERWINNING' : 'VERSLAGEN') : (won ? 'SPELER 1 WINT' : 'SPELER 2 WINT');
   document.getElementById('result-title').className = 'result-title ' + (state.mode !== 'solo' || won ? 'win' : 'lose');
   document.getElementById('result-reason').textContent = msg;
-  document.getElementById('result-reward').innerHTML = state.mode === 'solo' ? `+${gain} ${muntIcon(14)} munten` : '';
+  let beloning = state.mode === 'solo' ? `+${gain} ${muntIcon(14)} munten` : '';
+  const extra = state.mode === 'solo' ? verwerkUitslag(won) : null;
+  if (extra) beloning += extra.html;
+  document.getElementById('result-reward').innerHTML = beloning;
+  zetResultaatKnoppen(extra);
   renderAll();
   // Het eindscherm komt met een tel vertraging, zodat je de laatste zet nog
   // ziet. Ben je intussen naar het menu gelopen, dan hoort het er niet meer
@@ -3177,6 +3296,9 @@ const HELP_SECTIONS = [
     '<b>Gif</b> verzwakt je aanvallen, <b>zwaar gif</b> nog meer. <b>Brand</b> verzwakt alles én maakt je kleinste aanval een mis. <b>Verlamming</b> maakt je kleinste aanval een mis.',
     '<b>Verwarring</b> laat de schijf één vakje verspringen. <b>Slaap</b> houdt je stil tot een bondgenoot naast je staat. <b>Bevroren</b> laat je wel lopen maar niet aanvallen, en gaat na één gevecht vanzelf weg.',
     'Genezen doe je met de <b>Cleanse</b>-plate, via het Healing Center, of met een ability.' ]},
+  { h:'Campagne en Liga', p:[
+    'In de <b>Campagne</b> versla je de achttien facties een voor een, elk in drie gevechten. Het derde is een baasgevecht met de hele keten tot en met de eindvorm. Wie een hoofdstuk uitspeelt krijgt de basisvorm van die factie als figuur. Vooraf zie je wie er tegenover je staat.',
+    'In de <b>Liga</b> klim je van Brons via Zilver, Goud en Platina naar Legende. Winnen levert een ster op, drie sterren is een divisie omhoog. Verliezen kost een ster, maar onder de bodem van je rang zak je nooit. Hoe hoger je staat, hoe sterker je tegenstander — en de eerste keer in een nieuwe rang levert diamantjes op.' ]},
   { h:'Mega-evolutie', p:[
     'Met de kaart <b>Megasteen</b> in je deck kan één <b>eindvorm</b> op het veld megaën — maar <b>één keer per potje</b>.',
     'Een mega blijft <b>7 beurten</b> gemegad (je ziet een roze ring en een M met het aantal beurten). Z\'n aanvallen worden 30 sterker, z\'n paarse vakken krijgen een ster erbij en één mis-vak wordt een blok.',
@@ -5734,6 +5856,111 @@ async function runCombat(att, def) {
 }
 
 // ==========================================
+// CAMPAGNE EN LIGA (sessie 45)
+// Tot nu toe was er alleen een los potje tegen de AI. Duel had daarnaast een
+// verhaallijn met steeds sterkere tegenstanders waar je figuren mee verdiende,
+// en een Liga met rangen om te beklimmen. Alles hieronder is pure rekenlogica
+// (geen scherm, geen profiel-schrijven), zodat de tests het los kunnen draaien.
+// ==========================================
+// CAMPAGNE-START (marker voor headless tests — niet verwijderen)
+
+// Vaste willekeur per gevecht: de vooruitblik moet precies het team tonen dat
+// je daarna tegenkomt, en opnieuw spelen geeft hetzelfde team.
+function zaadRng(zaad) {
+  let t = zaad >>> 0;
+  return () => { t += 0x6D2B79F5; let r = Math.imul(t ^ (t >>> 15), 1 | t);
+    r ^= r + Math.imul(r ^ (r >>> 7), 61 | r); return ((r ^ (r >>> 14)) >>> 0) / 4294967296; };
+}
+// Achttien hoofdstukken, één per factie, van makkelijk naar zwaar. Eerst de
+// facties waarvan een nieuwe speler de basisvorm NOG NIET heeft: dan verdien
+// je vanaf hoofdstuk 1 een figuur, zoals in de Duel-campagne. Daarna de zes
+// waar je mee begint, en als laatste de facties met een EX-god als eindvorm.
+const CAMPAGNE = ['Stormhoogte','Bamboewoud','Diepe Woud','Berghart','Woestijnwind','Savanne',
+  'Nevelheuvels','Zonnetempel','Wildernis','Halfgoden','Smidse','Dodenrijk',
+  'Hemelhal','Vuurdiepte','Zandrijk','Zeediepte','IJsvlakte','Sterrenhof'];
+const GEVECHTEN_PER_HOOFDSTUK = 3;
+function basisVanFactie(fac) {
+  return Object.keys(UNIT_DEFS).find(k => UNIT_DEFS[k].fac === fac && isBasisvorm(k));
+}
+const GEDRAG_TREDEN = ['makkelijk', 'normaal', 'moeilijk'];
+// Het vijandelijke team van hoofdstuk h, gevecht g (beide vanaf 0).
+function campagneGevecht(h, g) {
+  const fac = CAMPAGNE[h], kern = basisVanFactie(fac);
+  const rng = zaadRng(1000 + h * 10 + g);
+  const rest = Object.keys(UNIT_DEFS).filter(k => isBasisvorm(k) && k !== kern);
+  const anderen = [];
+  while (anderen.length < 5) { const k = rest[Math.floor(rng() * rest.length)]; if (!anderen.includes(k)) anderen.push(k); }
+  const stap = h * GEVECHTEN_PER_HOOFDSTUK + g;             // 0 .. 53
+  const level = Math.min(4, 1 + Math.floor(stap / 13));
+  const ketens = g;                                          // 0, 1, en de baas de hele keten
+  const trede = (h < 5 ? 0 : h < 12 ? 1 : 2) + (g === 2 ? 1 : 0);
+  const gedrag = GEDRAG_TREDEN[Math.min(2, trede)];
+  const plates = g === 2 && h >= 12 ? ['megasteen', 'xattack', 'fullheal'] : ['xattack', 'fullheal', 'respin'];
+  return { naam: fac, kern, units: [kern, ...anderen], level, ketens, gedrag, plates, baas: g === 2 };
+}
+function campagneOpen(voortgang, h, g) {
+  const gedaan = n => (voortgang && voortgang[CAMPAGNE[n]]) || 0;
+  if (h > 0 && gedaan(h - 1) < GEVECHTEN_PER_HOOFDSTUK) return false;
+  return g <= gedaan(h);
+}
+// Beloning bij de EERSTE winst van dit gevecht. Het hoofdstuk afmaken levert de
+// basisvorm van de factie op, of diamantjes als je hem al had.
+function campagneBeloning(h, g, bezit) {
+  const b = { diamanten: 2 + Math.floor(h / 3), figuur: null };
+  if (g === GEVECHTEN_PER_HOOFDSTUK - 1) {
+    const kern = basisVanFactie(CAMPAGNE[h]);
+    if (bezit && bezit[kern]) b.diamanten += PRICE.C; else b.figuur = kern;
+  }
+  return b;
+}
+
+// Liga: vier rangen met drie divisies (III, II, I) en daarboven Legende.
+// Een plek is één getal: 0 = Brons III ... 11 = Platina I, 12 = Legende.
+const LIGA_RANGEN = ['Brons', 'Zilver', 'Goud', 'Platina', 'Legende'];
+const LIGA_STERREN = 3;
+const LIGA_TOP = 12;
+const LIGA_PROMOTIE = { 1: 10, 2: 20, 3: 30, 4: 50 };   // diamantjes, eerste keer een nieuwe rang
+function ligaRang(plek) { return Math.min(4, Math.floor(plek / 3)); }
+function ligaNaam(plek) {
+  if (plek >= LIGA_TOP) return 'Legende';
+  return `${LIGA_RANGEN[ligaRang(plek)]} ${['III', 'II', 'I'][plek % 3]}`;
+}
+function freshLiga() { return { plek: 0, sterren: 0, hoogste: 0 }; }
+// Winst: een ster erbij, bij drie een divisie omhoog. Verlies: een ster eraf,
+// maar nooit onder de bodem van je huidige rang — Brons blijft Brons.
+function ligaNaUitslag(liga, gewonnen) {
+  const l = { ...liga }, oudeRang = ligaRang(l.plek);
+  if (gewonnen) {
+    if (l.plek >= LIGA_TOP) l.sterren++;
+    else if (++l.sterren >= LIGA_STERREN) { l.plek++; l.sterren = 0; }
+  } else if (l.sterren > 0) {
+    l.sterren--;
+  } else {
+    const bodem = l.plek >= LIGA_TOP ? LIGA_TOP : oudeRang * 3;
+    if (l.plek > bodem) { l.plek--; l.sterren = LIGA_STERREN - 1; }
+  }
+  const nieuweRang = ligaRang(l.plek);
+  const beloning = nieuweRang > ligaRang(liga.hoogste || 0) ? LIGA_PROMOTIE[nieuweRang] || 0 : 0;
+  l.hoogste = Math.max(liga.hoogste || 0, l.plek);
+  return { liga: l, promotie: nieuweRang > oudeRang, beloning };
+}
+// Hoe sterk speelt de tegenstander op deze plek?
+function ligaTegenstander(plek, rng) {
+  const r = ligaRang(plek);
+  const basis = Object.keys(UNIT_DEFS).filter(isBasisvorm), units = [];
+  while (units.length < 6) { const k = basis[Math.floor(rng() * basis.length)]; if (!units.includes(k)) units.push(k); }
+  const trap = [
+    { level:1, ketens:0, gedrag:'makkelijk', plates:['fullheal','respin','xdefend'] },
+    { level:2, ketens:1, gedrag:'normaal',   plates:['xattack','fullheal','respin'] },
+    { level:3, ketens:2, gedrag:'normaal',   plates:['xattack','dazzle','fullheal'] },
+    { level:4, ketens:2, gedrag:'moeilijk',  plates:['xattack','focus','dazzle'] },
+    { level:4, ketens:2, gedrag:'moeilijk',  plates:['megasteen','xattack','focus'] },
+  ][r];
+  return { naam: ligaNaam(plek), units, ...trap };
+}
+// CAMPAGNE-END (marker voor headless tests — niet verwijderen)
+
+// ==========================================
 // MEGA-EVOLUTIE (sessie 44) — de regels uit Duel (Serebii, mechanics.shtml):
 //  - "you'll receive a special plate to Mega Evolve the Pokémon"
 //  - "it will remain Mega Evolved for 7 turns"
@@ -5971,8 +6198,114 @@ document.getElementById('btn-deck-random').addEventListener('click', () => {
 document.getElementById('btn-deck-start').addEventListener('click', onDeckConfirm);
 document.getElementById('btn-deck-back').addEventListener('click', goHome);
 // Home-tegels & subschermen
-document.getElementById('tile-solo').addEventListener('click', () => startMatchFlow('solo'));
-document.getElementById('tile-hotseat').addEventListener('click', () => startMatchFlow('hotseat'));
+
+// ===== Campagne en Liga: schermen en uitslagen (sessie 45) =====
+function speelCampagne(h, g) {
+  const t = campagneGevecht(h, g);
+  volgendePotje = { soort:'campagne', h, g, tegenstander:t };
+  startMatchFlow('solo');
+}
+function speelLiga() {
+  const t = ligaTegenstander(profile.liga.plek, zaadRng(Date.now() & 0xffffffff));
+  volgendePotje = { soort:'liga', tegenstander:t };
+  startMatchFlow('solo');
+}
+// Wat levert deze uitslag op, buiten de munten? Geeft html voor het
+// resultaatscherm terug, en zet het vervolg klaar.
+function verwerkUitslag(won) {
+  const pot = volgendePotje; if (!pot) return null;
+  let html = '';
+  if (pot.soort === 'campagne') {
+    const fac = CAMPAGNE[pot.h], gedaan = profile.campagne[fac] || 0;
+    if (won && pot.g >= gedaan) {                // eerste keer gewonnen
+      profile.campagne[fac] = pot.g + 1;
+      const b = campagneBeloning(pot.h, pot.g, profile.owned);
+      profile.diamanten += b.diamanten;
+      html += ` · +${b.diamanten} ${diamantIcon(14)}`;
+      if (b.figuur) { profile.owned[b.figuur] = 1; html += `<div class="res-figuur">${unitVisual(b.figuur, 'p1', 64)}<b>${UNIT_DEFS[b.figuur].name}</b> sluit zich bij je aan!</div>`; }
+      if (pot.g === GEVECHTEN_PER_HOOFDSTUK - 1) html += `<div class="res-regel">Hoofdstuk ${pot.h + 1} — ${fac} — voltooid</div>`;
+    } else if (won) html += `<div class="res-regel">Al eerder gewonnen — geen extra beloning</div>`;
+    // wat is het volgende gevecht?
+    let vh = pot.h, vg = pot.g + (won ? 1 : 0);
+    if (vg >= GEVECHTEN_PER_HOOFDSTUK) { vh++; vg = 0; }
+    pot.vervolg = vh < CAMPAGNE.length && campagneOpen(profile.campagne, vh, vg) ? () => speelCampagne(vh, vg) : null;
+    pot.vervolgTekst = won ? 'Volgend gevecht' : 'Opnieuw proberen';
+    pot.terugTekst = 'Naar de campagne';
+  } else if (pot.soort === 'liga') {
+    const r = ligaNaUitslag(profile.liga, won);
+    profile.liga = r.liga;
+    html += `<div class="res-regel">${won ? '★ Ster erbij' : (r.liga.sterren < (pot.voorSterren ?? 99) ? '☆ Ster kwijt' : 'Geen ster verloren')} — ${ligaNaam(r.liga.plek)}</div>`;
+    if (r.promotie) html += `<div class="res-regel res-promotie">Promotie naar ${LIGA_RANGEN[ligaRang(r.liga.plek)]}!</div>`;
+    if (r.beloning) { profile.diamanten += r.beloning; html += `<div class="res-regel">Eerste keer ${LIGA_RANGEN[ligaRang(r.liga.plek)]}: +${r.beloning} ${diamantIcon(14)}</div>`; }
+    pot.vervolg = speelLiga; pot.vervolgTekst = 'Nog een potje'; pot.terugTekst = 'Naar de Liga';
+  }
+  saveProfile();
+  return { html };
+}
+function zetResultaatKnoppen(extra) {
+  const verder = document.getElementById('btn-result-verder'), menu = document.getElementById('btn-result-menu');
+  const pot = volgendePotje;
+  if (extra && pot && pot.vervolg) { verder.style.display = ''; verder.textContent = pot.vervolgTekst; }
+  else verder.style.display = 'none';
+  menu.textContent = (pot && pot.terugTekst) || 'Terug naar het menu';
+}
+
+function renderCampagne() {
+  document.getElementById('camp-valuta').innerHTML = beideValuta();
+  const lijst = document.getElementById('camp-lijst'); lijst.innerHTML = '';
+  CAMPAGNE.forEach((fac, h) => {
+    const gedaan = profile.campagne[fac] || 0, open = campagneOpen(profile.campagne, h, 0);
+    const kern = basisVanFactie(fac);
+    const kaart = document.createElement('div');
+    kaart.className = 'camp-kaart' + (open ? '' : ' dicht') + (gedaan >= GEVECHTEN_PER_HOOFDSTUK ? ' klaar' : '');
+    const bollen = Array.from({ length: GEVECHTEN_PER_HOOFDSTUK }, (_, g) => {
+      const st = g < gedaan ? 'gewonnen' : campagneOpen(profile.campagne, h, g) ? 'open' : 'dicht';
+      return `<button class="camp-bol ${st}${g === 2 ? ' baas' : ''}" data-g="${g}" aria-label="Gevecht ${g + 1}">${g === 2 ? '♛' : g + 1}</button>`;
+    }).join('');
+    kaart.innerHTML = `<div class="camp-art">${unitVisual(kern, 'p2', 58)}</div>
+      <div class="camp-tekst"><div class="camp-nr">Hoofdstuk ${h + 1}</div><div class="camp-naam">${fac}</div>
+      <div class="camp-prijs">${open ? `Uitspelen: ${profile.owned[kern] ? `+${PRICE.C} diamantjes` : UNIT_DEFS[kern].name + ' sluit zich aan'}` : 'Speel eerst het vorige hoofdstuk uit'}</div></div>
+      <div class="camp-bollen">${bollen}</div>`;
+    kaart.querySelectorAll('.camp-bol').forEach(b => b.addEventListener('click', () => {
+      const g = +b.dataset.g;
+      if (!campagneOpen(profile.campagne, h, g)) { sfx('denied'); toast('Win eerst het gevecht ervoor'); return; }
+      sfx('select'); toonCampagneVooraf(h, g);
+    }));
+    lijst.appendChild(kaart);
+  });
+}
+// Vooraf zien tegen wie je gaat: het team van de tegenstander.
+function toonCampagneVooraf(h, g) {
+  const t = campagneGevecht(h, g);
+  const ov = document.getElementById('vooraf-overlay');
+  document.getElementById('vooraf-titel').textContent = `${t.naam} — ${t.baas ? 'Baasgevecht' : 'Gevecht ' + (g + 1)}`;
+  document.getElementById('vooraf-sub').textContent = `Level ${t.level} · ${t.ketens ? (t.ketens === 2 ? 'hele keten eronder' : 'één evolutie eronder') : 'geen evoluties'} · speelt ${t.gedrag}`;
+  document.getElementById('vooraf-team').innerHTML = t.units.map(k => `<div class="vooraf-fig">${unitVisual(k, 'p2', 46)}<span>${UNIT_DEFS[k].name}</span></div>`).join('');
+  document.getElementById('btn-vooraf-start').onclick = () => { ov.classList.remove('active'); speelCampagne(h, g); };
+  ov.classList.add('active');
+}
+
+function renderLiga() {
+  document.getElementById('liga-valuta').innerHTML = beideValuta();
+  const l = profile.liga, rang = ligaRang(l.plek);
+  document.getElementById('liga-embleem').className = 'liga-embleem rang-' + rang;
+  document.getElementById('liga-naam').textContent = ligaNaam(l.plek);
+  document.getElementById('liga-sterren').innerHTML = l.plek >= LIGA_TOP
+    ? `<span class="liga-legende">${l.sterren} overwinningen als Legende</span>`
+    : Array.from({ length: LIGA_STERREN }, (_, i) => `<span class="liga-ster${i < l.sterren ? ' aan' : ''}">★</span>`).join('');
+  const volgende = rang + 1 <= 4 && ligaRang(l.hoogste) < rang + 1 ? LIGA_PROMOTIE[rang + 1] : 0;
+  document.getElementById('liga-doel').textContent = l.plek >= LIGA_TOP ? 'Je staat aan de top.'
+    : `Volgende: ${ligaNaam(Math.min(LIGA_TOP, (Math.floor(l.plek / 3) + 1) * 3))}` + (volgende ? ` — beloning ${volgende} diamantjes` : '');
+  document.getElementById('liga-trap').innerHTML = LIGA_RANGEN.map((n, i) =>
+    `<div class="liga-trede${i === rang ? ' nu' : ''}${i < rang ? ' gehaald' : ''}"><i class="liga-dot rang-${i}"></i>${n}</div>`).join('');
+}
+document.getElementById('btn-liga-zoek').addEventListener('click', () => { sfx('select'); speelLiga(); });
+document.getElementById('btn-vooraf-terug').addEventListener('click', () => document.getElementById('vooraf-overlay').classList.remove('active'));
+
+document.getElementById('tile-solo').addEventListener('click', () => { volgendePotje = null; startMatchFlow('solo'); });
+document.getElementById('tile-hotseat').addEventListener('click', () => { volgendePotje = null; startMatchFlow('hotseat'); });
+document.getElementById('tile-campagne').addEventListener('click', () => { renderCampagne(); showScreen('campagne'); });
+document.getElementById('tile-liga').addEventListener('click', () => { renderLiga(); showScreen('liga'); });
 document.getElementById('tile-collection').addEventListener('click', () => { renderCollection(); showScreen('collection'); });
 document.getElementById('tile-store').addEventListener('click', () => { renderStore(); showScreen('store'); });
 document.getElementById('tile-settings').addEventListener('click', () => { renderSettings(); showScreen('settings'); });
@@ -5990,7 +6323,17 @@ document.addEventListener('click', (e) => {
 for (const b of document.querySelectorAll('.btn-back')) b.addEventListener('click', () => { renderHome(); showScreen(b.dataset.back); });
 document.getElementById('btn-detail-close').addEventListener('click', () => document.getElementById('detail-overlay').classList.remove('active'));
 document.getElementById('btn-detail-upgrade').addEventListener('click', doUpgrade);
-document.getElementById('btn-result-menu').addEventListener('click', goHome);
+document.getElementById('btn-result-menu').addEventListener('click', () => {
+  const soort = volgendePotje && volgendePotje.soort;
+  goHome();
+  if (soort === 'campagne') { renderCampagne(); showScreen('campagne'); }
+  else if (soort === 'liga') { renderLiga(); showScreen('liga'); }
+});
+document.getElementById('btn-result-verder').addEventListener('click', () => {
+  const vervolg = volgendePotje && volgendePotje.vervolg;
+  document.getElementById('result-overlay').classList.remove('active');
+  if (vervolg) vervolg();
+});
 document.getElementById('btn-info-close').addEventListener('click', () => document.getElementById('info-overlay').classList.remove('active'));
 document.getElementById('booster-card').addEventListener('click', openBooster);
 document.getElementById('btn-booster-close').addEventListener('click', () => document.getElementById('booster-overlay').classList.remove('active'));
@@ -6011,7 +6354,7 @@ const AI_LEVELS = {
   normaal:   { jitter: 5,  slip: 0.08, horizon: 3, keeper: 1.0, abilityWeight: 1.0, advance: 1.0,  think: 800 },
   moeilijk:  { jitter: 2,  slip: 0,    horizon: 4, keeper: 1.3, abilityWeight: 1.4, advance: 1.3,  think: 650 },
 };
-function aiCfg() { return AI_LEVELS[S('difficulty')] || AI_LEVELS.normaal; }
+function aiCfg() { return AI_LEVELS[(state && state.aiGedrag) || S('difficulty')] || AI_LEVELS.normaal; }
 
 function distTo(start, goalKey) {
   if (start === goalKey) return 0;

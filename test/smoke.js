@@ -48,7 +48,7 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
   await page.click('#btn-detail-close');
 
   // 4. Winkel
-  await page.click('.btn-back');
+  await page.click('#screen-collection .btn-back');
   await page.click('#tile-store');
   ok('Winkel opent', await page.locator('#screen-store.active').count() === 1);
   ok('Koopbare kaarten aanwezig', await page.locator('#store-grid .price-chip').count() === aantalUnits);
@@ -85,7 +85,7 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
     ok('Kist toont de naam van de unit', (await page.locator('#booster-name').innerText()).length > 2);
     await page.click('#btn-booster-close');
   }
-  await page.click('.btn-back >> nth=1');
+  await page.click('#screen-store .btn-back');
 
   // 5. Solo-flow: deck kiezen → game start
   await page.click('#tile-solo');
@@ -574,7 +574,53 @@ const { chromium } = require(require('path').join('/opt/node22/lib/node_modules/
   await page.click('#btn-detail-close');
 
   // 6. Terug naar home
-  await page.locator('.btn-back').first().click();
+  await page.click('#screen-collection .btn-back');
+  await page.waitForSelector('#screen-home.active');
+
+  // 7. Campagne (sessie 45): eerste gevecht spelen, winnen, bolletje aan
+  {
+    await page.click('#tile-campagne');
+    ok('Campagne opent met een hoofdstuk per factie',
+      await page.locator('#camp-lijst .camp-kaart').count() === await page.evaluate(() => CAMPAGNE.length));
+    ok('Alleen het eerste gevecht is open bij een nieuw begin',
+      await page.locator('#camp-lijst .camp-bol.open').count() === 1);
+    await page.locator('#camp-lijst .camp-bol.open').first().click();
+    await page.waitForSelector('#vooraf-overlay.active');
+    ok('Vooraf zie je de zes vijanden', await page.locator('#vooraf-team .vooraf-fig').count() === 6);
+    await page.click('#btn-vooraf-start');
+    await page.waitForSelector('#deck-overlay.active');
+    await page.click('#btn-deck-random'); await page.click('#btn-deck-start');
+    await page.waitForSelector('#screen-game.active');
+    ok('De tegenstander is het team uit de vooruitblik',
+      await page.evaluate(() => JSON.stringify(Object.values(state.units).filter(u => u.owner === 'p2').map(u => u.defKey).sort())
+        === JSON.stringify([...campagneGevecht(0, 0).units].sort())));
+    const dVoor = await page.evaluate(() => profile.diamanten);
+    await page.evaluate(() => endMatch('p1', 'goal'));
+    await page.waitForSelector('#result-overlay.active', { timeout: 5000 });
+    ok('Winst telt in de campagne en levert diamantjes', await page.evaluate(d => profile.campagne[CAMPAGNE[0]] === 1 && profile.diamanten > d, dVoor));
+    await page.waitForSelector('#btn-result-verder:visible', { timeout: 5000 }).catch(() => {});
+    ok('Het resultaatscherm biedt het volgende gevecht aan', (await page.locator('#btn-result-verder').textContent()).includes('Volgend'));
+    await page.click('#btn-result-menu');
+    await page.waitForSelector('#screen-campagne.active');
+    ok('Terug in de campagne is het eerste bolletje gewonnen', await page.locator('#camp-lijst .camp-bol.gewonnen').count() === 1);
+    await page.click('#screen-campagne .btn-back');
+  }
+  // 8. Liga (sessie 45): een potje winnen levert een ster op
+  {
+    await page.click('#tile-liga');
+    ok('Liga opent in Brons III', (await page.locator('#liga-naam').innerText()) === 'Brons III');
+    await page.click('#btn-liga-zoek');
+    await page.waitForSelector('#deck-overlay.active');
+    await page.click('#btn-deck-random'); await page.click('#btn-deck-start');
+    await page.waitForSelector('#screen-game.active');
+    await page.evaluate(() => endMatch('p1', 'goal'));
+    await page.waitForSelector('#result-overlay.active', { timeout: 5000 });
+    ok('Winst in de Liga is een ster', await page.evaluate(() => profile.liga.sterren === 1));
+    await page.click('#btn-result-menu');
+    await page.waitForSelector('#screen-liga.active');
+    ok('Het Liga-scherm toont de ster', await page.locator('#liga-sterren .liga-ster.aan').count() === 1);
+    await page.click('#screen-liga .btn-back');
+  }
   await page.waitForSelector('#screen-home.active');
   ok('Menu-knop keert terug naar home', true);
 
