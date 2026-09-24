@@ -776,7 +776,9 @@
   .deck-card .up { color: var(--gold); border: 1px solid rgba(245,158,11,0.4); border-radius: 4px; padding: 0 3px; margin-left: 3px; }
   .deck-card .rar { position: absolute; top: 2px; right: 4px; font-family: 'Cinzel', serif; font-size: 0.55rem; font-weight: 900; }
   .deck-card { position: relative; }
-  .rar-C { color: #9ca3af; } .rar-U { color: #38bdf8; } .rar-R { color: var(--gold); }
+  .rar-C { color: #9ca3af; } .rar-UC { color: #38bdf8; } .rar-R { color: var(--gold); }
+  .rar-EX { color: #f97316; text-shadow: 0 0 6px rgba(249,115,22,0.6); }
+  .rar-UX { background: linear-gradient(90deg,#f0abfc,#93c5fd,#86efac,#fde047); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
   @keyframes fxRise { 0% { transform: translateY(0); opacity: .9; } 100% { transform: translateY(-16px); opacity: 0; } }
   @keyframes fxFlicker { 0%, 100% { opacity: .95; } 40% { opacity: .15; } 60% { opacity: .7; } }
@@ -1905,12 +1907,12 @@ function plaatPrijs(key) { return PLATE_PRIJS[PLATES[key] ? PLATES[key].cost : 1
 // ==========================================
 const RARITY = {
   squire:'C', scout:'C', apprentice:'C', skeleton:'C', boar:'C', imp:'C',
-  cleric:'U', archer:'U', runesmith:'U', ghoul:'U', lupine:'U', hellhound:'U',
-  commander:'R', weaver:'R', warden:'R', necromancer:'R', wyrmling:'R', pitlord:'R',
+  cleric:'UC', archer:'UC', runesmith:'UC', ghoul:'UC', lupine:'UC', hellhound:'UC',
+  commander:'EX', weaver:'R', warden:'R', necromancer:'R', wyrmling:'R', pitlord:'EX',
   // twaalf nieuwe ketens, elk common -> uncommon -> rare
   siren:'C', harpy:'C', shabti:'C', jaguarwarrior:'C', kappa:'C', domovoi:'C', frostwight:'C', gnome:'C', peri:'C', anansi:'C', puca:'C', lamassu:'C',
-  hydra:'U', roc:'U', sphinx:'U', ahuizotl:'U', tengu:'U', leshy:'U', jotun:'U', mountaintroll:'U', marid:'U', mamiwata:'U', cusidhe:'U', anzu:'U',
-  poseidon:'R', thunderbird:'R', anubis:'R', tezcatlipoca:'R', ryujin:'R', babayaga:'R', ymir:'R', mountainking:'R', ifrit:'R', shango:'R', morrigan:'R', tiamat:'R',
+  hydra:'UC', roc:'UC', sphinx:'UC', ahuizotl:'UC', tengu:'UC', leshy:'UC', jotun:'UC', mountaintroll:'UC', marid:'UC', mamiwata:'UC', cusidhe:'UC', anzu:'UC',
+  poseidon:'EX', thunderbird:'R', anubis:'EX', tezcatlipoca:'R', ryujin:'R', babayaga:'R', ymir:'EX', mountainking:'R', ifrit:'R', shango:'R', morrigan:'R', tiamat:'EX',
 };
 // ==========================================
 // EVOLUTIE (sessie 39) — 1-op-1 overgenomen uit Pokémon Duel
@@ -1999,7 +2001,16 @@ const DIAMANT_BUNDELS = [
   { diamanten: 45,  munten: 1000 },   // ~10% extra
   { diamanten: 100, munten: 2000 },   // ~20% extra
 ];
-const PRICE = { C:4, U:8, R:16 };                 // figuren, in diamantjes
+// Vijf rangen zoals in Duel: C, UC, R, EX, UX. UX is bij ons de mega-vorm en
+// is niet te koop — die verdien je in het potje met een Megasteen.
+const RAR_INFO = {
+  C:  { naam:'Common',     rang:0, kleur:'#cbd5e1' },
+  UC: { naam:'Uncommon',   rang:1, kleur:'#7dd3fc' },
+  R:  { naam:'Rare',       rang:2, kleur:'#fbbf24' },
+  EX: { naam:'Extra Rare', rang:3, kleur:'#f97316' },
+  UX: { naam:'Ultra Rare', rang:4, kleur:'#f0abfc' },
+};
+const PRICE = { C:4, UC:8, R:16, EX:28 };          // figuren, in diamantjes
 const PLATE_PRIJS = { 1:3, 2:6, 3:10 };           // kaarten, naar hun kostenpunten
 // De drie kaarten waar je mee begint. Genoeg om meteen een geldig team te
 // bouwen (samen 3 van de 8 punten), de rest koop je.
@@ -2016,13 +2027,14 @@ const WIN_MUNTEN = 100, LOSS_MUNTEN = 25;
 // ==========================================
 // BOOSTER-START (marker voor headless tests — niet verwijderen)
 const BOOSTER_COST = 6;                            // in diamantjes (= 150 munten)
-const BOOSTER_ODDS = [['C', 0.65], ['U', 0.27], ['R', 0.08]];
-const BOOSTER_REFUND = { C: 2, U: 5, R: 10 };
+const BOOSTER_ODDS = [['C', 0.62], ['UC', 0.26], ['R', 0.09], ['EX', 0.03]];
+const BOOSTER_REFUND = { C: 2, UC: 5, R: 10, EX: 18 };
 // Puur: rand01 = getal in [0,1) voor de rarity, pick01 = idem voor de unitkeuze.
 function rollBooster(rand01, pick01, owned, rarityMap) {
   let acc = 0, rar = 'C';
   for (const [r, p] of BOOSTER_ODDS) { acc += p; if (rand01 < acc) { rar = r; break; } }
   let pool = Object.keys(rarityMap).filter(k => rarityMap[k] === rar);
+  if (!pool.length) pool = Object.keys(rarityMap);   // deze lade bestaat (nog) niet
   // Alles van deze zeldzaamheid al in bezit? Dan liever iets nieuws uit een
   // andere lade dan gegarandeerd een duplicaat.
   const fresh = pool.filter(k => !owned[k]);
@@ -2829,7 +2841,7 @@ function openUnitDetail(key) {
   const def = UNIT_DEFS[key], lvl = profile.owned[key], rar = RARITY[key];
   document.getElementById('detail-art').innerHTML = unitVisual(key, 'p1', 64);
   document.getElementById('detail-name').textContent = def.name;
-  document.getElementById('detail-sub').textContent = `${def.fac} · ${def.mp} MP · ${rar === 'C' ? 'Common' : rar === 'U' ? 'Uncommon' : 'Rare'} · Level ${lvl}`;
+  document.getElementById('detail-sub').textContent = `${def.fac} · ${def.mp} MP · ${RAR_INFO[rar].naam} · Level ${lvl}`;
   const slots = slotsAtLevel(key, lvl);
   renderDisk('disk-preview', slots, key);
   // Slot-samenvatting per kleur
@@ -2846,7 +2858,11 @@ function openUnitDetail(key) {
   }).join('');
   const ab = UNIT_DEFS[key].ability;
   const abHtml = ab ? `<div class="ability-line"><span class="ability-tag">✦ ${ABILITIES[ab].name}</span> ${ABILITIES[ab].desc}</div>` : `<div class="ability-line" style="opacity:0.5">Geen ability</div>`;
-  document.getElementById('detail-slots').innerHTML = pills + abHtml;
+  // Een eindvorm heeft ook een mega-vorm: dat is z'n UX, alleen te bereiken met
+  // een Megasteen in een potje.
+  const mt = isEindvorm(key) ? MEGA_TEAM[megaTeamVan(key)] : null;
+  const megaHtml = mt ? `<div class="ability-line"><span class="ability-tag rar-UX">UX · Mega ${UNIT_DEFS[key].name}</span> via de Megasteen: +30 op z'n aanvallen, en ${mt.naam.toLowerCase()} — ${mt.uitleg}.</div>` : '';
+  document.getElementById('detail-slots').innerHTML = pills + abHtml + megaHtml;
   // De evolutieketen van deze unit, zodat je ziet waar hij vandaan komt en waar
   // hij naartoe kan. Wat je nog niet bezit staat grijs.
   const keten = evolutieKeten(key);
@@ -2919,9 +2935,8 @@ function renderStore() {
   // Wat je nog niet hebt eerst, en daarbinnen het goedkoopst eerst. Anders
   // staat een uncommon-evolutie boven de commons en ziet een beginner met tien
   // diamantjes vooral dingen die hij niet kan betalen en toch niet mag opstellen.
-  const RANG = { C:0, U:1, R:2 };
   const entries = Object.entries(UNIT_DEFS).sort(([a], [b]) =>
-    (profile.owned[a] ? 1 : 0) - (profile.owned[b] ? 1 : 0) || RANG[RARITY[a]] - RANG[RARITY[b]]);
+    (profile.owned[a] ? 1 : 0) - (profile.owned[b] ? 1 : 0) || RAR_INFO[RARITY[a]].rang - RAR_INFO[RARITY[b]].rang);
   for (const [key, def] of entries) {
     const owned = !!profile.owned[key]; const rar = RARITY[key]; const price = PRICE[rar];
     const c = document.createElement('div');
@@ -2991,14 +3006,14 @@ function openBooster() {
     chest.style.display = 'none'; res.style.display = '';
     // Stralenkrans in de kleur van de zeldzaamheid, dan pas het figuur erover
     const kleur = roll.duplicate ? '#94a3b8'
-      : (roll.rarity === 'R' ? '#fbbf24' : roll.rarity === 'U' ? '#7dd3fc' : '#cbd5e1');
+      : RAR_INFO[roll.rarity].kleur;
     const stralen = animOff() ? ''
       : `<div id="booster-stralen" style="--bsk:${kleur}">` +
         Array.from({ length: 12 }, (_, i) => `<i style="--a:${i * 30}deg; animation-delay:${i * 45}ms"></i>`).join('') +
         '</div>';
     document.getElementById('booster-art').innerHTML = stralen + unitVisual(roll.key, 'p1', 84);
     document.getElementById('booster-name').textContent = def.name;
-    const rarLabel = roll.rarity === 'C' ? 'Common' : roll.rarity === 'U' ? 'Uncommon' : 'Rare';
+    const rarLabel = RAR_INFO[roll.rarity].naam;
     document.getElementById('booster-sub').textContent = `${def.fac} · ${def.mp} MP · ${rarLabel}`;
     document.getElementById('booster-bonus').textContent = roll.duplicate
       ? `Had je al — +${roll.refund} diamantjes terug`

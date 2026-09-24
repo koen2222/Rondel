@@ -471,12 +471,14 @@ section('=== OPGESLAGEN TEAMS (7 checks) ===');
 // De koers moet het tempo van vóór deze sessie houden: een gewonnen potje gaf
 // 100 credits en een common kostte er 100. Nu loopt dat via diamantjes, en dan
 // is het makkelijk om er per ongeluk een grind-spel van te maken.
-section('=== TWEE VALUTA (9 checks) ===');
+section('=== TWEE VALUTA (11 checks) ===');
 {
   check('Een gewonnen potje betaalt precies één common',
     WIN_MUNTEN / MUNT_PER_DIAMANT, PRICE.C);
-  check('Een uncommon kost twee potjes', PRICE.U, PRICE.C * 2);
+  check('Een uncommon kost twee potjes', PRICE.UC, PRICE.C * 2);
   check('Een rare kost vier potjes', PRICE.R, PRICE.C * 4);
+  check('Een extra rare kost meer dan een rare', PRICE.EX > PRICE.R, true);
+  check('Ultra rare (de mega) is niet te koop', PRICE.UX, undefined);
   check('Verliezen levert een kwart van winnen op', LOSS_MUNTEN * 4, WIN_MUNTEN);
   // Bundels: groter mag nooit ONgunstiger zijn dan de kleinste, anders straf je
   // de speler die in één keer wisselt.
@@ -528,15 +530,16 @@ section('=== KAARTEN (7 checks) ===');
 }
 
 // ─── 4f. BOOSTERKIST (sessie 24) ───────────────────────────────────────────────
-section('=== BOOSTERKIST (7 checks) ===');
+section('=== BOOSTERKIST (8 checks) ===');
 {
   const RAR = { squire:'C', scout:'C', apprentice:'C', skeleton:'C', boar:'C', imp:'C',
-    cleric:'U', archer:'U', runesmith:'U', ghoul:'U', lupine:'U', hellhound:'U',
-    commander:'R', weaver:'R', warden:'R', necromancer:'R', wyrmling:'R', pitlord:'R' };
+    cleric:'UC', archer:'UC', runesmith:'UC', ghoul:'UC', lupine:'UC', hellhound:'UC',
+    commander:'EX', weaver:'R', warden:'R', necromancer:'R', wyrmling:'R', pitlord:'EX' };
   check('Kansen tellen op tot 100%', BOOSTER_ODDS.reduce((a, [, p]) => a + p, 0).toFixed(2), '1.00');
   const none = {};
   check('Lage worp geeft een Common', rollBooster(0.1, 0.5, none, RAR).rarity, 'C');
-  check('Hoge worp geeft een Rare', rollBooster(0.99, 0.5, none, RAR).rarity, 'R');
+  check('Hoge worp geeft een Rare', rollBooster(0.93, 0.5, none, RAR).rarity, 'R');
+  check('Allerhoogste worp geeft een Extra Rare', rollBooster(0.99, 0.5, none, RAR).rarity, 'EX');
   check('Nieuwe unit is geen duplicaat', rollBooster(0.1, 0.5, none, RAR).duplicate, false);
   // Alle commons in bezit → de kist geeft liever iets nieuws dan een duplicaat
   const allC = { squire:1, scout:1, apprentice:1, skeleton:1, boar:1, imp:1 };
@@ -627,7 +630,7 @@ section('=== AANVALSANIMATIES (20 checks) ===');
 }
 
 // ─── 4g1b. EVOLUTIE (sessie 39, Duel-regels) ──────────────────────────────────
-section('=== EVOLUTIE (14 checks) ===');
+section('=== EVOLUTIE (15 checks) ===');
 {
   // Elke factie precies één keten van drie: common -> uncommon -> rare.
   // Niet op een vast getal vastpinnen — er komen ketens bij (sessie 41: van
@@ -641,11 +644,12 @@ section('=== EVOLUTIE (14 checks) ===');
   const gemengd = ketens.filter(k => new Set(k.split('>').map(u => UNIT_DEFS[u].fac)).size !== 1);
   check('Een keten blijft binnen één factie', gemengd, []);
   // Volgorde: C -> U -> R
-  const RANG = { C:0, U:1, R:2 };
+  const RANG = { C:0, UC:1, R:2, EX:2 };   // EX is een eindvorm, net als R
   const RAR_ = html.match(/\nconst RARITY = \{[\s\S]*?\};/)[0];
-  const rar = {}; for (const m of RAR_.matchAll(/(\w+):'([CUR])'/g)) rar[m[1]] = m[2];
+  const rar = {}; for (const m of RAR_.matchAll(/(\w+):'(C|UC|R|EX)'/g)) rar[m[1]] = m[2];
   const fout = ketens.filter(k => { const r = k.split('>').map(u => RANG[rar[u]]); return !(r[0] < r[1] && r[1] < r[2]); });
-  check('Elke keten loopt van Common via Uncommon naar Rare', fout, []);
+  check('Elke keten loopt van Common via Uncommon naar Rare of Extra Rare', fout, []);
+  check('Zes eindvormen zijn Extra Rare', Object.values(rar).filter(r => r === 'EX').length, 6);
   // Elke unit zit in precies één keten
   const alle = ketens.flatMap(k => k.split('>'));
   check('Elke unit zit in een keten', alle.length, Object.keys(UNIT_DEFS).length);
