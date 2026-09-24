@@ -1,0 +1,147 @@
+{
+  "tickTotal": 24,
+  "vinyls": [
+    {
+      "id": "minotaurus",
+      "name": "Minotaurus",
+      "mp": 2,
+      "passive": { "id": "axis_white_plus", "whiteBonusOnAxis": 10, "axisNodes": ["C_N", "C_N2", "C_S2", "C_S"] },
+      "wheel": [
+        { "color": "WHITE", "label": "Hoornstoot", "power": 80, "ticks": 8 },
+        { "color": "WHITE", "label": "Stormloop", "power": 50, "ticks": 6 },
+        { "color": "GOLD", "label": "Labyrintslag", "power": 100, "ticks": 3 },
+        { "color": "PURPLE", "label": "Stierenstorm", "stars": 2, "effect": "PUSH", "ticks": 2 },
+        { "color": "MISS", "ticks": 5 }
+      ]
+    },
+    {
+      "id": "basilisk",
+      "name": "Basilisk",
+      "mp": 2,
+      "wheel": [
+        { "color": "WHITE", "label": "Beet", "power": 70, "ticks": 7 },
+        { "color": "WHITE", "label": "Staart", "power": 40, "ticks": 4 },
+        { "color": "PURPLE", "label": "Versteen", "stars": 3, "effect": "PIN", "ticks": 4 },
+        { "color": "DODGE", "label": "Kronkel", "ticks": 3 },
+        { "color": "MISS", "ticks": 6 }
+      ]
+    },
+    {
+      "id": "chimera",
+      "name": "Chimera",
+      "mp": 2,
+      "wheel": [
+        { "color": "WHITE", "label": "Leeuwenklauw", "power": 90, "ticks": 6 },
+        { "color": "WHITE", "label": "Bokskop", "power": 30, "ticks": 6 },
+        { "color": "GOLD", "label": "Drakenbek", "power": 60, "ticks": 4 },
+        { "color": "PURPLE", "label": "Giftvuur", "stars": 1, "effect": "WAIT:1", "ticks": 3 },
+        { "color": "MISS", "ticks": 5 }
+      ]
+    },
+    {
+      "id": "witte-wieven",
+      "name": "Witte Wieven",
+      "mp": 3,
+      "passive": { "id": "phase_allies", "moveThroughAllies": true },
+      "wheel": [
+        { "color": "WHITE", "label": "Koudegolf", "power": 20, "ticks": 8 },
+        { "color": "PURPLE", "label": "Mist", "stars": 2, "effect": "SWAP", "ticks": 4 },
+        { "color": "DODGE", "label": "Vervluchtig", "ticks": 6 },
+        { "color": "MISS", "ticks": 6 }
+      ]
+    },
+    {
+      "id": "kelpie",
+      "name": "Kelpie",
+      "mp": 3,
+      "wheel": [
+        { "color": "WHITE", "label": "Hoef", "power": 40, "ticks": 8 },
+        { "color": "WHITE", "label": "Sleepstroom", "power": 70, "ticks": 4 },
+        { "color": "PURPLE", "label": "Sleep", "stars": 2, "effect": "SWAP", "ticks": 4 },
+        { "color": "DODGE", "label": "Onderduik", "ticks": 4 },
+        { "color": "MISS", "ticks": 4 }
+      ]
+    },
+    {
+      "id": "griffin",
+      "name": "Griffin",
+      "mp": 3,
+      "wheel": [
+        { "color": "WHITE", "label": "Klauw", "power": 60, "ticks": 8 },
+        { "color": "GOLD", "label": "Duikvlucht", "power": 50, "ticks": 6 },
+        { "color": "DODGE", "label": "Opvleugelen", "ticks": 4 },
+        { "color": "MISS", "ticks": 6 }
+      ]
+    },
+    {
+      "id": "draugr",
+      "name": "Draugr",
+      "mp": 1,
+      "passive": { "id": "slow_return", "waitBonus": 1 },
+      "wheel": [
+        { "color": "WHITE", "label": "Grafslag", "power": 110, "ticks": 8 },
+        { "color": "WHITE", "label": "Knekelgreep", "power": 70, "ticks": 8 },
+        { "color": "PURPLE", "label": "Grafgreep", "stars": 2, "effect": "PIN", "ticks": 4 },
+        { "color": "MISS", "ticks": 4 }
+      ]
+    },
+    {
+      "id": "phoenix",
+      "name": "Phoenix",
+      "mp": 2,
+      "passive": { "id": "rebirth", "firstKoToBank": true },
+      "wheel": [
+        { "color": "WHITE", "label": "Vleugelslag", "power": 50, "ticks": 10 },
+        { "color": "GOLD", "label": "Zonnesprong", "power": 40, "ticks": 4 },
+        { "color": "DODGE", "label": "Aswolk", "ticks": 4 },
+        { "color": "MISS", "ticks": 6 }
+      ]
+    },
+    {
+      "id": "cycloop",
+      "name": "Cycloop",
+      "mp": 1,
+      "wheel": [
+        { "color": "WHITE", "label": "Rotsvuist", "power": 130, "ticks": 10 },
+        { "color": "WHITE", "label": "Slinger", "power": 40, "ticks": 4 },
+        { "color": "PURPLE", "label": "Oog", "stars": 1, "effect": "ENTRYLOCK", "ticks": 2 },
+        { "color": "MISS", "ticks": 8 }
+      ]
+    },
+    {
+      "id": "fenrir",
+      "name": "Fenrir",
+      "mp": 3,
+      "wheel": [
+        { "color": "WHITE", "label": "Sleep", "power": 60, "ticks": 8 },
+        { "color": "WHITE", "label": "Nijd", "power": 30, "ticks": 4 },
+        { "color": "GOLD", "label": "Kettingbraak", "power": 90, "ticks": 3 },
+        { "color": "PURPLE", "label": "Beet", "stars": 2, "effect": "WAIT:1", "ticks": 4 },
+        { "color": "MISS", "ticks": 5 }
+      ]
+    },
+    {
+      "id": "golem",
+      "name": "Golem",
+      "mp": 1,
+      "passive": { "id": "immovable", "immune": ["SWAP", "PUSH"] },
+      "wheel": [
+        { "color": "WHITE", "label": "Kleihamer", "power": 100, "ticks": 10 },
+        { "color": "WHITE", "label": "Stamp", "power": 40, "ticks": 8 },
+        { "color": "DODGE", "label": "Steenkroon", "ticks": 2 },
+        { "color": "MISS", "ticks": 4 }
+      ]
+    },
+    {
+      "id": "banshee",
+      "name": "Banshee",
+      "mp": 2,
+      "wheel": [
+        { "color": "WHITE", "label": "Flits", "power": 20, "ticks": 8 },
+        { "color": "PURPLE", "label": "Klaagzang", "stars": 3, "effect": "WAIT:1", "ticks": 5 },
+        { "color": "DODGE", "label": "Jammertoon", "ticks": 5 },
+        { "color": "MISS", "ticks": 6 }
+      ]
+    }
+  ]
+}
