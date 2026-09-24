@@ -1499,15 +1499,15 @@ const UNIT_DEFS = {
   commander:   { name:'Odin',              fac:'Hemelhal',  mp:2, slots:[...G(3,50,'Ravenzwerm'), ...W(3,70,'Gungnir-worp'), ...W(2,40,'Speerwering'), ...P(3,'paralysis',2,'Alvaderbevel'), ...B(2), ...R(3)] },
   scout:       { name:'Hermes',            fac:'Halfgoden', mp:3, slots:[...W(3,30,'Caduceusslag'), ...W(2,10,'Vleugelhiel'), ...P(3,'poison',1,'Slangenbeet'), ...B(2), ...R(6)] },
   archer:      { name:'Chiron',            fac:'Halfgoden', mp:2, slots:[...W(4,60,'Sterrenpijl'), ...W(2,20,'Snelle Pees'), ...P(2,'poison',1,'Gifpijl'), ...B(4), ...R(4)] },
-  weaver:      { name:'Loki',              fac:'Halfgoden', mp:2, slots:[...W(2,70,'Dolkstoot'), ...G(4,40,'Verraderlijke Steek'), ...P(4,'confusion',2,'Dwaalbeeld'), ...B(3), ...R(3)] },
+  weaver:      { name:'Loki',              fac:'Halfgoden', mp:2, slots:[...W(2,70,'Dolkstoot'), ...G(4,40,'Verraderlijke Steek'), ...P(4,'wissel',2,'Dwaalbeeld'), ...B(3), ...R(3)] },
   apprentice:  { name:'Cycloop',           fac:'Smidse',    mp:2, slots:[...W(3,60,'Smidshamer'), ...W(2,30,'Vonkgooi'), ...P(1,'paralysis',1,'Aambeeldklap'), ...B(4), ...R(6)] },
   runesmith:   { name:'Hephaistos',        fac:'Smidse',    mp:2, slots:[...W(3,60,'Vuurhamer'), ...W(2,30,'Sintelslag'), ...P(4,'burn',1,'Smeltgloed'), ...B(3), ...R(4)] },
-  warden:      { name:'Talos',             fac:'Smidse',    mp:2, slots:[...W(4,90,'Bronzen Vuist'), ...W(2,50,'Zuilslag'), ...P(3,'paralysis',2,'IJzeren Greep'), ...B(4), ...R(3)] },
+  warden:      { name:'Talos',             fac:'Smidse',    mp:2, slots:[...W(4,90,'Bronzen Vuist'), ...W(2,50,'Zuilslag'), ...P(3,'wacht',2,'IJzeren Greep'), ...B(4), ...R(3)] },
   skeleton:    { name:'Draugr',            fac:'Dodenrijk', mp:2, slots:[...W(4,30,'Grafzwaard'), ...W(2,10,'Botstoot'), ...P(2,'confusion',1,'Grafkou'), ...B(2), ...R(6)] },
   ghoul:       { name:'Ghul',              fac:'Dodenrijk', mp:2, slots:[...W(3,50,'Klauwhaal'), ...W(2,20,'Knagende Beet'), ...P(4,'badlypoison',1,'Lijkenwalm'), ...B(3), ...R(4)] },
-  necromancer: { name:'Hel',               fac:'Dodenrijk', mp:2, slots:[...W(2,60,'Schedelstaf'), ...G(4,30,'Zielenstorm'), ...P(4,'sleep',2,'Doodsslaap'), ...B(3), ...R(3)] },
+  necromancer: { name:'Hel',               fac:'Dodenrijk', mp:2, slots:[...W(2,60,'Schedelstaf'), ...G(4,30,'Zielenstorm'), ...P(4,'terug',2,'Dodenroep'), ...B(3), ...R(3)] },
   boar:        { name:'Calydonische Ever', fac:'Wildernis', mp:2, slots:[...W(5,60,'Stormaanval'), ...W(2,20,'Hoefslag'), ...P(1,'confusion',1,'Slagtandstoot'), ...B(2), ...R(6)] },
-  lupine:      { name:'Fenrir',            fac:'Wildernis', mp:3, slots:[...W(4,50,'Kaakklem'), ...W(2,20,'Scheurbeet'), ...P(2,'paralysis',1,'Wolvenhuil'), ...B(3), ...R(5)] },
+  lupine:      { name:'Fenrir',            fac:'Wildernis', mp:3, slots:[...W(4,50,'Kaakklem'), ...W(2,20,'Scheurbeet'), ...P(2,'wegduw',1,'Wolvenhuil'), ...B(3), ...R(5)] },
   wyrmling:    { name:'Quetzalcoatl',      fac:'Wildernis', mp:2, slots:[...W(3,60,'Veerslag'), ...W(2,30,'Staartzwiep'), ...G(3,60,'Zonnevuur'), ...P(4,'burn',2,'Asadem'), ...B(2), ...R(2)] },
   imp:         { name:'Kobold',            fac:'Vuurdiepte',mp:3, slots:[...W(3,30,'Drietandprik'), ...W(2,10,'Plaagstoot'), ...P(3,'burn',1,'Vonkenspel'), ...B(2), ...R(6)] },
   hellhound:   { name:'Cerberus',          fac:'Vuurdiepte',mp:3, slots:[...W(4,50,'Drievoudige Beet'), ...W(2,20,'Grauw'), ...P(3,'burn',1,'Helleblaf'), ...B(3), ...R(4)] },
@@ -1518,37 +1518,37 @@ const UNIT_DEFS = {
   // de juiste animatie uitkomt (nagelopen tegen FX_TREFWOORDEN).
   siren:        { name:'Sirene',          fac:'Zeediepte',    mp:3, slots:[...W(3,30,'Lokwoord'), ...W(2,10,'Vinnenslag'), ...P(3,'sleep',1,'Sirenenlied'), ...B(2), ...R(6)] },
   hydra:        { name:'Hydra',           fac:'Zeediepte',    mp:2, slots:[...W(3,50,'Koppenbeet'), ...W(2,20,'Staartslag'), ...P(4,'badlypoison',1,'Gifwalm'), ...B(3), ...R(4)] },
-  poseidon:     { name:'Poseidon',        fac:'Zeediepte',    mp:2, slots:[...G(3,60,'Stormgolf'), ...W(3,70,'Drietandstoot'), ...W(2,40,'Zeebeuk'), ...P(3,'paralysis',2,'Zeebevel'), ...B(2), ...R(3)] },
+  poseidon:     { name:'Poseidon',        fac:'Zeediepte',    mp:2, slots:[...G(3,60,'Stormgolf'), ...W(3,70,'Drietandstoot'), ...W(2,40,'Zeebeuk'), ...P(3,'wegduw',2,'Getijdenbeuk'), ...B(2), ...R(3)] },
   harpy:        { name:'Harpij',          fac:'Stormhoogte',  mp:3, slots:[...W(3,30,'Klauwgriep'), ...W(2,10,'Duikslag'), ...P(3,'confusion',1,'Schrille Kreet'), ...B(2), ...R(6)] },
-  roc:          { name:'Roc',             fac:'Stormhoogte',  mp:3, slots:[...W(4,60,'Klauwvangst'), ...W(2,20,'Veerschot'), ...P(2,'paralysis',1,'Stormwind'), ...B(3), ...R(5)] },
+  roc:          { name:'Roc',             fac:'Stormhoogte',  mp:3, slots:[...W(4,60,'Klauwvangst'), ...W(2,20,'Veerschot'), ...P(2,'terug',1,'Wegvoerklauw'), ...B(3), ...R(5)] },
   thunderbird:  { name:'Donderdvogel',    fac:'Stormhoogte',  mp:2, slots:[...G(3,60,'Bliksemstorm'), ...W(3,70,'Onweersklauw'), ...W(2,40,'Stormveer'), ...P(3,'paralysis',2,'Donderbevel'), ...B(2), ...R(3)] },
   shabti:       { name:'Sjabti',          fac:'Zandrijk',     mp:2, slots:[...W(3,40,'Steenvuist'), ...W(2,10,'Zandslag'), ...P(2,'sleep',1,'Grafspreuk'), ...B(3), ...R(6)] },
-  sphinx:       { name:'Sfinx',           fac:'Zandrijk',     mp:2, slots:[...W(3,50,'Leeuwenklauw'), ...W(2,20,'Pootslag'), ...P(4,'confusion',1,'Raadselwoord'), ...B(3), ...R(4)] },
-  anubis:       { name:'Anubis',          fac:'Zandrijk',     mp:2, slots:[...G(3,60,'Zielenweging'), ...W(3,70,'Scepterslag'), ...W(2,40,'Dodenstaf'), ...P(3,'sleep',2,'Balsemvloek'), ...B(2), ...R(3)] },
+  sphinx:       { name:'Sfinx',           fac:'Zandrijk',     mp:2, slots:[...W(3,50,'Leeuwenklauw'), ...W(2,20,'Pootslag'), ...P(4,'wacht',1,'Raadselwoord'), ...B(3), ...R(4)] },
+  anubis:       { name:'Anubis',          fac:'Zandrijk',     mp:2, slots:[...G(3,60,'Zielenweging'), ...W(3,70,'Scepterslag'), ...W(2,40,'Dodenstaf'), ...P(3,'terug',2,'Balsemvloek'), ...B(2), ...R(3)] },
   jaguarwarrior:{ name:'Jaguarkrijger',   fac:'Zonnetempel',  mp:3, slots:[...W(3,40,'Obsidiaanslag'), ...W(2,10,'Klauwprik'), ...P(2,'paralysis',1,'Oorlogskreet'), ...B(3), ...R(6)] },
   ahuizotl:     { name:'Ahuizotl',        fac:'Zonnetempel',  mp:3, slots:[...W(3,50,'Staartgreep'), ...W(2,20,'Waterbeet'), ...P(4,'poison',1,'Diepstroom'), ...B(3), ...R(4)] },
-  tezcatlipoca: { name:'Tezcatlipoca',    fac:'Zonnetempel',  mp:2, slots:[...G(4,50,'Spiegelschijn'), ...W(2,70,'Obsidiaandolk'), ...P(4,'confusion',2,'Nachtwind'), ...B(3), ...R(3)] },
+  tezcatlipoca: { name:'Tezcatlipoca',    fac:'Zonnetempel',  mp:2, slots:[...G(4,50,'Spiegelschijn'), ...W(2,70,'Obsidiaandolk'), ...P(4,'wissel',2,'Spiegelwissel'), ...B(3), ...R(3)] },
   kappa:        { name:'Kappa',           fac:'Bamboewoud',   mp:2, slots:[...W(3,40,'Schaalslag'), ...W(2,10,'Kombeet'), ...P(2,'confusion',1,'Waterkom'), ...B(3), ...R(6)] },
-  tengu:        { name:'Tengu',           fac:'Bamboewoud',   mp:3, slots:[...W(4,50,'Klingsnee'), ...W(2,20,'Snelle Snee'), ...P(2,'confusion',1,'Bergwind'), ...B(3), ...R(5)] },
+  tengu:        { name:'Tengu',           fac:'Bamboewoud',   mp:3, slots:[...W(4,50,'Klingsnee'), ...W(2,20,'Snelle Snee'), ...P(2,'wegduw',1,'Bergwind'), ...B(3), ...R(5)] },
   ryujin:       { name:'Ryujin',          fac:'Bamboewoud',   mp:2, slots:[...G(3,60,'Parelschijn'), ...W(3,70,'Drakenklauw'), ...W(2,40,'Staartzwaai'), ...P(4,'paralysis',2,'Tijbevel'), ...B(2), ...R(2)] },
   domovoi:      { name:'Domovoj',         fac:'Diepe Woud',   mp:2, slots:[...W(3,40,'Bezemslag'), ...W(2,10,'Haardvonk'), ...P(2,'sleep',1,'Haardspreuk'), ...B(3), ...R(6)] },
   leshy:        { name:'Leshy',           fac:'Diepe Woud',   mp:2, slots:[...W(3,50,'Takkenslag'), ...W(2,20,'Wortelklem'), ...P(4,'poison',1,'Sporenwalm'), ...B(3), ...R(4)] },
   babayaga:     { name:'Baba Jaga',       fac:'Diepe Woud',   mp:3, slots:[...G(3,50,'Vijzelstamp'), ...W(3,60,'Heksenstaf'), ...W(2,30,'Botsnee'), ...P(4,'badlypoison',2,'Ketelbrouwsel'), ...B(2), ...R(2)] },
   frostwight:   { name:'Rijpgeest',       fac:'IJsvlakte',    mp:2, slots:[...W(3,40,'Rijpbijl'), ...W(2,10,'IJsstoot'), ...P(2,'paralysis',1,'Vrieskou'), ...B(3), ...R(6)] },
-  jotun:        { name:'Jotun',           fac:'IJsvlakte',    mp:2, slots:[...W(4,60,'Vuistslag'), ...W(2,20,'IJsscherf'), ...P(2,'paralysis',1,'Vriesadem'), ...B(3), ...R(5)] },
+  jotun:        { name:'Jotun',           fac:'IJsvlakte',    mp:2, slots:[...W(4,60,'Vuistslag'), ...W(2,20,'IJsscherf'), ...P(2,'wacht',1,'Vriesadem'), ...B(3), ...R(5)] },
   ymir:         { name:'Ymir',            fac:'IJsvlakte',    mp:2, slots:[...G(3,60,'Oerrijp'), ...W(4,80,'Reuzenvuist'), ...W(2,40,'IJsklauw'), ...P(3,'paralysis',2,'Vriesgreep'), ...B(2), ...R(2)] },
   gnome:        { name:'Gnoom',           fac:'Berghart',     mp:2, slots:[...W(3,40,'Houweelslag'), ...W(2,10,'Lantaarnschijn'), ...P(2,'confusion',1,'Kristalschijn'), ...B(3), ...R(6)] },
-  mountaintroll:{ name:'Bergtrol',        fac:'Berghart',     mp:2, slots:[...W(4,60,'Knotsbeuk'), ...W(2,20,'Rotsworp'), ...P(2,'paralysis',1,'Steenstamp'), ...B(3), ...R(5)] },
+  mountaintroll:{ name:'Bergtrol',        fac:'Berghart',     mp:2, slots:[...W(4,60,'Knotsbeuk'), ...W(2,20,'Rotsworp'), ...P(2,'wegduw',1,'Steenstamp'), ...B(3), ...R(5)] },
   mountainking: { name:'Dovregubbe',      fac:'Berghart',     mp:2, slots:[...G(3,60,'Bergbevel'), ...W(3,70,'Koningshamer'), ...W(2,40,'Kroonslag'), ...P(3,'paralysis',2,'Diepe Echo'), ...B(2), ...R(3)] },
   peri:         { name:'Peri',            fac:'Woestijnwind', mp:3, slots:[...W(3,30,'Vleugelveeg'), ...W(2,10,'Windsnee'), ...P(3,'sleep',1,'Zandslaap'), ...B(2), ...R(6)] },
-  marid:        { name:'Marid',           fac:'Woestijnwind', mp:2, slots:[...W(3,50,'Blauwe Vuist'), ...W(2,20,'Rookslag'), ...P(4,'confusion',1,'Wensbedrog'), ...B(3), ...R(4)] },
+  marid:        { name:'Marid',           fac:'Woestijnwind', mp:2, slots:[...W(3,50,'Blauwe Vuist'), ...W(2,20,'Rookslag'), ...P(4,'wissel',1,'Wensbedrog'), ...B(3), ...R(4)] },
   ifrit:        { name:'Ifrit',           fac:'Woestijnwind', mp:2, slots:[...G(3,60,'Laaiend Oordeel'), ...W(3,70,'Hellevlam'), ...W(2,40,'Asvonk'), ...P(4,'burn',2,'Brandvloek'), ...B(2), ...R(2)] },
   anansi:       { name:'Anansi',          fac:'Savanne',      mp:2, slots:[...W(3,40,'Spinklauw'), ...W(2,10,'Draadsnee'), ...P(2,'poison',1,'Webgif'), ...B(3), ...R(6)] },
   mamiwata:     { name:'Mami Wata',       fac:'Savanne',      mp:2, slots:[...W(3,50,'Slangenklem'), ...W(2,20,'Kamslag'), ...P(4,'poison',1,'Waterlied'), ...B(3), ...R(4)] },
   shango:       { name:'Shango',          fac:'Savanne',      mp:2, slots:[...G(3,60,'Bliksembijl'), ...W(3,70,'Dubbele Bijl'), ...W(2,40,'Vonkslag'), ...P(3,'paralysis',2,'Stormbevel'), ...B(2), ...R(3)] },
   puca:         { name:'Puca',            fac:'Nevelheuvels', mp:3, slots:[...W(3,30,'Nevelhoef'), ...W(2,10,'Schimmensnee'), ...P(3,'confusion',1,'Dwaallicht'), ...B(2), ...R(6)] },
   cusidhe:      { name:'Cu Sidhe',        fac:'Nevelheuvels', mp:3, slots:[...W(4,50,'Grafbeet'), ...W(2,20,'Scheurklauw'), ...P(2,'sleep',1,'Doodsblaf'), ...B(3), ...R(5)] },
-  morrigan:     { name:'Morrigan',        fac:'Nevelheuvels', mp:2, slots:[...G(3,60,'Ravenstorm'), ...W(3,70,'Speerworp'), ...W(2,40,'Schildwering'), ...P(3,'confusion',2,'Doemzang'), ...B(2), ...R(3)] },
+  morrigan:     { name:'Morrigan',        fac:'Nevelheuvels', mp:2, slots:[...G(3,60,'Ravenstorm'), ...W(3,70,'Speerworp'), ...W(2,40,'Schildwering'), ...P(3,'wacht',2,'Doemzang'), ...B(2), ...R(3)] },
   lamassu:      { name:'Lamassu',         fac:'Sterrenhof',   mp:2, slots:[...W(3,40,'Steenklauw'), ...W(2,10,'Vleugelslag'), ...P(2,'paralysis',1,'Poortwacht'), ...B(3), ...R(6)] },
   anzu:         { name:'Anzu',            fac:'Sterrenhof',   mp:3, slots:[...W(4,60,'Roofklauw'), ...W(2,20,'Tafelslag'), ...P(2,'paralysis',1,'Windgier'), ...B(3), ...R(5)] },
   tiamat:       { name:'Tiamat',          fac:'Sterrenhof',   mp:2, slots:[...G(4,60,'Chaosbrand'), ...W(3,70,'Drakenbeet'), ...W(2,40,'Vloedstaart'), ...P(4,'badlypoison',2,'Oervloek'), ...B(1), ...R(2)] },
@@ -2355,7 +2355,7 @@ function applyCondition(u, st) {
 }
 
 function koUnit(u) {
-  u.node = null; u.status = [];
+  u.node = null; u.status = []; u.vast = 0;
   // Bergvast (Mountain Warden): sla het Healing Center over, direct terug naar de bank
   if (abilityOf(u) === 'mountain') { u.status = ['wait']; state.bench[u.owner].push(u.uid); return; }
   state.hc[u.owner].push(u.uid);
@@ -2812,7 +2812,7 @@ function openUnitDetail(key) {
   const NL = { red:'Miss', blue:'Verdedig' };
   const pills = Object.entries(sum).map(([k, n]) => {
     const [kind, val] = k.split('-');
-    const label = kind === 'white' ? `${val} dmg` : kind === 'gold' ? `★ ${val} dmg` : kind === 'purple' ? val : NL[kind];
+    const label = kind === 'white' ? `${val} dmg` : kind === 'gold' ? `★ ${val} dmg` : kind === 'purple' ? paarsLabel(val) : NL[kind];
     return `<span class="slot-pill" style="color:${TXT[kind]};background:${COLORS[kind]}">${n}× ${label}</span>`;
   }).join('');
   const ab = UNIT_DEFS[key].ability;
@@ -3126,16 +3126,20 @@ const HELP_SECTIONS = [
     ['#e5e7eb','<b>Wit — aanval.</b> Het getal is de kracht. Hoogste getal wint; gelijk = niemand valt.'],
     ['#fbbf24','<b>Goud — doorbraak.</b> Slaat dwars door paars, blauw én mis heen. Alleen een sterkere aanval stopt hem.'],
     ['#3b82f6','<b>Blauw — verdediging.</b> Blokt wit en paars. Verliest wél van goud.'],
-    ['#8b5cf6','<b>Paars — vloek.</b> Geen schade, maar een status. Twee paarse tegen elkaar: de meeste sterren wint.'],
+    ['#8b5cf6','<b>Paars — vloek.</b> Geen schade, maar een status of een effect (zie hieronder). Twee paarse tegen elkaar: de meeste sterren wint.'],
     ['#ef4444','<b>Rood — mis.</b> Je doet niets. De ander kan je wel raken.'] ]},
   { h:'Statussen', p:[
     'Een figuur kan <b>één status tegelijk</b> hebben; een nieuwe vervangt de oude.',
     '<b>Gif</b> verzwakt je aanvallen, <b>zwaar gif</b> nog meer. <b>Brand</b> verzwakt alles én maakt je kleinste aanval een mis. <b>Verlamming</b> maakt je kleinste aanval een mis.',
     '<b>Verwarring</b> laat de schijf één vakje verspringen. <b>Slaap</b> houdt je stil tot een bondgenoot naast je staat. <b>Bevroren</b> laat je wel lopen maar niet aanvallen, en gaat na één gevecht vanzelf weg.',
     'Genezen doe je met de <b>Cleanse</b>-plate, via het Healing Center, of met een ability.' ]},
+  { h:'Paarse effecten', p:[
+    'Niet elk paars vak geeft een status. Sommige <b>doen iets</b> met de ander, net als in Duel:',
+    '<b>Wegduwen</b> — de ander schuift één punt van je af (nooit een doel in). <b>Wisselen</b> — jullie ruilen van plek; zet dat iemand op een doel, dan telt het. <b>Vastzetten</b> — de ander kan z\'n volgende beurt niet bewegen (je ziet kettingen). <b>Terugsturen</b> — de ander gaat terug naar z\'n zijlijn, zonder Healing Center.',
+    'Welk effect een figuur heeft zie je op z\'n schijf: een pijl, twee pijlen, een slotje of een bocht-pijl.' ]},
   { h:'Omsingelen', p:[
-    'Staat een figuur met <b>geen enkel vrij buurpunt</b> én met minstens één vijand ernaast, dan gaat hij <b>direct KO</b> — zonder gevecht.',
-    'Dat geldt voor beide kanten, dus let op waar je je eigen figuren neerzet.' ]},
+    'Staat een figuur zo dat <b>elk buurpunt door een vijand bezet</b> is, dan gaat hij <b>direct KO</b> — zonder gevecht.',
+    'Door je eigen figuren ingesloten raken is geen KO: dan kun je alleen niet bewegen.' ]},
   { h:'Healing Center', p:[
     'Verslagen figuren gaan naar het <b>Healing Center</b> (maximaal twee tegelijk), waar hun status geneest en hun level behouden blijft.',
     'Gaat er een <b>derde</b> figuur KO, dan schuift de langst wachtende terug naar je zijlijn en mag je hem de beurt erna weer inzetten.' ]},
@@ -3190,6 +3194,16 @@ function statusFX(g, u) {
     if (anim) { e.style.transformBox = 'fill-box'; e.style.transformOrigin = 'center'; e.style.animation = anim; if (delay) e.style.animationDelay = delay; e.classList.add('fx-anim'); }
     return e;
   };
+  // Vastgezet (paars effect 'wacht'): twee kettingen gekruist voor het figuur
+  // en een slotje op de sokkel. Staat los van de statussen, want vastzetten is
+  // geen status — hij kan tegelijk brandend én vastgezet zijn.
+  if (u.vast) {
+    const ketting = 'rgba(203,213,225,0.9)';
+    el('path', { d:'M -20 -44 L 20 -6 M 20 -44 L -20 -6', stroke:ketting, 'stroke-width':3.2,
+                 'stroke-dasharray':'5 3', 'stroke-linecap':'round', fill:'none' }, g);
+    el('rect', { x:-6, y:-3, width:12, height:9, rx:2, fill:'#e5e7eb', stroke:'#475569', 'stroke-width':1.2 }, g);
+    el('path', { d:'M -3.5 -3 v -3 a 3.5 3.5 0 0 1 7 0 v 3', stroke:'#e5e7eb', 'stroke-width':1.6, fill:'none' }, g);
+  }
   for (const st of u.status.slice(0, 2)) {
     if (st === 'frozen') {
       // Groot ijsblok om het hele poppetje heen
@@ -4302,7 +4316,7 @@ function usePlate(player, idx, targetUid, targetNode) {
     const back = state.hc[player].shift();
     if (back) { state.units[back].status = []; state.bench[player].push(back); }
   }
-  else if (key === 'scoopup') { u.node = null; u.status = u.status.filter(s => s !== 'wait'); state.bench[player].push(u.uid); }
+  else if (key === 'scoopup') { u.node = null; u.vast = 0; u.status = u.status.filter(s => s !== 'wait'); state.bench[player].push(u.uid); }
   else if (key === 'swapspot') { const other = state.units[state.pendingPlate.uid]; const a = other.node; other.node = u.node; u.node = a; }
   else if (key === 'hurdle') { state.units[state.pendingPlate.uid].node = targetNode; }
   else if (key === 'counter') { state.counterAttack[player] = true; }
@@ -4898,6 +4912,7 @@ function onUnitTap(uid) {
   if (u.owner === state.turn && u.node) {
     if (state.actionsLeft<=0) { hint('Je hebt je zet al gedaan — tik op End Turn'); sfx('denied'); return; }
     if (u.status.includes('sleep')) { hint(`${UNIT_DEFS[u.defKey].name} slaapt — zet een bondgenoot ernaast om hem te wekken`); sfx('denied'); return; }
+    if (u.vast) { hint(`${UNIT_DEFS[u.defKey].name} is vastgezet — deze beurt kan hij niet bewegen`); sfx('denied'); return; }
     state.pendingDeploy = null; state.selected = (state.selected===uid) ? null : uid;
     state.legalTargets = state.selected ? legalMoves(u) : new Set();
     if (state.selected) {
@@ -4946,7 +4961,7 @@ function showUnitInfo(uid) {
   const NL = { red:'Miss', blue:'Verdedig' };
   let pills = Object.entries(sum).map(([k, n]) => {
     const [kind, val] = k.split('-');
-    const label = kind === 'white' ? `${val} dmg` : kind === 'gold' ? `★ ${val} dmg` : kind === 'purple' ? val : NL[kind];
+    const label = kind === 'white' ? `${val} dmg` : kind === 'gold' ? `★ ${val} dmg` : kind === 'purple' ? paarsLabel(val) : NL[kind];
     return `<span class="slot-pill" style="color:${TXT[kind]};background:${COLORS[kind]}">${n}× ${label}</span>`;
   }).join('');
   const ab = def.ability;
@@ -5060,6 +5075,7 @@ function onDeployComplete(u) {
 }
 
 function legalMoves(u) {
+  if (u.vast) return new Set();            // vastgezet door een paars effect
   const frozen = u.status.includes('frozen');
   const phase = canPhase(u);   // Sluipen/Vleugelslag: dwars door bezette punten
   const mp = effMP(u);
@@ -5137,6 +5153,7 @@ function endTurn() {
   if (state.over || state.locked) return;
   // Sleep geneest via een aangrenzende bondgenoot; frozen geneest sinds sessie 22 ná een gevecht (Duel-regel)
   for (const u of Object.values(state.units)) { if (!u.node) continue; if (u.status.includes('sleep')) { const hasAdj = [...ADJ[u.node]].some(n => { const o = unitAt(n); return o && o.owner === u.owner; }); if (hasAdj) u.status = u.status.filter(s => s!=='sleep'); } }
+  for (const u of Object.values(state.units)) if (u.owner === state.turn && u.vast) u.vast--;
   state.turn = state.turn==='p1'?'p2':'p1'; state.actionsLeft = 1; state.selected = null; state.pendingDeploy = null; state.legalTargets = new Set();
   state.plateUsed = false; state.pendingPlate = null; state.mpBonus = {}; state.warcry = { p1:false, p2:false };
   for (const u of Object.values(state.units)) u.fx = {};   // plate-effecten gelden 'deze beurt'
@@ -5187,6 +5204,23 @@ function diskEffectGlyph(svg, effect, gx, gy, s) {
       break;
     case 'frozen':
       L(`M0 ${-s} L0 ${s} M ${-s*0.87} ${-s*0.5} L ${s*0.87} ${s*0.5} M ${s*0.87} ${-s*0.5} L ${-s*0.87} ${s*0.5}`);
+      break;
+    // Paarse effecten (sessie 44): pijlen voor beweging, een slot voor vastzetten
+    case 'wegduw':
+      L(`M ${-s*0.8} 0 L ${s*0.7} 0 M ${s*0.25} ${-s*0.5} L ${s*0.75} 0 L ${s*0.25} ${s*0.5}`);
+      L(`M ${-s*0.8} ${-s*0.55} L ${-s*0.8} ${s*0.55}`);
+      break;
+    case 'wissel':
+      L(`M ${-s*0.8} ${-s*0.35} L ${s*0.6} ${-s*0.35} M ${s*0.25} ${-s*0.7} L ${s*0.65} ${-s*0.35} L ${s*0.25} 0`);
+      L(`M ${s*0.8} ${s*0.35} L ${-s*0.6} ${s*0.35} M ${-s*0.25} ${s*0.7} L ${-s*0.65} ${s*0.35} L ${-s*0.25} 0`);
+      break;
+    case 'wacht':
+      P(`M ${-s*0.6} ${-s*0.1} h ${s*1.2} v ${s*1.0} h ${-s*1.2} Z`, '#e5e7eb');
+      L(`M ${-s*0.35} ${-s*0.1} v ${-s*0.35} a ${s*0.35} ${s*0.35} 0 0 1 ${s*0.7} 0 v ${s*0.35}`);
+      break;
+    case 'terug':
+      L(`M ${s*0.6} ${s*0.6} L ${s*0.6} ${-s*0.2} A ${s*0.55} ${s*0.55} 0 0 0 ${-s*0.5} ${-s*0.2} L ${-s*0.5} ${s*0.35}`);
+      L(`M ${-s*0.85} 0 L ${-s*0.5} ${s*0.45} L ${-s*0.15} 0`);
       break;
     default:
       el('circle', { cx:0, cy:0, r:s*0.55, fill:'#fff' }, g);
@@ -5483,8 +5517,20 @@ async function runCombat(att, def) {
 
   if (r.defKO && !r.attKO) { attNextNode = defInitialNode; }
 
-  if (r.statusOnAtt) { applyCondition(att, r.statusOnAtt); html += `<span class="status">-> ${r.statusOnAtt.toUpperCase()}</span><br>`; }
-  if (r.statusOnDef) { applyCondition(def, r.statusOnDef); html += `<span class="status">-> ${r.statusOnDef.toUpperCase()}</span><br>`; }
+  // Een paars vak is óf een status (meteen toepassen) óf een effect (onthouden
+  // en uitvoeren zodra het gevechtsscherm dicht is, zodat je het op het bord ziet).
+  const effecten = [];
+  const paars = (bron, doel, naam) => {
+    if (isPaarsEffect(naam)) {
+      effecten.push([bron, doel, naam]);
+      html += `<span class="status">${UNIT_DEFS[doel.defKey].name}: ${PAARS_EFFECTEN[naam].label}!</span><br>`;
+    } else {
+      applyCondition(doel, naam);
+      html += `<span class="status">-> ${(STATUS_NL[naam] || naam).toUpperCase()}</span><br>`;
+    }
+  };
+  if (r.statusOnAtt) paars(def, att, r.statusOnAtt);
+  if (r.statusOnDef) paars(att, def, r.statusOnDef);
 
   // Contact-abilities: status op de overlevende tegenstander (en op zichzelf bij Helse Jacht)
   const applyContact = (src, tgt, srcSurvives, tgtSurvives) => {
@@ -5577,6 +5623,30 @@ async function runCombat(att, def) {
   if (attWasFrozen) att.status = att.status.filter(s => s !== 'frozen');
   if (defWasFrozen) def.status = def.status.filter(s => s !== 'frozen');
 
+  // Paarse effecten: nu pas, met het bord weer in beeld.
+  for (const [bron, doel, naam] of effecten) {
+    if (!bron.node || !doel.node) continue;              // iemand ging toch neer
+    const van = doel.node, bronVan = bron.node;
+    const eff = PAARS_EFFECTEN[naam];
+    if (naam === 'wegduw') {
+      const naar = eff.plek(bron, doel);
+      if (!naar) { toast(`${UNIT_DEFS[doel.defKey].name} staat klem en blijft staan`); continue; }
+      await moveUnit(doel, naar);                        // zelfde sprong als een gewone zet
+    } else {
+      eff.doe(bron, doel);
+      queueFX(NODES[van].x, NODES[van].y, 'poof');
+      if (naam === 'wissel') queueFX(NODES[bronVan].x, NODES[bronVan].y, 'poof');
+      renderAll();
+    }
+    sfx('status');
+  }
+  // Een wissel kan iemand op een doel zetten. In Duel telt het doel bereiken,
+  // hoe je er ook komt.
+  if (effecten.length) {
+    const winnaar = Object.values(state.units).find(u => u.node && NODES[u.node].type === 'goal' && NODES[u.node].owner !== u.owner);
+    if (winnaar) { state.locked = false; endMatch(winnaar.owner, 'goal'); return; }
+  }
+
   // EVOLUTIE OF LEVEL-UP (Duel-regel + onze huisregel).
   // Duel: wie een gevecht wint en z'n evolutie eronder heeft hangen, MAG
   // evolueren — hij mag ook weigeren. Wij hadden al de huisregel "winnen = een
@@ -5596,6 +5666,55 @@ async function runCombat(att, def) {
   state.locked = false;
   afterAction();
 }
+
+// ==========================================
+// PAARSE EFFECTEN (sessie 44) — paars doet in Duel meer dan een status geven
+// Serebii noemt bij de paarse aanvallen steeds dezelfde handvol acties: de
+// ander wegduwen (Knock Away), van plek wisselen (Switch), vastzetten (Wait) en
+// terugsturen naar de zijlijn. Tot nu toe gaf ELK paars vak bij ons een status.
+// Hoe het werkt zonder resolve() te raken: een paars vak draagt z'n effectnaam
+// al in slot.effect, en resolve() geeft die door als statusOnAtt/statusOnDef.
+// Staat die naam in deze tabel, dan is het geen status maar een actie; die
+// wordt uitgevoerd nadat het gevechtsscherm dicht is, zodat je het op het bord
+// ziet gebeuren.
+// ==========================================
+// PAARS-START (marker voor headless tests — niet verwijderen)
+function vrijeBuren(node) { return [...ADJ[node]].filter(n => !unitAt(n)); }
+function afstand(a, b) { const A = NODES[a], B = NODES[b]; return Math.hypot(A.x - B.x, A.y - B.y); }
+const PAARS_EFFECTEN = {
+  // Eén punt van de aanvaller af. Nooit een doel in: dat zou een duw-overwinning
+  // zijn, en die bestaat in Duel niet. Staat hij klem, dan gebeurt er niets.
+  wegduw: { label:'Weggeduwd', waarde:0.35,
+    uitleg:'duwt de ander één punt van je af',
+    plek(bron, doel) {
+      const opties = vrijeBuren(doel.node).filter(n => NODES[n].type !== 'goal');
+      if (!opties.length) return null;
+      return opties.sort((a, b) => afstand(b, bron.node) - afstand(a, bron.node))[0];
+    },
+    doe(bron, doel) { const n = this.plek(bron, doel); if (n) doel.node = n; return !!n; } },
+  // Van plek ruilen. Kan iemand op een doel zetten: dat telt, net als in Duel.
+  wissel: { label:'Van plek gewisseld', waarde:0.2,
+    uitleg:'jij en de ander ruilen van plek',
+    doe(bron, doel) { const t = bron.node; bron.node = doel.node; doel.node = t; return true; } },
+  // Vastgezet: kan z'n eigen volgende beurt niet bewegen. Telt in beurten van
+  // de eigenaar; valt het tijdens z'n eigen beurt, dan is er nog één te gaan.
+  wacht: { label:'Vastgezet', waarde:0.3,
+    uitleg:'de ander kan z\'n volgende beurt niet bewegen',
+    doe(bron, doel) { doel.vast = (state.turn === doel.owner) ? 2 : 1; return true; } },
+  // Terug naar de eigen zijlijn — níet het Healing Center: geen KO, geen genezing.
+  terug: { label:'Teruggestuurd', waarde:0.5,
+    uitleg:'stuurt de ander terug naar z\'n zijlijn',
+    doe(bron, doel) { doel.node = null; doel.vast = 0; state.bench[doel.owner].push(doel.uid); return true; } },
+};
+function isPaarsEffect(naam) { return !!PAARS_EFFECTEN[naam]; }
+// Hoe heet dit paarse vak in gewone taal? Effect of status, allebei Nederlands.
+function paarsLabel(naam) {
+  if (PAARS_EFFECTEN[naam]) return PAARS_EFFECTEN[naam].label;
+  return (typeof STATUS_NL !== 'undefined' && STATUS_NL[naam]) || naam;
+}
+// Hoeveel is dit paarse vak waard voor de AI? Een status 0.25, een effect meer.
+function paarsWaarde(naam) { return PAARS_EFFECTEN[naam] ? PAARS_EFFECTEN[naam].waarde : 0.25; }
+// PAARS-END (marker voor headless tests — niet verwijderen)
 
 function resolve(a, d) {
   const o = { attKO:false, defKO:false, statusOnAtt:null, statusOnDef:null }; const A = a.k, D = d.k;
@@ -5789,7 +5908,7 @@ function combatEV(att, def) {
     const r = resolve(aFroz ? {k:'red'} : aS[i], dFroz ? {k:'red'} : dS[j]);
     if (r.defKO) ev += defUndying ? 0.15 * w : defCheapKO;
     if (r.attKO) ev -= attUndying ? 0.15 * w : attCheapKO;
-    if (r.statusOnDef) ev += 0.25; if (r.statusOnAtt) ev -= 0.25;
+    if (r.statusOnDef) ev += paarsWaarde(r.statusOnDef); if (r.statusOnAtt) ev -= paarsWaarde(r.statusOnAtt);
   }
   ev /= 256;
   // Wie een contact-ability heeft, wint elk treffen een beetje extra

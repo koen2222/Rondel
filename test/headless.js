@@ -67,6 +67,10 @@ if (!lijfSection) throw new Error('LIJF-blok niet gevonden');
 // Het dueltoneel (sessie 43): zes choreografieën en de keuze ertussen
 const toneelSection = html.slice(html.indexOf('// TONEEL-START'), html.indexOf('// TONEEL-END'));
 if (!toneelSection) throw new Error('TONEEL-blok niet gevonden');
+// Paarse effecten (sessie 44): wegduwen, wisselen, vastzetten, terugsturen
+const paarsSection = html.slice(html.indexOf('// PAARS-START'), html.indexOf('// PAARS-END'));
+const unitAtMatch = html.match(/\nfunction unitAt\(k\) \{[^\n]*\}/);
+if (!paarsSection || !unitAtMatch) throw new Error('PAARS-blok of unitAt() niet gevonden');
 if (!evoSection) throw new Error('EVO-blok niet gevonden');
 // Aanvalsanimaties: trefwoord→soort (FX) en soort→projectiel (DUELFX)
 const fxSection = html.slice(html.indexOf('const FX_TREFWOORDEN ='), html.indexOf('// FX-END'));
@@ -111,9 +115,11 @@ const evalCode = [
   lijfSection,
   fxSection,
   toneelSection,
+  unitAtMatch[0],
+  paarsSection,
   kleurMatch[0],
   duelFxSection,
-  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster, FX_TREFWOORDEN, attackFx, FX_KLEUR, FX_PROJECTIEL, projectielVoor, EVOLUTIE, evolutieVan, voorloperVan, isBasisvorm, evolutieKeten, evolutieBonus, MUNT_PER_DIAMANT, DIAMANT_BUNDELS, PRICE, PLATE_PRIJS, STARTER_PLATES, UPGRADE_COST, WIN_MUNTEN, LOSS_MUNTEN, freshProfile, migreerProfiel, LIJF, lijfVan, DUEL_SCENES, kiesDuelScene, VAL_PER_LIJF, valVoor };',
+  'module.exports = { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster, FX_TREFWOORDEN, attackFx, FX_KLEUR, FX_PROJECTIEL, projectielVoor, EVOLUTIE, evolutieVan, voorloperVan, isBasisvorm, evolutieKeten, evolutieBonus, MUNT_PER_DIAMANT, DIAMANT_BUNDELS, PRICE, PLATE_PRIJS, STARTER_PLATES, UPGRADE_COST, WIN_MUNTEN, LOSS_MUNTEN, freshProfile, migreerProfiel, LIJF, lijfVan, DUEL_SCENES, kiesDuelScene, VAL_PER_LIJF, valVoor, PAARS_EFFECTEN, isPaarsEffect, paarsLabel };',
 ].join('\n');
 
 // Schrijf tijdelijk evalueerbaar bestand (vermijdt new Function-beperkingen)
@@ -126,7 +132,7 @@ try {
   fs.unlinkSync(tmpPath);
 }
 
-const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster, FX_TREFWOORDEN, attackFx, FX_KLEUR, FX_PROJECTIEL, projectielVoor, EVOLUTIE, evolutieVan, voorloperVan, isBasisvorm, evolutieKeten, evolutieBonus, MUNT_PER_DIAMANT, DIAMANT_BUNDELS, PRICE, PLATE_PRIJS, STARTER_PLATES, UPGRADE_COST, WIN_MUNTEN, LOSS_MUNTEN, freshProfile, migreerProfiel, LIJF, lijfVan, DUEL_SCENES, kiesDuelScene, VAL_PER_LIJF, valVoor } = extracted;
+const { resolve, applyStatus, NODES, ADJ, ROUTES, koUnit, __setState, UNIT_DEFS, DISK_LAYOUT, arrangeSlots, ABILITIES, UNIT_ABILITY, abilityOf, contactStatusOf, canPhase, moveLabel, applyCondition, SETTING_DEFS, freshSettings, normalizeSettings, PLATES, PLATE_BUDGET, plateCost, DECK_SLOTS, normalizeDecks, BOOSTER_COST, BOOSTER_ODDS, BOOSTER_REFUND, rollBooster, FX_TREFWOORDEN, attackFx, FX_KLEUR, FX_PROJECTIEL, projectielVoor, EVOLUTIE, evolutieVan, voorloperVan, isBasisvorm, evolutieKeten, evolutieBonus, MUNT_PER_DIAMANT, DIAMANT_BUNDELS, PRICE, PLATE_PRIJS, STARTER_PLATES, UPGRADE_COST, WIN_MUNTEN, LOSS_MUNTEN, freshProfile, migreerProfiel, LIJF, lijfVan, DUEL_SCENES, kiesDuelScene, VAL_PER_LIJF, valVoor, PAARS_EFFECTEN, isPaarsEffect, paarsLabel } = extracted;
 
 // ─── Test harness ──────────────────────────────────────────────────────────────
 let pass = 0, fail = 0;
@@ -717,6 +723,45 @@ section('=== DUELTONEEL (6 checks) ===');
   check('Elke lichaamsbouw heeft een valvariant', bouwen.filter(b => !VAL_PER_LIJF[b]), []);
   check('Elke valvariant staat ook in de CSS',
     [...new Set(Object.values(VAL_PER_LIJF))].filter(v => !new RegExp('\\.dt-lijf\\.' + v + '\\b').test(css)), []);
+}
+
+// ─── 4g1e. PAARSE EFFECTEN (sessie 44) ────────────────────────────────────────
+// Vier Duel-acties op paarse vakken. Wat hier stilletjes mis kan gaan: een duw
+// die iemand een doel in schuift (bestaat niet in Duel), een duw op een figuur
+// die klem staat (moet niets doen, niet crashen), en een effect dat wel op een
+// schijf staat maar geen handler of uitleg heeft.
+section('=== PAARSE EFFECTEN (9 checks) ===');
+{
+  const namen = Object.keys(PAARS_EFFECTEN);
+  check('Vier effecten: wegduw, wissel, wacht, terug', namen.sort(), ['terug', 'wacht', 'wegduw', 'wissel']);
+  check('Elk effect heeft een handler, label en uitleg',
+    namen.filter(n => typeof PAARS_EFFECTEN[n].doe !== 'function' || !PAARS_EFFECTEN[n].label || !PAARS_EFFECTEN[n].uitleg), []);
+  const opSchijf = new Set();
+  for (const d of Object.values(UNIT_DEFS)) for (const sl of d.slots) if (sl.k === 'purple' && isPaarsEffect(sl.effect)) opSchijf.add(sl.effect);
+  check('Alle vier komen op een schijf voor', [...opSchijf].sort(), ['terug', 'wacht', 'wegduw', 'wissel']);
+  check('De uitleg noemt alle vier', ['Wegduwen', 'Wisselen', 'Vastzetten', 'Terugsturen'].filter(w => !html.includes('<b>' + w + '</b>')), []);
+
+  const maak = (units) => { const st = { units:{}, bench:{ p1:[], p2:[] }, turn:'p1' };
+    for (const u of units) st.units[u.uid] = { status:[], ...u }; __setState(st); return st; };
+  // Wegduwen: van de aanvaller af, en nooit een doel in
+  let st = maak([{ uid:'a', owner:'p1', node:'IT1' }, { uid:'d', owner:'p2', node:'IT2' }]);
+  const naar = PAARS_EFFECTEN.wegduw.plek(st.units.a, st.units.d);
+  check('Wegduwen: verder van de aanvaller af dan eerst', !!naar && Math.hypot(NODES[naar].x - NODES.IT1.x, NODES[naar].y - NODES.IT1.y) > Math.hypot(NODES.IT2.x - NODES.IT1.x, NODES.IT2.y - NODES.IT1.y), true);
+  // Alleen het doel is nog vrij: dan moet de duw NIETS doen, niet het doel in.
+  st = maak([{ uid:'a', owner:'p1', node:'T1' }, { uid:'d', owner:'p2', node:'T2' }, { uid:'f', owner:'p2', node:'IT2' }]);
+  check('Wegduwen schuift nooit een doel in', PAARS_EFFECTEN.wegduw.plek(st.units.a, st.units.d), null);
+  // Klem: alle buren bezet -> niets, geen crash
+  const klemBuren = [...ADJ.IL];
+  st = maak([{ uid:'d', owner:'p2', node:'IL' }, ...klemBuren.map((n, i) => ({ uid:'b' + i, owner:'p1', node:n }))]);
+  check('Wegduwen op een figuur die klem staat doet niets', PAARS_EFFECTEN.wegduw.doe(st.units.b0, st.units.d), false);
+  // Vastzetten telt in beurten van de eigenaar
+  st = maak([{ uid:'d', owner:'p2', node:'IT2' }]); st.turn = 'p1';
+  PAARS_EFFECTEN.wacht.doe(null, st.units.d);
+  check('Vastzetten in de beurt van de ander: één eigen beurt stil', st.units.d.vast, 1);
+  // Terugsturen: naar de zijlijn, niet naar het Healing Center
+  st = maak([{ uid:'d', owner:'p2', node:'IT2' }]);
+  PAARS_EFFECTEN.terug.doe(null, st.units.d);
+  check('Terugsturen zet hem op z\'n eigen zijlijn', [st.units.d.node, st.bench.p2], [null, ['d']]);
 }
 
 // ─── 4g2. PRESTATIE-VALKUILEN (sessie 38) ─────────────────────────────────────
