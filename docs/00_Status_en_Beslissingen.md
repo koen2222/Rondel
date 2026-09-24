@@ -1,5 +1,5 @@
 RONDEL — STATUS EN BESLISSINGEN
-Laatste update: 29 augustus 2026 (sessie 43)
+Laatste update: 24 september 2026 (sessie 44)
 
 KERNCONCEPT
 - Tabletop-first fantasy bordspel, einddoel = digitale app
@@ -313,6 +313,60 @@ kaarten."
   benoemde aanval heeft een animatie, elke soort heeft een kleur, elk
   projectiel staat ook echt in de CSS). Smoke +7 checks voor de bordhoogte, de
   twee vechters, het vliegende projectiel, het schild-icoon en de kaartvlucht.
+
+SESSIE 44 — DICHTER BIJ DUEL: PAARSE EFFECTEN, MEGA, VIJF ZELDZAAMHEDEN
+Koen: "kan je het spel verder afmaken dat het zo veel mogelijk op Pokemon Duel
+lijkt". Naast Duel gelegd bleven er vier grote verschillen over. Koen koos er
+drie om te bouwen (paarse effecten, mega-evolutie, EX/UX) en een om uit te
+zoeken (online spelen). Campagne/Liga/dagelijkse missies koos hij niet.
+
+1. PAARS DOET MEER DAN EEN STATUS. Wegduwen, wisselen, vastzetten, terugsturen.
+   resolve() is NIET aangeraakt: het effect zat al in slot.effect en resolve()
+   gaf het door; een naam die in PAARS_EFFECTEN staat is een actie in plaats van
+   een status, uitgevoerd nadat het gevechtsscherm dicht is.
+   - Wegduwen nooit een doel in (een duw-overwinning bestaat niet in Duel);
+     staat hij klem, dan gebeurt er niets.
+   - Wisselen KAN iemand op een doel zetten, en dat telt.
+   - Vastzetten is geen status (brandend en vastgezet tegelijk kan), telt in
+     beurten van de eigenaar, en zit centraal in legalMoves() zodat speler, AI
+     en de "kan niemand meer zetten"-check het allemaal vanzelf respecteren.
+   - Terugsturen: naar de eigen zijlijn, niet het Healing Center.
+   14 van de 54 figuren kregen een effect, op thema. Kansen identiek.
+   BALANS gemeten tegen de vorige versie, zelfde meting: rush 7/12 in 13 beurten
+   nieuw, 8/12 in 11 oud. Binnen de ruis — maar let op: de ruis is groot sinds
+   de AI in sessie 41 willekeurige basisvormen kiest (een eerdere meting van
+   dezelfde oude versie gaf 5/10 in 12 en 7/10 in 9). Vergelijk voortaan altijd
+   tegen een meting van de oude versie IN DEZELFDE SESSIE.
+   Meegenomen: de uitleg over omsingelen klopte sinds sessie 40 niet meer.
+
+2. MEGA-EVOLUTIE, NAGEKEKEN OP SEREBII (mechanics.shtml). Mijn plan zei "de rest
+   van het potje"; Duel zegt "remain Mega Evolved for 7 turns", "only Mega Evolve
+   1 Pokemon per game" en een effect "that affects your entire team". Duel wint.
+   In Duel is een mega een aparte figuur; wij hebben geen mega-art, dus is de
+   Megasteen een losse kaart (kost 2) die op elke eindvorm werkt. Mega-schijf:
+   +30 wit/goud, +1 ster paars, een mis wordt een blok. Team-effect op
+   lichaamsbouw: zwaar/beest/slang/steen = bondgenoten +10, de rest = +1 MP.
+   Na zeven eigen beurten terug; levels die hij als mega verdiende houdt hij.
+
+   BUG ONDERWEG: de AI kreeg kaarten mee ('rally', 'cleanse', 'hex' ...) die
+   sinds sessie 29 niet meer bestaan. aiUsePlate vond ze nooit, dus DE AI HEEFT
+   VIJFTIEN SESSIES LANG GEEN ENKELE KAART GESPEELD, en niemand merkte het — de
+   stapel tegenover je zag er gewoon uit als drie kaarten. Nu echte kaarten, op
+   Zwaar met een megasteen. Een smoke-check bewaakt dat de AI alleen bestaande
+   kaarten krijgt. Gevolg: de AI is iets sterker dan de balansmetingen van
+   sessie 38-43 suggereren; die waren allemaal ZONDER AI-kaarten.
+
+3. VIJF ZELDZAAMHEDEN. C / UC / R / EX / UX zoals Duel. De zes goden en titanen
+   onder de eindvormen zijn EX (28 diamantjes, 3% in de kist). UX is de
+   mega-vorm: niet te koop. Namen/kleuren/volgorde staan nu op een plek
+   (RAR_INFO) in plaats van in losse ternaries.
+
+4. ONLINE: zie docs/online-multiplayer.md. Kern: het kan, maar er moet een server
+   tussen die SCHEIDSRECHTER is (die draait de schijven, anders is valsspelen
+   niet te voorkomen). Aanbeveling Cloudflare Durable Objects, eerst
+   "vriendenpotje via een code", pas later matchmaking en een ranglijst.
+
+TESTS: headless 181 -> 202, smoke 90 -> 91.
 
 SESSIE 43 — HET GEVECHT IS EEN SCENE GEWORDEN
 Koen koos: een echte kleine cutscene, geen kort accentje. En op de vraag wat er
@@ -1420,6 +1474,10 @@ OPEN PUNTEN — IN VOLGORDE VAN URGENTIE
     i.p.v. sudden death (s22), geluid (s24). Hele lijst is nu af.
 14. NIEUW (sessie 24): boosterkist-economie balanceren — 150 credits, C65/U27/
     R8, duplicaat-terugbetaling 60/120/240. Eerste gok, speeltesten.
+20. NIEUW (sessie 44): de AI speelt sinds deze sessie weer kaarten. Balans
+    opnieuw speeltesten; alle metingen van sessie 38-43 waren zonder AI-kaarten.
+21. NIEUW (sessie 44): nog niet gebouwde Duel-onderdelen die Koen niet koos:
+    campagne, Liga met rangen, dagelijkse missies. En online (zie het document).
 19. NIEUW (sessie 42): ragdoll-gevechten. Volgorde: (a) art in delen knippen
     per lichaamsbouw, (b) blijvende figuur-laag die renders overleeft, (c)
     skeletanimatie idle/lopen/slaan/geraakt, (d) ragdoll bij KO. Stap (a) is het
